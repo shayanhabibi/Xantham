@@ -10,6 +10,29 @@ open Measure
 open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 
+/// Namespace ancestry of a source symbol; file/ambient modules and the global augmentation
+/// wrapper end the path. Complete symbol keys guard against malformed cyclic parent chains.
+let private namespacePathOf (ctx: Context) (symbol: SymbolResponse voption) =
+    let rec walk seen symbol =
+        async {
+            match symbol with
+            | ValueSome(current: SymbolResponse) when current.Parent.IsSome && not (Set.contains current.SymbolId seen) ->
+                let! parent = ctx.Session.Sessionless.getParentOfSymbol current.Reference
+
+                match parent with
+                | ValueSome owner when
+                    uint32 (owner.Flags &&& SymbolFlags.Module) <> 0u
+                    && Naming.isWritableTypeName owner.Name
+                    && owner.Name <> "__global"
+                    ->
+                    let! outer = walk (Set.add current.SymbolId seen) parent
+                    return outer @ [ owner.Name ]
+                | _ -> return []
+            | _ -> return []
+        }
+
+    walk Set.empty symbol
+
 /// The dump path `XANTHAM_FRONTIER_DUMP` names, read once per process. `None` leaves every hook
 /// below inert and the default corpus output untouched.
 let private frontierDump =
@@ -1521,6 +1544,11 @@ let private deriveFacts
             // reports concrete arguments here, and those are already substituted in.
             let! aliasTypeArguments = ctx.Session.getAliasTypeArgumentsOfType ty.Id
 
+            // A reference-only alias still needs every application argument: its body is not
+            // emitted here, so the substitution cannot be recovered from expanded members.
+            let aliasArguments =
+                aliasTypeArguments |> ValueOption.defaultValue [||] |> Array.toList
+
             let aliasTypeArguments =
                 aliasTypeArguments
                 |> ValueOption.defaultValue [||]
@@ -1588,6 +1616,15 @@ let private deriveFacts
                             return named alias
                         }
 
+            let! namespacePath =
+                async {
+                    match shapeName, named symbol with
+                    | Some _, None ->
+                        let! alias = ctx.Session.getAliasSymbolOfType ty.Id
+                        return! namespacePathOf ctx alias
+                    | _ -> return! namespacePathOf ctx symbol
+                }
+
             if shapeName.IsSome then
                 // Identity only (O7): the shape tier renders references to this group by
                 // templated name or widens them, and either way nothing reads its members.
@@ -1627,19 +1664,26 @@ let private deriveFacts
 
                 let targets, bases = nominal
 
+                let referenceArguments =
+                    if (named symbol).IsNone then
+                        aliasArguments
+                    else
+                        typeArguments
+
                 return
                     { TypeFacts.shallow ty with
                         Origin = origin
                         SymbolName = shapeName |> Option.map (fun value -> value * uom<Measure.symbolName>)
+                        NamespacePath = namespacePath
                         DeclFile =
                             Grouping.declFile symbol
                             |> Option.map (fun value -> value * uom<Measure.declFile>)
-                        TypeArguments = typeArguments |> List.map _.TypeId
+                        TypeArguments = referenceArguments |> List.map _.TypeId
                         TupleElements = tupleElements
                         AliasTypeArguments = aliasTypeArguments |> List.map _.TypeId
                         BaseTypes = bases |> List.map _.TypeId
                     },
-                    channel trace "type-arguments" typeArguments
+                    channel trace "type-arguments" referenceArguments
                     @ channel trace "alias-type-arguments" aliasTypeArguments
                     @ channel trace "target" targets
                     @ channel trace "base-types" bases
@@ -1707,6 +1751,7 @@ let private deriveFacts
                         { TypeFacts.shallow ty with
                             Origin = origin
                             SymbolName = symbol |> ValueOption.map _.SymbolName |> ValueOption.toOption
+                            NamespacePath = namespacePath
                             DeclFile =
                                 Grouping.declFile symbol
                                 |> Option.map (fun value -> value * uom<Measure.declFile>)
@@ -1788,6 +1833,7 @@ let private deriveFacts
                                 |> Option.map (fun value -> value * uom<Measure.declFile>)
                             SymbolParent = symbol |> ValueOption.bind _.ParentSymbolId |> ValueOption.toOption
                             SymbolFlags = symbol |> ValueOption.map _.Flags |> ValueOption.defaultValue SymbolFlags.None
+                            NamespacePath = namespacePath
                             Members = structure.Members
                             Declarations = []
                             DeclarationArguments = []

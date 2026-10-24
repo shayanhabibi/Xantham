@@ -108,12 +108,6 @@ type Exports =
 
 module Point =
     [<Interface>]
-    type Anchor =
-        abstract at: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (at: float) : Anchor = jsNative
-
-    [<Interface>]
     type Anchor2 =
         abstract at: string with get, set
         [<ParamObject; Emit("$0")>]
@@ -124,6 +118,12 @@ module Point =
         abstract x: float with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (x: float) : Defaults = jsNative
+
+    [<Interface>]
+    type Anchor =
+        abstract at: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (at: float) : Anchor = jsNative
 
 module TokenValue =
     [<Interface>]

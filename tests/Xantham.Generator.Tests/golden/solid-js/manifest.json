@@ -3,10 +3,10 @@
   "package": "solid-js",
   "module": "SolidJs",
   "counts": {
-    "exact": 72,
-    "ergonomic": 194,
-    "widened": 79,
-    "escape": 1
+    "exact": 323,
+    "ergonomic": 375,
+    "widened": 333,
+    "escape": 2
   },
   "passes": [
     {
@@ -15,9 +15,19 @@
       "escape": 11
     },
     {
+      "pass": "RT - resolve-type-table",
+      "total": 2,
+      "widened": 2
+    },
+    {
       "pass": "SY - synthesize-anonymous",
-      "total": 149,
-      "exact": 149
+      "total": 381,
+      "exact": 381
+    },
+    {
+      "pass": "LU - classify-literal-unions",
+      "total": 20,
+      "exact": 20
     },
     {
       "pass": "DT - detect-tagged-unions",
@@ -26,42 +36,47 @@
     },
     {
       "pass": "shape-callbacks",
-      "total": 150,
-      "ergonomic": 103,
-      "widened": 47
+      "total": 156,
+      "ergonomic": 97,
+      "widened": 59
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 984,
-      "exact": 15,
-      "ergonomic": 830,
-      "widened": 139
+      "total": 298314,
+      "exact": 2197,
+      "ergonomic": 289062,
+      "widened": 7055
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 58,
-      "exact": 4,
-      "ergonomic": 20,
-      "widened": 34
+      "total": 104,
+      "exact": 7,
+      "ergonomic": 29,
+      "widened": 68
     },
     {
       "pass": "SE - shape-exports",
-      "total": 247,
-      "exact": 2,
-      "ergonomic": 213,
-      "widened": 32
+      "total": 248,
+      "ergonomic": 200,
+      "widened": 47,
+      "escape": 1
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 170,
-      "ergonomic": 162,
+      "total": 560,
+      "ergonomic": 552,
       "widened": 8
     },
     {
+      "pass": "DO - dedupe-overloads",
+      "total": 10,
+      "widened": 10
+    },
+    {
       "pass": "RA - repair-arity",
-      "total": 12,
+      "total": 20,
       "ergonomic": 7,
-      "widened": 5
+      "widened": 13
     },
     {
       "pass": "DD - drop-orphan-delegates",

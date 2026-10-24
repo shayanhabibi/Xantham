@@ -3,16 +3,16 @@
   "package": "fable-core-ts-input",
   "module": "FableCoreTsInput",
   "counts": {
-    "exact": 1337,
-    "ergonomic": 2723,
-    "widened": 297,
-    "escape": 5
+    "exact": 3314,
+    "ergonomic": 2748,
+    "widened": 338,
+    "escape": 10
   },
   "passes": [
     {
       "pass": "SY - synthesize-anonymous",
-      "total": 1049,
-      "exact": 1049
+      "total": 1040,
+      "exact": 1040
     },
     {
       "pass": "LU - classify-literal-unions",
@@ -34,17 +34,17 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 83188,
-      "exact": 893,
-      "ergonomic": 81691,
-      "widened": 604
+      "total": 83179,
+      "exact": 894,
+      "ergonomic": 81695,
+      "widened": 590
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 122,
-      "ergonomic": 27,
-      "widened": 86,
-      "escape": 9
+      "total": 210,
+      "ergonomic": 57,
+      "widened": 134,
+      "escape": 19
     },
     {
       "pass": "SE - shape-exports",
@@ -53,9 +53,9 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 3042,
+      "total": 3050,
       "exact": 156,
-      "ergonomic": 2883,
+      "ergonomic": 2891,
       "widened": 3
     },
     {
@@ -72,14 +72,14 @@
     },
     {
       "pass": "RA - repair-arity",
-      "total": 7,
-      "ergonomic": 1,
-      "widened": 6
+      "total": 71,
+      "ergonomic": 38,
+      "widened": 33
     },
     {
       "pass": "normalize-obj-unions",
-      "total": 1,
-      "widened": 1
+      "total": 2,
+      "widened": 2
     },
     {
       "pass": "render-source",

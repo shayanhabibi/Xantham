@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "package": "foreign-namespace-lab",
+  "module": "ForeignNamespaceLab",
+  "counts": {
+    "exact": 0,
+    "ergonomic": 1,
+    "widened": 3,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SE - shape-exports",
+      "total": 3,
+      "widened": 3
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 1,
+      "ergonomic": 1
+    }
+  ]
+}

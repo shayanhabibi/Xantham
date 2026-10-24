@@ -577,685 +577,13 @@ module Es =
 
     type ParameterDecorator = delegate of target: Object * propertyKey: obj option * parameterIndex: float -> unit
 
-    [<Interface>]
-    type NumberFormatOptions =
-        abstract localeMatcher: NumberFormatOptions.LocaleMatcher option with get, set
-        abstract style: NumberFormatOptions.Style option with get, set
-        abstract currency: string option with get, set
-        abstract currencyDisplay: NumberFormatOptions.CurrencyDisplay option with get, set
-        abstract useGrouping: NumberFormatOptions.UseGrouping option with get, set
-        abstract minimumIntegerDigits: float option with get, set
-        abstract minimumFractionDigits: float option with get, set
-        abstract maximumFractionDigits: float option with get, set
-        abstract minimumSignificantDigits: float option with get, set
-        abstract maximumSignificantDigits: float option with get, set
-        abstract numberingSystem: string option with get, set
-        abstract compactDisplay: NumberFormatOptions.CompactDisplay option with get, set
-        abstract notation: NumberFormatOptions.Notation option with get, set
-        abstract signDisplay: NumberFormatOptions.SignDisplay option with get, set
-        abstract unit: string option with get, set
-        abstract unitDisplay: NumberFormatOptions.UnitDisplay option with get, set
-        abstract currencySign: NumberFormatOptions.CurrencySign option with get, set
-        abstract roundingPriority: NumberFormatOptions.RoundingPriority option with get, set
-        abstract roundingIncrement: NumberFormatOptions.RoundingIncrement option with get, set
-        abstract roundingMode: NumberFormatOptions.RoundingMode option with get, set
-        abstract trailingZeroDisplay: NumberFormatOptions.TrailingZeroDisplay option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                ?localeMatcher: NumberFormatOptions.LocaleMatcher,
-                ?style: NumberFormatOptions.Style,
-                ?currency: string,
-                ?currencyDisplay: NumberFormatOptions.CurrencyDisplay,
-                ?useGrouping: NumberFormatOptions.UseGrouping,
-                ?minimumIntegerDigits: float,
-                ?minimumFractionDigits: float,
-                ?maximumFractionDigits: float,
-                ?minimumSignificantDigits: float,
-                ?maximumSignificantDigits: float,
-                ?numberingSystem: string,
-                ?compactDisplay: NumberFormatOptions.CompactDisplay,
-                ?notation: NumberFormatOptions.Notation,
-                ?signDisplay: NumberFormatOptions.SignDisplay,
-                ?unit: string,
-                ?unitDisplay: NumberFormatOptions.UnitDisplay,
-                ?currencySign: NumberFormatOptions.CurrencySign,
-                ?roundingPriority: NumberFormatOptions.RoundingPriority,
-                ?roundingIncrement: NumberFormatOptions.RoundingIncrement,
-                ?roundingMode: NumberFormatOptions.RoundingMode,
-                ?trailingZeroDisplay: NumberFormatOptions.TrailingZeroDisplay
-            ) : NumberFormatOptions =
-            jsNative
-
     type Apply<'T> = delegate of target: 'T * thisArg: obj * argArray: obj[] -> obj
 
-    type CalendarLike = U6<string, PlainDate, PlainDateTime, PlainMonthDay, PlainYearMonth, ZonedDateTime>
-
-    [<Interface>]
-    type Collator =
-        abstract compare: x: string * y: string -> float
-        abstract resolvedOptions: unit -> ResolvedCollatorOptions
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (compare: Func<string, string, float>, resolvedOptions: (unit -> ResolvedCollatorOptions))
-            : Collator =
-            jsNative
-
-    type CollatorConstructor =
-        abstract supportedLocalesOf: locales: U2<string, string[]> * ?options: CollatorOptions -> string[]
-        abstract supportedLocalesOf: locales: LocalesArgument * ?options: CollatorOptions -> string[]
-
-        [<EmitConstructor>]
-        abstract Create: ?locales: U2<string, string[]> * ?options: CollatorOptions -> Collator
-
-        [<EmitConstructor>]
-        abstract Create: ?locales: LocalesArgument * ?options: CollatorOptions -> Collator
-
-        [<Emit("$0($1...)")>]
-        abstract Invoke: ?locales: U2<string, string[]> * ?options: CollatorOptions -> Collator
-
-        [<Emit("$0($1...)")>]
-        abstract Invoke: ?locales: LocalesArgument * ?options: CollatorOptions -> Collator
-
-    [<Interface>]
-    type CollatorOptions =
-        abstract usage: CollatorOptions.Usage option with get, set
-        abstract localeMatcher: NumberFormatOptions.LocaleMatcher option with get, set
-        abstract numeric: bool option with get, set
-        abstract caseFirst: CollatorOptions.CaseFirst option with get, set
-        abstract sensitivity: CollatorOptions.Sensitivity option with get, set
-        abstract collation: CollatorOptions.Collation option with get, set
-        abstract ignorePunctuation: bool option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                ?usage: CollatorOptions.Usage,
-                ?localeMatcher: NumberFormatOptions.LocaleMatcher,
-                ?numeric: bool,
-                ?caseFirst: CollatorOptions.CaseFirst,
-                ?sensitivity: CollatorOptions.Sensitivity,
-                ?collation: CollatorOptions.Collation,
-                ?ignorePunctuation: bool
-            ) : CollatorOptions =
-            jsNative
-
     type Construct<'T> = delegate of target: 'T * argArray: obj[] * newTarget: Function -> obj
-
-    [<Interface>]
-    type DateLikeObject =
-        abstract year: float option with get, set
-        abstract era: string option with get, set
-        abstract eraYear: float option with get, set
-        abstract month: float option with get, set
-        abstract monthCode: string option with get, set
-        abstract day: float with get, set
-        abstract calendar: string option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                day: float,
-                ?year: float,
-                ?era: string,
-                ?eraYear: float,
-                ?month: float,
-                ?monthCode: string,
-                ?calendar: string
-            ) : DateLikeObject =
-            jsNative
-
-    type DateTimeFormat =
-        abstract format: ?date: U2<float, Date> -> string
-
-        abstract format:
-            ?date: U8<float, Date, Instant, PlainDate, PlainDateTime, PlainMonthDay, PlainTime, PlainYearMonth> ->
-                string
-
-        abstract resolvedOptions: unit -> ResolvedDateTimeFormatOptions
-        abstract formatToParts: ?date: U2<float, Date> -> DateTimeFormatPart[]
-
-        abstract formatToParts:
-            ?date: U8<float, Date, Instant, PlainDate, PlainDateTime, PlainMonthDay, PlainTime, PlainYearMonth> ->
-                DateTimeFormatPart[]
-
-        abstract formatRange: startDate: U3<float, bigint, Date> * endDate: U3<float, bigint, Date> -> string
-
-        abstract formatRange:
-            startDate: U8<float, Date, Instant, PlainDate, PlainDateTime, PlainMonthDay, PlainTime, PlainYearMonth> *
-            endDate: U8<float, Date, Instant, PlainDate, PlainDateTime, PlainMonthDay, PlainTime, PlainYearMonth> ->
-                string
-
-        abstract formatRangeToParts:
-            startDate: U3<float, bigint, Date> * endDate: U3<float, bigint, Date> -> DateTimeRangeFormatPart[]
-
-        abstract formatRangeToParts:
-            startDate: U8<float, Date, Instant, PlainDate, PlainDateTime, PlainMonthDay, PlainTime, PlainYearMonth> *
-            endDate: U8<float, Date, Instant, PlainDate, PlainDateTime, PlainMonthDay, PlainTime, PlainYearMonth> ->
-                DateTimeRangeFormatPart[]
-
-    type DateTimeFormatConstructor =
-        abstract supportedLocalesOf: locales: U2<string, string[]> * ?options: DateTimeFormatOptions -> string[]
-        abstract supportedLocalesOf: locales: LocalesArgument * ?options: DateTimeFormatOptions -> string[]
-
-        [<EmitConstructor>]
-        abstract Create: ?locales: U2<string, string[]> * ?options: DateTimeFormatOptions -> DateTimeFormat
-
-        [<EmitConstructor>]
-        abstract Create: ?locales: LocalesArgument * ?options: DateTimeFormatOptions -> DateTimeFormat
-
-        [<Emit("$0($1...)")>]
-        abstract Invoke: ?locales: U2<string, string[]> * ?options: DateTimeFormatOptions -> DateTimeFormat
-
-        [<Emit("$0($1...)")>]
-        abstract Invoke: ?locales: LocalesArgument * ?options: DateTimeFormatOptions -> DateTimeFormat
-
-    [<Interface>]
-    type DateTimeFormatOptions =
-        abstract localeMatcher: NumberFormatOptions.LocaleMatcher option with get, set
-        abstract weekday: NumberFormatOptions.UnitDisplay option with get, set
-        abstract era: NumberFormatOptions.UnitDisplay option with get, set
-        abstract year: DateTimeFormatOptions.Year option with get, set
-        abstract month: DateTimeFormatOptions.Month option with get, set
-        abstract day: DateTimeFormatOptions.Year option with get, set
-        abstract hour: DateTimeFormatOptions.Year option with get, set
-        abstract minute: DateTimeFormatOptions.Year option with get, set
-        abstract second: DateTimeFormatOptions.Year option with get, set
-        abstract timeZoneName: DateTimeFormatOptions.TimeZoneName option with get, set
-        abstract formatMatcher: DateTimeFormatOptions.FormatMatcher option with get, set
-        abstract hour12: bool option with get, set
-        abstract timeZone: string option with get, set
-        abstract calendar: string option with get, set
-        abstract dayPeriod: NumberFormatOptions.UnitDisplay option with get, set
-        abstract numberingSystem: string option with get, set
-        abstract dateStyle: DateTimeFormatOptions.DateStyle option with get, set
-        abstract timeStyle: DateTimeFormatOptions.DateStyle option with get, set
-        abstract hourCycle: DateTimeFormatOptions.HourCycle option with get, set
-        abstract fractionalSecondDigits: DateTimeFormatOptions.FractionalSecondDigits option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                ?localeMatcher: NumberFormatOptions.LocaleMatcher,
-                ?weekday: NumberFormatOptions.UnitDisplay,
-                ?era: NumberFormatOptions.UnitDisplay,
-                ?year: DateTimeFormatOptions.Year,
-                ?month: DateTimeFormatOptions.Month,
-                ?day: DateTimeFormatOptions.Year,
-                ?hour: DateTimeFormatOptions.Year,
-                ?minute: DateTimeFormatOptions.Year,
-                ?second: DateTimeFormatOptions.Year,
-                ?timeZoneName: DateTimeFormatOptions.TimeZoneName,
-                ?formatMatcher: DateTimeFormatOptions.FormatMatcher,
-                ?hour12: bool,
-                ?timeZone: string,
-                ?calendar: string,
-                ?dayPeriod: NumberFormatOptions.UnitDisplay,
-                ?numberingSystem: string,
-                ?dateStyle: DateTimeFormatOptions.DateStyle,
-                ?timeStyle: DateTimeFormatOptions.DateStyle,
-                ?hourCycle: DateTimeFormatOptions.HourCycle,
-                ?fractionalSecondDigits: DateTimeFormatOptions.FractionalSecondDigits
-            ) : DateTimeFormatOptions =
-            jsNative
-
-    [<Interface>]
-    type DateTimeFormatPart =
-        abstract ``type``: DateTimeFormatPart.Type with get, set
-        abstract value: string with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create(``type``: DateTimeFormatPart.Type, value: string) : DateTimeFormatPart = jsNative
-
-    [<Interface>]
-    type DateTimeLikeObject =
-        inherit DateLikeObject
-        inherit TimeLikeObject
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                day: float,
-                ?year: float,
-                ?era: string,
-                ?eraYear: float,
-                ?month: float,
-                ?monthCode: string,
-                ?calendar: string,
-                ?hour: float,
-                ?minute: float,
-                ?second: float,
-                ?millisecond: float,
-                ?microsecond: float,
-                ?nanosecond: float
-            ) : DateTimeLikeObject =
-            jsNative
-
-    [<Interface>]
-    type DateTimeRangeFormatPart =
-        inherit DateTimeFormatPart
-        abstract source: NumberRangeFormatPart.Source with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (source: NumberRangeFormatPart.Source, ``type``: DateTimeFormatPart.Type, value: string)
-            : DateTimeRangeFormatPart =
-            jsNative
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type DateUnit =
-        | [<CompiledName("day")>] Day
-        | [<CompiledName("month")>] Month
-        | [<CompiledName("week")>] Week
-        | [<CompiledName("year")>] Year
 
     type DefineProperty<'T> = delegate of target: 'T * property: obj * attributes: PropertyDescriptor -> bool
 
     type DeleteProperty<'T> = delegate of target: 'T * p: obj -> bool
-
-    [<Interface>]
-    type DisambiguationOptions =
-        abstract disambiguation: ZonedDateTimeFromOptions.Disambiguation option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create(?disambiguation: ZonedDateTimeFromOptions.Disambiguation) : DisambiguationOptions =
-            jsNative
-
-    [<Interface>]
-    type DisplayNames =
-        /// <summary>
-        /// Receives a code and returns a string based on the locale and options provided when instantiating
-        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames"><c>Intl.DisplayNames()</c></a>
-        /// </summary>
-        /// <param name="code">
-        /// The <c>code</c> to provide depends on the <c>type</c> passed to display name during creation:
-        /// - If the type is <c>"region"</c>, code should be either an <a href="https://www.iso.org/iso-3166-country-codes.html">ISO-3166 two letters region code</a>,
-        /// or a <a href="https://unstats.un.org/unsd/methodology/m49/">three digits UN M49 Geographic Regions</a>.
-        /// - If the type is <c>"script"</c>, code should be an <a href="https://unicode.org/iso15924/iso15924-codes.html">ISO-15924 four letters script code</a>.
-        /// - If the type is <c>"language"</c>, code should be a <c>languageCode</c> ["-" <c>scriptCode</c>] ["-" <c>regionCode</c> ] *("-" <c>variant</c> )
-        /// subsequence of the unicode_language_id grammar in <a href="https://unicode.org/reports/tr35/#Unicode_language_identifier">UTS 35's Unicode Language and Locale Identifiers grammar</a>.
-        /// <c>languageCode</c> is either a two letters ISO 639-1 language code or a three letters ISO 639-2 language code.
-        /// - If the type is <c>"currency"</c>, code should be a <a href="https://www.iso.org/iso-4217-currency-codes.html">3-letter ISO 4217 currency code</a>.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames/of">MDN</a>.
-        /// </param>
-        abstract ``of``: code: string -> string option
-        /// <summary>
-        /// Returns a new object with properties reflecting the locale and style formatting options computed during the construction of the current
-        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames"><c>Intl/DisplayNames</c></a> object.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames/resolvedOptions">MDN</a>.
-        /// </summary>
-        abstract resolvedOptions: unit -> ResolvedDisplayNamesOptions
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (``of``: (string -> string option), resolvedOptions: (unit -> ResolvedDisplayNamesOptions))
-            : DisplayNames =
-            jsNative
-
-    type DisplayNamesConstructor =
-        /// <summary>
-        /// Returns an array containing those of the provided locales that are supported in display names without having to fall back to the runtime's default locale.
-        /// </summary>
-        /// <param name="locales">
-        /// A string with a BCP 47 language tag, or an array of such strings.
-        /// For the general form and interpretation of the <c>locales</c> argument, see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#locale_identification_and_negotiation">Intl</a>
-        /// page.
-        /// </param>
-        /// <param name="options">An object with a locale matcher.</param>
-        /// <returns>
-        /// An array of strings representing a subset of the given locale tags that are supported in display names without having to fall back to the runtime's default locale.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames/supportedLocalesOf">MDN</a>.
-        /// </returns>
-        abstract supportedLocalesOf:
-            ?locales: LocalesArgument * ?options: Intl.DisplayNames.SupportedLocalesOf.Options -> string[]
-
-        [<EmitConstructor>]
-        abstract Create: locales: LocalesArgument * options: DisplayNamesOptions -> DisplayNames
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type DisplayNamesFallback =
-        | [<CompiledName("code")>] Code
-        | [<CompiledName("none")>] None
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type DisplayNamesLanguageDisplay =
-        | [<CompiledName("dialect")>] Dialect
-        | [<CompiledName("standard")>] Standard
-
-    [<Interface>]
-    type DisplayNamesOptions =
-        abstract localeMatcher: RelativeTimeFormatLocaleMatcher option with get, set
-        abstract style: RelativeTimeFormatStyle option with get, set
-        abstract ``type``: DisplayNamesType with get, set
-        abstract languageDisplay: DisplayNamesLanguageDisplay option with get, set
-        abstract fallback: DisplayNamesFallback option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                ``type``: DisplayNamesType,
-                ?localeMatcher: RelativeTimeFormatLocaleMatcher,
-                ?style: RelativeTimeFormatStyle,
-                ?languageDisplay: DisplayNamesLanguageDisplay,
-                ?fallback: DisplayNamesFallback
-            ) : DisplayNamesOptions =
-            jsNative
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type DisplayNamesType =
-        | [<CompiledName("calendar")>] Calendar
-        | [<CompiledName("currency")>] Currency
-        | [<CompiledName("dateTimeField")>] DateTimeField
-        | [<CompiledName("language")>] Language
-        | [<CompiledName("region")>] Region
-        | [<CompiledName("script")>] Script
-
-    type Duration =
-        abstract years: float
-        abstract months: float
-        abstract weeks: float
-        abstract days: float
-        abstract hours: float
-        abstract minutes: float
-        abstract seconds: float
-        abstract milliseconds: float
-        abstract microseconds: float
-        abstract nanoseconds: float
-        abstract sign: float
-        abstract blank: bool
-        abstract ``with``: durationLike: Duration.With.DurationLike -> Duration
-        abstract negated: unit -> Duration
-        abstract abs: unit -> Duration
-        abstract add: other: DurationLike -> Duration
-        abstract subtract: other: DurationLike -> Duration
-        abstract round: roundTo: PluralizeUnit -> Duration
-        abstract round: roundTo: DurationRoundingOptions -> Duration
-        abstract total: totalOf: PluralizeUnit -> float
-        abstract total: totalOf: DurationTotalOptions -> float
-        abstract toString: ?options: DurationToStringOptions -> string
-        abstract toLocaleString: ?locales: LocalesArgument * ?options: DurationFormatOptions -> string
-        abstract toJSON: unit -> string
-        abstract valueOf: unit -> unit
-
-        [<Emit("$0[Symbol.toStringTag]")>]
-        abstract SymbolToStringTag: string
-
-    type DurationConstructor =
-        abstract from: item: DurationLike -> Duration
-        abstract compare: one: DurationLike * two: DurationLike * ?options: DurationRelativeToOptions -> float
-
-        [<EmitConstructor>]
-        abstract Create:
-            ?years: float *
-            ?months: float *
-            ?weeks: float *
-            ?days: float *
-            ?hours: float *
-            ?minutes: float *
-            ?seconds: float *
-            ?milliseconds: float *
-            ?microseconds: float *
-            ?nanoseconds: float ->
-                Duration
-
-    [<Interface>]
-    type DurationFormat =
-        /// <param name="duration">
-        /// The duration object to be formatted. It should include some or all of the following properties: months, weeks, days, hours, minutes, seconds, milliseconds, microseconds, nanoseconds.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DurationFormat/format">MDN</a>.
-        /// </param>
-        abstract format: duration: DurationFormat.Format.Duration -> string
-        /// <param name="duration">
-        /// The duration object to be formatted. It should include some or all of the following properties: months, weeks, days, hours, minutes, seconds, milliseconds, microseconds, nanoseconds.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DurationFormat/formatToParts">MDN</a>.
-        /// </param>
-        abstract formatToParts: duration: DurationFormat.Format.Duration -> DurationFormatPart[]
-        /// <summary>
-        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DurationFormat/resolvedOptions">MDN</a>.
-        /// </summary>
-        abstract resolvedOptions: unit -> ResolvedDurationFormatOptions
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                format: (DurationFormat.Format.Duration -> string),
-                formatToParts: (DurationFormat.Format.Duration -> DurationFormatPart[]),
-                resolvedOptions: (unit -> ResolvedDurationFormatOptions)
-            ) : DurationFormat =
-            jsNative
-
-    type DurationFormatConstructor =
-        /// <summary>
-        /// Returns an array containing those of the provided locales that are supported in display names without having to fall back to the runtime's default locale.
-        /// </summary>
-        /// <param name="locales">
-        /// A string with a BCP 47 language tag, or an array of such strings.
-        /// For the general form and interpretation of the <c>locales</c> argument, see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#locale_identification_and_negotiation">Intl</a>
-        /// page.
-        /// </param>
-        /// <param name="options">An object with a locale matcher.</param>
-        /// <returns>
-        /// An array of strings representing a subset of the given locale tags that are supported in display names without having to fall back to the runtime's default locale.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DurationFormat/supportedLocalesOf">MDN</a>.
-        /// </returns>
-        abstract supportedLocalesOf:
-            ?locales: LocalesArgument * ?options: Intl.DurationFormat.SupportedLocalesOf.Options -> string[]
-
-        [<EmitConstructor>]
-        abstract Create: ?locales: LocalesArgument * ?options: DurationFormatOptions -> DurationFormat
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type DurationFormatDisplayOption =
-        | [<CompiledName("always")>] Always
-        | [<CompiledName("auto")>] Auto
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type DurationFormatLocaleMatcher =
-        | [<CompiledName("best fit")>] BestFit
-        | [<CompiledName("lookup")>] Lookup
-
-    [<Interface>]
-    type DurationFormatOptions =
-        abstract localeMatcher: DurationFormatLocaleMatcher option with get, set
-        abstract numberingSystem: string option with get, set
-        abstract style: DurationFormatStyle option with get, set
-        abstract years: NumberFormatOptions.UnitDisplay option with get, set
-        abstract yearsDisplay: DurationFormatDisplayOption option with get, set
-        abstract months: NumberFormatOptions.UnitDisplay option with get, set
-        abstract monthsDisplay: DurationFormatDisplayOption option with get, set
-        abstract weeks: NumberFormatOptions.UnitDisplay option with get, set
-        abstract weeksDisplay: DurationFormatDisplayOption option with get, set
-        abstract days: NumberFormatOptions.UnitDisplay option with get, set
-        abstract daysDisplay: DurationFormatDisplayOption option with get, set
-        abstract hours: DateTimeFormatOptions.Month option with get, set
-        abstract hoursDisplay: DurationFormatDisplayOption option with get, set
-        abstract minutes: DateTimeFormatOptions.Month option with get, set
-        abstract minutesDisplay: DurationFormatDisplayOption option with get, set
-        abstract seconds: DateTimeFormatOptions.Month option with get, set
-        abstract secondsDisplay: DurationFormatDisplayOption option with get, set
-        abstract milliseconds: DurationFormatOptions.Milliseconds option with get, set
-        abstract millisecondsDisplay: DurationFormatDisplayOption option with get, set
-        abstract microseconds: DurationFormatOptions.Milliseconds option with get, set
-        abstract microsecondsDisplay: DurationFormatDisplayOption option with get, set
-        abstract nanoseconds: DurationFormatOptions.Milliseconds option with get, set
-        abstract nanosecondsDisplay: DurationFormatDisplayOption option with get, set
-        abstract fractionalDigits: DurationFormatOptions.FractionalDigits option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                ?localeMatcher: DurationFormatLocaleMatcher,
-                ?numberingSystem: string,
-                ?style: DurationFormatStyle,
-                ?years: NumberFormatOptions.UnitDisplay,
-                ?yearsDisplay: DurationFormatDisplayOption,
-                ?months: NumberFormatOptions.UnitDisplay,
-                ?monthsDisplay: DurationFormatDisplayOption,
-                ?weeks: NumberFormatOptions.UnitDisplay,
-                ?weeksDisplay: DurationFormatDisplayOption,
-                ?days: NumberFormatOptions.UnitDisplay,
-                ?daysDisplay: DurationFormatDisplayOption,
-                ?hours: DateTimeFormatOptions.Month,
-                ?hoursDisplay: DurationFormatDisplayOption,
-                ?minutes: DateTimeFormatOptions.Month,
-                ?minutesDisplay: DurationFormatDisplayOption,
-                ?seconds: DateTimeFormatOptions.Month,
-                ?secondsDisplay: DurationFormatDisplayOption,
-                ?milliseconds: DurationFormatOptions.Milliseconds,
-                ?millisecondsDisplay: DurationFormatDisplayOption,
-                ?microseconds: DurationFormatOptions.Milliseconds,
-                ?microsecondsDisplay: DurationFormatDisplayOption,
-                ?nanoseconds: DurationFormatOptions.Milliseconds,
-                ?nanosecondsDisplay: DurationFormatDisplayOption,
-                ?fractionalDigits: DurationFormatOptions.FractionalDigits
-            ) : DurationFormatOptions =
-            jsNative
-
-    type DurationFormatPart = U2<DurationFormatPart2, DurationFormatPart3>
-
-    [<Interface>]
-    type DurationFormatPart2 =
-        /// <remarks>TypeScript type: <c>"literal"</c></remarks>
-        abstract ``type``: string with get, set
-        abstract value: string with get, set
-        abstract unit: DurationFormatUnitSingular option with get, set
-
-        [<ParamObject; Emit("({ type: 'literal', ...$0 })")>]
-        static member Create(value: string, ?unit: DurationFormatUnitSingular) : DurationFormatPart2 = jsNative
-
-    module DurationFormatPart2 =
-        /// <remarks>TypeScript type: <c>"literal"</c></remarks>
-        [<Literal>]
-        let ``type`` = "literal"
-
-    [<Interface>]
-    type DurationFormatPart3 =
-        abstract ``type``: RelativeTimeFormatPart3.Type with get, set
-        abstract value: string with get, set
-        abstract unit: DurationFormatUnitSingular with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (``type``: RelativeTimeFormatPart3.Type, value: string, unit: DurationFormatUnitSingular)
-            : DurationFormatPart3 =
-            jsNative
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type DurationFormatStyle =
-        | [<CompiledName("digital")>] Digital
-        | [<CompiledName("long")>] Long
-        | [<CompiledName("narrow")>] Narrow
-        | [<CompiledName("short")>] Short
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type DurationFormatUnitSingular =
-        | [<CompiledName("day")>] Day
-        | [<CompiledName("hour")>] Hour
-        | [<CompiledName("microsecond")>] Microsecond
-        | [<CompiledName("millisecond")>] Millisecond
-        | [<CompiledName("minute")>] Minute
-        | [<CompiledName("month")>] Month
-        | [<CompiledName("nanosecond")>] Nanosecond
-        | [<CompiledName("second")>] Second
-        | [<CompiledName("week")>] Week
-        | [<CompiledName("year")>] Year
-
-    type DurationLike = U3<string, Duration, DurationLikeObject>
-
-    [<Interface>]
-    type DurationLikeObject =
-        abstract years: float option with get, set
-        abstract months: float option with get, set
-        abstract weeks: float option with get, set
-        abstract days: float option with get, set
-        abstract hours: float option with get, set
-        abstract minutes: float option with get, set
-        abstract seconds: float option with get, set
-        abstract milliseconds: float option with get, set
-        abstract microseconds: float option with get, set
-        abstract nanoseconds: float option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                ?years: float,
-                ?months: float,
-                ?weeks: float,
-                ?days: float,
-                ?hours: float,
-                ?minutes: float,
-                ?seconds: float,
-                ?milliseconds: float,
-                ?microseconds: float,
-                ?nanoseconds: float
-            ) : DurationLikeObject =
-            jsNative
-
-    [<Interface>]
-    type DurationRelativeToOptions =
-        abstract relativeTo:
-            U6<string, DateLikeObject, PlainDate, PlainDateTime, ZonedDateTime, ZonedDateTimeLikeObject> option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (?relativeTo: U6<string, DateLikeObject, PlainDate, PlainDateTime, ZonedDateTime, ZonedDateTimeLikeObject>)
-            : DurationRelativeToOptions =
-            jsNative
-
-    [<Interface>]
-    type DurationRoundingOptions =
-        inherit DurationRelativeToOptions
-        inherit RoundingOptionsWithLargestUnit<ZonedDateTime.Until.Options.Item>
-        abstract smallestUnit: Temporal.PluralizeUnit option with get, set
-        abstract largestUnit: DurationRoundingOptions.LargestUnit option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                ?smallestUnit: Temporal.PluralizeUnit,
-                ?roundingIncrement: float,
-                ?roundingMode: NumberFormatOptions.RoundingMode,
-                ?largestUnit: DurationRoundingOptions.LargestUnit,
-                ?relativeTo:
-                    U6<string, DateLikeObject, PlainDate, PlainDateTime, ZonedDateTime, ZonedDateTimeLikeObject>
-            ) : DurationRoundingOptions =
-            jsNative
-
-    [<Interface>]
-    type DurationToStringOptions =
-        inherit ToStringRoundingOptionsWithFractionalSeconds<DurationToStringOptions.Base.Item>
-        abstract smallestUnit: Temporal.PluralizeUnit4 option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                ?smallestUnit: Temporal.PluralizeUnit4,
-                ?roundingMode: NumberFormatOptions.RoundingMode,
-                ?fractionalSecondDigits: PlainTimeToStringOptions.FractionalSecondDigits
-            ) : DurationToStringOptions =
-            jsNative
-
-    [<Interface>]
-    type DurationTotalOptions =
-        inherit DurationRelativeToOptions
-        abstract unit: Temporal.PluralizeUnit with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                unit: Temporal.PluralizeUnit,
-                ?relativeTo:
-                    U6<string, DateLikeObject, PlainDate, PlainDateTime, ZonedDateTime, ZonedDateTimeLikeObject>
-            ) : DurationTotalOptions =
-            jsNative
 
     type Get<'T> = delegate of target: 'T * p: obj * receiver: obj -> obj
 
@@ -6990,56 +6318,11 @@ module Es =
 
     type Has<'T> = delegate of target: 'T * p: obj -> bool
 
-    type Instant =
-        abstract epochMilliseconds: float
-        abstract epochNanoseconds: bigint
-        abstract add: duration: DurationLike -> Instant
-        abstract subtract: duration: DurationLike -> Instant
-        abstract until: other: InstantLike * ?options: RoundingOptionsWithLargestUnit<TimeUnit> -> Duration
-        abstract since: other: InstantLike * ?options: RoundingOptionsWithLargestUnit<TimeUnit> -> Duration
-        abstract round: roundTo: Temporal.PluralizeUnit2 -> Instant
-        abstract round: roundTo: RoundingOptions<TimeUnit> -> Instant
-        abstract equals: other: InstantLike -> bool
-        abstract toString: ?options: InstantToStringOptions -> string
-        abstract toLocaleString: ?locales: LocalesArgument * ?options: DateTimeFormatOptions -> string
-        abstract toJSON: unit -> string
-        abstract valueOf: unit -> unit
-        abstract toZonedDateTimeISO: timeZone: TimeZoneLike -> ZonedDateTime
-
-        [<Emit("$0[Symbol.toStringTag]")>]
-        abstract SymbolToStringTag: string
-
-    type InstantConstructor =
-        abstract from: item: InstantLike -> Instant
-        abstract fromEpochMilliseconds: epochMilliseconds: float -> Instant
-        abstract fromEpochNanoseconds: epochNanoseconds: bigint -> Instant
-        abstract compare: one: InstantLike * two: InstantLike -> float
-
-        [<EmitConstructor>]
-        abstract Create: epochNanoseconds: bigint -> Instant
-
-    type InstantLike = U3<string, Instant, ZonedDateTime>
-
-    [<Interface>]
-    type InstantToStringOptions =
-        inherit PlainTimeToStringOptions
-        abstract timeZone: TimeZoneLike option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                ?timeZone: TimeZoneLike,
-                ?smallestUnit: Temporal.PluralizeUnit3,
-                ?roundingMode: NumberFormatOptions.RoundingMode,
-                ?fractionalSecondDigits: PlainTimeToStringOptions.FractionalSecondDigits
-            ) : InstantToStringOptions =
-            jsNative
-
     [<Interface>]
     type Intl =
-        abstract Collator: CollatorConstructor with get, set
-        abstract NumberFormat: NumberFormatConstructor with get, set
-        abstract DateTimeFormat: DateTimeFormatConstructor with get, set
+        abstract Collator: Intl.CollatorConstructor with get, set
+        abstract NumberFormat: Intl.NumberFormatConstructor with get, set
+        abstract DateTimeFormat: Intl.DateTimeFormatConstructor with get, set
         /// <summary>
         /// The <c>Intl.getCanonicalLocales()</c> method returns an array containing
         /// the canonical locale names. Duplicates will be omitted and elements
@@ -7050,14 +6333,14 @@ module Es =
         /// <param name="locale">A list of String values for which to get the canonical locale names</param>
         /// <returns>An array containing the canonical and validated locale names.</returns>
         abstract getCanonicalLocales: ?locale: U2<string, string[]> -> string[]
-        abstract PluralRules: PluralRulesConstructor
+        abstract PluralRules: Intl.PluralRulesConstructor
         /// <summary>
         /// The <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/RelativeTimeFormat"><c>Intl.RelativeTimeFormat</c></a>
         /// object is a constructor for objects that enable language-sensitive relative time formatting.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat#Browser_compatibility">Compatibility</a>.
         /// </summary>
-        abstract RelativeTimeFormat: RelativeTimeFormatConstructor
+        abstract RelativeTimeFormat: Intl.RelativeTimeFormatConstructor
         /// <summary>
         /// Constructor creates <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale">Intl.Locale</a>
         /// objects
@@ -7073,21 +6356,21 @@ module Es =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale">MDN</a>.
         /// </returns>
-        abstract Locale: LocaleConstructor
+        abstract Locale: Intl.LocaleConstructor
         /// <summary>
         /// The <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames"><c>Intl.DisplayNames()</c></a>
         /// object enables the consistent translation of language, region and script display names.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames#browser_compatibility">Compatibility</a>.
         /// </summary>
-        abstract DisplayNames: DisplayNamesConstructor
-        abstract ListFormat: ListFormatConstructor
+        abstract DisplayNames: Intl.DisplayNamesConstructor
+        abstract ListFormat: Intl.ListFormatConstructor
         /// <summary>
         /// The <c>Intl.Segmenter</c> object enables locale-sensitive text segmentation, enabling you to get meaningful items (graphemes, words or sentences) from a string.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter">MDN</a>
         /// </summary>
-        abstract Segmenter: SegmenterConstructor
+        abstract Segmenter: Intl.SegmenterConstructor
         /// <summary>
         /// Returns a sorted array of the supported collation, calendar, currency, numbering system, timezones, and units by the implementation.
         /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/supportedValuesOf">MDN</a>
@@ -7100,23 +6383,23 @@ module Es =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DurationFormat">MDN</a>
         /// </summary>
-        abstract DurationFormat: DurationFormatConstructor
+        abstract DurationFormat: Intl.DurationFormatConstructor
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
-                Collator: CollatorConstructor,
-                NumberFormat: NumberFormatConstructor,
-                DateTimeFormat: DateTimeFormatConstructor,
+                Collator: Intl.CollatorConstructor,
+                NumberFormat: Intl.NumberFormatConstructor,
+                DateTimeFormat: Intl.DateTimeFormatConstructor,
                 getCanonicalLocales: (U2<string, string[]> option -> string[]),
-                PluralRules: PluralRulesConstructor,
-                RelativeTimeFormat: RelativeTimeFormatConstructor,
-                Locale: LocaleConstructor,
-                DisplayNames: DisplayNamesConstructor,
-                ListFormat: ListFormatConstructor,
-                Segmenter: SegmenterConstructor,
+                PluralRules: Intl.PluralRulesConstructor,
+                RelativeTimeFormat: Intl.RelativeTimeFormatConstructor,
+                Locale: Intl.LocaleConstructor,
+                DisplayNames: Intl.DisplayNamesConstructor,
+                ListFormat: Intl.ListFormatConstructor,
+                Segmenter: Intl.SegmenterConstructor,
                 supportedValuesOf: (Intl.SupportedValuesOf.Key -> string[]),
-                DurationFormat: DurationFormatConstructor
+                DurationFormat: Intl.DurationFormatConstructor
             ) : Intl =
             jsNative
 
@@ -7224,726 +6507,6 @@ module Es =
         /// immediately returns that element value. Otherwise, find returns undefined.
         /// </param>
         abstract find: predicate: Fable.Core.TS.Es.ArrayIterator.Find.Predicate2<'T> -> 'T option
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type LDMLPluralRule =
-        | [<CompiledName("few")>] Few
-        | [<CompiledName("many")>] Many
-        | [<CompiledName("one")>] One
-        | [<CompiledName("other")>] Other
-        | [<CompiledName("two")>] Two
-        | [<CompiledName("zero")>] Zero
-
-    [<Interface>]
-    type ListFormat =
-        /// <summary>
-        /// Returns a string with a language-specific representation of the list.
-        /// </summary>
-        /// <param name="list">- An iterable object, such as an <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>.</param>
-        /// <remarks>@throws <c>TypeError</c> if <c>list</c> includes something other than the possible values.</remarks>
-        /// <returns>
-        /// A language-specific formatted string representing the elements of the list.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/ListFormat/format">MDN</a>.
-        /// </returns>
-        abstract format: list: Iterable<string, obj, obj> -> string
-        /// <summary>
-        /// Returns an Array of objects representing the different components that can be used to format a list of values in a locale-aware fashion.
-        /// </summary>
-        /// <param name="list">- An iterable object, such as an <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>, to be formatted according to a locale.</param>
-        /// <remarks>@throws <c>TypeError</c> if <c>list</c> includes something other than the possible values.</remarks>
-        /// <returns>
-        /// An Array of components which contains the formatted parts from the list.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/ListFormat/formatToParts">MDN</a>.
-        /// </returns>
-        abstract formatToParts: list: Iterable<string, obj, obj> -> ListFormat.FormatToParts.Result.Item[]
-        /// <summary>
-        /// Returns a new object with properties reflecting the locale and style
-        /// formatting options computed during the construction of the current
-        /// <c>Intl.ListFormat</c> object.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/ListFormat/resolvedOptions">MDN</a>.
-        /// </summary>
-        abstract resolvedOptions: unit -> ResolvedListFormatOptions
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                format: (Iterable<string, obj, obj> -> string),
-                formatToParts: (Iterable<string, obj, obj> -> ListFormat.FormatToParts.Result.Item[]),
-                resolvedOptions: (unit -> ResolvedListFormatOptions)
-            ) : ListFormat =
-            jsNative
-
-    type ListFormatConstructor =
-        /// <summary>
-        /// Returns an array containing those of the provided locales that are
-        /// supported in list formatting without having to fall back to the runtime's default locale.
-        /// </summary>
-        /// <param name="locales">
-        /// - A string with a <a href="http://tools.ietf.org/html/rfc5646">BCP 47 language tag</a>, or an array of such strings.
-        /// For the general form and interpretation of the <c>locales</c> argument,
-        /// see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_identification_and_negotiation"><c>Intl</c> page</a>.
-        /// </param>
-        /// <param name="options">
-        /// - An <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/ListFormat/supportedLocalesOf#parameters">object</a>.
-        /// with some or all possible options.
-        /// </param>
-        /// <returns>
-        /// An array of strings representing a subset of the given locale tags that are supported in list
-        /// formatting without having to fall back to the runtime's default locale.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/ListFormat/supportedLocalesOf">MDN</a>.
-        /// </returns>
-        abstract supportedLocalesOf:
-            locales: LocalesArgument * ?options: Intl.ListFormat.SupportedLocalesOf.Options -> string[]
-
-        [<EmitConstructor>]
-        abstract Create: ?locales: LocalesArgument * ?options: ListFormatOptions -> ListFormat
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type ListFormatLocaleMatcher =
-        | [<CompiledName("best fit")>] BestFit
-        | [<CompiledName("lookup")>] Lookup
-
-    [<Interface>]
-    type ListFormatOptions =
-        /// <summary>
-        /// The locale matching algorithm to use. For information about this option, see <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_negotiation">Intl page</a>.
-        /// </summary>
-        abstract localeMatcher: ListFormatLocaleMatcher option with get, set
-        /// <summary>
-        /// The format of output message.
-        /// </summary>
-        abstract ``type``: ListFormatType option with get, set
-        /// <summary>
-        /// The length of the internationalized message.
-        /// </summary>
-        abstract style: ListFormatStyle option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (?localeMatcher: ListFormatLocaleMatcher, ?``type``: ListFormatType, ?style: ListFormatStyle)
-            : ListFormatOptions =
-            jsNative
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type ListFormatStyle =
-        | [<CompiledName("long")>] Long
-        | [<CompiledName("narrow")>] Narrow
-        | [<CompiledName("short")>] Short
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type ListFormatType =
-        | [<CompiledName("conjunction")>] Conjunction
-        | [<CompiledName("disjunction")>] Disjunction
-        | [<CompiledName("unit")>] Unit
-
-    [<Interface>]
-    type Locale =
-        inherit LocaleOptions
-        /// <summary>
-        /// A string containing the language, and the script and region if available.
-        /// </summary>
-        abstract baseName: string with get, set
-        /// <summary>
-        /// The primary language subtag associated with the locale.
-        /// </summary>
-        abstract language: string with get, set
-        /// <summary>
-        /// Gets the most likely values for the language, script, and region of the locale based on existing values.
-        /// </summary>
-        abstract maximize: unit -> Locale
-        /// <summary>
-        /// Attempts to remove information about the locale that would be added by calling <c>Locale.maximize()</c>.
-        /// </summary>
-        abstract minimize: unit -> Locale
-        /// <summary>
-        /// Returns the locale's full locale identifier string.
-        /// </summary>
-        abstract toString: unit -> string
-        /// <summary>
-        /// Returns a list of one or more unique calendar identifiers for this locale.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/getCalendars">MDN Reference</a>
-        /// </summary>
-        abstract getCalendars: unit -> string[]
-        /// <summary>
-        /// Returns a list of one or more collation types for this locale.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/getCollations">MDN Reference</a>
-        /// </summary>
-        abstract getCollations: unit -> string[]
-        /// <summary>
-        /// Returns a list of one or more unique hour cycle identifiers for this locale.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/getHourCycles">MDN Reference</a>
-        /// </summary>
-        abstract getHourCycles: unit -> string[]
-        /// <summary>
-        /// Returns a list of one or more unique numbering system identifiers for this locale.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/getNumberingSystems">MDN Reference</a>
-        /// </summary>
-        abstract getNumberingSystems: unit -> string[]
-        /// <summary>
-        /// Returns the ordering of characters indicated by either ltr (left-to-right) or by rtl (right-to-left) for this locale.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/getTextInfo">MDN Reference</a>
-        /// </summary>
-        abstract getTextInfo: unit -> TextInfo
-        /// <summary>
-        /// Returns a list of supported time zones for this locale.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/getTimeZones">MDN Reference</a>
-        /// </summary>
-        abstract getTimeZones: unit -> string[] option
-        /// <summary>
-        /// Returns a <c>WeekInfo</c> object with the properties <c>firstDay</c>, <c>weekend</c> and <c>minimalDays</c> for this locale.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/getWeekInfo">MDN Reference</a>
-        /// </summary>
-        abstract getWeekInfo: unit -> WeekInfo
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                baseName: string,
-                language: string,
-                maximize: (unit -> Locale),
-                minimize: (unit -> Locale),
-                toString: (unit -> string),
-                getCalendars: (unit -> string[]),
-                getCollations: (unit -> string[]),
-                getHourCycles: (unit -> string[]),
-                getNumberingSystems: (unit -> string[]),
-                getTextInfo: (unit -> TextInfo),
-                getTimeZones: (unit -> string[] option),
-                getWeekInfo: (unit -> WeekInfo),
-                ?calendar: string,
-                ?caseFirst: LocaleCollationCaseFirst,
-                ?collation: string,
-                ?hourCycle: LocaleHourCycleKey,
-                ?numberingSystem: string,
-                ?numeric: bool,
-                ?region: string,
-                ?script: string
-            ) : Locale =
-            jsNative
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type LocaleCollationCaseFirst =
-        | [<CompiledName("false")>] False
-        | [<CompiledName("lower")>] Lower
-        | [<CompiledName("upper")>] Upper
-
-    type LocaleConstructor =
-        [<EmitConstructor>]
-        abstract Create: tag: U2<string, Locale> * ?options: LocaleOptions -> Locale
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type LocaleHourCycleKey =
-        | [<CompiledName("h11")>] H11
-        | [<CompiledName("h12")>] H12
-        | [<CompiledName("h23")>] H23
-        | [<CompiledName("h24")>] H24
-
-    [<Interface>]
-    type LocaleOptions =
-        /// <summary>
-        /// A string containing the language, and the script and region if available.
-        /// </summary>
-        abstract baseName: string option with get, set
-        /// <summary>
-        /// The part of the Locale that indicates the locale's calendar era.
-        /// </summary>
-        abstract calendar: string option with get, set
-        /// <summary>
-        /// Flag that defines whether case is taken into account for the locale's collation rules.
-        /// </summary>
-        abstract caseFirst: LocaleCollationCaseFirst option with get, set
-        /// <summary>
-        /// The collation type used for sorting
-        /// </summary>
-        abstract collation: string option with get, set
-        /// <summary>
-        /// The time keeping format convention used by the locale.
-        /// </summary>
-        abstract hourCycle: LocaleHourCycleKey option with get, set
-        /// <summary>
-        /// The primary language subtag associated with the locale.
-        /// </summary>
-        abstract language: string option with get, set
-        /// <summary>
-        /// The numeral system used by the locale.
-        /// </summary>
-        abstract numberingSystem: string option with get, set
-        /// <summary>
-        /// Flag that defines whether the locale has special collation handling for numeric characters.
-        /// </summary>
-        abstract numeric: bool option with get, set
-        /// <summary>
-        /// The region of the world (usually a country) associated with the locale. Possible values are region codes as defined by ISO 3166-1.
-        /// </summary>
-        abstract region: string option with get, set
-        /// <summary>
-        /// The script used for writing the particular language used in the locale. Possible values are script codes as defined by ISO 15924.
-        /// </summary>
-        abstract script: string option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                ?baseName: string,
-                ?calendar: string,
-                ?caseFirst: LocaleCollationCaseFirst,
-                ?collation: string,
-                ?hourCycle: LocaleHourCycleKey,
-                ?language: string,
-                ?numberingSystem: string,
-                ?numeric: bool,
-                ?region: string,
-                ?script: string
-            ) : LocaleOptions =
-            jsNative
-
-    type LocalesArgument = U3<string, Locale, U2<string, Locale>[]> option
-
-    [<Interface>]
-    type Now =
-        abstract timeZoneId: unit -> string
-        abstract instant: unit -> Instant
-        abstract plainDateTimeISO: ?timeZone: TimeZoneLike -> PlainDateTime
-        abstract zonedDateTimeISO: ?timeZone: TimeZoneLike -> ZonedDateTime
-        abstract plainDateISO: ?timeZone: TimeZoneLike -> PlainDate
-        abstract plainTimeISO: ?timeZone: TimeZoneLike -> PlainTime
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                timeZoneId: (unit -> string),
-                instant: (unit -> Instant),
-                plainDateTimeISO: (TimeZoneLike option -> PlainDateTime),
-                zonedDateTimeISO: (TimeZoneLike option -> ZonedDateTime),
-                plainDateISO: (TimeZoneLike option -> PlainDate),
-                plainTimeISO: (TimeZoneLike option -> PlainTime)
-            ) : Now =
-            jsNative
-
-    type NumberFormat =
-        abstract format: value: float -> string
-        abstract format: value: U2<float, bigint> -> string
-        abstract format: value: U3<float, bigint, string> -> string
-        abstract resolvedOptions: unit -> ResolvedNumberFormatOptions
-        abstract formatToParts: ?number: U2<float, bigint> -> NumberFormatPart[]
-        abstract formatToParts: value: U3<float, bigint, string> -> NumberFormatPart[]
-        abstract formatRange: start: U3<float, bigint, string> * ``end``: U3<float, bigint, string> -> string
-
-        abstract formatRangeToParts:
-            start: U3<float, bigint, string> * ``end``: U3<float, bigint, string> -> NumberRangeFormatPart[]
-
-    type NumberFormatConstructor =
-        abstract supportedLocalesOf: locales: U2<string, string[]> * ?options: NumberFormatOptions -> string[]
-        abstract supportedLocalesOf: locales: LocalesArgument * ?options: NumberFormatOptions -> string[]
-
-        [<EmitConstructor>]
-        abstract Create: ?locales: U2<string, string[]> * ?options: NumberFormatOptions -> NumberFormat
-
-        [<EmitConstructor>]
-        abstract Create: ?locales: LocalesArgument * ?options: NumberFormatOptions -> NumberFormat
-
-        [<Emit("$0($1...)")>]
-        abstract Invoke: ?locales: U2<string, string[]> * ?options: NumberFormatOptions -> NumberFormat
-
-        [<Emit("$0($1...)")>]
-        abstract Invoke: ?locales: LocalesArgument * ?options: NumberFormatOptions -> NumberFormat
-
-    [<Interface>]
-    type NumberFormatPart =
-        abstract ``type``: NumberFormatPart.Type with get, set
-        abstract value: string with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create(``type``: NumberFormatPart.Type, value: string) : NumberFormatPart = jsNative
-
-    [<Interface>]
-    type NumberRangeFormatPart =
-        abstract ``type``: NumberRangeFormatPart.Type with get, set
-        abstract value: string with get, set
-        abstract source: NumberRangeFormatPart.Source with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (``type``: NumberRangeFormatPart.Type, value: string, source: NumberRangeFormatPart.Source)
-            : NumberRangeFormatPart =
-            jsNative
-
-    [<Interface>]
-    type OverflowOptions =
-        abstract overflow: OverflowOptions.Overflow option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create(?overflow: OverflowOptions.Overflow) : OverflowOptions = jsNative
-
-    type PlainDate =
-        abstract calendarId: string
-        abstract era: string option
-        abstract eraYear: float option
-        abstract year: float
-        abstract month: float
-        abstract monthCode: string
-        abstract day: float
-        abstract dayOfWeek: float
-        abstract dayOfYear: float
-        abstract weekOfYear: float option
-        abstract yearOfWeek: float option
-        abstract daysInWeek: float
-        abstract daysInMonth: float
-        abstract daysInYear: float
-        abstract monthsInYear: float
-        abstract inLeapYear: bool
-        abstract toPlainYearMonth: unit -> PlainYearMonth
-        abstract toPlainMonthDay: unit -> PlainMonthDay
-        abstract add: duration: DurationLike * ?options: OverflowOptions -> PlainDate
-        abstract subtract: duration: DurationLike * ?options: OverflowOptions -> PlainDate
-        abstract ``with``: dateLike: PlainMonthDay.With.MonthDayLike * ?options: OverflowOptions -> PlainDate
-        abstract withCalendar: calendarLike: CalendarLike -> PlainDate
-        abstract until: other: PlainDateLike * ?options: RoundingOptionsWithLargestUnit<DateUnit> -> Duration
-        abstract since: other: PlainDateLike * ?options: RoundingOptionsWithLargestUnit<DateUnit> -> Duration
-        abstract equals: other: PlainDateLike -> bool
-        abstract toPlainDateTime: ?time: PlainTimeLike -> PlainDateTime
-        abstract toZonedDateTime: timeZone: TimeZoneLike -> ZonedDateTime
-        abstract toZonedDateTime: item: PlainDateToZonedDateTimeOptions -> ZonedDateTime
-        abstract toString: ?options: PlainDateToStringOptions -> string
-        abstract toLocaleString: ?locales: LocalesArgument * ?options: DateTimeFormatOptions -> string
-        abstract toJSON: unit -> string
-        abstract valueOf: unit -> unit
-
-        [<Emit("$0[Symbol.toStringTag]")>]
-        abstract SymbolToStringTag: string
-
-    type PlainDateConstructor =
-        abstract from: item: PlainDateLike * ?options: OverflowOptions -> PlainDate
-        abstract compare: one: PlainDateLike * two: PlainDateLike -> float
-
-        [<EmitConstructor>]
-        abstract Create: isoYear: float * isoMonth: float * isoDay: float * ?calendar: string -> PlainDate
-
-    type PlainDateLike = U5<string, DateLikeObject, PlainDate, PlainDateTime, ZonedDateTime>
-
-    type PlainDateTime =
-        abstract calendarId: string
-        abstract era: string option
-        abstract eraYear: float option
-        abstract year: float
-        abstract month: float
-        abstract monthCode: string
-        abstract day: float
-        abstract hour: float
-        abstract minute: float
-        abstract second: float
-        abstract millisecond: float
-        abstract microsecond: float
-        abstract nanosecond: float
-        abstract dayOfWeek: float
-        abstract dayOfYear: float
-        abstract weekOfYear: float option
-        abstract yearOfWeek: float option
-        abstract daysInWeek: float
-        abstract daysInMonth: float
-        abstract daysInYear: float
-        abstract monthsInYear: float
-        abstract inLeapYear: bool
-        abstract ``with``: dateTimeLike: PlainDateTime.With.DateTimeLike * ?options: OverflowOptions -> PlainDateTime
-        abstract withPlainTime: ?plainTime: PlainTimeLike -> PlainDateTime
-        abstract withCalendar: calendar: CalendarLike -> PlainDateTime
-        abstract add: duration: DurationLike * ?options: OverflowOptions -> PlainDateTime
-        abstract subtract: duration: DurationLike * ?options: OverflowOptions -> PlainDateTime
-
-        abstract until:
-            other: PlainDateTimeLike * ?options: RoundingOptionsWithLargestUnit<ZonedDateTime.Until.Options.Item> ->
-                Duration
-
-        abstract since:
-            other: PlainDateTimeLike * ?options: RoundingOptionsWithLargestUnit<ZonedDateTime.Until.Options.Item> ->
-                Duration
-
-        abstract round: roundTo: PluralizeUnit -> PlainDateTime
-        abstract round: roundTo: RoundingOptions<ZonedDateTime.Round.RoundTo.Item> -> PlainDateTime
-        abstract equals: other: PlainDateTimeLike -> bool
-        abstract toString: ?options: PlainDateTimeToStringOptions -> string
-        abstract toLocaleString: ?locales: LocalesArgument * ?options: DateTimeFormatOptions -> string
-        abstract toJSON: unit -> string
-        abstract valueOf: unit -> unit
-        abstract toZonedDateTime: timeZone: TimeZoneLike * ?options: DisambiguationOptions -> ZonedDateTime
-        abstract toPlainDate: unit -> PlainDate
-        abstract toPlainTime: unit -> PlainTime
-
-        [<Emit("$0[Symbol.toStringTag]")>]
-        abstract SymbolToStringTag: string
-
-    type PlainDateTimeConstructor =
-        abstract from: item: PlainDateTimeLike * ?options: OverflowOptions -> PlainDateTime
-        abstract compare: one: PlainDateTimeLike * two: PlainDateTimeLike -> float
-
-        [<EmitConstructor>]
-        abstract Create:
-            isoYear: float *
-            isoMonth: float *
-            isoDay: float *
-            ?hour: float *
-            ?minute: float *
-            ?second: float *
-            ?millisecond: float *
-            ?microsecond: float *
-            ?nanosecond: float *
-            ?calendar: string ->
-                PlainDateTime
-
-    type PlainDateTimeLike = U5<string, DateTimeLikeObject, PlainDate, PlainDateTime, ZonedDateTime>
-
-    [<Interface>]
-    type PlainDateTimeToStringOptions =
-        inherit PlainDateToStringOptions
-        inherit PlainTimeToStringOptions
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                ?smallestUnit: Temporal.PluralizeUnit3,
-                ?roundingMode: NumberFormatOptions.RoundingMode,
-                ?fractionalSecondDigits: PlainTimeToStringOptions.FractionalSecondDigits,
-                ?calendarName: PlainDateToStringOptions.CalendarName
-            ) : PlainDateTimeToStringOptions =
-            jsNative
-
-    [<Interface>]
-    type PlainDateToStringOptions =
-        abstract calendarName: PlainDateToStringOptions.CalendarName option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create(?calendarName: PlainDateToStringOptions.CalendarName) : PlainDateToStringOptions = jsNative
-
-    [<Interface>]
-    type PlainDateToZonedDateTimeOptions =
-        abstract plainTime: PlainTimeLike option with get, set
-        abstract timeZone: TimeZoneLike with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create(timeZone: TimeZoneLike, ?plainTime: PlainTimeLike) : PlainDateToZonedDateTimeOptions =
-            jsNative
-
-    type PlainMonthDay =
-        abstract calendarId: string
-        abstract monthCode: string
-        abstract day: float
-        abstract ``with``: monthDayLike: PlainMonthDay.With.MonthDayLike * ?options: OverflowOptions -> PlainMonthDay
-        abstract equals: other: PlainMonthDayLike -> bool
-        abstract toString: ?options: PlainDateToStringOptions -> string
-        abstract toLocaleString: ?locales: LocalesArgument * ?options: DateTimeFormatOptions -> string
-        abstract toJSON: unit -> string
-        abstract valueOf: unit -> unit
-        abstract toPlainDate: item: PlainMonthDayToPlainDateOptions -> PlainDate
-
-        [<Emit("$0[Symbol.toStringTag]")>]
-        abstract SymbolToStringTag: string
-
-    type PlainMonthDayConstructor =
-        abstract from: item: PlainMonthDayLike * ?options: OverflowOptions -> PlainMonthDay
-
-        [<EmitConstructor>]
-        abstract Create: isoMonth: float * isoDay: float * ?calendar: string * ?referenceISOYear: float -> PlainMonthDay
-
-    type PlainMonthDayLike = U3<string, DateLikeObject, PlainMonthDay>
-
-    [<Interface>]
-    type PlainMonthDayToPlainDateOptions =
-        abstract era: string option with get, set
-        abstract eraYear: float option with get, set
-        abstract year: float option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create(?era: string, ?eraYear: float, ?year: float) : PlainMonthDayToPlainDateOptions = jsNative
-
-    type PlainTime =
-        abstract hour: float
-        abstract minute: float
-        abstract second: float
-        abstract millisecond: float
-        abstract microsecond: float
-        abstract nanosecond: float
-        abstract add: duration: DurationLike -> PlainTime
-        abstract subtract: duration: DurationLike -> PlainTime
-        abstract ``with``: timeLike: PlainTime.With.TimeLike * ?options: OverflowOptions -> PlainTime
-        abstract until: other: PlainTimeLike * ?options: RoundingOptionsWithLargestUnit<TimeUnit> -> Duration
-        abstract since: other: PlainTimeLike * ?options: RoundingOptionsWithLargestUnit<TimeUnit> -> Duration
-        abstract equals: other: PlainTimeLike -> bool
-        abstract round: roundTo: Temporal.PluralizeUnit2 -> PlainTime
-        abstract round: roundTo: RoundingOptions<TimeUnit> -> PlainTime
-        abstract toString: ?options: PlainTimeToStringOptions -> string
-        abstract toLocaleString: ?locales: LocalesArgument * ?options: DateTimeFormatOptions -> string
-        abstract toJSON: unit -> string
-        abstract valueOf: unit -> unit
-
-        [<Emit("$0[Symbol.toStringTag]")>]
-        abstract SymbolToStringTag: string
-
-    type PlainTimeConstructor =
-        abstract from: item: PlainTimeLike * ?options: OverflowOptions -> PlainTime
-        abstract compare: one: PlainTimeLike * two: PlainTimeLike -> float
-
-        [<EmitConstructor>]
-        abstract Create:
-            ?hour: float *
-            ?minute: float *
-            ?second: float *
-            ?millisecond: float *
-            ?microsecond: float *
-            ?nanosecond: float ->
-                PlainTime
-
-    type PlainTimeLike = U5<string, PlainDateTime, PlainTime, TimeLikeObject, ZonedDateTime>
-
-    [<Interface>]
-    type PlainTimeToStringOptions =
-        inherit ToStringRoundingOptionsWithFractionalSeconds<PlainTimeToStringOptions.Base.Item>
-        abstract smallestUnit: Temporal.PluralizeUnit3 option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                ?smallestUnit: Temporal.PluralizeUnit3,
-                ?roundingMode: NumberFormatOptions.RoundingMode,
-                ?fractionalSecondDigits: PlainTimeToStringOptions.FractionalSecondDigits
-            ) : PlainTimeToStringOptions =
-            jsNative
-
-    type PlainYearMonth =
-        abstract calendarId: string
-        abstract era: string option
-        abstract eraYear: float option
-        abstract year: float
-        abstract month: float
-        abstract monthCode: string
-        abstract daysInYear: float
-        abstract daysInMonth: float
-        abstract monthsInYear: float
-        abstract inLeapYear: bool
-
-        abstract ``with``:
-            yearMonthLike: PlainYearMonth.With.YearMonthLike * ?options: OverflowOptions -> PlainYearMonth
-
-        abstract add: duration: DurationLike * ?options: OverflowOptions -> PlainYearMonth
-        abstract subtract: duration: DurationLike * ?options: OverflowOptions -> PlainYearMonth
-
-        abstract until:
-            other: PlainYearMonthLike * ?options: RoundingOptionsWithLargestUnit<PlainYearMonth.Until.Options.Item> ->
-                Duration
-
-        abstract since:
-            other: PlainYearMonthLike * ?options: RoundingOptionsWithLargestUnit<PlainYearMonth.Until.Options.Item> ->
-                Duration
-
-        abstract equals: other: PlainYearMonthLike -> bool
-        abstract toString: ?options: PlainDateToStringOptions -> string
-        abstract toLocaleString: ?locales: LocalesArgument * ?options: DateTimeFormatOptions -> string
-        abstract toJSON: unit -> string
-        abstract valueOf: unit -> unit
-        abstract toPlainDate: item: PlainYearMonthToPlainDateOptions -> PlainDate
-
-        [<Emit("$0[Symbol.toStringTag]")>]
-        abstract SymbolToStringTag: string
-
-    type PlainYearMonthConstructor =
-        abstract from: item: PlainYearMonthLike * ?options: OverflowOptions -> PlainYearMonth
-        abstract compare: one: PlainYearMonthLike * two: PlainYearMonthLike -> float
-
-        [<EmitConstructor>]
-        abstract Create:
-            isoYear: float * isoMonth: float * ?calendar: string * ?referenceISODay: float -> PlainYearMonth
-
-    type PlainYearMonthLike = U3<string, PlainYearMonth, YearMonthLikeObject>
-
-    [<Interface>]
-    type PlainYearMonthToPlainDateOptions =
-        abstract day: float with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create(day: float) : PlainYearMonthToPlainDateOptions = jsNative
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type PluralRuleType =
-        | [<CompiledName("cardinal")>] Cardinal
-        | [<CompiledName("ordinal")>] Ordinal
-
-    [<Interface>]
-    type PluralRules =
-        abstract resolvedOptions: unit -> ResolvedPluralRulesOptions
-        abstract ``select``: n: float -> LDMLPluralRule
-        abstract selectRange: start: float * ``end``: float -> LDMLPluralRule
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                resolvedOptions: (unit -> ResolvedPluralRulesOptions),
-                ``select``: (float -> LDMLPluralRule),
-                selectRange: Func<float, float, LDMLPluralRule>
-            ) : PluralRules =
-            jsNative
-
-    type PluralRulesConstructor =
-        abstract supportedLocalesOf:
-            locales: U2<string, string[]> * ?options: Intl.PluralRules.SupportedLocalesOf.Options -> string[]
-
-        abstract supportedLocalesOf:
-            locales: LocalesArgument * ?options: Intl.PluralRules.SupportedLocalesOf.Options2 -> string[]
-
-        [<EmitConstructor>]
-        abstract Create: ?locales: U2<string, string[]> * ?options: PluralRulesOptions -> PluralRules
-
-        [<EmitConstructor>]
-        abstract Create: ?locales: LocalesArgument * ?options: PluralRulesOptions -> PluralRules
-
-    [<Interface>]
-    type PluralRulesOptions =
-        abstract localeMatcher: NumberFormatOptions.LocaleMatcher option with get, set
-        abstract ``type``: PluralRuleType option with get, set
-        abstract minimumIntegerDigits: float option with get, set
-        abstract minimumFractionDigits: float option with get, set
-        abstract maximumFractionDigits: float option with get, set
-        abstract minimumSignificantDigits: float option with get, set
-        abstract maximumSignificantDigits: float option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                ?localeMatcher: NumberFormatOptions.LocaleMatcher,
-                ?``type``: PluralRuleType,
-                ?minimumIntegerDigits: float,
-                ?minimumFractionDigits: float,
-                ?maximumFractionDigits: float,
-                ?minimumSignificantDigits: float,
-                ?maximumSignificantDigits: float
-            ) : PluralRulesOptions =
-            jsNative
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type PluralizeUnit =
-        | [<CompiledName("day")>] Day
-        | [<CompiledName("days")>] Days
-        | [<CompiledName("hour")>] Hour
-        | [<CompiledName("hours")>] Hours
-        | [<CompiledName("microsecond")>] Microsecond
-        | [<CompiledName("microseconds")>] Microseconds
-        | [<CompiledName("millisecond")>] Millisecond
-        | [<CompiledName("milliseconds")>] Milliseconds
-        | [<CompiledName("minute")>] Minute
-        | [<CompiledName("minutes")>] Minutes
-        | [<CompiledName("nanosecond")>] Nanosecond
-        | [<CompiledName("nanoseconds")>] Nanoseconds
-        | [<CompiledName("second")>] Second
-        | [<CompiledName("seconds")>] Seconds
 
     [<Interface>]
     type RawJSONInstance =
@@ -8085,933 +6648,35 @@ module Es =
         /// <returns>Whether setting the prototype was successful.</returns>
         abstract setPrototypeOf: target: obj * ?proto: obj -> bool
 
-    [<Interface>]
-    type RelativeTimeFormat =
-        /// <summary>
-        /// Formats a value and a unit according to the locale
-        /// and formatting options of the given
-        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/RelativeTimeFormat"><c>Intl.RelativeTimeFormat</c></a>
-        /// object.
-        /// <br /><br />
-        /// While this method automatically provides the correct plural forms,
-        /// the grammatical form is otherwise as neutral as possible.
-        /// <br /><br />
-        /// It is the caller's responsibility to handle cut-off logic
-        /// such as deciding between displaying "in 7 days" or "in 1 week".
-        /// This API does not support relative dates involving compound units.
-        /// e.g "in 5 days and 4 hours".
-        /// </summary>
-        /// <param name="value">-  Numeric value to use in the internationalized relative time message</param>
-        /// <param name="unit">- <a href="https://tc39.es/ecma402/#sec-singularrelativetimeunit">Unit</a> to use in the relative time internationalized message.</param>
-        /// <remarks>@throws <c>RangeError</c> if <c>unit</c> was given something other than <c>unit</c> possible values</remarks>
-        /// <returns>
-        /// Internationalized relative time message as string
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/format">MDN</a>.
-        /// </returns>
-        abstract format: value: float * unit: RelativeTimeFormatUnit -> string
-        /// <summary>
-        /// Returns an array of objects representing the relative time format in parts that can be used for custom locale-aware formatting.
-        /// </summary>
-        /// <param name="value">- Numeric value to use in the internationalized relative time message</param>
-        /// <param name="unit">- <a href="https://tc39.es/ecma402/#sec-singularrelativetimeunit">Unit</a> to use in the relative time internationalized message.</param>
-        /// <remarks>
-        /// @throws
-        /// <c>RangeError</c> if <c>unit</c> was given something other than <c>unit</c> possible values
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/formatToParts">MDN</a>.
-        /// </remarks>
-        abstract formatToParts: value: float * unit: RelativeTimeFormatUnit -> RelativeTimeFormatPart[]
-        /// <summary>
-        /// Provides access to the locale and options computed during initialization of this <c>Intl.RelativeTimeFormat</c> object.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/resolvedOptions">MDN</a>.
-        /// </summary>
-        abstract resolvedOptions: unit -> ResolvedRelativeTimeFormatOptions
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                format: Func<float, RelativeTimeFormatUnit, string>,
-                formatToParts: Func<float, RelativeTimeFormatUnit, RelativeTimeFormatPart[]>,
-                resolvedOptions: (unit -> ResolvedRelativeTimeFormatOptions)
-            ) : RelativeTimeFormat =
-            jsNative
-
-    type RelativeTimeFormatConstructor =
-        /// <summary>
-        /// Returns an array containing those of the provided locales
-        /// that are supported in date and time formatting
-        /// without having to fall back to the runtime's default locale.
-        /// </summary>
-        /// <param name="locales">
-        /// - A string with a <a href="http://tools.ietf.org/html/rfc5646">BCP 47 language tag</a>, or an array of such strings.
-        /// For the general form and interpretation of the locales argument,
-        /// see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_identification_and_negotiation"><c>Intl</c> page</a>.
-        /// </param>
-        /// <param name="options">
-        /// - An <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/RelativeTimeFormat#Parameters">object</a>
-        /// with some or all of options of the formatting.
-        /// </param>
-        /// <returns>
-        /// An array containing those of the provided locales
-        /// that are supported in date and time formatting
-        /// without having to fall back to the runtime's default locale.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/supportedLocalesOf">MDN</a>.
-        /// </returns>
-        abstract supportedLocalesOf: ?locales: LocalesArgument * ?options: RelativeTimeFormatOptions -> string[]
-
-        [<EmitConstructor>]
-        abstract Create: ?locales: LocalesArgument * ?options: RelativeTimeFormatOptions -> RelativeTimeFormat
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type RelativeTimeFormatLocaleMatcher =
-        | [<CompiledName("best fit")>] BestFit
-        | [<CompiledName("lookup")>] Lookup
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type RelativeTimeFormatNumeric =
-        | [<CompiledName("always")>] Always
-        | [<CompiledName("auto")>] Auto
-
-    [<Interface>]
-    type RelativeTimeFormatOptions =
-        /// <summary>
-        /// The locale matching algorithm to use. For information about this option, see <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_negotiation">Intl page</a>.
-        /// </summary>
-        abstract localeMatcher: RelativeTimeFormatLocaleMatcher option with get, set
-        /// <summary>
-        /// The format of output message.
-        /// </summary>
-        abstract numeric: RelativeTimeFormatNumeric option with get, set
-        /// <summary>
-        /// The length of the internationalized message.
-        /// </summary>
-        abstract style: RelativeTimeFormatStyle option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                ?localeMatcher: RelativeTimeFormatLocaleMatcher,
-                ?numeric: RelativeTimeFormatNumeric,
-                ?style: RelativeTimeFormatStyle
-            ) : RelativeTimeFormatOptions =
-            jsNative
-
-    type RelativeTimeFormatPart = U2<RelativeTimeFormatPart2, RelativeTimeFormatPart3>
-
-    [<Interface>]
-    type RelativeTimeFormatPart2 =
-        /// <remarks>TypeScript type: <c>"literal"</c></remarks>
-        abstract ``type``: string with get, set
-        abstract value: string with get, set
-
-        [<ParamObject; Emit("({ type: 'literal', ...$0 })")>]
-        static member Create(value: string) : RelativeTimeFormatPart2 = jsNative
-
-    module RelativeTimeFormatPart2 =
-        /// <remarks>TypeScript type: <c>"literal"</c></remarks>
-        [<Literal>]
-        let ``type`` = "literal"
-
-    [<Interface>]
-    type RelativeTimeFormatPart3 =
-        abstract ``type``: RelativeTimeFormatPart3.Type with get, set
-        abstract value: string with get, set
-        abstract unit: RelativeTimeFormatUnitSingular with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (``type``: RelativeTimeFormatPart3.Type, value: string, unit: RelativeTimeFormatUnitSingular)
-            : RelativeTimeFormatPart3 =
-            jsNative
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type RelativeTimeFormatStyle =
-        | [<CompiledName("long")>] Long
-        | [<CompiledName("narrow")>] Narrow
-        | [<CompiledName("short")>] Short
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type RelativeTimeFormatUnit =
-        | [<CompiledName("day")>] Day
-        | [<CompiledName("days")>] Days
-        | [<CompiledName("hour")>] Hour
-        | [<CompiledName("hours")>] Hours
-        | [<CompiledName("minute")>] Minute
-        | [<CompiledName("minutes")>] Minutes
-        | [<CompiledName("month")>] Month
-        | [<CompiledName("months")>] Months
-        | [<CompiledName("quarter")>] Quarter
-        | [<CompiledName("quarters")>] Quarters
-        | [<CompiledName("second")>] Second
-        | [<CompiledName("seconds")>] Seconds
-        | [<CompiledName("week")>] Week
-        | [<CompiledName("weeks")>] Weeks
-        | [<CompiledName("year")>] Year
-        | [<CompiledName("years")>] Years
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type RelativeTimeFormatUnitSingular =
-        | [<CompiledName("day")>] Day
-        | [<CompiledName("hour")>] Hour
-        | [<CompiledName("minute")>] Minute
-        | [<CompiledName("month")>] Month
-        | [<CompiledName("quarter")>] Quarter
-        | [<CompiledName("second")>] Second
-        | [<CompiledName("week")>] Week
-        | [<CompiledName("year")>] Year
-
-    [<Interface>]
-    type ResolvedCollatorOptions =
-        abstract locale: string with get, set
-        abstract usage: string with get, set
-        abstract sensitivity: string with get, set
-        abstract ignorePunctuation: bool with get, set
-        abstract collation: string with get, set
-        abstract caseFirst: string with get, set
-        abstract numeric: bool with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                locale: string,
-                usage: string,
-                sensitivity: string,
-                ignorePunctuation: bool,
-                collation: string,
-                caseFirst: string,
-                numeric: bool
-            ) : ResolvedCollatorOptions =
-            jsNative
-
-    [<Interface>]
-    type ResolvedDateTimeFormatOptions =
-        abstract locale: string with get, set
-        abstract calendar: string with get, set
-        abstract numberingSystem: string with get, set
-        abstract timeZone: string with get, set
-        abstract hour12: bool option with get, set
-        abstract weekday: string option with get, set
-        abstract era: string option with get, set
-        abstract year: string option with get, set
-        abstract month: string option with get, set
-        abstract day: string option with get, set
-        abstract hour: string option with get, set
-        abstract minute: string option with get, set
-        abstract second: string option with get, set
-        abstract timeZoneName: string option with get, set
-        abstract formatMatcher: DateTimeFormatOptions.FormatMatcher option with get, set
-        abstract dateStyle: DateTimeFormatOptions.DateStyle option with get, set
-        abstract timeStyle: DateTimeFormatOptions.DateStyle option with get, set
-        abstract hourCycle: DateTimeFormatOptions.HourCycle option with get, set
-        abstract dayPeriod: NumberFormatOptions.UnitDisplay option with get, set
-        abstract fractionalSecondDigits: DateTimeFormatOptions.FractionalSecondDigits option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                locale: string,
-                calendar: string,
-                numberingSystem: string,
-                timeZone: string,
-                ?hour12: bool,
-                ?weekday: string,
-                ?era: string,
-                ?year: string,
-                ?month: string,
-                ?day: string,
-                ?hour: string,
-                ?minute: string,
-                ?second: string,
-                ?timeZoneName: string,
-                ?formatMatcher: DateTimeFormatOptions.FormatMatcher,
-                ?dateStyle: DateTimeFormatOptions.DateStyle,
-                ?timeStyle: DateTimeFormatOptions.DateStyle,
-                ?hourCycle: DateTimeFormatOptions.HourCycle,
-                ?dayPeriod: NumberFormatOptions.UnitDisplay,
-                ?fractionalSecondDigits: DateTimeFormatOptions.FractionalSecondDigits
-            ) : ResolvedDateTimeFormatOptions =
-            jsNative
-
-    [<Interface>]
-    type ResolvedDisplayNamesOptions =
-        abstract locale: string with get, set
-        abstract style: RelativeTimeFormatStyle with get, set
-        abstract ``type``: DisplayNamesType with get, set
-        abstract fallback: DisplayNamesFallback with get, set
-        abstract languageDisplay: DisplayNamesLanguageDisplay option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                locale: string,
-                style: RelativeTimeFormatStyle,
-                ``type``: DisplayNamesType,
-                fallback: DisplayNamesFallback,
-                ?languageDisplay: DisplayNamesLanguageDisplay
-            ) : ResolvedDisplayNamesOptions =
-            jsNative
-
-    [<Interface>]
-    type ResolvedDurationFormatOptions =
-        abstract locale: string with get, set
-        abstract numberingSystem: string with get, set
-        abstract style: DurationFormatStyle with get, set
-        abstract years: NumberFormatOptions.UnitDisplay with get, set
-        abstract yearsDisplay: DurationFormatDisplayOption with get, set
-        abstract months: NumberFormatOptions.UnitDisplay with get, set
-        abstract monthsDisplay: DurationFormatDisplayOption with get, set
-        abstract weeks: NumberFormatOptions.UnitDisplay with get, set
-        abstract weeksDisplay: DurationFormatDisplayOption with get, set
-        abstract days: NumberFormatOptions.UnitDisplay with get, set
-        abstract daysDisplay: DurationFormatDisplayOption with get, set
-        abstract hours: DateTimeFormatOptions.Month with get, set
-        abstract hoursDisplay: DurationFormatDisplayOption with get, set
-        abstract minutes: DateTimeFormatOptions.Month with get, set
-        abstract minutesDisplay: DurationFormatDisplayOption with get, set
-        abstract seconds: DateTimeFormatOptions.Month with get, set
-        abstract secondsDisplay: DurationFormatDisplayOption with get, set
-        abstract milliseconds: DurationFormatOptions.Milliseconds with get, set
-        abstract millisecondsDisplay: DurationFormatDisplayOption with get, set
-        abstract microseconds: DurationFormatOptions.Milliseconds with get, set
-        abstract microsecondsDisplay: DurationFormatDisplayOption with get, set
-        abstract nanoseconds: DurationFormatOptions.Milliseconds with get, set
-        abstract nanosecondsDisplay: DurationFormatDisplayOption with get, set
-        abstract fractionalDigits: DurationFormatOptions.FractionalDigits option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                locale: string,
-                numberingSystem: string,
-                style: DurationFormatStyle,
-                years: NumberFormatOptions.UnitDisplay,
-                yearsDisplay: DurationFormatDisplayOption,
-                months: NumberFormatOptions.UnitDisplay,
-                monthsDisplay: DurationFormatDisplayOption,
-                weeks: NumberFormatOptions.UnitDisplay,
-                weeksDisplay: DurationFormatDisplayOption,
-                days: NumberFormatOptions.UnitDisplay,
-                daysDisplay: DurationFormatDisplayOption,
-                hours: DateTimeFormatOptions.Month,
-                hoursDisplay: DurationFormatDisplayOption,
-                minutes: DateTimeFormatOptions.Month,
-                minutesDisplay: DurationFormatDisplayOption,
-                seconds: DateTimeFormatOptions.Month,
-                secondsDisplay: DurationFormatDisplayOption,
-                milliseconds: DurationFormatOptions.Milliseconds,
-                millisecondsDisplay: DurationFormatDisplayOption,
-                microseconds: DurationFormatOptions.Milliseconds,
-                microsecondsDisplay: DurationFormatDisplayOption,
-                nanoseconds: DurationFormatOptions.Milliseconds,
-                nanosecondsDisplay: DurationFormatDisplayOption,
-                ?fractionalDigits: DurationFormatOptions.FractionalDigits
-            ) : ResolvedDurationFormatOptions =
-            jsNative
-
-    [<Interface>]
-    type ResolvedListFormatOptions =
-        abstract locale: string with get, set
-        abstract style: ListFormatStyle with get, set
-        abstract ``type``: ListFormatType with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (locale: string, style: ListFormatStyle, ``type``: ListFormatType)
-            : ResolvedListFormatOptions =
-            jsNative
-
-    [<Interface>]
-    type ResolvedNumberFormatOptions =
-        abstract locale: string with get, set
-        abstract numberingSystem: string with get, set
-        abstract style: NumberFormatOptions.Style with get, set
-        abstract currency: string option with get, set
-        abstract currencyDisplay: NumberFormatOptions.CurrencyDisplay option with get, set
-        abstract minimumIntegerDigits: float with get, set
-        abstract minimumFractionDigits: float option with get, set
-        abstract maximumFractionDigits: float option with get, set
-        abstract minimumSignificantDigits: float option with get, set
-        abstract maximumSignificantDigits: float option with get, set
-        abstract useGrouping: ResolvedNumberFormatOptions.UseGrouping with get, set
-        abstract compactDisplay: NumberFormatOptions.CompactDisplay option with get, set
-        abstract notation: NumberFormatOptions.Notation with get, set
-        abstract signDisplay: NumberFormatOptions.SignDisplay with get, set
-        abstract unit: string option with get, set
-        abstract unitDisplay: NumberFormatOptions.UnitDisplay option with get, set
-        abstract currencySign: NumberFormatOptions.CurrencySign option with get, set
-        abstract roundingPriority: NumberFormatOptions.RoundingPriority with get, set
-        abstract roundingMode: NumberFormatOptions.RoundingMode with get, set
-        abstract roundingIncrement: NumberFormatOptions.RoundingIncrement with get, set
-        abstract trailingZeroDisplay: NumberFormatOptions.TrailingZeroDisplay with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                locale: string,
-                numberingSystem: string,
-                style: NumberFormatOptions.Style,
-                minimumIntegerDigits: float,
-                useGrouping: ResolvedNumberFormatOptions.UseGrouping,
-                notation: NumberFormatOptions.Notation,
-                signDisplay: NumberFormatOptions.SignDisplay,
-                roundingPriority: NumberFormatOptions.RoundingPriority,
-                roundingMode: NumberFormatOptions.RoundingMode,
-                roundingIncrement: NumberFormatOptions.RoundingIncrement,
-                trailingZeroDisplay: NumberFormatOptions.TrailingZeroDisplay,
-                ?currency: string,
-                ?currencyDisplay: NumberFormatOptions.CurrencyDisplay,
-                ?minimumFractionDigits: float,
-                ?maximumFractionDigits: float,
-                ?minimumSignificantDigits: float,
-                ?maximumSignificantDigits: float,
-                ?compactDisplay: NumberFormatOptions.CompactDisplay,
-                ?unit: string,
-                ?unitDisplay: NumberFormatOptions.UnitDisplay,
-                ?currencySign: NumberFormatOptions.CurrencySign
-            ) : ResolvedNumberFormatOptions =
-            jsNative
-
-    [<Interface>]
-    type ResolvedPluralRulesOptions =
-        abstract locale: string with get, set
-        abstract pluralCategories: LDMLPluralRule[] with get, set
-        abstract ``type``: PluralRuleType with get, set
-        abstract minimumIntegerDigits: float with get, set
-        abstract minimumFractionDigits: float with get, set
-        abstract maximumFractionDigits: float with get, set
-        abstract minimumSignificantDigits: float option with get, set
-        abstract maximumSignificantDigits: float option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                locale: string,
-                pluralCategories: LDMLPluralRule[],
-                ``type``: PluralRuleType,
-                minimumIntegerDigits: float,
-                minimumFractionDigits: float,
-                maximumFractionDigits: float,
-                ?minimumSignificantDigits: float,
-                ?maximumSignificantDigits: float
-            ) : ResolvedPluralRulesOptions =
-            jsNative
-
-    [<Interface>]
-    type ResolvedRelativeTimeFormatOptions =
-        abstract locale: string with get, set
-        abstract style: RelativeTimeFormatStyle with get, set
-        abstract numeric: RelativeTimeFormatNumeric with get, set
-        abstract numberingSystem: string with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (locale: string, style: RelativeTimeFormatStyle, numeric: RelativeTimeFormatNumeric, numberingSystem: string) : ResolvedRelativeTimeFormatOptions =
-            jsNative
-
-    [<Interface>]
-    type ResolvedSegmenterOptions =
-        abstract locale: string with get, set
-        abstract granularity: ResolvedSegmenterOptions.Granularity with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (locale: string, granularity: ResolvedSegmenterOptions.Granularity)
-            : ResolvedSegmenterOptions =
-            jsNative
-
-    [<Interface>]
-    type RoundingOptions<'Units> =
-        abstract smallestUnit: U2<'Units, string> option with get, set
-        abstract roundingIncrement: float option with get, set
-        abstract roundingMode: NumberFormatOptions.RoundingMode option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                ?smallestUnit: U2<'Units, string>,
-                ?roundingIncrement: float,
-                ?roundingMode: NumberFormatOptions.RoundingMode
-            ) : RoundingOptions<'Units> =
-            jsNative
-
-    [<Interface>]
-    type RoundingOptionsWithLargestUnit<'Units> =
-        inherit RoundingOptions<'Units>
-        abstract largestUnit: U2<string, 'Units> option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                ?largestUnit: U2<string, 'Units>,
-                ?smallestUnit: U2<'Units, string>,
-                ?roundingIncrement: float,
-                ?roundingMode: NumberFormatOptions.RoundingMode
-            ) : RoundingOptionsWithLargestUnit<'Units> =
-            jsNative
-
-    [<Interface>]
-    type SegmentData =
-        /// <summary>
-        /// A string containing the segment extracted from the original input string.
-        /// </summary>
-        abstract segment: string with get, set
-        /// <summary>
-        /// The code unit index in the original input string at which the segment begins.
-        /// </summary>
-        abstract index: float with get, set
-        /// <summary>
-        /// The complete input string that was segmented.
-        /// </summary>
-        abstract input: string with get, set
-        /// <summary>
-        /// A boolean value only if granularity is "word"; otherwise, undefined.
-        /// If granularity is "word", then isWordLike is true when the segment is word-like (i.e., consists of letters/numbers/ideographs/etc.); otherwise, false.
-        /// </summary>
-        abstract isWordLike: bool option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create(segment: string, index: float, input: string, ?isWordLike: bool) : SegmentData = jsNative
-
-    type SegmentIterator<'T> =
-        inherit IteratorObject<'T, unit, obj>
-        abstract next: [<ParamArray>] __0: obj[] -> U2<IteratorReturnResult<unit>, IteratorYieldResult<'T>>
-
-        /// <summary>
-        /// Creates an iterator whose values are the result of applying the callback to the values from this iterator.
-        /// </summary>
-        /// <param name="callbackfn">A function that accepts up to two arguments to be used to transform values from the underlying iterator.</param>
-        abstract map<'U> :
-            callbackfn: Fable.Core.TS.Es.ArrayIterator.Map.Callbackfn<'T, 'U> -> IteratorObject<'U, unit, obj>
-
-        /// <summary>
-        /// Creates an iterator whose values are those from this iterator for which the provided predicate returns true.
-        /// </summary>
-        /// <param name="predicate">A function that accepts up to two arguments to be used to test values from the underlying iterator.</param>
-        /// <param name="predicate">A function that accepts up to two arguments to be used to test values from the underlying iterator.</param>
-        abstract filter<'S> :
-            predicate: Fable.Core.TS.Es.ArrayIterator.Filter.Predicate<'T> -> IteratorObject<'S, unit, obj>
-
-        /// <summary>
-        /// Creates an iterator whose values are those from this iterator for which the provided predicate returns true.
-        /// </summary>
-        /// <param name="predicate">A function that accepts up to two arguments to be used to test values from the underlying iterator.</param>
-        /// <param name="predicate">A function that accepts up to two arguments to be used to test values from the underlying iterator.</param>
-        abstract filter:
-            predicate: Fable.Core.TS.Es.ArrayIterator.Filter.Predicate2<'T> -> IteratorObject<'T, unit, obj>
-
-        /// <summary>
-        /// Creates an iterator whose values are the result of applying the callback to the values from this iterator and then flattening the resulting iterators or iterables.
-        /// </summary>
-        /// <param name="callback">A function that accepts up to two arguments to be used to transform values from the underlying iterator into new iterators or iterables to be flattened into the result.</param>
-        abstract flatMap<'U> :
-            callback: Fable.Core.TS.Es.ArrayIterator.FlatMap.Callback<'T, 'U> -> IteratorObject<'U, unit, obj>
-
-        /// <summary>
-        /// Calls the specified callback function for all the elements in this iterator. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
-        /// </summary>
-        /// <param name="callbackfn">A function that accepts up to three arguments. The reduce method calls the callbackfn function one time for each element in the iterator.</param>
-        /// <param name="initialValue">If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of a value from the iterator.</param>
-        /// <param name="callbackfn">A function that accepts up to three arguments. The reduce method calls the callbackfn function one time for each element in the iterator.</param>
-        /// <param name="initialValue">If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of a value from the iterator.</param>
-        abstract reduce: callbackfn: Fable.Core.TS.Es.ArrayIterator.Reduce.Callbackfn<'T> -> 'T
-        /// <summary>
-        /// Calls the specified callback function for all the elements in this iterator. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
-        /// </summary>
-        /// <param name="callbackfn">A function that accepts up to three arguments. The reduce method calls the callbackfn function one time for each element in the iterator.</param>
-        /// <param name="initialValue">If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of a value from the iterator.</param>
-        /// <param name="callbackfn">A function that accepts up to three arguments. The reduce method calls the callbackfn function one time for each element in the iterator.</param>
-        /// <param name="initialValue">If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of a value from the iterator.</param>
-        abstract reduce: callbackfn: Fable.Core.TS.Es.ArrayIterator.Reduce.Callbackfn2<'T> * initialValue: 'T -> 'T
-
-        /// <summary>
-        /// Calls the specified callback function for all the elements in this iterator. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
-        /// </summary>
-        /// <param name="callbackfn">A function that accepts up to three arguments. The reduce method calls the callbackfn function one time for each element in the iterator.</param>
-        /// <param name="initialValue">If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of a value from the iterator.</param>
-        /// <param name="callbackfn">A function that accepts up to three arguments. The reduce method calls the callbackfn function one time for each element in the iterator.</param>
-        /// <param name="initialValue">If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of a value from the iterator.</param>
-        abstract reduce<'U> :
-            callbackfn: Fable.Core.TS.Es.ArrayIterator.Reduce.Callbackfn3<'U, 'T> * initialValue: 'U -> 'U
-
-        /// <summary>
-        /// Performs the specified action for each element in the iterator.
-        /// </summary>
-        /// <param name="callbackfn">A function that accepts up to two arguments. forEach calls the callbackfn function one time for each element in the iterator.</param>
-        abstract forEach: callbackfn: Fable.Core.TS.Es.ArrayIterator.ForEach.Callbackfn<'T> -> unit
-        /// <summary>
-        /// Determines whether the specified callback function returns true for any element of this iterator.
-        /// </summary>
-        /// <param name="predicate">
-        /// A function that accepts up to two arguments. The some method calls
-        /// the predicate function for each element in this iterator until the predicate returns a value
-        /// true, or until the end of the iterator.
-        /// </param>
-        abstract some: predicate: Fable.Core.TS.Es.ArrayIterator.Some.Predicate<'T> -> bool
-        /// <summary>
-        /// Determines whether all the members of this iterator satisfy the specified test.
-        /// </summary>
-        /// <param name="predicate">
-        /// A function that accepts up to two arguments. The every method calls
-        /// the predicate function for each element in this iterator until the predicate returns
-        /// false, or until the end of this iterator.
-        /// </param>
-        abstract every: predicate: Fable.Core.TS.Es.ArrayIterator.Every.Predicate<'T> -> bool
-        /// <summary>
-        /// Returns the value of the first element in this iterator where predicate is true, and undefined
-        /// otherwise.
-        /// </summary>
-        /// <param name="predicate">
-        /// find calls predicate once for each element of this iterator, in
-        /// order, until it finds one where predicate returns true. If such an element is found, find
-        /// immediately returns that element value. Otherwise, find returns undefined.
-        /// </param>
-        abstract find<'S> : predicate: Fable.Core.TS.Es.ArrayIterator.Find.Predicate<'T> -> 'S option
-        /// <summary>
-        /// Returns the value of the first element in this iterator where predicate is true, and undefined
-        /// otherwise.
-        /// </summary>
-        /// <param name="predicate">
-        /// find calls predicate once for each element of this iterator, in
-        /// order, until it finds one where predicate returns true. If such an element is found, find
-        /// immediately returns that element value. Otherwise, find returns undefined.
-        /// </param>
-        abstract find: predicate: Fable.Core.TS.Es.ArrayIterator.Find.Predicate2<'T> -> 'T option
-
-    [<Interface>]
-    type Segmenter =
-        /// <summary>
-        /// Returns <c>Segments</c> object containing the segments of the input string, using the segmenter's locale and granularity.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter/segment">MDN</a>
-        /// </summary>
-        /// <param name="input">- The text to be segmented as a <c>string</c>.</param>
-        /// <returns>A new iterable Segments object containing the segments of the input string, using the segmenter's locale and granularity.</returns>
-        abstract segment: input: string -> Segments
-        /// <summary>
-        /// The <c>resolvedOptions()</c> method of <c>Intl.Segmenter</c> instances returns a new object with properties reflecting the options computed during initialization of this <c>Segmenter</c> object.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter/resolvedOptions">MDN</a>
-        /// </summary>
-        abstract resolvedOptions: unit -> ResolvedSegmenterOptions
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (segment: (string -> Segments), resolvedOptions: (unit -> ResolvedSegmenterOptions))
-            : Segmenter =
-            jsNative
-
-    type SegmenterConstructor =
-        /// <summary>
-        /// Returns an array containing those of the provided locales that are supported without having to fall back to the runtime's default locale.
-        /// </summary>
-        /// <param name="locales">
-        /// - A string with a <a href="http://tools.ietf.org/html/rfc5646">BCP 47 language tag</a>, or an array of such strings.
-        /// For the general form and interpretation of the <c>locales</c> argument,
-        /// see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_identification_and_negotiation"><c>Intl</c> page</a>.
-        /// </param>
-        /// <param name="options">
-        /// An <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter/supportedLocalesOf#parameters">object</a>.
-        /// with some or all possible options.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter/supportedLocalesOf">MDN</a>
-        /// </param>
-        abstract supportedLocalesOf:
-            locales: LocalesArgument * ?options: Intl.Segmenter.SupportedLocalesOf.Options -> string[]
-
-        [<EmitConstructor>]
-        abstract Create: ?locales: LocalesArgument * ?options: SegmenterOptions -> Segmenter
-
-    [<Interface>]
-    type SegmenterOptions =
-        /// <summary>
-        /// The locale matching algorithm to use. For information about this option, see <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_negotiation">Intl page</a>.
-        /// </summary>
-        abstract localeMatcher: NumberFormatOptions.LocaleMatcher option with get, set
-        /// <summary>
-        /// The type of input to be split
-        /// </summary>
-        abstract granularity: ResolvedSegmenterOptions.Granularity option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (?localeMatcher: NumberFormatOptions.LocaleMatcher, ?granularity: ResolvedSegmenterOptions.Granularity)
-            : SegmenterOptions =
-            jsNative
-
-    type Segments =
-        inherit seq<SegmentData>
-        /// <summary>
-        /// Returns an object describing the segment in the original string that includes the code unit at a specified index.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter/segment/Segments/containing">MDN</a>
-        /// </summary>
-        /// <param name="codeUnitIndex">- A number specifying the index of the code unit in the original input string. If the value is omitted, it defaults to <c>0</c>.</param>
-        abstract containing: ?codeUnitIndex: float -> SegmentData option
-
     type Set2<'T> = delegate of target: 'T * p: obj * newValue: obj * receiver: obj -> bool
 
     type SetPrototypeOf<'T> = delegate of target: 'T * v: obj option -> bool
 
     [<Interface>]
     type Temporal =
-        abstract Now: Now with get, set
-        abstract PlainDate: PlainDateConstructor with get, set
-        abstract PlainTime: PlainTimeConstructor with get, set
-        abstract PlainDateTime: PlainDateTimeConstructor with get, set
-        abstract ZonedDateTime: ZonedDateTimeConstructor with get, set
-        abstract Duration: DurationConstructor with get, set
-        abstract Instant: InstantConstructor with get, set
-        abstract PlainYearMonth: PlainYearMonthConstructor with get, set
-        abstract PlainMonthDay: PlainMonthDayConstructor with get, set
+        abstract Now: Temporal.Now with get, set
+        abstract PlainDate: Temporal.PlainDateConstructor with get, set
+        abstract PlainTime: Temporal.PlainTimeConstructor with get, set
+        abstract PlainDateTime: Temporal.PlainDateTimeConstructor with get, set
+        abstract ZonedDateTime: Temporal.ZonedDateTimeConstructor with get, set
+        abstract Duration: Temporal.DurationConstructor with get, set
+        abstract Instant: Temporal.InstantConstructor with get, set
+        abstract PlainYearMonth: Temporal.PlainYearMonthConstructor with get, set
+        abstract PlainMonthDay: Temporal.PlainMonthDayConstructor with get, set
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
-                Now: Now,
-                PlainDate: PlainDateConstructor,
-                PlainTime: PlainTimeConstructor,
-                PlainDateTime: PlainDateTimeConstructor,
-                ZonedDateTime: ZonedDateTimeConstructor,
-                Duration: DurationConstructor,
-                Instant: InstantConstructor,
-                PlainYearMonth: PlainYearMonthConstructor,
-                PlainMonthDay: PlainMonthDayConstructor
+                Now: Temporal.Now,
+                PlainDate: Temporal.PlainDateConstructor,
+                PlainTime: Temporal.PlainTimeConstructor,
+                PlainDateTime: Temporal.PlainDateTimeConstructor,
+                ZonedDateTime: Temporal.ZonedDateTimeConstructor,
+                Duration: Temporal.DurationConstructor,
+                Instant: Temporal.InstantConstructor,
+                PlainYearMonth: Temporal.PlainYearMonthConstructor,
+                PlainMonthDay: Temporal.PlainMonthDayConstructor
             ) : Temporal =
-            jsNative
-
-    [<Interface>]
-    type TextInfo =
-        /// <summary>
-        /// A string indicating the direction of text for the locale. Can be either "ltr" (left-to-right) or "rtl" (right-to-left).
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/getTextInfo#direction">MDN Reference</a>
-        /// </summary>
-        abstract direction: TextInfo.Direction option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create(?direction: TextInfo.Direction) : TextInfo = jsNative
-
-    [<Interface>]
-    type TimeLikeObject =
-        abstract hour: float option with get, set
-        abstract minute: float option with get, set
-        abstract second: float option with get, set
-        abstract millisecond: float option with get, set
-        abstract microsecond: float option with get, set
-        abstract nanosecond: float option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (?hour: float, ?minute: float, ?second: float, ?millisecond: float, ?microsecond: float, ?nanosecond: float)
-            : TimeLikeObject =
-            jsNative
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type TimeUnit =
-        | [<CompiledName("hour")>] Hour
-        | [<CompiledName("microsecond")>] Microsecond
-        | [<CompiledName("millisecond")>] Millisecond
-        | [<CompiledName("minute")>] Minute
-        | [<CompiledName("nanosecond")>] Nanosecond
-        | [<CompiledName("second")>] Second
-
-    type TimeZoneLike = U2<string, ZonedDateTime>
-
-    [<Interface>]
-    type ToStringRoundingOptions<'Units> =
-        inherit ToStringRoundingOptions.Base<'Units>
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (?smallestUnit: U2<'Units, string>, ?roundingMode: NumberFormatOptions.RoundingMode)
-            : ToStringRoundingOptions<'Units> =
-            jsNative
-
-    [<Interface>]
-    type ToStringRoundingOptionsWithFractionalSeconds<'Units> =
-        inherit ToStringRoundingOptions<'Units>
-        abstract fractionalSecondDigits: PlainTimeToStringOptions.FractionalSecondDigits option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                ?fractionalSecondDigits: PlainTimeToStringOptions.FractionalSecondDigits,
-                ?smallestUnit: U2<'Units, string>,
-                ?roundingMode: NumberFormatOptions.RoundingMode
-            ) : ToStringRoundingOptionsWithFractionalSeconds<'Units> =
-            jsNative
-
-    [<Interface>]
-    type TransitionOptions =
-        abstract direction: ZonedDateTime.GetTimeZoneTransition.Direction with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create(direction: ZonedDateTime.GetTimeZoneTransition.Direction) : TransitionOptions = jsNative
-
-    [<Interface>]
-    type WeekInfo =
-        /// <summary>
-        /// An integer between 1 (Monday) and 7 (Sunday) indicating the first day of the week for the locale. Commonly 1, 5, 6, or 7.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/getWeekInfo#firstday">MDN Reference</a>
-        /// </summary>
-        abstract firstDay: float with get, set
-        /// <summary>
-        /// An array of integers between 1 and 7 indicating the weekend days for the locale.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/getWeekInfo#weekend">MDN Reference</a>
-        /// </summary>
-        abstract weekend: float[] with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create(firstDay: float, weekend: float[]) : WeekInfo = jsNative
-
-    [<Interface>]
-    type YearMonthLikeObject =
-        inherit YearMonthLikeObject.Base
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (?year: float, ?era: string, ?eraYear: float, ?month: float, ?monthCode: string, ?calendar: string)
-            : YearMonthLikeObject =
-            jsNative
-
-    type ZonedDateTime =
-        abstract calendarId: string
-        abstract timeZoneId: string
-        abstract era: string option
-        abstract eraYear: float option
-        abstract year: float
-        abstract month: float
-        abstract monthCode: string
-        abstract day: float
-        abstract hour: float
-        abstract minute: float
-        abstract second: float
-        abstract millisecond: float
-        abstract microsecond: float
-        abstract nanosecond: float
-        abstract epochMilliseconds: float
-        abstract epochNanoseconds: bigint
-        abstract dayOfWeek: float
-        abstract dayOfYear: float
-        abstract weekOfYear: float option
-        abstract yearOfWeek: float option
-        abstract hoursInDay: float
-        abstract daysInWeek: float
-        abstract daysInMonth: float
-        abstract daysInYear: float
-        abstract monthsInYear: float
-        abstract inLeapYear: bool
-        abstract offsetNanoseconds: float
-        abstract offset: string
-
-        abstract ``with``:
-            zonedDateTimeLike: ZonedDateTime.With.ZonedDateTimeLike * ?options: ZonedDateTimeFromOptions ->
-                ZonedDateTime
-
-        abstract withPlainTime: ?plainTime: PlainTimeLike -> ZonedDateTime
-        abstract withTimeZone: timeZone: TimeZoneLike -> ZonedDateTime
-        abstract withCalendar: calendar: CalendarLike -> ZonedDateTime
-        abstract add: duration: DurationLike * ?options: OverflowOptions -> ZonedDateTime
-        abstract subtract: duration: DurationLike * ?options: OverflowOptions -> ZonedDateTime
-
-        abstract until:
-            other: ZonedDateTimeLike * ?options: RoundingOptionsWithLargestUnit<ZonedDateTime.Until.Options.Item> ->
-                Duration
-
-        abstract since:
-            other: ZonedDateTimeLike * ?options: RoundingOptionsWithLargestUnit<ZonedDateTime.Until.Options.Item> ->
-                Duration
-
-        abstract round: roundTo: PluralizeUnit -> ZonedDateTime
-        abstract round: roundTo: RoundingOptions<ZonedDateTime.Round.RoundTo.Item> -> ZonedDateTime
-        abstract equals: other: ZonedDateTimeLike -> bool
-        abstract toString: ?options: ZonedDateTimeToStringOptions -> string
-        abstract toLocaleString: ?locales: LocalesArgument * ?options: DateTimeFormatOptions -> string
-        abstract toJSON: unit -> string
-        abstract valueOf: unit -> unit
-        abstract startOfDay: unit -> ZonedDateTime
-        abstract getTimeZoneTransition: direction: ZonedDateTime.GetTimeZoneTransition.Direction -> ZonedDateTime option
-        abstract getTimeZoneTransition: direction: TransitionOptions -> ZonedDateTime option
-        abstract toInstant: unit -> Instant
-        abstract toPlainDate: unit -> PlainDate
-        abstract toPlainTime: unit -> PlainTime
-        abstract toPlainDateTime: unit -> PlainDateTime
-
-        [<Emit("$0[Symbol.toStringTag]")>]
-        abstract SymbolToStringTag: string
-
-    type ZonedDateTimeConstructor =
-        abstract from: item: ZonedDateTimeLike * ?options: ZonedDateTimeFromOptions -> ZonedDateTime
-        abstract compare: one: ZonedDateTimeLike * two: ZonedDateTimeLike -> float
-
-        [<EmitConstructor>]
-        abstract Create: epochNanoseconds: bigint * timeZone: string * ?calendar: string -> ZonedDateTime
-
-    [<Interface>]
-    type ZonedDateTimeFromOptions =
-        inherit OverflowOptions
-        inherit DisambiguationOptions
-        abstract offset: ZonedDateTimeFromOptions.Offset option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                ?offset: ZonedDateTimeFromOptions.Offset,
-                ?disambiguation: ZonedDateTimeFromOptions.Disambiguation,
-                ?overflow: OverflowOptions.Overflow
-            ) : ZonedDateTimeFromOptions =
-            jsNative
-
-    type ZonedDateTimeLike = U3<string, ZonedDateTime, ZonedDateTimeLikeObject>
-
-    [<Interface>]
-    type ZonedDateTimeLikeObject =
-        inherit DateTimeLikeObject
-        abstract timeZone: TimeZoneLike with get, set
-        abstract offset: string option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                timeZone: TimeZoneLike,
-                day: float,
-                ?offset: string,
-                ?year: float,
-                ?era: string,
-                ?eraYear: float,
-                ?month: float,
-                ?monthCode: string,
-                ?calendar: string,
-                ?hour: float,
-                ?minute: float,
-                ?second: float,
-                ?millisecond: float,
-                ?microsecond: float,
-                ?nanosecond: float
-            ) : ZonedDateTimeLikeObject =
-            jsNative
-
-    [<Interface>]
-    type ZonedDateTimeToStringOptions =
-        inherit PlainDateTimeToStringOptions
-        abstract offset: ZonedDateTimeToStringOptions.Offset option with get, set
-        abstract timeZoneName: ZonedDateTimeToStringOptions.TimeZoneName option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                ?offset: ZonedDateTimeToStringOptions.Offset,
-                ?timeZoneName: ZonedDateTimeToStringOptions.TimeZoneName,
-                ?smallestUnit: Temporal.PluralizeUnit3,
-                ?roundingMode: NumberFormatOptions.RoundingMode,
-                ?fractionalSecondDigits: PlainTimeToStringOptions.FractionalSecondDigits,
-                ?calendarName: PlainDateToStringOptions.CalendarName
-            ) : ZonedDateTimeToStringOptions =
             jsNative
 
     type Map<'K, 'V> =
@@ -10971,7 +8636,7 @@ module Es =
         /// <summary>
         /// Returns a string representation appropriate to the host environment's current locale.
         /// </summary>
-        abstract toLocaleString: ?locales: LocalesArgument * ?options: BigIntToLocaleStringOptions -> string
+        abstract toLocaleString: ?locales: Intl.LocalesArgument * ?options: BigIntToLocaleStringOptions -> string
         /// <summary>
         /// Returns the primitive value of the specified object.
         /// </summary>
@@ -11320,7 +8985,7 @@ module Es =
         /// <summary>
         /// Converts the array to a string by using the current locale.
         /// </summary>
-        abstract toLocaleString: ?locales: U2<string, string[]> * ?options: NumberFormatOptions -> string
+        abstract toLocaleString: ?locales: U2<string, string[]> * ?options: Intl.NumberFormatOptions -> string
         /// <summary>
         /// Returns a string representation of the array.
         /// </summary>
@@ -11816,7 +9481,7 @@ module Es =
         /// <summary>
         /// Converts the array to a string by using the current locale.
         /// </summary>
-        abstract toLocaleString: ?locales: U2<string, string[]> * ?options: NumberFormatOptions -> string
+        abstract toLocaleString: ?locales: U2<string, string[]> * ?options: Intl.NumberFormatOptions -> string
         /// <summary>
         /// Returns a string representation of the array.
         /// </summary>
@@ -12658,7 +10323,7 @@ module Es =
         /// <summary>
         /// Converts a number to a string by using the current locale.
         /// </summary>
-        abstract toLocaleString: ?locales: U2<string, string[]> * ?options: NumberFormatOptions -> string
+        abstract toLocaleString: ?locales: U2<string, string[]> * ?options: Intl.NumberFormatOptions -> string
         /// <summary>
         /// Copies the array and returns the copy with the elements in reverse order.
         /// </summary>
@@ -13538,7 +11203,7 @@ module Es =
         /// <param name="that">String to compare to target string</param>
         /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used. This parameter must conform to BCP 47 standards; see the Intl.Collator object for details.</param>
         /// <param name="options">An object that contains one or more properties that specify comparison options. see the Intl.Collator object for details.</param>
-        abstract localeCompare: that: string * ?locales: U2<string, string[]> * ?options: CollatorOptions -> float
+        abstract localeCompare: that: string * ?locales: U2<string, string[]> * ?options: Intl.CollatorOptions -> float
         /// <summary>
         /// Determines whether two strings are equivalent in the current locale.
         /// Determines whether two strings are equivalent in the current or specified locale.
@@ -13550,7 +11215,7 @@ module Es =
         /// <param name="that">String to compare to target string</param>
         /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used. This parameter must conform to BCP 47 standards; see the Intl.Collator object for details.</param>
         /// <param name="options">An object that contains one or more properties that specify comparison options. see the Intl.Collator object for details.</param>
-        abstract localeCompare: that: string * ?locales: LocalesArgument * ?options: CollatorOptions -> float
+        abstract localeCompare: that: string * ?locales: Intl.LocalesArgument * ?options: Intl.CollatorOptions -> float
         /// <summary>
         /// Matches a string with a regular expression, and returns an array containing the results of that search.
         /// Matches a string or an object that supports being matched against, and returns an array
@@ -13680,7 +11345,7 @@ module Es =
         /// <summary>
         /// Converts all alphabetic characters to lowercase, taking into account the host environment's current locale.
         /// </summary>
-        abstract toLocaleLowerCase: ?locales: LocalesArgument -> string
+        abstract toLocaleLowerCase: ?locales: Intl.LocalesArgument -> string
         /// <summary>
         /// Converts all the alphabetic characters in a string to uppercase.
         /// </summary>
@@ -13692,7 +11357,7 @@ module Es =
         /// <summary>
         /// Returns a string where all alphabetic characters have been converted to uppercase, taking into account the host environment's current locale.
         /// </summary>
-        abstract toLocaleUpperCase: ?locales: LocalesArgument -> string
+        abstract toLocaleUpperCase: ?locales: Intl.LocalesArgument -> string
         /// <summary>
         /// Removes the leading and trailing white space and line terminator characters from a string.
         /// </summary>
@@ -14012,7 +11677,7 @@ module Es =
         /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
         /// <param name="locales">A locale string, array of locale strings, Intl.Locale object, or array of Intl.Locale objects that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</param>
         /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
-        abstract toLocaleString: ?locales: U2<string, string[]> * ?options: NumberFormatOptions -> string
+        abstract toLocaleString: ?locales: U2<string, string[]> * ?options: Intl.NumberFormatOptions -> string
         /// <summary>
         /// Converts a number to a string by using the current or specified locale.
         /// </summary>
@@ -14020,7 +11685,7 @@ module Es =
         /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
         /// <param name="locales">A locale string, array of locale strings, Intl.Locale object, or array of Intl.Locale objects that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</param>
         /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
-        abstract toLocaleString: ?locales: LocalesArgument * ?options: NumberFormatOptions -> string
+        abstract toLocaleString: ?locales: Intl.LocalesArgument * ?options: Intl.NumberFormatOptions -> string
 
     type NumberConstructor =
         /// <summary>
@@ -14428,7 +12093,7 @@ module Es =
         /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
         /// <param name="locales">A locale string, array of locale strings, Intl.Locale object, or array of Intl.Locale objects that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</param>
         /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
-        abstract toLocaleString: ?locales: U2<string, string[]> * ?options: DateTimeFormatOptions -> string
+        abstract toLocaleString: ?locales: U2<string, string[]> * ?options: Intl.DateTimeFormatOptions -> string
         /// <summary>
         /// Returns a value as a string value appropriate to the host environment's current locale.
         /// Converts a date and time to a string by using the current or specified locale.
@@ -14437,7 +12102,7 @@ module Es =
         /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
         /// <param name="locales">A locale string, array of locale strings, Intl.Locale object, or array of Intl.Locale objects that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</param>
         /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
-        abstract toLocaleString: ?locales: LocalesArgument * ?options: DateTimeFormatOptions -> string
+        abstract toLocaleString: ?locales: Intl.LocalesArgument * ?options: Intl.DateTimeFormatOptions -> string
         /// <summary>
         /// Returns a date as a string value appropriate to the host environment's current locale.
         /// Converts a date to a string by using the current or specified locale.
@@ -14451,7 +12116,7 @@ module Es =
         /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
         /// <param name="locales">A locale string, array of locale strings, Intl.Locale object, or array of Intl.Locale objects that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</param>
         /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
-        abstract toLocaleDateString: ?locales: U2<string, string[]> * ?options: DateTimeFormatOptions -> string
+        abstract toLocaleDateString: ?locales: U2<string, string[]> * ?options: Intl.DateTimeFormatOptions -> string
         /// <summary>
         /// Returns a date as a string value appropriate to the host environment's current locale.
         /// Converts a date to a string by using the current or specified locale.
@@ -14460,7 +12125,7 @@ module Es =
         /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
         /// <param name="locales">A locale string, array of locale strings, Intl.Locale object, or array of Intl.Locale objects that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</param>
         /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
-        abstract toLocaleDateString: ?locales: LocalesArgument * ?options: DateTimeFormatOptions -> string
+        abstract toLocaleDateString: ?locales: Intl.LocalesArgument * ?options: Intl.DateTimeFormatOptions -> string
         /// <summary>
         /// Returns a time as a string value appropriate to the host environment's current locale.
         /// Converts a time to a string by using the current or specified locale.
@@ -14474,7 +12139,7 @@ module Es =
         /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
         /// <param name="locales">A locale string, array of locale strings, Intl.Locale object, or array of Intl.Locale objects that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</param>
         /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
-        abstract toLocaleTimeString: ?locales: U2<string, string[]> * ?options: DateTimeFormatOptions -> string
+        abstract toLocaleTimeString: ?locales: U2<string, string[]> * ?options: Intl.DateTimeFormatOptions -> string
         /// <summary>
         /// Returns a time as a string value appropriate to the host environment's current locale.
         /// Converts a time to a string by using the current or specified locale.
@@ -14483,7 +12148,7 @@ module Es =
         /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
         /// <param name="locales">A locale string, array of locale strings, Intl.Locale object, or array of Intl.Locale objects that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used.</param>
         /// <param name="options">An object that contains one or more properties that specify comparison options.</param>
-        abstract toLocaleTimeString: ?locales: LocalesArgument * ?options: DateTimeFormatOptions -> string
+        abstract toLocaleTimeString: ?locales: Intl.LocalesArgument * ?options: Intl.DateTimeFormatOptions -> string
         /// <summary>
         /// Returns the stored time value in milliseconds since midnight, January 1, 1970 UTC.
         /// </summary>
@@ -14665,7 +12330,7 @@ module Es =
         /// Used by the JSON.stringify method to enable the transformation of an object's data for JavaScript Object Notation (JSON) serialization.
         /// </summary>
         abstract toJSON: ?key: obj -> string
-        abstract toTemporalInstant: unit -> Instant
+        abstract toTemporalInstant: unit -> Temporal.Instant
 
         /// <summary>
         /// Converts a Date object to a string.
@@ -16222,7 +13887,7 @@ module Es =
         /// <summary>
         /// Converts a number to a string by using the current locale.
         /// </summary>
-        abstract toLocaleString: locales: U2<string, string[]> * ?options: NumberFormatOptions -> string
+        abstract toLocaleString: locales: U2<string, string[]> * ?options: Intl.NumberFormatOptions -> string
         /// <summary>
         /// Returns a string representation of an array.
         /// </summary>
@@ -16782,7 +14447,7 @@ module Es =
         /// <summary>
         /// Converts a number to a string by using the current locale.
         /// </summary>
-        abstract toLocaleString: locales: U2<string, string[]> * ?options: NumberFormatOptions -> string
+        abstract toLocaleString: locales: U2<string, string[]> * ?options: Intl.NumberFormatOptions -> string
         /// <summary>
         /// Returns a string representation of an array.
         /// </summary>
@@ -17402,7 +15067,7 @@ module Es =
         /// <summary>
         /// Converts a number to a string by using the current locale.
         /// </summary>
-        abstract toLocaleString: locales: U2<string, string[]> * ?options: NumberFormatOptions -> string
+        abstract toLocaleString: locales: U2<string, string[]> * ?options: Intl.NumberFormatOptions -> string
         /// <summary>
         /// Returns a string representation of an array.
         /// </summary>
@@ -17969,7 +15634,7 @@ module Es =
         /// <summary>
         /// Converts a number to a string by using the current locale.
         /// </summary>
-        abstract toLocaleString: locales: U2<string, string[]> * ?options: NumberFormatOptions -> string
+        abstract toLocaleString: locales: U2<string, string[]> * ?options: Intl.NumberFormatOptions -> string
         /// <summary>
         /// Returns a string representation of an array.
         /// </summary>
@@ -18529,7 +16194,7 @@ module Es =
         /// <summary>
         /// Converts a number to a string by using the current locale.
         /// </summary>
-        abstract toLocaleString: locales: U2<string, string[]> * ?options: NumberFormatOptions -> string
+        abstract toLocaleString: locales: U2<string, string[]> * ?options: Intl.NumberFormatOptions -> string
         /// <summary>
         /// Returns a string representation of an array.
         /// </summary>
@@ -19089,7 +16754,7 @@ module Es =
         /// <summary>
         /// Converts a number to a string by using the current locale.
         /// </summary>
-        abstract toLocaleString: locales: U2<string, string[]> * ?options: NumberFormatOptions -> string
+        abstract toLocaleString: locales: U2<string, string[]> * ?options: Intl.NumberFormatOptions -> string
         /// <summary>
         /// Returns a string representation of an array.
         /// </summary>
@@ -19649,7 +17314,7 @@ module Es =
         /// <summary>
         /// Converts a number to a string by using the current locale.
         /// </summary>
-        abstract toLocaleString: locales: U2<string, string[]> * ?options: NumberFormatOptions -> string
+        abstract toLocaleString: locales: U2<string, string[]> * ?options: Intl.NumberFormatOptions -> string
         /// <summary>
         /// Returns a string representation of an array.
         /// </summary>
@@ -20212,7 +17877,7 @@ module Es =
         /// <summary>
         /// Converts a number to a string by using the current locale.
         /// </summary>
-        abstract toLocaleString: locales: U2<string, string[]> * ?options: NumberFormatOptions -> string
+        abstract toLocaleString: locales: U2<string, string[]> * ?options: Intl.NumberFormatOptions -> string
         /// <summary>
         /// Returns a string representation of an array.
         /// </summary>
@@ -20775,7 +18440,7 @@ module Es =
         /// <summary>
         /// Converts a number to a string by using the current locale.
         /// </summary>
-        abstract toLocaleString: locales: U2<string, string[]> * ?options: NumberFormatOptions -> string
+        abstract toLocaleString: locales: U2<string, string[]> * ?options: Intl.NumberFormatOptions -> string
         /// <summary>
         /// Returns a string representation of an array.
         /// </summary>
@@ -21470,46 +19135,6 @@ module Es =
 
             type Mapfn2<'T> = delegate of v: 'T * k: float -> bigint
 
-    module CollatorOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type CaseFirst =
-            | [<CompiledName("false")>] False
-            | [<CompiledName("lower")>] Lower
-            | [<CompiledName("upper")>] Upper
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Collation =
-            | [<CompiledName("big5han")>] Big5han
-            | [<CompiledName("compat")>] Compat
-            | [<CompiledName("default")>] Default
-            | [<CompiledName("dict")>] Dict
-            | [<CompiledName("direct")>] Direct
-            | [<CompiledName("ducet")>] Ducet
-            | [<CompiledName("emoji")>] Emoji
-            | [<CompiledName("eor")>] Eor
-            | [<CompiledName("gb2312")>] Gb2312
-            | [<CompiledName("phonebk")>] Phonebk
-            | [<CompiledName("phonetic")>] Phonetic
-            | [<CompiledName("pinyin")>] Pinyin
-            | [<CompiledName("reformed")>] Reformed
-            | [<CompiledName("searchjl")>] Searchjl
-            | [<CompiledName("stroke")>] Stroke
-            | [<CompiledName("trad")>] Trad
-            | [<CompiledName("unihan")>] Unihan
-            | [<CompiledName("zhuyin")>] Zhuyin
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Sensitivity =
-            | [<CompiledName("accent")>] Accent
-            | [<CompiledName("base")>] Base
-            | [<CompiledName("case")>] Case
-            | [<CompiledName("variant")>] Variant
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Usage =
-            | [<CompiledName("search")>] Search
-            | [<CompiledName("sort")>] Sort
-
     module Date =
         [<StringEnum(CaseRules.None)>]
         type Default = | [<CompiledName("default")>] Default
@@ -21519,70 +19144,6 @@ module Es =
 
         [<StringEnum(CaseRules.None)>]
         type String = | [<CompiledName("string")>] String
-
-    module DateTimeFormatOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type DateStyle =
-            | [<CompiledName("full")>] Full
-            | [<CompiledName("long")>] Long
-            | [<CompiledName("medium")>] Medium
-            | [<CompiledName("short")>] Short
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type FormatMatcher =
-            | [<CompiledName("basic")>] Basic
-            | [<CompiledName("best fit")>] BestFit
-
-        type FractionalSecondDigits =
-            | N1 = 1
-            | N2 = 2
-            | N3 = 3
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type HourCycle =
-            | [<CompiledName("h11")>] H11
-            | [<CompiledName("h12")>] H12
-            | [<CompiledName("h23")>] H23
-            | [<CompiledName("h24")>] H24
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Month =
-            | [<CompiledName("2-digit")>] N2Digit
-            | [<CompiledName("long")>] Long
-            | [<CompiledName("narrow")>] Narrow
-            | [<CompiledName("numeric")>] Numeric
-            | [<CompiledName("short")>] Short
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type TimeZoneName =
-            | [<CompiledName("long")>] Long
-            | [<CompiledName("longGeneric")>] LongGeneric
-            | [<CompiledName("longOffset")>] LongOffset
-            | [<CompiledName("short")>] Short
-            | [<CompiledName("shortGeneric")>] ShortGeneric
-            | [<CompiledName("shortOffset")>] ShortOffset
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Year =
-            | [<CompiledName("2-digit")>] N2Digit
-            | [<CompiledName("numeric")>] Numeric
-
-    module DateTimeFormatPart =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Type =
-            | [<CompiledName("day")>] Day
-            | [<CompiledName("dayPeriod")>] DayPeriod
-            | [<CompiledName("era")>] Era
-            | [<CompiledName("fractionalSecond")>] FractionalSecond
-            | [<CompiledName("hour")>] Hour
-            | [<CompiledName("literal")>] Literal
-            | [<CompiledName("minute")>] Minute
-            | [<CompiledName("month")>] Month
-            | [<CompiledName("second")>] Second
-            | [<CompiledName("timeZoneName")>] TimeZoneName
-            | [<CompiledName("unknown")>] Unknown
-            | [<CompiledName("weekday")>] Weekday
-            | [<CompiledName("year")>] Year
 
     module DecoratorContext =
         type ItemConstructor =
@@ -21599,122 +19160,6 @@ module Es =
 
             [<EmitIndexer>]
             abstract Item: obj -> obj with get, set
-
-    module Duration =
-        module With =
-            [<Interface>]
-            type DurationLike =
-                abstract days: float option with get, set
-                abstract hours: float option with get, set
-                abstract microseconds: float option with get, set
-                abstract milliseconds: float option with get, set
-                abstract minutes: float option with get, set
-                abstract months: float option with get, set
-                abstract nanoseconds: float option with get, set
-                abstract seconds: float option with get, set
-                abstract weeks: float option with get, set
-                abstract years: float option with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create
-                    (
-                        ?days: float,
-                        ?hours: float,
-                        ?microseconds: float,
-                        ?milliseconds: float,
-                        ?minutes: float,
-                        ?months: float,
-                        ?nanoseconds: float,
-                        ?seconds: float,
-                        ?weeks: float,
-                        ?years: float
-                    ) : DurationLike =
-                    jsNative
-
-    module DurationFormat =
-        module Format =
-            [<Interface>]
-            type Duration =
-                abstract days: float option with get, set
-                abstract hours: float option with get, set
-                abstract microseconds: float option with get, set
-                abstract milliseconds: float option with get, set
-                abstract minutes: float option with get, set
-                abstract months: float option with get, set
-                abstract nanoseconds: float option with get, set
-                abstract seconds: float option with get, set
-                abstract weeks: float option with get, set
-                abstract years: float option with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create
-                    (
-                        ?days: float,
-                        ?hours: float,
-                        ?microseconds: float,
-                        ?milliseconds: float,
-                        ?minutes: float,
-                        ?months: float,
-                        ?nanoseconds: float,
-                        ?seconds: float,
-                        ?weeks: float,
-                        ?years: float
-                    ) : Duration =
-                    jsNative
-
-    module DurationFormatOptions =
-        type FractionalDigits =
-            | N0 = 0
-            | N1 = 1
-            | N2 = 2
-            | N3 = 3
-            | N4 = 4
-            | N5 = 5
-            | N6 = 6
-            | N7 = 7
-            | N8 = 8
-            | N9 = 9
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Milliseconds =
-            | [<CompiledName("long")>] Long
-            | [<CompiledName("narrow")>] Narrow
-            | [<CompiledName("numeric")>] Numeric
-            | [<CompiledName("short")>] Short
-
-    module DurationRoundingOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type LargestUnit =
-            | [<CompiledName("auto")>] Auto
-            | [<CompiledName("day")>] Day
-            | [<CompiledName("days")>] Days
-            | [<CompiledName("hour")>] Hour
-            | [<CompiledName("hours")>] Hours
-            | [<CompiledName("microsecond")>] Microsecond
-            | [<CompiledName("microseconds")>] Microseconds
-            | [<CompiledName("millisecond")>] Millisecond
-            | [<CompiledName("milliseconds")>] Milliseconds
-            | [<CompiledName("minute")>] Minute
-            | [<CompiledName("minutes")>] Minutes
-            | [<CompiledName("month")>] Month
-            | [<CompiledName("months")>] Months
-            | [<CompiledName("nanosecond")>] Nanosecond
-            | [<CompiledName("nanoseconds")>] Nanoseconds
-            | [<CompiledName("second")>] Second
-            | [<CompiledName("seconds")>] Seconds
-            | [<CompiledName("week")>] Week
-            | [<CompiledName("weeks")>] Weeks
-            | [<CompiledName("year")>] Year
-            | [<CompiledName("years")>] Years
-
-    module DurationToStringOptions =
-        module Base =
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type Item =
-                | [<CompiledName("microsecond")>] Microsecond
-                | [<CompiledName("millisecond")>] Millisecond
-                | [<CompiledName("nanosecond")>] Nanosecond
-                | [<CompiledName("second")>] Second
 
     module ElementTagNameMap =
         type Base =
@@ -22066,6 +19511,671 @@ module Es =
 
             type Mapfn2<'T> = delegate of v: 'T * k: float -> float
 
+    module GlobalThis =
+        /// <summary>
+        /// The decorator context types provided to class element decorators.
+        /// </summary>
+        type ClassMemberDecoratorContext = Fable.Core.TS.Es.ClassMemberDecoratorContext
+
+        /// <summary>
+        /// The decorator context types provided to any decorator.
+        /// </summary>
+        type DecoratorContext = Fable.Core.TS.Es.DecoratorContext
+
+        type DecoratorMetadataObject = obj
+
+        type DecoratorMetadata = obj
+
+        /// <summary>
+        /// Context provided to a class decorator.
+        /// </summary>
+        /// <remarks>@template Class The type of the decorated class associated with this context.</remarks>
+        type ClassDecoratorContext<'Class> = Fable.Core.TS.Es.ClassDecoratorContext<'Class>
+
+        /// <summary>
+        /// Context provided to a class method decorator.
+        /// </summary>
+        /// <remarks>
+        /// @template
+        /// This The type on which the class element will be defined. For a static class element, this will be
+        /// the type of the constructor. For a non-static class element, this will be the type of the instance.
+        /// </remarks>
+        /// <remarks>@template Value The type of the decorated class method.</remarks>
+        type ClassMethodDecoratorContext<'This, 'Value> = Fable.Core.TS.Es.ClassMethodDecoratorContext<'This, 'Value>
+
+        /// <summary>
+        /// Context provided to a class getter decorator.
+        /// </summary>
+        /// <remarks>
+        /// @template
+        /// This The type on which the class element will be defined. For a static class element, this will be
+        /// the type of the constructor. For a non-static class element, this will be the type of the instance.
+        /// </remarks>
+        /// <remarks>@template Value The property type of the decorated class getter.</remarks>
+        type ClassGetterDecoratorContext<'This, 'Value> = Fable.Core.TS.Es.ClassGetterDecoratorContext<'This, 'Value>
+
+        /// <summary>
+        /// Context provided to a class setter decorator.
+        /// </summary>
+        /// <remarks>
+        /// @template
+        /// This The type on which the class element will be defined. For a static class element, this will be
+        /// the type of the constructor. For a non-static class element, this will be the type of the instance.
+        /// </remarks>
+        /// <remarks>@template Value The type of the decorated class setter.</remarks>
+        type ClassSetterDecoratorContext<'This, 'Value> = Fable.Core.TS.Es.ClassSetterDecoratorContext<'This, 'Value>
+
+        /// <summary>
+        /// Context provided to a class <c>accessor</c> field decorator.
+        /// </summary>
+        /// <remarks>
+        /// @template
+        /// This The type on which the class element will be defined. For a static class element, this will be
+        /// the type of the constructor. For a non-static class element, this will be the type of the instance.
+        /// </remarks>
+        /// <remarks>@template Value The type of decorated class field.</remarks>
+        type ClassAccessorDecoratorContext<'This, 'Value> =
+            Fable.Core.TS.Es.ClassAccessorDecoratorContext<'This, 'Value>
+
+        /// <summary>
+        /// Describes the target provided to class <c>accessor</c> field decorators.
+        /// </summary>
+        /// <remarks>@template This The <c>this</c> type to which the target applies.</remarks>
+        /// <remarks>@template Value The property type for the class <c>accessor</c> field.</remarks>
+        type ClassAccessorDecoratorTarget<'This, 'Value> = Fable.Core.TS.Es.ClassAccessorDecoratorTarget<'This, 'Value>
+
+        /// <summary>
+        /// Describes the allowed return value from a class <c>accessor</c> field decorator.
+        /// </summary>
+        /// <remarks>@template This The <c>this</c> type to which the target applies.</remarks>
+        /// <remarks>@template Value The property type for the class <c>accessor</c> field.</remarks>
+        type ClassAccessorDecoratorResult<'This, 'Value> = Fable.Core.TS.Es.ClassAccessorDecoratorResult<'This, 'Value>
+
+        /// <summary>
+        /// Context provided to a class field decorator.
+        /// </summary>
+        /// <remarks>
+        /// @template
+        /// This The type on which the class element will be defined. For a static class element, this will be
+        /// the type of the constructor. For a non-static class element, this will be the type of the instance.
+        /// </remarks>
+        /// <remarks>@template Value The type of the decorated class field.</remarks>
+        type ClassFieldDecoratorContext<'This, 'Value> = Fable.Core.TS.Es.ClassFieldDecoratorContext<'This, 'Value>
+
+        type ClassDecorator = Fable.Core.TS.Es.ClassDecorator
+
+        type PropertyDecorator = Fable.Core.TS.Es.PropertyDecorator
+
+        type MethodDecorator = Fable.Core.TS.Es.MethodDecorator
+
+        type ParameterDecorator = Fable.Core.TS.Es.ParameterDecorator
+
+        type Map<'K, 'V> = Fable.Core.TS.Es.Map<'K, 'V>
+
+        type MapConstructor = Fable.Core.TS.Es.MapConstructor
+
+        type ReadonlyMap<'K, 'V> = Fable.Core.TS.Es.ReadonlyMap<'K, 'V>
+
+        type WeakMap<'K, 'V> = Fable.Core.TS.Es.WeakMap<'K, 'V>
+
+        type WeakMapConstructor = Fable.Core.TS.Es.WeakMapConstructor
+
+        type Set<'T> = Fable.Core.TS.Es.Set<'T>
+
+        type SetConstructor = Fable.Core.TS.Es.SetConstructor
+
+        type ReadonlySet<'T> = Fable.Core.TS.Es.ReadonlySet<'T>
+
+        type WeakSet<'T> = Fable.Core.TS.Es.WeakSet<'T>
+
+        type WeakSetConstructor = Fable.Core.TS.Es.WeakSetConstructor
+
+        type Generator<'T, 'TReturn, 'TNext> = Fable.Core.TS.Es.Generator<'T, 'TReturn, 'TNext>
+
+        type GeneratorFunction = Fable.Core.TS.Es.GeneratorFunction
+
+        type GeneratorFunctionConstructor = Fable.Core.TS.Es.GeneratorFunctionConstructor
+
+        type SymbolConstructor = Fable.Core.TS.Es.SymbolConstructor
+
+        type IteratorYieldResult<'TYield> = Fable.Core.TS.Es.IteratorYieldResult<'TYield>
+
+        type IteratorReturnResult<'TReturn> = Fable.Core.TS.Es.IteratorReturnResult<'TReturn>
+
+        type IteratorResult<'T, 'TReturn> =
+            U2<Fable.Core.TS.Es.IteratorReturnResult<'TReturn>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
+
+        type Iterator<'T, 'TReturn, 'TNext> = Fable.Core.TS.Es.Iterator<'T, 'TReturn, 'TNext>
+
+        type Iterable<'T, 'TReturn, 'TNext> = Fable.Core.TS.Es.Iterable<'T, 'TReturn, 'TNext>
+
+        /// <summary>
+        /// Describes a user-defined Iterator that is also iterable.
+        /// </summary>
+        type IterableIterator<'T, 'TReturn, 'TNext> = Fable.Core.TS.Es.IterableIterator<'T, 'TReturn, 'TNext>
+
+        /// <summary>
+        /// Describes an Iterator produced by the runtime that inherits from the intrinsic <c>Iterator.prototype</c>.
+        /// </summary>
+        type IteratorObject<'T, 'TReturn, 'TNext> = Fable.Core.TS.Es.IteratorObject<'T, 'TReturn, 'TNext>
+
+        /// <summary>
+        /// Defines the <c>TReturn</c> type used for built-in iterators produced by <c>Array</c>, <c>Map</c>, <c>Set</c>, and others.
+        /// This is <c>undefined</c> when <c>strictBuiltInIteratorReturn</c> is <c>true</c>; otherwise, this is <c>any</c>.
+        /// </summary>
+        type BuiltinIteratorReturn = unit
+
+        type ArrayIterator<'T> = Fable.Core.TS.Es.ArrayIterator<'T>
+
+        type MapIterator<'T> = Fable.Core.TS.Es.MapIterator<'T>
+
+        type SetIterator<'T> = Fable.Core.TS.Es.SetIterator<'T>
+
+        /// <summary>
+        /// Represents the completion of an asynchronous operation
+        /// </summary>
+        type PromiseConstructor = Fable.Core.TS.Es.PromiseConstructor
+
+        type StringIterator<'T> = Fable.Core.TS.Es.StringIterator<'T>
+
+        type ProxyHandler<'T> = Fable.Core.TS.Es.ProxyHandler<'T>
+
+        type ProxyConstructor = Fable.Core.TS.Es.ProxyConstructor
+
+        type SharedArrayBuffer = Fable.Core.TS.Es.SharedArrayBuffer
+
+        type SharedArrayBufferConstructor = Fable.Core.TS.Es.SharedArrayBufferConstructor
+
+        type Atomics = Fable.Core.TS.Es.Atomics
+
+        type AsyncGenerator<'T, 'TReturn, 'TNext> = Fable.Core.TS.Es.AsyncGenerator<'T, 'TReturn, 'TNext>
+
+        type AsyncGeneratorFunction = Fable.Core.TS.Es.AsyncGeneratorFunction
+
+        type AsyncGeneratorFunctionConstructor = Fable.Core.TS.Es.AsyncGeneratorFunctionConstructor
+
+        type AsyncIterator<'T, 'TReturn, 'TNext> = Fable.Core.TS.Es.AsyncIterator<'T, 'TReturn, 'TNext>
+
+        type AsyncIterable<'T, 'TReturn, 'TNext> = Fable.Core.TS.Es.AsyncIterable<'T, 'TReturn, 'TNext>
+
+        /// <summary>
+        /// Describes a user-defined AsyncIterator that is also async iterable.
+        /// </summary>
+        type AsyncIterableIterator<'T, 'TReturn, 'TNext> = Fable.Core.TS.Es.AsyncIterableIterator<'T, 'TReturn, 'TNext>
+
+        /// <summary>
+        /// Describes an AsyncIterator produced by the runtime that inherits from the intrinsic <c>AsyncIterator.prototype</c>.
+        /// </summary>
+        type AsyncIteratorObject<'T, 'TReturn, 'TNext> = Fable.Core.TS.Es.AsyncIteratorObject<'T, 'TReturn, 'TNext>
+
+        [<Erase>]
+        type FlatArray<'Arr, 'Depth> = private FlatArray__ of obj
+
+        type BigIntToLocaleStringOptions = Fable.Core.TS.Es.BigIntToLocaleStringOptions
+
+        type BigInt = Fable.Core.TS.Es.BigInt
+
+        type BigIntConstructor = Fable.Core.TS.Es.BigIntConstructor
+
+        /// <summary>
+        /// A typed array of 64-bit signed integer values. The contents are initialized to 0. If the
+        /// requested number of bytes could not be allocated, an exception is raised.
+        /// </summary>
+        type BigInt64Array<'TArrayBuffer> = Fable.Core.TS.Es.BigInt64Array<'TArrayBuffer>
+
+        type BigInt64ArrayConstructor = Fable.Core.TS.Es.BigInt64ArrayConstructor
+
+        /// <summary>
+        /// A typed array of 64-bit unsigned integer values. The contents are initialized to 0. If the
+        /// requested number of bytes could not be allocated, an exception is raised.
+        /// </summary>
+        type BigUint64Array<'TArrayBuffer> = Fable.Core.TS.Es.BigUint64Array<'TArrayBuffer>
+
+        type BigUint64ArrayConstructor = Fable.Core.TS.Es.BigUint64ArrayConstructor
+
+        type PromiseFulfilledResult<'T> = Fable.Core.TS.Es.PromiseFulfilledResult<'T>
+
+        type PromiseRejectedResult = Fable.Core.TS.Es.PromiseRejectedResult
+
+        type PromiseSettledResult<'T> = Fable.Core.TS.Es.PromiseSettledResult<'T>
+
+        type RegExpStringIterator<'T> = Fable.Core.TS.Es.RegExpStringIterator<'T>
+
+        type AggregateError = Fable.Core.TS.Es.AggregateError
+
+        type AggregateErrorConstructor = Fable.Core.TS.Es.AggregateErrorConstructor
+
+        type WeakRef<'T> = Fable.Core.TS.Es.WeakRef<'T>
+
+        type WeakRefConstructor = Fable.Core.TS.Es.WeakRefConstructor
+
+        type FinalizationRegistry<'T> = Fable.Core.TS.Es.FinalizationRegistry<'T>
+
+        type FinalizationRegistryConstructor = Fable.Core.TS.Es.FinalizationRegistryConstructor
+
+        type ErrorOptions = Fable.Core.TS.Es.ErrorOptions
+
+        type RegExpIndicesArray = Fable.Core.TS.Es.RegExpIndicesArray
+
+        type PromiseWithResolvers<'T> = Fable.Core.TS.Es.PromiseWithResolvers<'T>
+
+        type ReadonlySetLike<'T> = Fable.Core.TS.Es.ReadonlySetLike<'T>
+
+        /// <summary>
+        /// A typed array of 16-bit float values. The contents are initialized to 0. If the requested number
+        /// of bytes could not be allocated an exception is raised.
+        /// </summary>
+        type Float16Array<'TArrayBuffer> = Fable.Core.TS.Es.Float16Array<'TArrayBuffer>
+
+        type Float16ArrayConstructor = Fable.Core.TS.Es.Float16ArrayConstructor
+
+        type IteratorConstructor = Fable.Core.TS.Es.IteratorConstructor
+
+        /// <summary>
+        /// A frozen object containing JSON text for a primitive value, created by <c>JSON.rawJSON()</c>.
+        /// </summary>
+        type RawJSON = Fable.Core.TS.Es.RawJSON
+
+        type Symbol = Fable.Core.TS.Es.Symbol
+
+        type PropertyKey = obj
+
+        type PropertyDescriptor = Fable.Core.TS.Es.PropertyDescriptor
+
+        type PropertyDescriptorMap = Fable.Core.TS.Es.PropertyDescriptorMap
+
+        /// <summary>
+        /// Provides functionality common to all JavaScript objects.
+        /// </summary>
+        type Object = Fable.Core.TS.Es.Object
+
+        type ObjectConstructor = Fable.Core.TS.Es.ObjectConstructor
+
+        /// <summary>
+        /// Creates a new function.
+        /// </summary>
+        type Function = Fable.Core.TS.Es.Function
+
+        type FunctionConstructor = Fable.Core.TS.Es.FunctionConstructor
+
+        /// <summary>
+        /// Extracts the type of the 'this' parameter of a function type, or 'unknown' if the function type has no 'this' parameter.
+        /// </summary>
+        [<Erase>]
+        type ThisParameterType<'T> = private ThisParameterType__ of obj
+
+        /// <summary>
+        /// Removes the 'this' parameter from a function type.
+        /// </summary>
+        [<Erase>]
+        type OmitThisParameter<'T> = private OmitThisParameter__ of obj
+
+        type CallableFunction = Fable.Core.TS.Es.CallableFunction
+
+        type NewableFunction = Fable.Core.TS.Es.NewableFunction
+
+        type IArguments = Fable.Core.TS.Es.IArguments
+
+        /// <summary>
+        /// Allows manipulation and formatting of text strings and determination and location of substrings within strings.
+        /// </summary>
+        type String = Fable.Core.TS.Es.String
+
+        type StringConstructor = Fable.Core.TS.Es.StringConstructor
+
+        type Boolean = Fable.Core.TS.Es.Boolean
+
+        type BooleanConstructor = Fable.Core.TS.Es.BooleanConstructor
+
+        /// <summary>
+        /// An object that represents a number of any kind. All JavaScript numbers are 64-bit floating-point numbers.
+        /// </summary>
+        type Number = Fable.Core.TS.Es.Number
+
+        type NumberConstructor = Fable.Core.TS.Es.NumberConstructor
+
+        type TemplateStringsArray = Fable.Core.TS.Es.TemplateStringsArray
+
+        /// <summary>
+        /// The type of <c>import.meta</c>.
+        /// <br /><br />
+        /// If you need to declare that a given property exists on <c>import.meta</c>,
+        /// this type may be augmented via interface merging.
+        /// </summary>
+        type ImportMeta = Fable.Core.TS.Es.ImportMeta
+
+        /// <summary>
+        /// The type for the optional second argument to <c>import()</c>.
+        /// <br /><br />
+        /// If your host environment supports additional options, this type may be
+        /// augmented via interface merging.
+        /// </summary>
+        type ImportCallOptions = Fable.Core.TS.Es.ImportCallOptions
+
+        /// <summary>
+        /// The type for the <c>assert</c> property of the optional second argument to <c>import()</c>.
+        /// </summary>
+        /// <remarks>@deprecated</remarks>
+        type ImportAssertions = Fable.Core.TS.Es.ImportAssertions
+
+        /// <summary>
+        /// The type for the <c>with</c> property of the optional second argument to <c>import()</c>.
+        /// </summary>
+        type ImportAttributes = Fable.Core.TS.Es.ImportAttributes
+
+        /// <summary>
+        /// An intrinsic object that provides basic mathematics functionality and constants.
+        /// </summary>
+        type Math = Fable.Core.TS.Es.Math
+
+        /// <summary>
+        /// Enables basic storage and retrieval of dates and times.
+        /// </summary>
+        type Date = Fable.Core.TS.Es.Date
+
+        type DateConstructor = Fable.Core.TS.Es.DateConstructor
+
+        type RegExpMatchArray = Fable.Core.TS.Es.RegExpMatchArray
+
+        type RegExpExecArray = Fable.Core.TS.Es.RegExpExecArray
+
+        type RegExp = Fable.Core.TS.Es.RegExp
+
+        type RegExpConstructor = Fable.Core.TS.Es.RegExpConstructor
+
+        type Error = Fable.Core.TS.Es.Error
+
+        type ErrorConstructor = Fable.Core.TS.Es.ErrorConstructor
+
+        type EvalError = Fable.Core.TS.Es.EvalError
+
+        type EvalErrorConstructor = Fable.Core.TS.Es.EvalErrorConstructor
+
+        type RangeError = Fable.Core.TS.Es.RangeError
+
+        type RangeErrorConstructor = Fable.Core.TS.Es.RangeErrorConstructor
+
+        type ReferenceError = Fable.Core.TS.Es.ReferenceError
+
+        type ReferenceErrorConstructor = Fable.Core.TS.Es.ReferenceErrorConstructor
+
+        type SyntaxError = Fable.Core.TS.Es.SyntaxError
+
+        type SyntaxErrorConstructor = Fable.Core.TS.Es.SyntaxErrorConstructor
+
+        type TypeError = Fable.Core.TS.Es.TypeError
+
+        type TypeErrorConstructor = Fable.Core.TS.Es.TypeErrorConstructor
+
+        type URIError = Fable.Core.TS.Es.URIError
+
+        type URIErrorConstructor = Fable.Core.TS.Es.URIErrorConstructor
+
+        /// <summary>
+        /// An intrinsic object that provides functions to convert JavaScript values to and from the JavaScript Object Notation (JSON) format.
+        /// </summary>
+        type JSON = Fable.Core.TS.Es.JSON
+
+        type ReadonlyArray = obj
+
+        type ConcatArray<'T> = Fable.Core.TS.Es.ConcatArray<'T>
+
+        type Array = obj
+
+        type ArrayConstructor = Fable.Core.TS.Es.ArrayConstructor
+
+        type TypedPropertyDescriptor<'T> = Fable.Core.TS.Es.TypedPropertyDescriptor<'T>
+
+        type PromiseConstructorLike = Fable.Core.TS.Es.PromiseConstructorLike
+
+        type PromiseLike<'T> = Fable.Core.TS.Es.PromiseLike<'T>
+
+        /// <summary>
+        /// Represents the completion of an asynchronous operation
+        /// </summary>
+        type Promise<'T> = Fable.Core.TS.Es.Promise<'T>
+
+        /// <summary>
+        /// Recursively unwraps the "awaited type" of a type. Non-promise "thenables" should resolve to <c>never</c>. This emulates the behavior of <c>await</c>.
+        /// </summary>
+        [<Erase>]
+        type Awaited<'T> = private Awaited__ of obj
+
+        type ArrayLike<'T> = Fable.Core.TS.Es.ArrayLike<'T>
+
+        /// <summary>
+        /// Make all properties in T optional
+        /// </summary>
+        [<Erase>]
+        type Partial<'T> = private Partial__ of obj
+
+        /// <summary>
+        /// Make all properties in T required
+        /// </summary>
+        [<Erase>]
+        type Required<'T> = private Required__ of obj
+
+        /// <summary>
+        /// Make all properties in T readonly
+        /// </summary>
+        [<Erase>]
+        type Readonly<'T> = private Readonly__ of obj
+
+        /// <summary>
+        /// From T, pick a set of properties whose keys are in the union K
+        /// </summary>
+        [<Erase>]
+        type Pick<'T, 'K> = private Pick__ of obj
+
+        /// <summary>
+        /// Construct a type with a set of properties K of type T
+        /// </summary>
+        [<Erase>]
+        type Record<'K, 'T> = private Record__ of obj
+
+        /// <summary>
+        /// Exclude from T those types that are assignable to U
+        /// </summary>
+        [<Erase>]
+        type Exclude<'T, 'U> = private Exclude__ of 'T
+
+        /// <summary>
+        /// Extract from T those types that are assignable to U
+        /// </summary>
+        [<Erase>]
+        type Extract<'T, 'U> = private Extract__ of 'T
+
+        /// <summary>
+        /// Construct a type with the properties of T except for those in type K.
+        /// </summary>
+        [<Erase>]
+        type Omit<'T, 'K> = private Omit__ of obj
+
+        /// <summary>
+        /// Exclude null and undefined from T
+        /// </summary>
+        [<Erase>]
+        type NonNullable<'T> = private NonNullable__ of obj
+
+        /// <summary>
+        /// Obtain the parameters of a function type in a tuple
+        /// </summary>
+        [<Erase>]
+        type Parameters<'T> = private Parameters__ of obj
+
+        /// <summary>
+        /// Obtain the parameters of a constructor function type in a tuple
+        /// </summary>
+        [<Erase>]
+        type ConstructorParameters<'T> = private ConstructorParameters__ of obj
+
+        /// <summary>
+        /// Obtain the return type of a function type
+        /// </summary>
+        [<Erase>]
+        type ReturnType<'T> = private ReturnType__ of obj
+
+        /// <summary>
+        /// Obtain the return type of a constructor function type
+        /// </summary>
+        [<Erase>]
+        type InstanceType<'T> = private InstanceType__ of obj
+
+        /// <summary>
+        /// Convert string literal type to uppercase
+        /// </summary>
+        [<Erase>]
+        type Uppercase<'S> = private Uppercase__ of obj
+
+        /// <summary>
+        /// Convert string literal type to lowercase
+        /// </summary>
+        [<Erase>]
+        type Lowercase<'S> = private Lowercase__ of obj
+
+        /// <summary>
+        /// Convert first character of string literal type to uppercase
+        /// </summary>
+        [<Erase>]
+        type Capitalize<'S> = private Capitalize__ of obj
+
+        /// <summary>
+        /// Convert first character of string literal type to lowercase
+        /// </summary>
+        [<Erase>]
+        type Uncapitalize<'S> = private Uncapitalize__ of obj
+
+        /// <summary>
+        /// Marker for non-inference type position
+        /// </summary>
+        [<Erase>]
+        type NoInfer<'T> = private NoInfer__ of obj
+
+        /// <summary>
+        /// Marker for contextual 'this' type
+        /// </summary>
+        type ThisType = obj
+
+        /// <summary>
+        /// Stores types to be used with WeakSet, WeakMap, WeakRef, and FinalizationRegistry
+        /// </summary>
+        type WeakKeyTypes = Fable.Core.TS.Es.WeakKeyTypes
+
+        type WeakKey = obj
+
+        /// <summary>
+        /// Represents a raw buffer of binary data, which is used to store data for the
+        /// different typed arrays. ArrayBuffers cannot be read from or written to directly,
+        /// but can be passed to a typed array or DataView Object to interpret the raw
+        /// buffer as needed.
+        /// </summary>
+        type ArrayBuffer = Fable.Core.TS.Es.ArrayBuffer
+
+        /// <summary>
+        /// Allowed ArrayBuffer types for the buffer of an ArrayBufferView and related Typed Arrays.
+        /// </summary>
+        type ArrayBufferTypes = Fable.Core.TS.Es.ArrayBufferTypes
+
+        type ArrayBufferLike = U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>
+
+        type ArrayBufferConstructor = Fable.Core.TS.Es.ArrayBufferConstructor
+
+        type ArrayBufferView<'TArrayBuffer> = Fable.Core.TS.Es.ArrayBufferView<'TArrayBuffer>
+
+        type DataView<'TArrayBuffer> = Fable.Core.TS.Es.DataView<'TArrayBuffer>
+
+        type DataViewConstructor = Fable.Core.TS.Es.DataViewConstructor
+
+        /// <summary>
+        /// A typed array of 8-bit integer values. The contents are initialized to 0. If the requested
+        /// number of bytes could not be allocated an exception is raised.
+        /// </summary>
+        type Int8Array<'TArrayBuffer> = Fable.Core.TS.Es.Int8Array<'TArrayBuffer>
+
+        type Int8ArrayConstructor = Fable.Core.TS.Es.Int8ArrayConstructor
+
+        /// <summary>
+        /// A typed array of 8-bit unsigned integer values. The contents are initialized to 0. If the
+        /// requested number of bytes could not be allocated an exception is raised.
+        /// </summary>
+        type Uint8Array<'TArrayBuffer> = Fable.Core.TS.Es.Uint8Array<'TArrayBuffer>
+
+        type Uint8ArrayConstructor = Fable.Core.TS.Es.Uint8ArrayConstructor
+
+        /// <summary>
+        /// A typed array of 8-bit unsigned integer (clamped) values. The contents are initialized to 0.
+        /// If the requested number of bytes could not be allocated an exception is raised.
+        /// </summary>
+        type Uint8ClampedArray<'TArrayBuffer> = Fable.Core.TS.Es.Uint8ClampedArray<'TArrayBuffer>
+
+        type Uint8ClampedArrayConstructor = Fable.Core.TS.Es.Uint8ClampedArrayConstructor
+
+        /// <summary>
+        /// A typed array of 16-bit signed integer values. The contents are initialized to 0. If the
+        /// requested number of bytes could not be allocated an exception is raised.
+        /// </summary>
+        type Int16Array<'TArrayBuffer> = Fable.Core.TS.Es.Int16Array<'TArrayBuffer>
+
+        type Int16ArrayConstructor = Fable.Core.TS.Es.Int16ArrayConstructor
+
+        /// <summary>
+        /// A typed array of 16-bit unsigned integer values. The contents are initialized to 0. If the
+        /// requested number of bytes could not be allocated an exception is raised.
+        /// </summary>
+        type Uint16Array<'TArrayBuffer> = Fable.Core.TS.Es.Uint16Array<'TArrayBuffer>
+
+        type Uint16ArrayConstructor = Fable.Core.TS.Es.Uint16ArrayConstructor
+
+        /// <summary>
+        /// A typed array of 32-bit signed integer values. The contents are initialized to 0. If the
+        /// requested number of bytes could not be allocated an exception is raised.
+        /// </summary>
+        type Int32Array<'TArrayBuffer> = Fable.Core.TS.Es.Int32Array<'TArrayBuffer>
+
+        type Int32ArrayConstructor = Fable.Core.TS.Es.Int32ArrayConstructor
+
+        /// <summary>
+        /// A typed array of 32-bit unsigned integer values. The contents are initialized to 0. If the
+        /// requested number of bytes could not be allocated an exception is raised.
+        /// </summary>
+        type Uint32Array<'TArrayBuffer> = Fable.Core.TS.Es.Uint32Array<'TArrayBuffer>
+
+        type Uint32ArrayConstructor = Fable.Core.TS.Es.Uint32ArrayConstructor
+
+        /// <summary>
+        /// A typed array of 32-bit float values. The contents are initialized to 0. If the requested number
+        /// of bytes could not be allocated an exception is raised.
+        /// </summary>
+        type Float32Array<'TArrayBuffer> = Fable.Core.TS.Es.Float32Array<'TArrayBuffer>
+
+        type Float32ArrayConstructor = Fable.Core.TS.Es.Float32ArrayConstructor
+
+        /// <summary>
+        /// A typed array of 64-bit float values. The contents are initialized to 0. If the requested
+        /// number of bytes could not be allocated an exception is raised.
+        /// </summary>
+        type Float64Array<'TArrayBuffer> = Fable.Core.TS.Es.Float64Array<'TArrayBuffer>
+
+        type Float64ArrayConstructor = Fable.Core.TS.Es.Float64ArrayConstructor
+
+        type Disposable = Fable.Core.TS.Es.Disposable
+
+        type AsyncDisposable = Fable.Core.TS.Es.AsyncDisposable
+
+        type SuppressedError = Fable.Core.TS.Es.SuppressedError
+
+        type SuppressedErrorConstructor = Fable.Core.TS.Es.SuppressedErrorConstructor
+
+        type DisposableStack = Fable.Core.TS.Es.DisposableStack
+
+        type DisposableStackConstructor = Fable.Core.TS.Es.DisposableStackConstructor
+
+        type AsyncDisposableStack = Fable.Core.TS.Es.AsyncDisposableStack
+
+        type AsyncDisposableStackConstructor = Fable.Core.TS.Es.AsyncDisposableStackConstructor
+
+        type AbstractModuleSource = Fable.Core.TS.Es.AbstractModuleSource
+
     module Int16Array =
         module Every =
             type Predicate<'TArrayBuffer> =
@@ -22319,51 +20429,2359 @@ module Es =
             type Mapfn2<'T> = delegate of v: 'T * k: float -> float
 
     module Intl =
+        [<Interface>]
+        type DurationFormatPart2 =
+            /// <remarks>TypeScript type: <c>"literal"</c></remarks>
+            abstract ``type``: string with get, set
+            abstract value: string with get, set
+            abstract unit: Fable.Core.TS.Es.Intl.DurationFormatUnitSingular option with get, set
+
+            [<ParamObject; Emit("({ type: 'literal', ...$0 })")>]
+            static member Create
+                (value: string, ?unit: Fable.Core.TS.Es.Intl.DurationFormatUnitSingular)
+                : DurationFormatPart2 =
+                jsNative
+
+        module DurationFormatPart2 =
+            /// <remarks>TypeScript type: <c>"literal"</c></remarks>
+            [<Literal>]
+            let ``type`` = "literal"
+
+        [<Interface>]
+        type DurationFormatPart3 =
+            abstract ``type``: Intl.RelativeTimeFormatPart3.Type with get, set
+            abstract value: string with get, set
+            abstract unit: Fable.Core.TS.Es.Intl.DurationFormatUnitSingular with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    ``type``: Intl.RelativeTimeFormatPart3.Type,
+                    value: string,
+                    unit: Fable.Core.TS.Es.Intl.DurationFormatUnitSingular
+                ) : DurationFormatPart3 =
+                jsNative
+
+        [<Interface>]
+        type RelativeTimeFormatPart2 =
+            /// <remarks>TypeScript type: <c>"literal"</c></remarks>
+            abstract ``type``: string with get, set
+            abstract value: string with get, set
+
+            [<ParamObject; Emit("({ type: 'literal', ...$0 })")>]
+            static member Create(value: string) : RelativeTimeFormatPart2 = jsNative
+
+        module RelativeTimeFormatPart2 =
+            /// <remarks>TypeScript type: <c>"literal"</c></remarks>
+            [<Literal>]
+            let ``type`` = "literal"
+
+        [<Interface>]
+        type RelativeTimeFormatPart3 =
+            abstract ``type``: Intl.RelativeTimeFormatPart3.Type with get, set
+            abstract value: string with get, set
+            abstract unit: Fable.Core.TS.Es.Intl.RelativeTimeFormatUnitSingular with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    ``type``: Intl.RelativeTimeFormatPart3.Type,
+                    value: string,
+                    unit: Fable.Core.TS.Es.Intl.RelativeTimeFormatUnitSingular
+                ) : RelativeTimeFormatPart3 =
+                jsNative
+
+        [<Interface>]
+        type DateTimeFormatPartTypesRegistry =
+            abstract day: obj with get, set
+            abstract dayPeriod: obj with get, set
+            abstract era: obj with get, set
+            abstract hour: obj with get, set
+            abstract literal: obj with get, set
+            abstract minute: obj with get, set
+            abstract month: obj with get, set
+            abstract second: obj with get, set
+            abstract timeZoneName: obj with get, set
+            abstract weekday: obj with get, set
+            abstract year: obj with get, set
+            abstract unknown: unit
+            abstract fractionalSecond: obj with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    day: obj,
+                    dayPeriod: obj,
+                    era: obj,
+                    hour: obj,
+                    literal: obj,
+                    minute: obj,
+                    month: obj,
+                    second: obj,
+                    timeZoneName: obj,
+                    weekday: obj,
+                    year: obj,
+                    fractionalSecond: obj
+                ) : DateTimeFormatPartTypesRegistry =
+                jsNative
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type DateTimeFormatPartTypes =
+            | [<CompiledName("day")>] Day
+            | [<CompiledName("dayPeriod")>] DayPeriod
+            | [<CompiledName("era")>] Era
+            | [<CompiledName("fractionalSecond")>] FractionalSecond
+            | [<CompiledName("hour")>] Hour
+            | [<CompiledName("literal")>] Literal
+            | [<CompiledName("minute")>] Minute
+            | [<CompiledName("month")>] Month
+            | [<CompiledName("second")>] Second
+            | [<CompiledName("timeZoneName")>] TimeZoneName
+            | [<CompiledName("unknown")>] Unknown
+            | [<CompiledName("weekday")>] Weekday
+            | [<CompiledName("year")>] Year
+
+        [<Interface>]
+        type DateTimeFormatPart =
+            abstract ``type``: Fable.Core.TS.Es.Intl.DateTimeFormatPartTypes with get, set
+            abstract value: string with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (``type``: Fable.Core.TS.Es.Intl.DateTimeFormatPartTypes, value: string)
+                : DateTimeFormatPart =
+                jsNative
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type LDMLPluralRule =
+            | [<CompiledName("few")>] Few
+            | [<CompiledName("many")>] Many
+            | [<CompiledName("one")>] One
+            | [<CompiledName("other")>] Other
+            | [<CompiledName("two")>] Two
+            | [<CompiledName("zero")>] Zero
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type PluralRuleType =
+            | [<CompiledName("cardinal")>] Cardinal
+            | [<CompiledName("ordinal")>] Ordinal
+
+        [<Interface>]
+        type PluralRulesOptions =
+            abstract localeMatcher: Intl.NumberFormatOptions.LocaleMatcher option with get, set
+            abstract ``type``: Fable.Core.TS.Es.Intl.PluralRuleType option with get, set
+            abstract minimumIntegerDigits: float option with get, set
+            abstract minimumFractionDigits: float option with get, set
+            abstract maximumFractionDigits: float option with get, set
+            abstract minimumSignificantDigits: float option with get, set
+            abstract maximumSignificantDigits: float option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    ?localeMatcher: Intl.NumberFormatOptions.LocaleMatcher,
+                    ?``type``: Fable.Core.TS.Es.Intl.PluralRuleType,
+                    ?minimumIntegerDigits: float,
+                    ?minimumFractionDigits: float,
+                    ?maximumFractionDigits: float,
+                    ?minimumSignificantDigits: float,
+                    ?maximumSignificantDigits: float
+                ) : PluralRulesOptions =
+                jsNative
+
+        [<Interface>]
+        type ResolvedPluralRulesOptions =
+            abstract locale: string with get, set
+            abstract pluralCategories: Fable.Core.TS.Es.Intl.LDMLPluralRule[] with get, set
+            abstract ``type``: Fable.Core.TS.Es.Intl.PluralRuleType with get, set
+            abstract minimumIntegerDigits: float with get, set
+            abstract minimumFractionDigits: float with get, set
+            abstract maximumFractionDigits: float with get, set
+            abstract minimumSignificantDigits: float option with get, set
+            abstract maximumSignificantDigits: float option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    locale: string,
+                    pluralCategories: Fable.Core.TS.Es.Intl.LDMLPluralRule[],
+                    ``type``: Fable.Core.TS.Es.Intl.PluralRuleType,
+                    minimumIntegerDigits: float,
+                    minimumFractionDigits: float,
+                    maximumFractionDigits: float,
+                    ?minimumSignificantDigits: float,
+                    ?maximumSignificantDigits: float
+                ) : ResolvedPluralRulesOptions =
+                jsNative
+
+        [<Interface>]
+        type PluralRules =
+            abstract resolvedOptions: unit -> Fable.Core.TS.Es.Intl.ResolvedPluralRulesOptions
+            abstract ``select``: n: float -> Fable.Core.TS.Es.Intl.LDMLPluralRule
+            abstract selectRange: start: float * ``end``: float -> Fable.Core.TS.Es.Intl.LDMLPluralRule
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    resolvedOptions: (unit -> Fable.Core.TS.Es.Intl.ResolvedPluralRulesOptions),
+                    ``select``: (float -> Fable.Core.TS.Es.Intl.LDMLPluralRule),
+                    selectRange: Func<float, float, Fable.Core.TS.Es.Intl.LDMLPluralRule>
+                ) : PluralRules =
+                jsNative
+
+        type PluralRulesConstructor =
+            abstract supportedLocalesOf:
+                locales: U2<string, string[]> * ?options: Intl.PluralRulesConstructor.SupportedLocalesOf.Options ->
+                    string[]
+
+            abstract supportedLocalesOf:
+                locales: Fable.Core.TS.Es.Intl.LocalesArgument *
+                ?options: Intl.PluralRulesConstructor.SupportedLocalesOf.Options2 ->
+                    string[]
+
+            [<EmitConstructor>]
+            abstract Create:
+                ?locales: U2<string, string[]> * ?options: Fable.Core.TS.Es.Intl.PluralRulesOptions ->
+                    Fable.Core.TS.Es.Intl.PluralRules
+
+            [<EmitConstructor>]
+            abstract Create:
+                ?locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Fable.Core.TS.Es.Intl.PluralRulesOptions ->
+                    Fable.Core.TS.Es.Intl.PluralRules
+
+        [<Interface>]
+        type NumberFormatPartTypeRegistry =
+            abstract literal: unit
+            abstract nan: unit
+            abstract infinity: unit
+            abstract percent: unit
+            abstract integer: unit
+            abstract group: unit
+            abstract decimal: unit
+            abstract fraction: unit
+            abstract plusSign: unit
+            abstract minusSign: unit
+            abstract percentSign: unit
+            abstract currency: unit
+            abstract compact: unit
+            abstract exponentInteger: unit
+            abstract exponentMinusSign: unit
+            abstract exponentSeparator: unit
+            abstract unit: unit
+            abstract unknown: unit
+
+            [<ParamObject; Emit("$0")>]
+            static member Create() : NumberFormatPartTypeRegistry = jsNative
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type NumberFormatPartTypes =
+            | [<CompiledName("compact")>] Compact
+            | [<CompiledName("currency")>] Currency
+            | [<CompiledName("decimal")>] Decimal
+            | [<CompiledName("exponentInteger")>] ExponentInteger
+            | [<CompiledName("exponentMinusSign")>] ExponentMinusSign
+            | [<CompiledName("exponentSeparator")>] ExponentSeparator
+            | [<CompiledName("fraction")>] Fraction
+            | [<CompiledName("group")>] Group
+            | [<CompiledName("infinity")>] Infinity
+            | [<CompiledName("integer")>] Integer
+            | [<CompiledName("literal")>] Literal
+            | [<CompiledName("minusSign")>] MinusSign
+            | [<CompiledName("nan")>] Nan
+            | [<CompiledName("percent")>] Percent
+            | [<CompiledName("percentSign")>] PercentSign
+            | [<CompiledName("plusSign")>] PlusSign
+            | [<CompiledName("unit")>] Unit
+            | [<CompiledName("unknown")>] Unknown
+
+        [<Interface>]
+        type NumberFormatPart =
+            abstract ``type``: Fable.Core.TS.Es.Intl.NumberFormatPartTypes with get, set
+            abstract value: string with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (``type``: Fable.Core.TS.Es.Intl.NumberFormatPartTypes, value: string)
+                : NumberFormatPart =
+                jsNative
+
+        /// <summary>
+        /// A string that is a valid <a href="https://unicode.org/reports/tr35/#Unicode_locale_identifier">Unicode BCP 47 Locale Identifier</a>.
+        /// <br /><br />
+        /// For example: "fa", "es-MX", "zh-Hant-TW".
+        /// <br /><br />
+        /// See <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#locales_argument">MDN - Intl - locales argument</a>.
+        /// </summary>
+        type UnicodeBCP47LocaleIdentifier = string
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type RelativeTimeFormatUnit =
+            | [<CompiledName("day")>] Day
+            | [<CompiledName("days")>] Days
+            | [<CompiledName("hour")>] Hour
+            | [<CompiledName("hours")>] Hours
+            | [<CompiledName("minute")>] Minute
+            | [<CompiledName("minutes")>] Minutes
+            | [<CompiledName("month")>] Month
+            | [<CompiledName("months")>] Months
+            | [<CompiledName("quarter")>] Quarter
+            | [<CompiledName("quarters")>] Quarters
+            | [<CompiledName("second")>] Second
+            | [<CompiledName("seconds")>] Seconds
+            | [<CompiledName("week")>] Week
+            | [<CompiledName("weeks")>] Weeks
+            | [<CompiledName("year")>] Year
+            | [<CompiledName("years")>] Years
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type RelativeTimeFormatUnitSingular =
+            | [<CompiledName("day")>] Day
+            | [<CompiledName("hour")>] Hour
+            | [<CompiledName("minute")>] Minute
+            | [<CompiledName("month")>] Month
+            | [<CompiledName("quarter")>] Quarter
+            | [<CompiledName("second")>] Second
+            | [<CompiledName("week")>] Week
+            | [<CompiledName("year")>] Year
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type RelativeTimeFormatLocaleMatcher =
+            | [<CompiledName("best fit")>] BestFit
+            | [<CompiledName("lookup")>] Lookup
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type RelativeTimeFormatNumeric =
+            | [<CompiledName("always")>] Always
+            | [<CompiledName("auto")>] Auto
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type RelativeTimeFormatStyle =
+            | [<CompiledName("long")>] Long
+            | [<CompiledName("narrow")>] Narrow
+            | [<CompiledName("short")>] Short
+
+        /// <summary>
+        /// The locale or locales to use
+        /// <br /><br />
+        /// See <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#locales_argument">MDN - Intl - locales argument</a>.
+        /// </summary>
+        type LocalesArgument =
+            U3<string, Fable.Core.TS.Es.Intl.Locale, U2<string, Fable.Core.TS.Es.Intl.Locale>[]> option
+
+        /// <summary>
+        /// An object with some or all of properties of <c>options</c> parameter
+        /// of <c>Intl.RelativeTimeFormat</c> constructor.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/RelativeTimeFormat#Parameters">MDN</a>.
+        /// </summary>
+        [<Interface>]
+        type RelativeTimeFormatOptions =
+            /// <summary>
+            /// The locale matching algorithm to use. For information about this option, see <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_negotiation">Intl page</a>.
+            /// </summary>
+            abstract localeMatcher: Fable.Core.TS.Es.Intl.RelativeTimeFormatLocaleMatcher option with get, set
+            /// <summary>
+            /// The format of output message.
+            /// </summary>
+            abstract numeric: Fable.Core.TS.Es.Intl.RelativeTimeFormatNumeric option with get, set
+            /// <summary>
+            /// The length of the internationalized message.
+            /// </summary>
+            abstract style: Fable.Core.TS.Es.Intl.RelativeTimeFormatStyle option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    ?localeMatcher: Fable.Core.TS.Es.Intl.RelativeTimeFormatLocaleMatcher,
+                    ?numeric: Fable.Core.TS.Es.Intl.RelativeTimeFormatNumeric,
+                    ?style: Fable.Core.TS.Es.Intl.RelativeTimeFormatStyle
+                ) : RelativeTimeFormatOptions =
+                jsNative
+
+        /// <summary>
+        /// An object with properties reflecting the locale
+        /// and formatting options computed during initialization
+        /// of the <c>Intl.RelativeTimeFormat</c> object
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/resolvedOptions#Description">MDN</a>.
+        /// </summary>
+        [<Interface>]
+        type ResolvedRelativeTimeFormatOptions =
+            abstract locale: string with get, set
+            abstract style: Fable.Core.TS.Es.Intl.RelativeTimeFormatStyle with get, set
+            abstract numeric: Fable.Core.TS.Es.Intl.RelativeTimeFormatNumeric with get, set
+            abstract numberingSystem: string with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    locale: string,
+                    style: Fable.Core.TS.Es.Intl.RelativeTimeFormatStyle,
+                    numeric: Fable.Core.TS.Es.Intl.RelativeTimeFormatNumeric,
+                    numberingSystem: string
+                ) : ResolvedRelativeTimeFormatOptions =
+                jsNative
+
+        /// <summary>
+        /// An object representing the relative time format in parts
+        /// that can be used for custom locale-aware formatting.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/formatToParts#Using_formatToParts">MDN</a>.
+        /// </summary>
+        type RelativeTimeFormatPart =
+            U2<Fable.Core.TS.Es.Intl.RelativeTimeFormatPart2, Fable.Core.TS.Es.Intl.RelativeTimeFormatPart3>
+
+        /// <summary>
+        /// The <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/RelativeTimeFormat"><c>Intl.RelativeTimeFormat</c></a>
+        /// object is a constructor for objects that enable language-sensitive relative time formatting.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat#Browser_compatibility">Compatibility</a>.
+        /// </summary>
+        [<Interface>]
+        type RelativeTimeFormat =
+            /// <summary>
+            /// Formats a value and a unit according to the locale
+            /// and formatting options of the given
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/RelativeTimeFormat"><c>Intl.RelativeTimeFormat</c></a>
+            /// object.
+            /// <br /><br />
+            /// While this method automatically provides the correct plural forms,
+            /// the grammatical form is otherwise as neutral as possible.
+            /// <br /><br />
+            /// It is the caller's responsibility to handle cut-off logic
+            /// such as deciding between displaying "in 7 days" or "in 1 week".
+            /// This API does not support relative dates involving compound units.
+            /// e.g "in 5 days and 4 hours".
+            /// </summary>
+            /// <param name="value">-  Numeric value to use in the internationalized relative time message</param>
+            /// <param name="unit">- <a href="https://tc39.es/ecma402/#sec-singularrelativetimeunit">Unit</a> to use in the relative time internationalized message.</param>
+            /// <remarks>@throws <c>RangeError</c> if <c>unit</c> was given something other than <c>unit</c> possible values</remarks>
+            /// <returns>
+            /// Internationalized relative time message as string
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/format">MDN</a>.
+            /// </returns>
+            abstract format: value: float * unit: Fable.Core.TS.Es.Intl.RelativeTimeFormatUnit -> string
+
+            /// <summary>
+            /// Returns an array of objects representing the relative time format in parts that can be used for custom locale-aware formatting.
+            /// </summary>
+            /// <param name="value">- Numeric value to use in the internationalized relative time message</param>
+            /// <param name="unit">- <a href="https://tc39.es/ecma402/#sec-singularrelativetimeunit">Unit</a> to use in the relative time internationalized message.</param>
+            /// <remarks>
+            /// @throws
+            /// <c>RangeError</c> if <c>unit</c> was given something other than <c>unit</c> possible values
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/formatToParts">MDN</a>.
+            /// </remarks>
+            abstract formatToParts:
+                value: float * unit: Fable.Core.TS.Es.Intl.RelativeTimeFormatUnit ->
+                    Fable.Core.TS.Es.Intl.RelativeTimeFormatPart[]
+
+            /// <summary>
+            /// Provides access to the locale and options computed during initialization of this <c>Intl.RelativeTimeFormat</c> object.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/resolvedOptions">MDN</a>.
+            /// </summary>
+            abstract resolvedOptions: unit -> Fable.Core.TS.Es.Intl.ResolvedRelativeTimeFormatOptions
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    format: Func<float, Fable.Core.TS.Es.Intl.RelativeTimeFormatUnit, string>,
+                    formatToParts:
+                        Func<
+                            float,
+                            Fable.Core.TS.Es.Intl.RelativeTimeFormatUnit,
+                            Fable.Core.TS.Es.Intl.RelativeTimeFormatPart[]
+                         >,
+                    resolvedOptions: (unit -> Fable.Core.TS.Es.Intl.ResolvedRelativeTimeFormatOptions)
+                ) : RelativeTimeFormat =
+                jsNative
+
+        type RelativeTimeFormatConstructor =
+            /// <summary>
+            /// Returns an array containing those of the provided locales
+            /// that are supported in date and time formatting
+            /// without having to fall back to the runtime's default locale.
+            /// </summary>
+            /// <param name="locales">
+            /// - A string with a <a href="http://tools.ietf.org/html/rfc5646">BCP 47 language tag</a>, or an array of such strings.
+            /// For the general form and interpretation of the locales argument,
+            /// see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_identification_and_negotiation"><c>Intl</c> page</a>.
+            /// </param>
+            /// <param name="options">
+            /// - An <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/RelativeTimeFormat#Parameters">object</a>
+            /// with some or all of options of the formatting.
+            /// </param>
+            /// <returns>
+            /// An array containing those of the provided locales
+            /// that are supported in date and time formatting
+            /// without having to fall back to the runtime's default locale.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/supportedLocalesOf">MDN</a>.
+            /// </returns>
+            abstract supportedLocalesOf:
+                ?locales: Fable.Core.TS.Es.Intl.LocalesArgument *
+                ?options: Fable.Core.TS.Es.Intl.RelativeTimeFormatOptions ->
+                    string[]
+
+            [<EmitConstructor>]
+            abstract Create:
+                ?locales: Fable.Core.TS.Es.Intl.LocalesArgument *
+                ?options: Fable.Core.TS.Es.Intl.RelativeTimeFormatOptions ->
+                    Fable.Core.TS.Es.Intl.RelativeTimeFormat
+
+        [<Interface>]
+        type NumberFormatOptionsSignDisplayRegistry =
+            abstract auto: unit
+            abstract never: unit
+            abstract always: unit
+            abstract exceptZero: unit
+            abstract negative: unit
+
+            [<ParamObject; Emit("$0")>]
+            static member Create() : NumberFormatOptionsSignDisplayRegistry = jsNative
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type NumberFormatOptionsSignDisplay =
+            | [<CompiledName("always")>] Always
+            | [<CompiledName("auto")>] Auto
+            | [<CompiledName("exceptZero")>] ExceptZero
+            | [<CompiledName("negative")>] Negative
+            | [<CompiledName("never")>] Never
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type LocaleHourCycleKey =
+            | [<CompiledName("h11")>] H11
+            | [<CompiledName("h12")>] H12
+            | [<CompiledName("h23")>] H23
+            | [<CompiledName("h24")>] H24
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type LocaleCollationCaseFirst =
+            | [<CompiledName("false")>] False
+            | [<CompiledName("lower")>] Lower
+            | [<CompiledName("upper")>] Upper
+
+        [<Interface>]
+        type LocaleOptions =
+            /// <summary>
+            /// A string containing the language, and the script and region if available.
+            /// </summary>
+            abstract baseName: string option with get, set
+            /// <summary>
+            /// The part of the Locale that indicates the locale's calendar era.
+            /// </summary>
+            abstract calendar: string option with get, set
+            /// <summary>
+            /// Flag that defines whether case is taken into account for the locale's collation rules.
+            /// </summary>
+            abstract caseFirst: Fable.Core.TS.Es.Intl.LocaleCollationCaseFirst option with get, set
+            /// <summary>
+            /// The collation type used for sorting
+            /// </summary>
+            abstract collation: string option with get, set
+            /// <summary>
+            /// The time keeping format convention used by the locale.
+            /// </summary>
+            abstract hourCycle: Fable.Core.TS.Es.Intl.LocaleHourCycleKey option with get, set
+            /// <summary>
+            /// The primary language subtag associated with the locale.
+            /// </summary>
+            abstract language: string option with get, set
+            /// <summary>
+            /// The numeral system used by the locale.
+            /// </summary>
+            abstract numberingSystem: string option with get, set
+            /// <summary>
+            /// Flag that defines whether the locale has special collation handling for numeric characters.
+            /// </summary>
+            abstract numeric: bool option with get, set
+            /// <summary>
+            /// The region of the world (usually a country) associated with the locale. Possible values are region codes as defined by ISO 3166-1.
+            /// </summary>
+            abstract region: string option with get, set
+            /// <summary>
+            /// The script used for writing the particular language used in the locale. Possible values are script codes as defined by ISO 15924.
+            /// </summary>
+            abstract script: string option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    ?baseName: string,
+                    ?calendar: string,
+                    ?caseFirst: Fable.Core.TS.Es.Intl.LocaleCollationCaseFirst,
+                    ?collation: string,
+                    ?hourCycle: Fable.Core.TS.Es.Intl.LocaleHourCycleKey,
+                    ?language: string,
+                    ?numberingSystem: string,
+                    ?numeric: bool,
+                    ?region: string,
+                    ?script: string
+                ) : LocaleOptions =
+                jsNative
+
+        /// <summary>
+        /// Constructor creates <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale">Intl.Locale</a>
+        /// objects
+        /// </summary>
+        /// <param name="tag">
+        /// - A string with a <a href="http://tools.ietf.org/html/rfc5646">BCP 47 language tag</a>.
+        /// For the general form and interpretation of the locales argument,
+        /// see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_identification_and_negotiation"><c>Intl</c> page</a>.
+        /// </param>
+        /// <param name="options">- An <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/Locale#Parameters">object</a> with some or all of options of the locale.</param>
+        /// <returns>
+        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale">Intl.Locale</a> object.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale">MDN</a>.
+        /// </returns>
+        [<Interface>]
+        type Locale =
+            inherit Fable.Core.TS.Es.Intl.LocaleOptions
+            /// <summary>
+            /// A string containing the language, and the script and region if available.
+            /// </summary>
+            abstract baseName: string with get, set
+            /// <summary>
+            /// The primary language subtag associated with the locale.
+            /// </summary>
+            abstract language: string with get, set
+            /// <summary>
+            /// Gets the most likely values for the language, script, and region of the locale based on existing values.
+            /// </summary>
+            abstract maximize: unit -> Fable.Core.TS.Es.Intl.Locale
+            /// <summary>
+            /// Attempts to remove information about the locale that would be added by calling <c>Locale.maximize()</c>.
+            /// </summary>
+            abstract minimize: unit -> Fable.Core.TS.Es.Intl.Locale
+            /// <summary>
+            /// Returns the locale's full locale identifier string.
+            /// </summary>
+            abstract toString: unit -> string
+            /// <summary>
+            /// Returns a list of one or more unique calendar identifiers for this locale.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/getCalendars">MDN Reference</a>
+            /// </summary>
+            abstract getCalendars: unit -> string[]
+            /// <summary>
+            /// Returns a list of one or more collation types for this locale.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/getCollations">MDN Reference</a>
+            /// </summary>
+            abstract getCollations: unit -> string[]
+            /// <summary>
+            /// Returns a list of one or more unique hour cycle identifiers for this locale.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/getHourCycles">MDN Reference</a>
+            /// </summary>
+            abstract getHourCycles: unit -> string[]
+            /// <summary>
+            /// Returns a list of one or more unique numbering system identifiers for this locale.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/getNumberingSystems">MDN Reference</a>
+            /// </summary>
+            abstract getNumberingSystems: unit -> string[]
+            /// <summary>
+            /// Returns the ordering of characters indicated by either ltr (left-to-right) or by rtl (right-to-left) for this locale.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/getTextInfo">MDN Reference</a>
+            /// </summary>
+            abstract getTextInfo: unit -> Fable.Core.TS.Es.Intl.TextInfo
+            /// <summary>
+            /// Returns a list of supported time zones for this locale.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/getTimeZones">MDN Reference</a>
+            /// </summary>
+            abstract getTimeZones: unit -> string[] option
+            /// <summary>
+            /// Returns a <c>WeekInfo</c> object with the properties <c>firstDay</c>, <c>weekend</c> and <c>minimalDays</c> for this locale.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/getWeekInfo">MDN Reference</a>
+            /// </summary>
+            abstract getWeekInfo: unit -> Fable.Core.TS.Es.Intl.WeekInfo
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    baseName: string,
+                    language: string,
+                    maximize: (unit -> Fable.Core.TS.Es.Intl.Locale),
+                    minimize: (unit -> Fable.Core.TS.Es.Intl.Locale),
+                    toString: (unit -> string),
+                    getCalendars: (unit -> string[]),
+                    getCollations: (unit -> string[]),
+                    getHourCycles: (unit -> string[]),
+                    getNumberingSystems: (unit -> string[]),
+                    getTextInfo: (unit -> Fable.Core.TS.Es.Intl.TextInfo),
+                    getTimeZones: (unit -> string[] option),
+                    getWeekInfo: (unit -> Fable.Core.TS.Es.Intl.WeekInfo),
+                    ?calendar: string,
+                    ?caseFirst: Fable.Core.TS.Es.Intl.LocaleCollationCaseFirst,
+                    ?collation: string,
+                    ?hourCycle: Fable.Core.TS.Es.Intl.LocaleHourCycleKey,
+                    ?numberingSystem: string,
+                    ?numeric: bool,
+                    ?region: string,
+                    ?script: string
+                ) : Locale =
+                jsNative
+
+        type LocaleConstructor =
+            [<EmitConstructor>]
+            abstract Create:
+                tag: U2<string, Fable.Core.TS.Es.Intl.Locale> * ?options: Fable.Core.TS.Es.Intl.LocaleOptions ->
+                    Fable.Core.TS.Es.Intl.Locale
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type DisplayNamesFallback =
+            | [<CompiledName("code")>] Code
+            | [<CompiledName("none")>] None
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type DisplayNamesType =
+            | [<CompiledName("calendar")>] Calendar
+            | [<CompiledName("currency")>] Currency
+            | [<CompiledName("dateTimeField")>] DateTimeField
+            | [<CompiledName("language")>] Language
+            | [<CompiledName("region")>] Region
+            | [<CompiledName("script")>] Script
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type DisplayNamesLanguageDisplay =
+            | [<CompiledName("dialect")>] Dialect
+            | [<CompiledName("standard")>] Standard
+
+        [<Interface>]
+        type DisplayNamesOptions =
+            abstract localeMatcher: Fable.Core.TS.Es.Intl.RelativeTimeFormatLocaleMatcher option with get, set
+            abstract style: Fable.Core.TS.Es.Intl.RelativeTimeFormatStyle option with get, set
+            abstract ``type``: Fable.Core.TS.Es.Intl.DisplayNamesType with get, set
+            abstract languageDisplay: Fable.Core.TS.Es.Intl.DisplayNamesLanguageDisplay option with get, set
+            abstract fallback: Fable.Core.TS.Es.Intl.DisplayNamesFallback option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    ``type``: Fable.Core.TS.Es.Intl.DisplayNamesType,
+                    ?localeMatcher: Fable.Core.TS.Es.Intl.RelativeTimeFormatLocaleMatcher,
+                    ?style: Fable.Core.TS.Es.Intl.RelativeTimeFormatStyle,
+                    ?languageDisplay: Fable.Core.TS.Es.Intl.DisplayNamesLanguageDisplay,
+                    ?fallback: Fable.Core.TS.Es.Intl.DisplayNamesFallback
+                ) : DisplayNamesOptions =
+                jsNative
+
+        [<Interface>]
+        type ResolvedDisplayNamesOptions =
+            abstract locale: string with get, set
+            abstract style: Fable.Core.TS.Es.Intl.RelativeTimeFormatStyle with get, set
+            abstract ``type``: Fable.Core.TS.Es.Intl.DisplayNamesType with get, set
+            abstract fallback: Fable.Core.TS.Es.Intl.DisplayNamesFallback with get, set
+            abstract languageDisplay: Fable.Core.TS.Es.Intl.DisplayNamesLanguageDisplay option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    locale: string,
+                    style: Fable.Core.TS.Es.Intl.RelativeTimeFormatStyle,
+                    ``type``: Fable.Core.TS.Es.Intl.DisplayNamesType,
+                    fallback: Fable.Core.TS.Es.Intl.DisplayNamesFallback,
+                    ?languageDisplay: Fable.Core.TS.Es.Intl.DisplayNamesLanguageDisplay
+                ) : ResolvedDisplayNamesOptions =
+                jsNative
+
+        /// <summary>
+        /// The <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames"><c>Intl.DisplayNames()</c></a>
+        /// object enables the consistent translation of language, region and script display names.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames#browser_compatibility">Compatibility</a>.
+        /// </summary>
+        [<Interface>]
+        type DisplayNames =
+            /// <summary>
+            /// Receives a code and returns a string based on the locale and options provided when instantiating
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames"><c>Intl.DisplayNames()</c></a>
+            /// </summary>
+            /// <param name="code">
+            /// The <c>code</c> to provide depends on the <c>type</c> passed to display name during creation:
+            /// - If the type is <c>"region"</c>, code should be either an <a href="https://www.iso.org/iso-3166-country-codes.html">ISO-3166 two letters region code</a>,
+            /// or a <a href="https://unstats.un.org/unsd/methodology/m49/">three digits UN M49 Geographic Regions</a>.
+            /// - If the type is <c>"script"</c>, code should be an <a href="https://unicode.org/iso15924/iso15924-codes.html">ISO-15924 four letters script code</a>.
+            /// - If the type is <c>"language"</c>, code should be a <c>languageCode</c> ["-" <c>scriptCode</c>] ["-" <c>regionCode</c> ] *("-" <c>variant</c> )
+            /// subsequence of the unicode_language_id grammar in <a href="https://unicode.org/reports/tr35/#Unicode_language_identifier">UTS 35's Unicode Language and Locale Identifiers grammar</a>.
+            /// <c>languageCode</c> is either a two letters ISO 639-1 language code or a three letters ISO 639-2 language code.
+            /// - If the type is <c>"currency"</c>, code should be a <a href="https://www.iso.org/iso-4217-currency-codes.html">3-letter ISO 4217 currency code</a>.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames/of">MDN</a>.
+            /// </param>
+            abstract ``of``: code: string -> string option
+            /// <summary>
+            /// Returns a new object with properties reflecting the locale and style formatting options computed during the construction of the current
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames"><c>Intl/DisplayNames</c></a> object.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames/resolvedOptions">MDN</a>.
+            /// </summary>
+            abstract resolvedOptions: unit -> Fable.Core.TS.Es.Intl.ResolvedDisplayNamesOptions
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    ``of``: (string -> string option),
+                    resolvedOptions: (unit -> Fable.Core.TS.Es.Intl.ResolvedDisplayNamesOptions)
+                ) : DisplayNames =
+                jsNative
+
+        type DisplayNamesConstructor =
+            /// <summary>
+            /// Returns an array containing those of the provided locales that are supported in display names without having to fall back to the runtime's default locale.
+            /// </summary>
+            /// <param name="locales">
+            /// A string with a BCP 47 language tag, or an array of such strings.
+            /// For the general form and interpretation of the <c>locales</c> argument, see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#locale_identification_and_negotiation">Intl</a>
+            /// page.
+            /// </param>
+            /// <param name="options">An object with a locale matcher.</param>
+            /// <returns>
+            /// An array of strings representing a subset of the given locale tags that are supported in display names without having to fall back to the runtime's default locale.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames/supportedLocalesOf">MDN</a>.
+            /// </returns>
+            abstract supportedLocalesOf:
+                ?locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Intl.DisplayNames.SupportedLocalesOf.Options ->
+                    string[]
+
+            [<EmitConstructor>]
+            abstract Create:
+                locales: Fable.Core.TS.Es.Intl.LocalesArgument * options: Fable.Core.TS.Es.Intl.DisplayNamesOptions ->
+                    Fable.Core.TS.Es.Intl.DisplayNames
+
+        [<Interface>]
+        type DateTimeRangeFormatPart =
+            inherit Fable.Core.TS.Es.Intl.DateTimeFormatPart
+            abstract source: Intl.NumberRangeFormatPart.Source with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    source: Intl.NumberRangeFormatPart.Source,
+                    ``type``: Fable.Core.TS.Es.Intl.DateTimeFormatPartTypes,
+                    value: string
+                ) : DateTimeRangeFormatPart =
+                jsNative
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type ListFormatLocaleMatcher =
+            | [<CompiledName("best fit")>] BestFit
+            | [<CompiledName("lookup")>] Lookup
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type ListFormatType =
+            | [<CompiledName("conjunction")>] Conjunction
+            | [<CompiledName("disjunction")>] Disjunction
+            | [<CompiledName("unit")>] Unit
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type ListFormatStyle =
+            | [<CompiledName("long")>] Long
+            | [<CompiledName("narrow")>] Narrow
+            | [<CompiledName("short")>] Short
+
+        /// <summary>
+        /// An object with some or all properties of the <c>Intl.ListFormat</c> constructor <c>options</c> parameter.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/ListFormat/ListFormat#parameters">MDN</a>.
+        /// </summary>
+        [<Interface>]
+        type ListFormatOptions =
+            /// <summary>
+            /// The locale matching algorithm to use. For information about this option, see <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_negotiation">Intl page</a>.
+            /// </summary>
+            abstract localeMatcher: Fable.Core.TS.Es.Intl.ListFormatLocaleMatcher option with get, set
+            /// <summary>
+            /// The format of output message.
+            /// </summary>
+            abstract ``type``: Fable.Core.TS.Es.Intl.ListFormatType option with get, set
+            /// <summary>
+            /// The length of the internationalized message.
+            /// </summary>
+            abstract style: Fable.Core.TS.Es.Intl.ListFormatStyle option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    ?localeMatcher: Fable.Core.TS.Es.Intl.ListFormatLocaleMatcher,
+                    ?``type``: Fable.Core.TS.Es.Intl.ListFormatType,
+                    ?style: Fable.Core.TS.Es.Intl.ListFormatStyle
+                ) : ListFormatOptions =
+                jsNative
+
+        [<Interface>]
+        type ResolvedListFormatOptions =
+            abstract locale: string with get, set
+            abstract style: Fable.Core.TS.Es.Intl.ListFormatStyle with get, set
+            abstract ``type``: Fable.Core.TS.Es.Intl.ListFormatType with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    locale: string,
+                    style: Fable.Core.TS.Es.Intl.ListFormatStyle,
+                    ``type``: Fable.Core.TS.Es.Intl.ListFormatType
+                ) : ResolvedListFormatOptions =
+                jsNative
+
+        [<Interface>]
+        type ListFormat =
+            /// <summary>
+            /// Returns a string with a language-specific representation of the list.
+            /// </summary>
+            /// <param name="list">- An iterable object, such as an <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>.</param>
+            /// <remarks>@throws <c>TypeError</c> if <c>list</c> includes something other than the possible values.</remarks>
+            /// <returns>
+            /// A language-specific formatted string representing the elements of the list.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/ListFormat/format">MDN</a>.
+            /// </returns>
+            abstract format: list: Iterable<string, obj, obj> -> string
+            /// <summary>
+            /// Returns an Array of objects representing the different components that can be used to format a list of values in a locale-aware fashion.
+            /// </summary>
+            /// <param name="list">- An iterable object, such as an <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>, to be formatted according to a locale.</param>
+            /// <remarks>@throws <c>TypeError</c> if <c>list</c> includes something other than the possible values.</remarks>
+            /// <returns>
+            /// An Array of components which contains the formatted parts from the list.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/ListFormat/formatToParts">MDN</a>.
+            /// </returns>
+            abstract formatToParts: list: Iterable<string, obj, obj> -> Intl.ListFormat.FormatToParts.Result.Item[]
+            /// <summary>
+            /// Returns a new object with properties reflecting the locale and style
+            /// formatting options computed during the construction of the current
+            /// <c>Intl.ListFormat</c> object.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/ListFormat/resolvedOptions">MDN</a>.
+            /// </summary>
+            abstract resolvedOptions: unit -> Fable.Core.TS.Es.Intl.ResolvedListFormatOptions
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    format: (Iterable<string, obj, obj> -> string),
+                    formatToParts: (Iterable<string, obj, obj> -> Intl.ListFormat.FormatToParts.Result.Item[]),
+                    resolvedOptions: (unit -> Fable.Core.TS.Es.Intl.ResolvedListFormatOptions)
+                ) : ListFormat =
+                jsNative
+
+        type ListFormatConstructor =
+            /// <summary>
+            /// Returns an array containing those of the provided locales that are
+            /// supported in list formatting without having to fall back to the runtime's default locale.
+            /// </summary>
+            /// <param name="locales">
+            /// - A string with a <a href="http://tools.ietf.org/html/rfc5646">BCP 47 language tag</a>, or an array of such strings.
+            /// For the general form and interpretation of the <c>locales</c> argument,
+            /// see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_identification_and_negotiation"><c>Intl</c> page</a>.
+            /// </param>
+            /// <param name="options">
+            /// - An <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/ListFormat/supportedLocalesOf#parameters">object</a>.
+            /// with some or all possible options.
+            /// </param>
+            /// <returns>
+            /// An array of strings representing a subset of the given locale tags that are supported in list
+            /// formatting without having to fall back to the runtime's default locale.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/ListFormat/supportedLocalesOf">MDN</a>.
+            /// </returns>
+            abstract supportedLocalesOf:
+                locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Intl.ListFormat.SupportedLocalesOf.Options ->
+                    string[]
+
+            [<EmitConstructor>]
+            abstract Create:
+                ?locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Fable.Core.TS.Es.Intl.ListFormatOptions ->
+                    Fable.Core.TS.Es.Intl.ListFormat
+
+        /// <summary>
+        /// An object with some or all properties of the <c>Intl.Segmenter</c> constructor <c>options</c> parameter.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter/Segmenter#parameters">MDN</a>
+        /// </summary>
+        [<Interface>]
+        type SegmenterOptions =
+            /// <summary>
+            /// The locale matching algorithm to use. For information about this option, see <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_negotiation">Intl page</a>.
+            /// </summary>
+            abstract localeMatcher: Intl.NumberFormatOptions.LocaleMatcher option with get, set
+            /// <summary>
+            /// The type of input to be split
+            /// </summary>
+            abstract granularity: Intl.ResolvedSegmenterOptions.Granularity option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    ?localeMatcher: Intl.NumberFormatOptions.LocaleMatcher,
+                    ?granularity: Intl.ResolvedSegmenterOptions.Granularity
+                ) : SegmenterOptions =
+                jsNative
+
+        /// <summary>
+        /// The <c>Intl.Segmenter</c> object enables locale-sensitive text segmentation, enabling you to get meaningful items (graphemes, words or sentences) from a string.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter">MDN</a>
+        /// </summary>
+        [<Interface>]
+        type Segmenter =
+            /// <summary>
+            /// Returns <c>Segments</c> object containing the segments of the input string, using the segmenter's locale and granularity.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter/segment">MDN</a>
+            /// </summary>
+            /// <param name="input">- The text to be segmented as a <c>string</c>.</param>
+            /// <returns>A new iterable Segments object containing the segments of the input string, using the segmenter's locale and granularity.</returns>
+            abstract segment: input: string -> Fable.Core.TS.Es.Intl.Segments
+            /// <summary>
+            /// The <c>resolvedOptions()</c> method of <c>Intl.Segmenter</c> instances returns a new object with properties reflecting the options computed during initialization of this <c>Segmenter</c> object.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter/resolvedOptions">MDN</a>
+            /// </summary>
+            abstract resolvedOptions: unit -> Fable.Core.TS.Es.Intl.ResolvedSegmenterOptions
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    segment: (string -> Fable.Core.TS.Es.Intl.Segments),
+                    resolvedOptions: (unit -> Fable.Core.TS.Es.Intl.ResolvedSegmenterOptions)
+                ) : Segmenter =
+                jsNative
+
+        type SegmenterConstructor =
+            /// <summary>
+            /// Returns an array containing those of the provided locales that are supported without having to fall back to the runtime's default locale.
+            /// </summary>
+            /// <param name="locales">
+            /// - A string with a <a href="http://tools.ietf.org/html/rfc5646">BCP 47 language tag</a>, or an array of such strings.
+            /// For the general form and interpretation of the <c>locales</c> argument,
+            /// see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_identification_and_negotiation"><c>Intl</c> page</a>.
+            /// </param>
+            /// <param name="options">
+            /// An <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter/supportedLocalesOf#parameters">object</a>.
+            /// with some or all possible options.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter/supportedLocalesOf">MDN</a>
+            /// </param>
+            abstract supportedLocalesOf:
+                locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Intl.Segmenter.SupportedLocalesOf.Options ->
+                    string[]
+
+            [<EmitConstructor>]
+            abstract Create:
+                ?locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Fable.Core.TS.Es.Intl.SegmenterOptions ->
+                    Fable.Core.TS.Es.Intl.Segmenter
+
+        [<Interface>]
+        type ResolvedSegmenterOptions =
+            abstract locale: string with get, set
+            abstract granularity: Intl.ResolvedSegmenterOptions.Granularity with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (locale: string, granularity: Intl.ResolvedSegmenterOptions.Granularity)
+                : ResolvedSegmenterOptions =
+                jsNative
+
+        type SegmentIterator<'T> =
+            inherit IteratorObject<'T, unit, obj>
+            abstract next: [<ParamArray>] __0: obj[] -> U2<IteratorReturnResult<unit>, IteratorYieldResult<'T>>
+
+            /// <summary>
+            /// Creates an iterator whose values are the result of applying the callback to the values from this iterator.
+            /// </summary>
+            /// <param name="callbackfn">A function that accepts up to two arguments to be used to transform values from the underlying iterator.</param>
+            abstract map<'U> :
+                callbackfn: Fable.Core.TS.Es.ArrayIterator.Map.Callbackfn<'T, 'U> -> IteratorObject<'U, unit, obj>
+
+            /// <summary>
+            /// Creates an iterator whose values are those from this iterator for which the provided predicate returns true.
+            /// </summary>
+            /// <param name="predicate">A function that accepts up to two arguments to be used to test values from the underlying iterator.</param>
+            /// <param name="predicate">A function that accepts up to two arguments to be used to test values from the underlying iterator.</param>
+            abstract filter<'S> :
+                predicate: Fable.Core.TS.Es.ArrayIterator.Filter.Predicate<'T> -> IteratorObject<'S, unit, obj>
+
+            /// <summary>
+            /// Creates an iterator whose values are those from this iterator for which the provided predicate returns true.
+            /// </summary>
+            /// <param name="predicate">A function that accepts up to two arguments to be used to test values from the underlying iterator.</param>
+            /// <param name="predicate">A function that accepts up to two arguments to be used to test values from the underlying iterator.</param>
+            abstract filter:
+                predicate: Fable.Core.TS.Es.ArrayIterator.Filter.Predicate2<'T> -> IteratorObject<'T, unit, obj>
+
+            /// <summary>
+            /// Creates an iterator whose values are the result of applying the callback to the values from this iterator and then flattening the resulting iterators or iterables.
+            /// </summary>
+            /// <param name="callback">A function that accepts up to two arguments to be used to transform values from the underlying iterator into new iterators or iterables to be flattened into the result.</param>
+            abstract flatMap<'U> :
+                callback: Fable.Core.TS.Es.ArrayIterator.FlatMap.Callback<'T, 'U> -> IteratorObject<'U, unit, obj>
+
+            /// <summary>
+            /// Calls the specified callback function for all the elements in this iterator. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+            /// </summary>
+            /// <param name="callbackfn">A function that accepts up to three arguments. The reduce method calls the callbackfn function one time for each element in the iterator.</param>
+            /// <param name="initialValue">If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of a value from the iterator.</param>
+            /// <param name="callbackfn">A function that accepts up to three arguments. The reduce method calls the callbackfn function one time for each element in the iterator.</param>
+            /// <param name="initialValue">If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of a value from the iterator.</param>
+            abstract reduce: callbackfn: Fable.Core.TS.Es.ArrayIterator.Reduce.Callbackfn<'T> -> 'T
+            /// <summary>
+            /// Calls the specified callback function for all the elements in this iterator. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+            /// </summary>
+            /// <param name="callbackfn">A function that accepts up to three arguments. The reduce method calls the callbackfn function one time for each element in the iterator.</param>
+            /// <param name="initialValue">If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of a value from the iterator.</param>
+            /// <param name="callbackfn">A function that accepts up to three arguments. The reduce method calls the callbackfn function one time for each element in the iterator.</param>
+            /// <param name="initialValue">If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of a value from the iterator.</param>
+            abstract reduce: callbackfn: Fable.Core.TS.Es.ArrayIterator.Reduce.Callbackfn2<'T> * initialValue: 'T -> 'T
+
+            /// <summary>
+            /// Calls the specified callback function for all the elements in this iterator. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+            /// </summary>
+            /// <param name="callbackfn">A function that accepts up to three arguments. The reduce method calls the callbackfn function one time for each element in the iterator.</param>
+            /// <param name="initialValue">If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of a value from the iterator.</param>
+            /// <param name="callbackfn">A function that accepts up to three arguments. The reduce method calls the callbackfn function one time for each element in the iterator.</param>
+            /// <param name="initialValue">If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of a value from the iterator.</param>
+            abstract reduce<'U> :
+                callbackfn: Fable.Core.TS.Es.ArrayIterator.Reduce.Callbackfn3<'U, 'T> * initialValue: 'U -> 'U
+
+            /// <summary>
+            /// Performs the specified action for each element in the iterator.
+            /// </summary>
+            /// <param name="callbackfn">A function that accepts up to two arguments. forEach calls the callbackfn function one time for each element in the iterator.</param>
+            abstract forEach: callbackfn: Fable.Core.TS.Es.ArrayIterator.ForEach.Callbackfn<'T> -> unit
+            /// <summary>
+            /// Determines whether the specified callback function returns true for any element of this iterator.
+            /// </summary>
+            /// <param name="predicate">
+            /// A function that accepts up to two arguments. The some method calls
+            /// the predicate function for each element in this iterator until the predicate returns a value
+            /// true, or until the end of the iterator.
+            /// </param>
+            abstract some: predicate: Fable.Core.TS.Es.ArrayIterator.Some.Predicate<'T> -> bool
+            /// <summary>
+            /// Determines whether all the members of this iterator satisfy the specified test.
+            /// </summary>
+            /// <param name="predicate">
+            /// A function that accepts up to two arguments. The every method calls
+            /// the predicate function for each element in this iterator until the predicate returns
+            /// false, or until the end of this iterator.
+            /// </param>
+            abstract every: predicate: Fable.Core.TS.Es.ArrayIterator.Every.Predicate<'T> -> bool
+            /// <summary>
+            /// Returns the value of the first element in this iterator where predicate is true, and undefined
+            /// otherwise.
+            /// </summary>
+            /// <param name="predicate">
+            /// find calls predicate once for each element of this iterator, in
+            /// order, until it finds one where predicate returns true. If such an element is found, find
+            /// immediately returns that element value. Otherwise, find returns undefined.
+            /// </param>
+            abstract find<'S> : predicate: Fable.Core.TS.Es.ArrayIterator.Find.Predicate<'T> -> 'S option
+            /// <summary>
+            /// Returns the value of the first element in this iterator where predicate is true, and undefined
+            /// otherwise.
+            /// </summary>
+            /// <param name="predicate">
+            /// find calls predicate once for each element of this iterator, in
+            /// order, until it finds one where predicate returns true. If such an element is found, find
+            /// immediately returns that element value. Otherwise, find returns undefined.
+            /// </param>
+            abstract find: predicate: Fable.Core.TS.Es.ArrayIterator.Find.Predicate2<'T> -> 'T option
+
+        /// <summary>
+        /// A <c>Segments</c> object is an iterable collection of the segments of a text string. It is returned by a call to the <c>segment()</c> method of an <c>Intl.Segmenter</c> object.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter/segment/Segments">MDN</a>
+        /// </summary>
+        type Segments =
+            inherit seq<Fable.Core.TS.Es.Intl.SegmentData>
+            /// <summary>
+            /// Returns an object describing the segment in the original string that includes the code unit at a specified index.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter/segment/Segments/containing">MDN</a>
+            /// </summary>
+            /// <param name="codeUnitIndex">- A number specifying the index of the code unit in the original input string. If the value is omitted, it defaults to <c>0</c>.</param>
+            abstract containing: ?codeUnitIndex: float -> Fable.Core.TS.Es.Intl.SegmentData option
+
+        [<Interface>]
+        type SegmentData =
+            /// <summary>
+            /// A string containing the segment extracted from the original input string.
+            /// </summary>
+            abstract segment: string with get, set
+            /// <summary>
+            /// The code unit index in the original input string at which the segment begins.
+            /// </summary>
+            abstract index: float with get, set
+            /// <summary>
+            /// The complete input string that was segmented.
+            /// </summary>
+            abstract input: string with get, set
+            /// <summary>
+            /// A boolean value only if granularity is "word"; otherwise, undefined.
+            /// If granularity is "word", then isWordLike is true when the segment is word-like (i.e., consists of letters/numbers/ideographs/etc.); otherwise, false.
+            /// </summary>
+            abstract isWordLike: bool option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create(segment: string, index: float, input: string, ?isWordLike: bool) : SegmentData =
+                jsNative
+
+        [<Interface>]
+        type NumberFormatRangePartTypeRegistry =
+            inherit Fable.Core.TS.Es.Intl.NumberFormatPartTypeRegistry
+            abstract approximatelySign: unit
+
+            [<ParamObject; Emit("$0")>]
+            static member Create() : NumberFormatRangePartTypeRegistry = jsNative
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type NumberFormatRangePartTypes =
+            | [<CompiledName("approximatelySign")>] ApproximatelySign
+            | [<CompiledName("compact")>] Compact
+            | [<CompiledName("currency")>] Currency
+            | [<CompiledName("decimal")>] Decimal
+            | [<CompiledName("exponentInteger")>] ExponentInteger
+            | [<CompiledName("exponentMinusSign")>] ExponentMinusSign
+            | [<CompiledName("exponentSeparator")>] ExponentSeparator
+            | [<CompiledName("fraction")>] Fraction
+            | [<CompiledName("group")>] Group
+            | [<CompiledName("infinity")>] Infinity
+            | [<CompiledName("integer")>] Integer
+            | [<CompiledName("literal")>] Literal
+            | [<CompiledName("minusSign")>] MinusSign
+            | [<CompiledName("nan")>] Nan
+            | [<CompiledName("percent")>] Percent
+            | [<CompiledName("percentSign")>] PercentSign
+            | [<CompiledName("plusSign")>] PlusSign
+            | [<CompiledName("unit")>] Unit
+            | [<CompiledName("unknown")>] Unknown
+
+        [<Interface>]
+        type NumberRangeFormatPart =
+            abstract ``type``: Fable.Core.TS.Es.Intl.NumberFormatRangePartTypes with get, set
+            abstract value: string with get, set
+            abstract source: Intl.NumberRangeFormatPart.Source with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    ``type``: Fable.Core.TS.Es.Intl.NumberFormatRangePartTypes,
+                    value: string,
+                    source: Intl.NumberRangeFormatPart.Source
+                ) : NumberRangeFormatPart =
+                jsNative
+
+        type StringNumericLiteral = string
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type DurationFormatLocaleMatcher =
+            | [<CompiledName("best fit")>] BestFit
+            | [<CompiledName("lookup")>] Lookup
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type DurationFormatStyle =
+            | [<CompiledName("digital")>] Digital
+            | [<CompiledName("long")>] Long
+            | [<CompiledName("narrow")>] Narrow
+            | [<CompiledName("short")>] Short
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type DurationFormatDisplayOption =
+            | [<CompiledName("always")>] Always
+            | [<CompiledName("auto")>] Auto
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type DurationFormatUnit =
+            | [<CompiledName("days")>] Days
+            | [<CompiledName("hours")>] Hours
+            | [<CompiledName("microseconds")>] Microseconds
+            | [<CompiledName("milliseconds")>] Milliseconds
+            | [<CompiledName("minutes")>] Minutes
+            | [<CompiledName("months")>] Months
+            | [<CompiledName("nanoseconds")>] Nanoseconds
+            | [<CompiledName("seconds")>] Seconds
+            | [<CompiledName("weeks")>] Weeks
+            | [<CompiledName("years")>] Years
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type DurationFormatUnitSingular =
+            | [<CompiledName("day")>] Day
+            | [<CompiledName("hour")>] Hour
+            | [<CompiledName("microsecond")>] Microsecond
+            | [<CompiledName("millisecond")>] Millisecond
+            | [<CompiledName("minute")>] Minute
+            | [<CompiledName("month")>] Month
+            | [<CompiledName("nanosecond")>] Nanosecond
+            | [<CompiledName("second")>] Second
+            | [<CompiledName("week")>] Week
+            | [<CompiledName("year")>] Year
+
+        /// <summary>
+        /// An object representing the relative time format in parts
+        /// that can be used for custom locale-aware formatting.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DurationFormat/formatToParts">MDN</a>.
+        /// </summary>
+        type DurationFormatPart =
+            U2<Fable.Core.TS.Es.Intl.DurationFormatPart2, Fable.Core.TS.Es.Intl.DurationFormatPart3>
+
+        /// <summary>
+        /// An object with some or all properties of the <c>Intl.DurationFormat</c> constructor <c>options</c> parameter.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DurationFormat/DurationFormat#parameters">MDN</a>
+        /// </summary>
+        [<Interface>]
+        type DurationFormatOptions =
+            abstract localeMatcher: Fable.Core.TS.Es.Intl.DurationFormatLocaleMatcher option with get, set
+            abstract numberingSystem: string option with get, set
+            abstract style: Fable.Core.TS.Es.Intl.DurationFormatStyle option with get, set
+            abstract years: Intl.NumberFormatOptions.UnitDisplay option with get, set
+            abstract yearsDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption option with get, set
+            abstract months: Intl.NumberFormatOptions.UnitDisplay option with get, set
+            abstract monthsDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption option with get, set
+            abstract weeks: Intl.NumberFormatOptions.UnitDisplay option with get, set
+            abstract weeksDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption option with get, set
+            abstract days: Intl.NumberFormatOptions.UnitDisplay option with get, set
+            abstract daysDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption option with get, set
+            abstract hours: Intl.DateTimeFormatOptions.Month option with get, set
+            abstract hoursDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption option with get, set
+            abstract minutes: Intl.DateTimeFormatOptions.Month option with get, set
+            abstract minutesDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption option with get, set
+            abstract seconds: Intl.DateTimeFormatOptions.Month option with get, set
+            abstract secondsDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption option with get, set
+            abstract milliseconds: Intl.DurationFormatOptions.Milliseconds option with get, set
+            abstract millisecondsDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption option with get, set
+            abstract microseconds: Intl.DurationFormatOptions.Milliseconds option with get, set
+            abstract microsecondsDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption option with get, set
+            abstract nanoseconds: Intl.DurationFormatOptions.Milliseconds option with get, set
+            abstract nanosecondsDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption option with get, set
+            abstract fractionalDigits: Intl.DurationFormatOptions.FractionalDigits option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    ?localeMatcher: Fable.Core.TS.Es.Intl.DurationFormatLocaleMatcher,
+                    ?numberingSystem: string,
+                    ?style: Fable.Core.TS.Es.Intl.DurationFormatStyle,
+                    ?years: Intl.NumberFormatOptions.UnitDisplay,
+                    ?yearsDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption,
+                    ?months: Intl.NumberFormatOptions.UnitDisplay,
+                    ?monthsDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption,
+                    ?weeks: Intl.NumberFormatOptions.UnitDisplay,
+                    ?weeksDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption,
+                    ?days: Intl.NumberFormatOptions.UnitDisplay,
+                    ?daysDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption,
+                    ?hours: Intl.DateTimeFormatOptions.Month,
+                    ?hoursDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption,
+                    ?minutes: Intl.DateTimeFormatOptions.Month,
+                    ?minutesDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption,
+                    ?seconds: Intl.DateTimeFormatOptions.Month,
+                    ?secondsDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption,
+                    ?milliseconds: Intl.DurationFormatOptions.Milliseconds,
+                    ?millisecondsDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption,
+                    ?microseconds: Intl.DurationFormatOptions.Milliseconds,
+                    ?microsecondsDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption,
+                    ?nanoseconds: Intl.DurationFormatOptions.Milliseconds,
+                    ?nanosecondsDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption,
+                    ?fractionalDigits: Intl.DurationFormatOptions.FractionalDigits
+                ) : DurationFormatOptions =
+                jsNative
+
+        /// <summary>
+        /// The Intl.DurationFormat object enables language-sensitive duration formatting.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DurationFormat">MDN</a>
+        /// </summary>
+        [<Interface>]
+        type DurationFormat =
+            /// <param name="duration">
+            /// The duration object to be formatted. It should include some or all of the following properties: months, weeks, days, hours, minutes, seconds, milliseconds, microseconds, nanoseconds.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DurationFormat/format">MDN</a>.
+            /// </param>
+            abstract format: duration: Intl.DurationFormat.Format.Duration -> string
+
+            /// <param name="duration">
+            /// The duration object to be formatted. It should include some or all of the following properties: months, weeks, days, hours, minutes, seconds, milliseconds, microseconds, nanoseconds.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DurationFormat/formatToParts">MDN</a>.
+            /// </param>
+            abstract formatToParts:
+                duration: Intl.DurationFormat.Format.Duration -> Fable.Core.TS.Es.Intl.DurationFormatPart[]
+
+            /// <summary>
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DurationFormat/resolvedOptions">MDN</a>.
+            /// </summary>
+            abstract resolvedOptions: unit -> Fable.Core.TS.Es.Intl.ResolvedDurationFormatOptions
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    format: (Intl.DurationFormat.Format.Duration -> string),
+                    formatToParts: (Intl.DurationFormat.Format.Duration -> Fable.Core.TS.Es.Intl.DurationFormatPart[]),
+                    resolvedOptions: (unit -> Fable.Core.TS.Es.Intl.ResolvedDurationFormatOptions)
+                ) : DurationFormat =
+                jsNative
+
+        type DurationFormatConstructor =
+            /// <summary>
+            /// Returns an array containing those of the provided locales that are supported in display names without having to fall back to the runtime's default locale.
+            /// </summary>
+            /// <param name="locales">
+            /// A string with a BCP 47 language tag, or an array of such strings.
+            /// For the general form and interpretation of the <c>locales</c> argument, see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#locale_identification_and_negotiation">Intl</a>
+            /// page.
+            /// </param>
+            /// <param name="options">An object with a locale matcher.</param>
+            /// <returns>
+            /// An array of strings representing a subset of the given locale tags that are supported in display names without having to fall back to the runtime's default locale.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DurationFormat/supportedLocalesOf">MDN</a>.
+            /// </returns>
+            abstract supportedLocalesOf:
+                ?locales: Fable.Core.TS.Es.Intl.LocalesArgument *
+                ?options: Intl.DurationFormat.SupportedLocalesOf.Options ->
+                    string[]
+
+            [<EmitConstructor>]
+            abstract Create:
+                ?locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Fable.Core.TS.Es.Intl.DurationFormatOptions ->
+                    Fable.Core.TS.Es.Intl.DurationFormat
+
+        [<Interface>]
+        type ResolvedDurationFormatOptions =
+            abstract locale: string with get, set
+            abstract numberingSystem: string with get, set
+            abstract style: Fable.Core.TS.Es.Intl.DurationFormatStyle with get, set
+            abstract years: Intl.NumberFormatOptions.UnitDisplay with get, set
+            abstract yearsDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption with get, set
+            abstract months: Intl.NumberFormatOptions.UnitDisplay with get, set
+            abstract monthsDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption with get, set
+            abstract weeks: Intl.NumberFormatOptions.UnitDisplay with get, set
+            abstract weeksDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption with get, set
+            abstract days: Intl.NumberFormatOptions.UnitDisplay with get, set
+            abstract daysDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption with get, set
+            abstract hours: Intl.DateTimeFormatOptions.Month with get, set
+            abstract hoursDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption with get, set
+            abstract minutes: Intl.DateTimeFormatOptions.Month with get, set
+            abstract minutesDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption with get, set
+            abstract seconds: Intl.DateTimeFormatOptions.Month with get, set
+            abstract secondsDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption with get, set
+            abstract milliseconds: Intl.DurationFormatOptions.Milliseconds with get, set
+            abstract millisecondsDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption with get, set
+            abstract microseconds: Intl.DurationFormatOptions.Milliseconds with get, set
+            abstract microsecondsDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption with get, set
+            abstract nanoseconds: Intl.DurationFormatOptions.Milliseconds with get, set
+            abstract nanosecondsDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption with get, set
+            abstract fractionalDigits: Intl.DurationFormatOptions.FractionalDigits option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    locale: string,
+                    numberingSystem: string,
+                    style: Fable.Core.TS.Es.Intl.DurationFormatStyle,
+                    years: Intl.NumberFormatOptions.UnitDisplay,
+                    yearsDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption,
+                    months: Intl.NumberFormatOptions.UnitDisplay,
+                    monthsDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption,
+                    weeks: Intl.NumberFormatOptions.UnitDisplay,
+                    weeksDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption,
+                    days: Intl.NumberFormatOptions.UnitDisplay,
+                    daysDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption,
+                    hours: Intl.DateTimeFormatOptions.Month,
+                    hoursDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption,
+                    minutes: Intl.DateTimeFormatOptions.Month,
+                    minutesDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption,
+                    seconds: Intl.DateTimeFormatOptions.Month,
+                    secondsDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption,
+                    milliseconds: Intl.DurationFormatOptions.Milliseconds,
+                    millisecondsDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption,
+                    microseconds: Intl.DurationFormatOptions.Milliseconds,
+                    microsecondsDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption,
+                    nanoseconds: Intl.DurationFormatOptions.Milliseconds,
+                    nanosecondsDisplay: Fable.Core.TS.Es.Intl.DurationFormatDisplayOption,
+                    ?fractionalDigits: Intl.DurationFormatOptions.FractionalDigits
+                ) : ResolvedDurationFormatOptions =
+                jsNative
+
+        [<Interface>]
+        type CollatorOptions =
+            abstract usage: Intl.CollatorOptions.Usage option with get, set
+            abstract localeMatcher: Intl.NumberFormatOptions.LocaleMatcher option with get, set
+            abstract numeric: bool option with get, set
+            abstract caseFirst: Intl.CollatorOptions.CaseFirst option with get, set
+            abstract sensitivity: Intl.CollatorOptions.Sensitivity option with get, set
+            abstract collation: Intl.CollatorOptions.Collation option with get, set
+            abstract ignorePunctuation: bool option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    ?usage: Intl.CollatorOptions.Usage,
+                    ?localeMatcher: Intl.NumberFormatOptions.LocaleMatcher,
+                    ?numeric: bool,
+                    ?caseFirst: Intl.CollatorOptions.CaseFirst,
+                    ?sensitivity: Intl.CollatorOptions.Sensitivity,
+                    ?collation: Intl.CollatorOptions.Collation,
+                    ?ignorePunctuation: bool
+                ) : CollatorOptions =
+                jsNative
+
+        [<Interface>]
+        type ResolvedCollatorOptions =
+            abstract locale: string with get, set
+            abstract usage: string with get, set
+            abstract sensitivity: string with get, set
+            abstract ignorePunctuation: bool with get, set
+            abstract collation: string with get, set
+            abstract caseFirst: string with get, set
+            abstract numeric: bool with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    locale: string,
+                    usage: string,
+                    sensitivity: string,
+                    ignorePunctuation: bool,
+                    collation: string,
+                    caseFirst: string,
+                    numeric: bool
+                ) : ResolvedCollatorOptions =
+                jsNative
+
+        [<Interface>]
+        type Collator =
+            abstract compare: x: string * y: string -> float
+            abstract resolvedOptions: unit -> Fable.Core.TS.Es.Intl.ResolvedCollatorOptions
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    compare: Func<string, string, float>,
+                    resolvedOptions: (unit -> Fable.Core.TS.Es.Intl.ResolvedCollatorOptions)
+                ) : Collator =
+                jsNative
+
+        type CollatorConstructor =
+            abstract supportedLocalesOf:
+                locales: U2<string, string[]> * ?options: Fable.Core.TS.Es.Intl.CollatorOptions -> string[]
+
+            abstract supportedLocalesOf:
+                locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Fable.Core.TS.Es.Intl.CollatorOptions ->
+                    string[]
+
+            [<EmitConstructor>]
+            abstract Create:
+                ?locales: U2<string, string[]> * ?options: Fable.Core.TS.Es.Intl.CollatorOptions ->
+                    Fable.Core.TS.Es.Intl.Collator
+
+            [<EmitConstructor>]
+            abstract Create:
+                ?locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Fable.Core.TS.Es.Intl.CollatorOptions ->
+                    Fable.Core.TS.Es.Intl.Collator
+
+            [<Emit("$0($1...)")>]
+            abstract Invoke:
+                ?locales: U2<string, string[]> * ?options: Fable.Core.TS.Es.Intl.CollatorOptions ->
+                    Fable.Core.TS.Es.Intl.Collator
+
+            [<Emit("$0($1...)")>]
+            abstract Invoke:
+                ?locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Fable.Core.TS.Es.Intl.CollatorOptions ->
+                    Fable.Core.TS.Es.Intl.Collator
+
+        [<Interface>]
+        type NumberFormatOptionsStyleRegistry =
+            abstract decimal: unit
+            abstract percent: unit
+            abstract currency: unit
+            abstract unit: unit
+
+            [<ParamObject; Emit("$0")>]
+            static member Create() : NumberFormatOptionsStyleRegistry = jsNative
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type NumberFormatOptionsStyle =
+            | [<CompiledName("currency")>] Currency
+            | [<CompiledName("decimal")>] Decimal
+            | [<CompiledName("percent")>] Percent
+            | [<CompiledName("unit")>] Unit
+
+        [<Interface>]
+        type NumberFormatOptionsCurrencyDisplayRegistry =
+            abstract code: unit
+            abstract symbol: unit
+            abstract name: unit
+            abstract narrowSymbol: unit
+
+            [<ParamObject; Emit("$0")>]
+            static member Create() : NumberFormatOptionsCurrencyDisplayRegistry = jsNative
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type NumberFormatOptionsCurrencyDisplay =
+            | [<CompiledName("code")>] Code
+            | [<CompiledName("name")>] Name
+            | [<CompiledName("narrowSymbol")>] NarrowSymbol
+            | [<CompiledName("symbol")>] Symbol
+
+        [<Interface>]
+        type NumberFormatOptionsUseGroupingRegistry =
+            abstract min2: unit
+            abstract auto: unit
+            abstract always: unit
+
+            [<ParamObject; Emit("$0")>]
+            static member Create() : NumberFormatOptionsUseGroupingRegistry = jsNative
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type NumberFormatOptionsUseGrouping =
+            | [<CompiledName("always")>] Always
+            | [<CompiledName("auto")>] Auto
+            | [<CompiledName("false")>] False
+            | [<CompiledName("min2")>] Min2
+            | [<CompiledName("true")>] True
+            | [<CompiledValue(false)>] False2
+            | [<CompiledValue(true)>] True2
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type ResolvedNumberFormatOptionsUseGrouping =
+            | [<CompiledName("always")>] Always
+            | [<CompiledName("auto")>] Auto
+            | [<CompiledName("min2")>] Min2
+            | [<CompiledValue(false)>] False
+
+        [<Interface>]
+        type NumberFormatOptions =
+            abstract localeMatcher: Intl.NumberFormatOptions.LocaleMatcher option with get, set
+            abstract style: Fable.Core.TS.Es.Intl.NumberFormatOptionsStyle option with get, set
+            abstract currency: string option with get, set
+            abstract currencyDisplay: Fable.Core.TS.Es.Intl.NumberFormatOptionsCurrencyDisplay option with get, set
+            abstract useGrouping: Fable.Core.TS.Es.Intl.NumberFormatOptionsUseGrouping option with get, set
+            abstract minimumIntegerDigits: float option with get, set
+            abstract minimumFractionDigits: float option with get, set
+            abstract maximumFractionDigits: float option with get, set
+            abstract minimumSignificantDigits: float option with get, set
+            abstract maximumSignificantDigits: float option with get, set
+            abstract numberingSystem: string option with get, set
+            abstract compactDisplay: Intl.NumberFormatOptions.CompactDisplay option with get, set
+            abstract notation: Intl.NumberFormatOptions.Notation option with get, set
+            abstract signDisplay: Fable.Core.TS.Es.Intl.NumberFormatOptionsSignDisplay option with get, set
+            abstract unit: string option with get, set
+            abstract unitDisplay: Intl.NumberFormatOptions.UnitDisplay option with get, set
+            abstract currencySign: Intl.NumberFormatOptions.CurrencySign option with get, set
+            abstract roundingPriority: Intl.NumberFormatOptions.RoundingPriority option with get, set
+            abstract roundingIncrement: Intl.NumberFormatOptions.RoundingIncrement option with get, set
+            abstract roundingMode: Intl.NumberFormatOptions.RoundingMode option with get, set
+            abstract trailingZeroDisplay: Intl.NumberFormatOptions.TrailingZeroDisplay option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    ?localeMatcher: Intl.NumberFormatOptions.LocaleMatcher,
+                    ?style: Fable.Core.TS.Es.Intl.NumberFormatOptionsStyle,
+                    ?currency: string,
+                    ?currencyDisplay: Fable.Core.TS.Es.Intl.NumberFormatOptionsCurrencyDisplay,
+                    ?useGrouping: Fable.Core.TS.Es.Intl.NumberFormatOptionsUseGrouping,
+                    ?minimumIntegerDigits: float,
+                    ?minimumFractionDigits: float,
+                    ?maximumFractionDigits: float,
+                    ?minimumSignificantDigits: float,
+                    ?maximumSignificantDigits: float,
+                    ?numberingSystem: string,
+                    ?compactDisplay: Intl.NumberFormatOptions.CompactDisplay,
+                    ?notation: Intl.NumberFormatOptions.Notation,
+                    ?signDisplay: Fable.Core.TS.Es.Intl.NumberFormatOptionsSignDisplay,
+                    ?unit: string,
+                    ?unitDisplay: Intl.NumberFormatOptions.UnitDisplay,
+                    ?currencySign: Intl.NumberFormatOptions.CurrencySign,
+                    ?roundingPriority: Intl.NumberFormatOptions.RoundingPriority,
+                    ?roundingIncrement: Intl.NumberFormatOptions.RoundingIncrement,
+                    ?roundingMode: Intl.NumberFormatOptions.RoundingMode,
+                    ?trailingZeroDisplay: Intl.NumberFormatOptions.TrailingZeroDisplay
+                ) : NumberFormatOptions =
+                jsNative
+
+        [<Interface>]
+        type ResolvedNumberFormatOptions =
+            abstract locale: string with get, set
+            abstract numberingSystem: string with get, set
+            abstract style: Fable.Core.TS.Es.Intl.NumberFormatOptionsStyle with get, set
+            abstract currency: string option with get, set
+            abstract currencyDisplay: Fable.Core.TS.Es.Intl.NumberFormatOptionsCurrencyDisplay option with get, set
+            abstract minimumIntegerDigits: float with get, set
+            abstract minimumFractionDigits: float option with get, set
+            abstract maximumFractionDigits: float option with get, set
+            abstract minimumSignificantDigits: float option with get, set
+            abstract maximumSignificantDigits: float option with get, set
+            abstract useGrouping: Fable.Core.TS.Es.Intl.ResolvedNumberFormatOptionsUseGrouping with get, set
+            abstract compactDisplay: Intl.NumberFormatOptions.CompactDisplay option with get, set
+            abstract notation: Intl.NumberFormatOptions.Notation with get, set
+            abstract signDisplay: Fable.Core.TS.Es.Intl.NumberFormatOptionsSignDisplay with get, set
+            abstract unit: string option with get, set
+            abstract unitDisplay: Intl.NumberFormatOptions.UnitDisplay option with get, set
+            abstract currencySign: Intl.NumberFormatOptions.CurrencySign option with get, set
+            abstract roundingPriority: Intl.NumberFormatOptions.RoundingPriority with get, set
+            abstract roundingMode: Intl.NumberFormatOptions.RoundingMode with get, set
+            abstract roundingIncrement: Intl.NumberFormatOptions.RoundingIncrement with get, set
+            abstract trailingZeroDisplay: Intl.NumberFormatOptions.TrailingZeroDisplay with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    locale: string,
+                    numberingSystem: string,
+                    style: Fable.Core.TS.Es.Intl.NumberFormatOptionsStyle,
+                    minimumIntegerDigits: float,
+                    useGrouping: Fable.Core.TS.Es.Intl.ResolvedNumberFormatOptionsUseGrouping,
+                    notation: Intl.NumberFormatOptions.Notation,
+                    signDisplay: Fable.Core.TS.Es.Intl.NumberFormatOptionsSignDisplay,
+                    roundingPriority: Intl.NumberFormatOptions.RoundingPriority,
+                    roundingMode: Intl.NumberFormatOptions.RoundingMode,
+                    roundingIncrement: Intl.NumberFormatOptions.RoundingIncrement,
+                    trailingZeroDisplay: Intl.NumberFormatOptions.TrailingZeroDisplay,
+                    ?currency: string,
+                    ?currencyDisplay: Fable.Core.TS.Es.Intl.NumberFormatOptionsCurrencyDisplay,
+                    ?minimumFractionDigits: float,
+                    ?maximumFractionDigits: float,
+                    ?minimumSignificantDigits: float,
+                    ?maximumSignificantDigits: float,
+                    ?compactDisplay: Intl.NumberFormatOptions.CompactDisplay,
+                    ?unit: string,
+                    ?unitDisplay: Intl.NumberFormatOptions.UnitDisplay,
+                    ?currencySign: Intl.NumberFormatOptions.CurrencySign
+                ) : ResolvedNumberFormatOptions =
+                jsNative
+
+        type NumberFormat =
+            abstract format: value: float -> string
+            abstract format: value: U2<float, bigint> -> string
+            abstract format: value: U3<float, bigint, string> -> string
+            abstract resolvedOptions: unit -> Fable.Core.TS.Es.Intl.ResolvedNumberFormatOptions
+            abstract formatToParts: ?number: U2<float, bigint> -> Fable.Core.TS.Es.Intl.NumberFormatPart[]
+            abstract formatToParts: value: U3<float, bigint, string> -> Fable.Core.TS.Es.Intl.NumberFormatPart[]
+            abstract formatRange: start: U3<float, bigint, string> * ``end``: U3<float, bigint, string> -> string
+
+            abstract formatRangeToParts:
+                start: U3<float, bigint, string> * ``end``: U3<float, bigint, string> ->
+                    Fable.Core.TS.Es.Intl.NumberRangeFormatPart[]
+
+        type NumberFormatConstructor =
+            abstract supportedLocalesOf:
+                locales: U2<string, string[]> * ?options: Fable.Core.TS.Es.Intl.NumberFormatOptions -> string[]
+
+            abstract supportedLocalesOf:
+                locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Fable.Core.TS.Es.Intl.NumberFormatOptions ->
+                    string[]
+
+            [<EmitConstructor>]
+            abstract Create:
+                ?locales: U2<string, string[]> * ?options: Fable.Core.TS.Es.Intl.NumberFormatOptions ->
+                    Fable.Core.TS.Es.Intl.NumberFormat
+
+            [<EmitConstructor>]
+            abstract Create:
+                ?locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Fable.Core.TS.Es.Intl.NumberFormatOptions ->
+                    Fable.Core.TS.Es.Intl.NumberFormat
+
+            [<Emit("$0($1...)")>]
+            abstract Invoke:
+                ?locales: U2<string, string[]> * ?options: Fable.Core.TS.Es.Intl.NumberFormatOptions ->
+                    Fable.Core.TS.Es.Intl.NumberFormat
+
+            [<Emit("$0($1...)")>]
+            abstract Invoke:
+                ?locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Fable.Core.TS.Es.Intl.NumberFormatOptions ->
+                    Fable.Core.TS.Es.Intl.NumberFormat
+
+        [<Interface>]
+        type DateTimeFormatOptions =
+            abstract localeMatcher: Intl.NumberFormatOptions.LocaleMatcher option with get, set
+            abstract weekday: Intl.NumberFormatOptions.UnitDisplay option with get, set
+            abstract era: Intl.NumberFormatOptions.UnitDisplay option with get, set
+            abstract year: Intl.DateTimeFormatOptions.Year option with get, set
+            abstract month: Intl.DateTimeFormatOptions.Month option with get, set
+            abstract day: Intl.DateTimeFormatOptions.Year option with get, set
+            abstract hour: Intl.DateTimeFormatOptions.Year option with get, set
+            abstract minute: Intl.DateTimeFormatOptions.Year option with get, set
+            abstract second: Intl.DateTimeFormatOptions.Year option with get, set
+            abstract timeZoneName: Intl.DateTimeFormatOptions.TimeZoneName option with get, set
+            abstract formatMatcher: Intl.DateTimeFormatOptions.FormatMatcher option with get, set
+            abstract hour12: bool option with get, set
+            abstract timeZone: string option with get, set
+            abstract calendar: string option with get, set
+            abstract dayPeriod: Intl.NumberFormatOptions.UnitDisplay option with get, set
+            abstract numberingSystem: string option with get, set
+            abstract dateStyle: Intl.DateTimeFormatOptions.DateStyle option with get, set
+            abstract timeStyle: Intl.DateTimeFormatOptions.DateStyle option with get, set
+            abstract hourCycle: Intl.DateTimeFormatOptions.HourCycle option with get, set
+            abstract fractionalSecondDigits: Intl.DateTimeFormatOptions.FractionalSecondDigits option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    ?localeMatcher: Intl.NumberFormatOptions.LocaleMatcher,
+                    ?weekday: Intl.NumberFormatOptions.UnitDisplay,
+                    ?era: Intl.NumberFormatOptions.UnitDisplay,
+                    ?year: Intl.DateTimeFormatOptions.Year,
+                    ?month: Intl.DateTimeFormatOptions.Month,
+                    ?day: Intl.DateTimeFormatOptions.Year,
+                    ?hour: Intl.DateTimeFormatOptions.Year,
+                    ?minute: Intl.DateTimeFormatOptions.Year,
+                    ?second: Intl.DateTimeFormatOptions.Year,
+                    ?timeZoneName: Intl.DateTimeFormatOptions.TimeZoneName,
+                    ?formatMatcher: Intl.DateTimeFormatOptions.FormatMatcher,
+                    ?hour12: bool,
+                    ?timeZone: string,
+                    ?calendar: string,
+                    ?dayPeriod: Intl.NumberFormatOptions.UnitDisplay,
+                    ?numberingSystem: string,
+                    ?dateStyle: Intl.DateTimeFormatOptions.DateStyle,
+                    ?timeStyle: Intl.DateTimeFormatOptions.DateStyle,
+                    ?hourCycle: Intl.DateTimeFormatOptions.HourCycle,
+                    ?fractionalSecondDigits: Intl.DateTimeFormatOptions.FractionalSecondDigits
+                ) : DateTimeFormatOptions =
+                jsNative
+
+        [<Interface>]
+        type ResolvedDateTimeFormatOptions =
+            abstract locale: string with get, set
+            abstract calendar: string with get, set
+            abstract numberingSystem: string with get, set
+            abstract timeZone: string with get, set
+            abstract hour12: bool option with get, set
+            abstract weekday: string option with get, set
+            abstract era: string option with get, set
+            abstract year: string option with get, set
+            abstract month: string option with get, set
+            abstract day: string option with get, set
+            abstract hour: string option with get, set
+            abstract minute: string option with get, set
+            abstract second: string option with get, set
+            abstract timeZoneName: string option with get, set
+            abstract formatMatcher: Intl.DateTimeFormatOptions.FormatMatcher option with get, set
+            abstract dateStyle: Intl.DateTimeFormatOptions.DateStyle option with get, set
+            abstract timeStyle: Intl.DateTimeFormatOptions.DateStyle option with get, set
+            abstract hourCycle: Intl.DateTimeFormatOptions.HourCycle option with get, set
+            abstract dayPeriod: Intl.NumberFormatOptions.UnitDisplay option with get, set
+            abstract fractionalSecondDigits: Intl.DateTimeFormatOptions.FractionalSecondDigits option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    locale: string,
+                    calendar: string,
+                    numberingSystem: string,
+                    timeZone: string,
+                    ?hour12: bool,
+                    ?weekday: string,
+                    ?era: string,
+                    ?year: string,
+                    ?month: string,
+                    ?day: string,
+                    ?hour: string,
+                    ?minute: string,
+                    ?second: string,
+                    ?timeZoneName: string,
+                    ?formatMatcher: Intl.DateTimeFormatOptions.FormatMatcher,
+                    ?dateStyle: Intl.DateTimeFormatOptions.DateStyle,
+                    ?timeStyle: Intl.DateTimeFormatOptions.DateStyle,
+                    ?hourCycle: Intl.DateTimeFormatOptions.HourCycle,
+                    ?dayPeriod: Intl.NumberFormatOptions.UnitDisplay,
+                    ?fractionalSecondDigits: Intl.DateTimeFormatOptions.FractionalSecondDigits
+                ) : ResolvedDateTimeFormatOptions =
+                jsNative
+
+        type DateTimeFormat =
+            abstract format: ?date: U2<float, Date> -> string
+
+            abstract format:
+                ?date:
+                    U8<
+                        float,
+                        Date,
+                        Temporal.Instant,
+                        Temporal.PlainDate,
+                        Temporal.PlainDateTime,
+                        Temporal.PlainMonthDay,
+                        Temporal.PlainTime,
+                        Temporal.PlainYearMonth
+                     > ->
+                    string
+
+            abstract resolvedOptions: unit -> Fable.Core.TS.Es.Intl.ResolvedDateTimeFormatOptions
+            abstract formatToParts: ?date: U2<float, Date> -> Fable.Core.TS.Es.Intl.DateTimeFormatPart[]
+
+            abstract formatToParts:
+                ?date:
+                    U8<
+                        float,
+                        Date,
+                        Temporal.Instant,
+                        Temporal.PlainDate,
+                        Temporal.PlainDateTime,
+                        Temporal.PlainMonthDay,
+                        Temporal.PlainTime,
+                        Temporal.PlainYearMonth
+                     > ->
+                    Fable.Core.TS.Es.Intl.DateTimeFormatPart[]
+
+            abstract formatRange: startDate: U3<float, bigint, Date> * endDate: U3<float, bigint, Date> -> string
+
+            abstract formatRange:
+                startDate:
+                    U8<
+                        float,
+                        Date,
+                        Temporal.Instant,
+                        Temporal.PlainDate,
+                        Temporal.PlainDateTime,
+                        Temporal.PlainMonthDay,
+                        Temporal.PlainTime,
+                        Temporal.PlainYearMonth
+                     > *
+                endDate:
+                    U8<
+                        float,
+                        Date,
+                        Temporal.Instant,
+                        Temporal.PlainDate,
+                        Temporal.PlainDateTime,
+                        Temporal.PlainMonthDay,
+                        Temporal.PlainTime,
+                        Temporal.PlainYearMonth
+                     > ->
+                    string
+
+            abstract formatRangeToParts:
+                startDate: U3<float, bigint, Date> * endDate: U3<float, bigint, Date> ->
+                    Fable.Core.TS.Es.Intl.DateTimeRangeFormatPart[]
+
+            abstract formatRangeToParts:
+                startDate:
+                    U8<
+                        float,
+                        Date,
+                        Temporal.Instant,
+                        Temporal.PlainDate,
+                        Temporal.PlainDateTime,
+                        Temporal.PlainMonthDay,
+                        Temporal.PlainTime,
+                        Temporal.PlainYearMonth
+                     > *
+                endDate:
+                    U8<
+                        float,
+                        Date,
+                        Temporal.Instant,
+                        Temporal.PlainDate,
+                        Temporal.PlainDateTime,
+                        Temporal.PlainMonthDay,
+                        Temporal.PlainTime,
+                        Temporal.PlainYearMonth
+                     > ->
+                    Fable.Core.TS.Es.Intl.DateTimeRangeFormatPart[]
+
+        type DateTimeFormatConstructor =
+            abstract supportedLocalesOf:
+                locales: U2<string, string[]> * ?options: Fable.Core.TS.Es.Intl.DateTimeFormatOptions -> string[]
+
+            abstract supportedLocalesOf:
+                locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Fable.Core.TS.Es.Intl.DateTimeFormatOptions ->
+                    string[]
+
+            [<EmitConstructor>]
+            abstract Create:
+                ?locales: U2<string, string[]> * ?options: Fable.Core.TS.Es.Intl.DateTimeFormatOptions ->
+                    Fable.Core.TS.Es.Intl.DateTimeFormat
+
+            [<EmitConstructor>]
+            abstract Create:
+                ?locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Fable.Core.TS.Es.Intl.DateTimeFormatOptions ->
+                    Fable.Core.TS.Es.Intl.DateTimeFormat
+
+            [<Emit("$0($1...)")>]
+            abstract Invoke:
+                ?locales: U2<string, string[]> * ?options: Fable.Core.TS.Es.Intl.DateTimeFormatOptions ->
+                    Fable.Core.TS.Es.Intl.DateTimeFormat
+
+            [<Emit("$0($1...)")>]
+            abstract Invoke:
+                ?locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Fable.Core.TS.Es.Intl.DateTimeFormatOptions ->
+                    Fable.Core.TS.Es.Intl.DateTimeFormat
+
+        type FormattableTemporalObject =
+            U6<
+                Temporal.Instant,
+                Temporal.PlainDate,
+                Temporal.PlainDateTime,
+                Temporal.PlainMonthDay,
+                Temporal.PlainTime,
+                Temporal.PlainYearMonth
+             >
+
+        /// <summary>
+        /// An object representing text typesetting information associated with the Locale data specified in UTS 35's Layouts Elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/getTextInfo#return_value">MDN Reference</a>
+        /// </summary>
+        [<Interface>]
+        type TextInfo =
+            /// <summary>
+            /// A string indicating the direction of text for the locale. Can be either "ltr" (left-to-right) or "rtl" (right-to-left).
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/getTextInfo#direction">MDN Reference</a>
+            /// </summary>
+            abstract direction: Intl.TextInfo.Direction option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create(?direction: Intl.TextInfo.Direction) : TextInfo = jsNative
+
+        /// <summary>
+        /// An object representing week information associated with the Locale data specified in UTS 35's Week Elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/getWeekInfo#return_value">MDN Reference</a>
+        /// </summary>
+        [<Interface>]
+        type WeekInfo =
+            /// <summary>
+            /// An integer between 1 (Monday) and 7 (Sunday) indicating the first day of the week for the locale. Commonly 1, 5, 6, or 7.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/getWeekInfo#firstday">MDN Reference</a>
+            /// </summary>
+            abstract firstDay: float with get, set
+            /// <summary>
+            /// An array of integers between 1 and 7 indicating the weekend days for the locale.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/getWeekInfo#weekend">MDN Reference</a>
+            /// </summary>
+            abstract weekend: float[] with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create(firstDay: float, weekend: float[]) : WeekInfo = jsNative
+
+        module CollatorOptions =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type CaseFirst =
+                | [<CompiledName("false")>] False
+                | [<CompiledName("lower")>] Lower
+                | [<CompiledName("upper")>] Upper
+
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Collation =
+                | [<CompiledName("big5han")>] Big5han
+                | [<CompiledName("compat")>] Compat
+                | [<CompiledName("default")>] Default
+                | [<CompiledName("dict")>] Dict
+                | [<CompiledName("direct")>] Direct
+                | [<CompiledName("ducet")>] Ducet
+                | [<CompiledName("emoji")>] Emoji
+                | [<CompiledName("eor")>] Eor
+                | [<CompiledName("gb2312")>] Gb2312
+                | [<CompiledName("phonebk")>] Phonebk
+                | [<CompiledName("phonetic")>] Phonetic
+                | [<CompiledName("pinyin")>] Pinyin
+                | [<CompiledName("reformed")>] Reformed
+                | [<CompiledName("searchjl")>] Searchjl
+                | [<CompiledName("stroke")>] Stroke
+                | [<CompiledName("trad")>] Trad
+                | [<CompiledName("unihan")>] Unihan
+                | [<CompiledName("zhuyin")>] Zhuyin
+
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Sensitivity =
+                | [<CompiledName("accent")>] Accent
+                | [<CompiledName("base")>] Base
+                | [<CompiledName("case")>] Case
+                | [<CompiledName("variant")>] Variant
+
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Usage =
+                | [<CompiledName("search")>] Search
+                | [<CompiledName("sort")>] Sort
+
+        module DateTimeFormatOptions =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type DateStyle =
+                | [<CompiledName("full")>] Full
+                | [<CompiledName("long")>] Long
+                | [<CompiledName("medium")>] Medium
+                | [<CompiledName("short")>] Short
+
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type FormatMatcher =
+                | [<CompiledName("basic")>] Basic
+                | [<CompiledName("best fit")>] BestFit
+
+            type FractionalSecondDigits =
+                | N1 = 1
+                | N2 = 2
+                | N3 = 3
+
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type HourCycle =
+                | [<CompiledName("h11")>] H11
+                | [<CompiledName("h12")>] H12
+                | [<CompiledName("h23")>] H23
+                | [<CompiledName("h24")>] H24
+
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Month =
+                | [<CompiledName("2-digit")>] N2Digit
+                | [<CompiledName("long")>] Long
+                | [<CompiledName("narrow")>] Narrow
+                | [<CompiledName("numeric")>] Numeric
+                | [<CompiledName("short")>] Short
+
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type TimeZoneName =
+                | [<CompiledName("long")>] Long
+                | [<CompiledName("longGeneric")>] LongGeneric
+                | [<CompiledName("longOffset")>] LongOffset
+                | [<CompiledName("short")>] Short
+                | [<CompiledName("shortGeneric")>] ShortGeneric
+                | [<CompiledName("shortOffset")>] ShortOffset
+
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Year =
+                | [<CompiledName("2-digit")>] N2Digit
+                | [<CompiledName("numeric")>] Numeric
+
         module DisplayNames =
             module SupportedLocalesOf =
                 [<Interface>]
                 type Options =
-                    abstract localeMatcher: RelativeTimeFormatLocaleMatcher option with get, set
+                    abstract localeMatcher: Fable.Core.TS.Es.Intl.RelativeTimeFormatLocaleMatcher option with get, set
 
                     [<ParamObject; Emit("$0")>]
-                    static member Create(?localeMatcher: RelativeTimeFormatLocaleMatcher) : Options = jsNative
+                    static member Create
+                        (?localeMatcher: Fable.Core.TS.Es.Intl.RelativeTimeFormatLocaleMatcher)
+                        : Options =
+                        jsNative
 
         module DurationFormat =
+            module Format =
+                [<Interface>]
+                type Duration =
+                    abstract days: float option with get, set
+                    abstract hours: float option with get, set
+                    abstract microseconds: float option with get, set
+                    abstract milliseconds: float option with get, set
+                    abstract minutes: float option with get, set
+                    abstract months: float option with get, set
+                    abstract nanoseconds: float option with get, set
+                    abstract seconds: float option with get, set
+                    abstract weeks: float option with get, set
+                    abstract years: float option with get, set
+
+                    [<ParamObject; Emit("$0")>]
+                    static member Create
+                        (
+                            ?days: float,
+                            ?hours: float,
+                            ?microseconds: float,
+                            ?milliseconds: float,
+                            ?minutes: float,
+                            ?months: float,
+                            ?nanoseconds: float,
+                            ?seconds: float,
+                            ?weeks: float,
+                            ?years: float
+                        ) : Duration =
+                        jsNative
+
             module SupportedLocalesOf =
                 [<Interface>]
                 type Options =
-                    abstract localeMatcher: DurationFormatLocaleMatcher option with get, set
+                    abstract localeMatcher: Fable.Core.TS.Es.Intl.DurationFormatLocaleMatcher option with get, set
 
                     [<ParamObject; Emit("$0")>]
-                    static member Create(?localeMatcher: DurationFormatLocaleMatcher) : Options = jsNative
+                    static member Create(?localeMatcher: Fable.Core.TS.Es.Intl.DurationFormatLocaleMatcher) : Options =
+                        jsNative
+
+        module DurationFormatOptions =
+            type FractionalDigits =
+                | N0 = 0
+                | N1 = 1
+                | N2 = 2
+                | N3 = 3
+                | N4 = 4
+                | N5 = 5
+                | N6 = 6
+                | N7 = 7
+                | N8 = 8
+                | N9 = 9
+
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Milliseconds =
+                | [<CompiledName("long")>] Long
+                | [<CompiledName("narrow")>] Narrow
+                | [<CompiledName("numeric")>] Numeric
+                | [<CompiledName("short")>] Short
 
         module ListFormat =
+            module FormatToParts =
+                module Result =
+                    [<Interface>]
+                    type Item =
+                        abstract ``type``: Intl.ListFormat.FormatToParts.Result.Item.Type with get, set
+                        abstract value: string with get, set
+
+                        [<ParamObject; Emit("$0")>]
+                        static member Create
+                            (``type``: Intl.ListFormat.FormatToParts.Result.Item.Type, value: string)
+                            : Item =
+                            jsNative
+
+                    module Item =
+                        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                        type Type =
+                            | [<CompiledName("element")>] Element
+                            | [<CompiledName("literal")>] Literal
+
             module SupportedLocalesOf =
                 [<Interface>]
                 type Options =
                     /// <summary>
                     /// The locale matching algorithm to use. For information about this option, see <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_negotiation">Intl page</a>.
                     /// </summary>
-                    abstract localeMatcher: ListFormatLocaleMatcher option with get, set
+                    abstract localeMatcher: Fable.Core.TS.Es.Intl.ListFormatLocaleMatcher option with get, set
 
                     [<ParamObject; Emit("$0")>]
-                    static member Create(?localeMatcher: ListFormatLocaleMatcher) : Options = jsNative
+                    static member Create(?localeMatcher: Fable.Core.TS.Es.Intl.ListFormatLocaleMatcher) : Options =
+                        jsNative
 
-        module PluralRules =
+        module NumberFormatOptions =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type CompactDisplay =
+                | [<CompiledName("long")>] Long
+                | [<CompiledName("short")>] Short
+
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type CurrencySign =
+                | [<CompiledName("accounting")>] Accounting
+                | [<CompiledName("standard")>] Standard
+
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type LocaleMatcher =
+                | [<CompiledName("best fit")>] BestFit
+                | [<CompiledName("lookup")>] Lookup
+
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Notation =
+                | [<CompiledName("compact")>] Compact
+                | [<CompiledName("engineering")>] Engineering
+                | [<CompiledName("scientific")>] Scientific
+                | [<CompiledName("standard")>] Standard
+
+            type RoundingIncrement =
+                | N1 = 1
+                | N2 = 2
+                | N5 = 5
+                | N10 = 10
+                | N20 = 20
+                | N25 = 25
+                | N50 = 50
+                | N100 = 100
+                | N200 = 200
+                | N250 = 250
+                | N500 = 500
+                | N1000 = 1000
+                | N2000 = 2000
+                | N2500 = 2500
+                | N5000 = 5000
+
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type RoundingMode =
+                | [<CompiledName("ceil")>] Ceil
+                | [<CompiledName("expand")>] Expand
+                | [<CompiledName("floor")>] Floor
+                | [<CompiledName("halfCeil")>] HalfCeil
+                | [<CompiledName("halfEven")>] HalfEven
+                | [<CompiledName("halfExpand")>] HalfExpand
+                | [<CompiledName("halfFloor")>] HalfFloor
+                | [<CompiledName("halfTrunc")>] HalfTrunc
+                | [<CompiledName("trunc")>] Trunc
+
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type RoundingPriority =
+                | [<CompiledName("auto")>] Auto
+                | [<CompiledName("lessPrecision")>] LessPrecision
+                | [<CompiledName("morePrecision")>] MorePrecision
+
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type TrailingZeroDisplay =
+                | [<CompiledName("auto")>] Auto
+                | [<CompiledName("stripIfInteger")>] StripIfInteger
+
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type UnitDisplay =
+                | [<CompiledName("long")>] Long
+                | [<CompiledName("narrow")>] Narrow
+                | [<CompiledName("short")>] Short
+
+        module NumberRangeFormatPart =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Source =
+                | [<CompiledName("endRange")>] EndRange
+                | [<CompiledName("shared")>] Shared
+                | [<CompiledName("startRange")>] StartRange
+
+        module PluralRulesConstructor =
             module SupportedLocalesOf =
                 [<Interface>]
                 type Options =
-                    abstract localeMatcher: NumberFormatOptions.LocaleMatcher option with get, set
+                    abstract localeMatcher: Intl.NumberFormatOptions.LocaleMatcher option with get, set
 
                     [<ParamObject; Emit("$0")>]
-                    static member Create(?localeMatcher: NumberFormatOptions.LocaleMatcher) : Options = jsNative
+                    static member Create(?localeMatcher: Intl.NumberFormatOptions.LocaleMatcher) : Options = jsNative
 
                 [<Interface>]
                 type Options2 =
-                    abstract localeMatcher: NumberFormatOptions.LocaleMatcher option with get, set
+                    abstract localeMatcher: Intl.NumberFormatOptions.LocaleMatcher option with get, set
 
                     [<ParamObject; Emit("$0")>]
-                    static member Create(?localeMatcher: NumberFormatOptions.LocaleMatcher) : Options2 = jsNative
+                    static member Create(?localeMatcher: Intl.NumberFormatOptions.LocaleMatcher) : Options2 = jsNative
+
+        module RelativeTimeFormatPart3 =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Type =
+                | [<CompiledName("compact")>] Compact
+                | [<CompiledName("currency")>] Currency
+                | [<CompiledName("decimal")>] Decimal
+                | [<CompiledName("exponentInteger")>] ExponentInteger
+                | [<CompiledName("exponentMinusSign")>] ExponentMinusSign
+                | [<CompiledName("exponentSeparator")>] ExponentSeparator
+                | [<CompiledName("fraction")>] Fraction
+                | [<CompiledName("group")>] Group
+                | [<CompiledName("infinity")>] Infinity
+                | [<CompiledName("integer")>] Integer
+                | [<CompiledName("minusSign")>] MinusSign
+                | [<CompiledName("nan")>] Nan
+                | [<CompiledName("percent")>] Percent
+                | [<CompiledName("percentSign")>] PercentSign
+                | [<CompiledName("plusSign")>] PlusSign
+                | [<CompiledName("unit")>] Unit
+                | [<CompiledName("unknown")>] Unknown
+
+        module ResolvedSegmenterOptions =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Granularity =
+                | [<CompiledName("grapheme")>] Grapheme
+                | [<CompiledName("sentence")>] Sentence
+                | [<CompiledName("word")>] Word
 
         module Segmenter =
             module SupportedLocalesOf =
@@ -22372,10 +22790,10 @@ module Es =
                     /// <summary>
                     /// The locale matching algorithm to use. For information about this option, see <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_negotiation">Intl page</a>.
                     /// </summary>
-                    abstract localeMatcher: NumberFormatOptions.LocaleMatcher option with get, set
+                    abstract localeMatcher: Intl.NumberFormatOptions.LocaleMatcher option with get, set
 
                     [<ParamObject; Emit("$0")>]
-                    static member Create(?localeMatcher: NumberFormatOptions.LocaleMatcher) : Options = jsNative
+                    static member Create(?localeMatcher: Intl.NumberFormatOptions.LocaleMatcher) : Options = jsNative
 
         module SupportedValuesOf =
             [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -22386,6 +22804,12 @@ module Es =
                 | [<CompiledName("numberingSystem")>] NumberingSystem
                 | [<CompiledName("timeZone")>] TimeZone
                 | [<CompiledName("unit")>] Unit
+
+        module TextInfo =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Direction =
+                | [<CompiledName("ltr")>] Ltr
+                | [<CompiledName("rtl")>] Rtl
 
     module IteratorConstructor =
         module Zip =
@@ -22552,24 +22976,6 @@ module Es =
         module Stringify =
             type Replacer = delegate of key: string * value: obj -> obj
 
-    module ListFormat =
-        module FormatToParts =
-            module Result =
-                [<Interface>]
-                type Item =
-                    abstract ``type``: ListFormat.FormatToParts.Result.Item.Type with get, set
-                    abstract value: string with get, set
-
-                    [<ParamObject; Emit("$0")>]
-                    static member Create(``type``: ListFormat.FormatToParts.Result.Item.Type, value: string) : Item =
-                        jsNative
-
-                module Item =
-                    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                    type Type =
-                        | [<CompiledName("element")>] Element
-                        | [<CompiledName("literal")>] Literal
-
     module Map =
         module ForEach =
             type Callbackfn<'V, 'K> = delegate of value: 'V * key: 'K * map: Map<'K, 'V> -> unit
@@ -22583,158 +22989,6 @@ module Es =
             type ResultConstructor<'B, 'R> =
                 [<EmitConstructor>]
                 abstract Create: [<ParamArray>] args: 'B -> 'R
-
-    module NumberFormatOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type CompactDisplay =
-            | [<CompiledName("long")>] Long
-            | [<CompiledName("short")>] Short
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type CurrencyDisplay =
-            | [<CompiledName("code")>] Code
-            | [<CompiledName("name")>] Name
-            | [<CompiledName("narrowSymbol")>] NarrowSymbol
-            | [<CompiledName("symbol")>] Symbol
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type CurrencySign =
-            | [<CompiledName("accounting")>] Accounting
-            | [<CompiledName("standard")>] Standard
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type LocaleMatcher =
-            | [<CompiledName("best fit")>] BestFit
-            | [<CompiledName("lookup")>] Lookup
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Notation =
-            | [<CompiledName("compact")>] Compact
-            | [<CompiledName("engineering")>] Engineering
-            | [<CompiledName("scientific")>] Scientific
-            | [<CompiledName("standard")>] Standard
-
-        type RoundingIncrement =
-            | N1 = 1
-            | N2 = 2
-            | N5 = 5
-            | N10 = 10
-            | N20 = 20
-            | N25 = 25
-            | N50 = 50
-            | N100 = 100
-            | N200 = 200
-            | N250 = 250
-            | N500 = 500
-            | N1000 = 1000
-            | N2000 = 2000
-            | N2500 = 2500
-            | N5000 = 5000
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type RoundingMode =
-            | [<CompiledName("ceil")>] Ceil
-            | [<CompiledName("expand")>] Expand
-            | [<CompiledName("floor")>] Floor
-            | [<CompiledName("halfCeil")>] HalfCeil
-            | [<CompiledName("halfEven")>] HalfEven
-            | [<CompiledName("halfExpand")>] HalfExpand
-            | [<CompiledName("halfFloor")>] HalfFloor
-            | [<CompiledName("halfTrunc")>] HalfTrunc
-            | [<CompiledName("trunc")>] Trunc
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type RoundingPriority =
-            | [<CompiledName("auto")>] Auto
-            | [<CompiledName("lessPrecision")>] LessPrecision
-            | [<CompiledName("morePrecision")>] MorePrecision
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type SignDisplay =
-            | [<CompiledName("always")>] Always
-            | [<CompiledName("auto")>] Auto
-            | [<CompiledName("exceptZero")>] ExceptZero
-            | [<CompiledName("negative")>] Negative
-            | [<CompiledName("never")>] Never
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Style =
-            | [<CompiledName("currency")>] Currency
-            | [<CompiledName("decimal")>] Decimal
-            | [<CompiledName("percent")>] Percent
-            | [<CompiledName("unit")>] Unit
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type TrailingZeroDisplay =
-            | [<CompiledName("auto")>] Auto
-            | [<CompiledName("stripIfInteger")>] StripIfInteger
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type UnitDisplay =
-            | [<CompiledName("long")>] Long
-            | [<CompiledName("narrow")>] Narrow
-            | [<CompiledName("short")>] Short
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type UseGrouping =
-            | [<CompiledName("always")>] Always
-            | [<CompiledName("auto")>] Auto
-            | [<CompiledName("false")>] False
-            | [<CompiledName("min2")>] Min2
-            | [<CompiledName("true")>] True
-            | [<CompiledValue(false)>] False2
-            | [<CompiledValue(true)>] True2
-
-    module NumberFormatPart =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Type =
-            | [<CompiledName("compact")>] Compact
-            | [<CompiledName("currency")>] Currency
-            | [<CompiledName("decimal")>] Decimal
-            | [<CompiledName("exponentInteger")>] ExponentInteger
-            | [<CompiledName("exponentMinusSign")>] ExponentMinusSign
-            | [<CompiledName("exponentSeparator")>] ExponentSeparator
-            | [<CompiledName("fraction")>] Fraction
-            | [<CompiledName("group")>] Group
-            | [<CompiledName("infinity")>] Infinity
-            | [<CompiledName("integer")>] Integer
-            | [<CompiledName("literal")>] Literal
-            | [<CompiledName("minusSign")>] MinusSign
-            | [<CompiledName("nan")>] Nan
-            | [<CompiledName("percent")>] Percent
-            | [<CompiledName("percentSign")>] PercentSign
-            | [<CompiledName("plusSign")>] PlusSign
-            | [<CompiledName("unit")>] Unit
-            | [<CompiledName("unknown")>] Unknown
-
-    module NumberRangeFormatPart =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Source =
-            | [<CompiledName("endRange")>] EndRange
-            | [<CompiledName("shared")>] Shared
-            | [<CompiledName("startRange")>] StartRange
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Type =
-            | [<CompiledName("approximatelySign")>] ApproximatelySign
-            | [<CompiledName("compact")>] Compact
-            | [<CompiledName("currency")>] Currency
-            | [<CompiledName("decimal")>] Decimal
-            | [<CompiledName("exponentInteger")>] ExponentInteger
-            | [<CompiledName("exponentMinusSign")>] ExponentMinusSign
-            | [<CompiledName("exponentSeparator")>] ExponentSeparator
-            | [<CompiledName("fraction")>] Fraction
-            | [<CompiledName("group")>] Group
-            | [<CompiledName("infinity")>] Infinity
-            | [<CompiledName("integer")>] Integer
-            | [<CompiledName("literal")>] Literal
-            | [<CompiledName("minusSign")>] MinusSign
-            | [<CompiledName("nan")>] Nan
-            | [<CompiledName("percent")>] Percent
-            | [<CompiledName("percentSign")>] PercentSign
-            | [<CompiledName("plusSign")>] PlusSign
-            | [<CompiledName("unit")>] Unit
-            | [<CompiledName("unknown")>] Unknown
 
     module ObjectConstructor =
         module Create =
@@ -22770,142 +23024,6 @@ module Es =
 
         module GroupBy =
             type KeySelector<'T, 'K> = delegate of item: 'T * index: float -> 'K
-
-    module OverflowOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Overflow =
-            | [<CompiledName("constrain")>] Constrain
-            | [<CompiledName("reject")>] Reject
-
-    module PlainDateTime =
-        module With =
-            [<Interface>]
-            type DateTimeLike =
-                abstract day: float option with get, set
-                abstract era: string option with get, set
-                abstract eraYear: float option with get, set
-                abstract hour: float option with get, set
-                abstract microsecond: float option with get, set
-                abstract millisecond: float option with get, set
-                abstract minute: float option with get, set
-                abstract month: float option with get, set
-                abstract monthCode: string option with get, set
-                abstract nanosecond: float option with get, set
-                abstract second: float option with get, set
-                abstract year: float option with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create
-                    (
-                        ?day: float,
-                        ?era: string,
-                        ?eraYear: float,
-                        ?hour: float,
-                        ?microsecond: float,
-                        ?millisecond: float,
-                        ?minute: float,
-                        ?month: float,
-                        ?monthCode: string,
-                        ?nanosecond: float,
-                        ?second: float,
-                        ?year: float
-                    ) : DateTimeLike =
-                    jsNative
-
-    module PlainDateToStringOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type CalendarName =
-            | [<CompiledName("always")>] Always
-            | [<CompiledName("auto")>] Auto
-            | [<CompiledName("critical")>] Critical
-            | [<CompiledName("never")>] Never
-
-    module PlainMonthDay =
-        module With =
-            [<Interface>]
-            type MonthDayLike =
-                abstract day: float option with get, set
-                abstract era: string option with get, set
-                abstract eraYear: float option with get, set
-                abstract month: float option with get, set
-                abstract monthCode: string option with get, set
-                abstract year: float option with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create
-                    (?day: float, ?era: string, ?eraYear: float, ?month: float, ?monthCode: string, ?year: float)
-                    : MonthDayLike =
-                    jsNative
-
-    module PlainTime =
-        module With =
-            [<Interface>]
-            type TimeLike =
-                abstract hour: float option with get, set
-                abstract microsecond: float option with get, set
-                abstract millisecond: float option with get, set
-                abstract minute: float option with get, set
-                abstract nanosecond: float option with get, set
-                abstract second: float option with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create
-                    (
-                        ?hour: float,
-                        ?microsecond: float,
-                        ?millisecond: float,
-                        ?minute: float,
-                        ?nanosecond: float,
-                        ?second: float
-                    ) : TimeLike =
-                    jsNative
-
-    module PlainTimeToStringOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type FractionalSecondDigits =
-            | [<CompiledName("auto")>] Auto
-            | [<CompiledValue(0)>] N0
-            | [<CompiledValue(1)>] N1
-            | [<CompiledValue(2)>] N2
-            | [<CompiledValue(3)>] N3
-            | [<CompiledValue(4)>] N4
-            | [<CompiledValue(5)>] N5
-            | [<CompiledValue(6)>] N6
-            | [<CompiledValue(7)>] N7
-            | [<CompiledValue(8)>] N8
-            | [<CompiledValue(9)>] N9
-
-        module Base =
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type Item =
-                | [<CompiledName("microsecond")>] Microsecond
-                | [<CompiledName("millisecond")>] Millisecond
-                | [<CompiledName("minute")>] Minute
-                | [<CompiledName("nanosecond")>] Nanosecond
-                | [<CompiledName("second")>] Second
-
-    module PlainYearMonth =
-        module Until =
-            module Options =
-                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                type Item =
-                    | [<CompiledName("month")>] Month
-                    | [<CompiledName("year")>] Year
-
-        module With =
-            [<Interface>]
-            type YearMonthLike =
-                abstract era: string option with get, set
-                abstract eraYear: float option with get, set
-                abstract month: float option with get, set
-                abstract monthCode: string option with get, set
-                abstract year: float option with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create
-                    (?era: string, ?eraYear: float, ?month: float, ?monthCode: string, ?year: float)
-                    : YearMonthLike =
-                    jsNative
 
     module PromiseConstructor =
         type Executor<'T> = delegate of resolve: (U2<'T, JS.Promise<'T>> -> unit) * reject: (obj option -> unit) -> unit
@@ -22944,42 +23062,6 @@ module Es =
     module RegExp =
         module SymbolReplace =
             type Replacer = delegate of substring: string * args: obj[] -> string
-
-    module RelativeTimeFormatPart3 =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Type =
-            | [<CompiledName("compact")>] Compact
-            | [<CompiledName("currency")>] Currency
-            | [<CompiledName("decimal")>] Decimal
-            | [<CompiledName("exponentInteger")>] ExponentInteger
-            | [<CompiledName("exponentMinusSign")>] ExponentMinusSign
-            | [<CompiledName("exponentSeparator")>] ExponentSeparator
-            | [<CompiledName("fraction")>] Fraction
-            | [<CompiledName("group")>] Group
-            | [<CompiledName("infinity")>] Infinity
-            | [<CompiledName("integer")>] Integer
-            | [<CompiledName("minusSign")>] MinusSign
-            | [<CompiledName("nan")>] Nan
-            | [<CompiledName("percent")>] Percent
-            | [<CompiledName("percentSign")>] PercentSign
-            | [<CompiledName("plusSign")>] PlusSign
-            | [<CompiledName("unit")>] Unit
-            | [<CompiledName("unknown")>] Unknown
-
-    module ResolvedNumberFormatOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type UseGrouping =
-            | [<CompiledName("always")>] Always
-            | [<CompiledName("auto")>] Auto
-            | [<CompiledName("min2")>] Min2
-            | [<CompiledValue(false)>] False
-
-    module ResolvedSegmenterOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Granularity =
-            | [<CompiledName("grapheme")>] Grapheme
-            | [<CompiledName("sentence")>] Sentence
-            | [<CompiledName("word")>] Word
 
     module Set =
         module ForEach =
@@ -23049,8 +23131,56 @@ module Es =
                 static member Create(raw: U2<ArrayLike<string>, string[]>) : Template = jsNative
 
     module Temporal =
+        [<Interface>]
+        type Now =
+            abstract timeZoneId: unit -> string
+            abstract instant: unit -> Fable.Core.TS.Es.Temporal.Instant
+
+            abstract plainDateTimeISO:
+                ?timeZone: Fable.Core.TS.Es.Temporal.TimeZoneLike -> Fable.Core.TS.Es.Temporal.PlainDateTime
+
+            abstract zonedDateTimeISO:
+                ?timeZone: Fable.Core.TS.Es.Temporal.TimeZoneLike -> Fable.Core.TS.Es.Temporal.ZonedDateTime
+
+            abstract plainDateISO:
+                ?timeZone: Fable.Core.TS.Es.Temporal.TimeZoneLike -> Fable.Core.TS.Es.Temporal.PlainDate
+
+            abstract plainTimeISO:
+                ?timeZone: Fable.Core.TS.Es.Temporal.TimeZoneLike -> Fable.Core.TS.Es.Temporal.PlainTime
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    timeZoneId: (unit -> string),
+                    instant: (unit -> Fable.Core.TS.Es.Temporal.Instant),
+                    plainDateTimeISO:
+                        (Fable.Core.TS.Es.Temporal.TimeZoneLike option -> Fable.Core.TS.Es.Temporal.PlainDateTime),
+                    zonedDateTimeISO:
+                        (Fable.Core.TS.Es.Temporal.TimeZoneLike option -> Fable.Core.TS.Es.Temporal.ZonedDateTime),
+                    plainDateISO: (Fable.Core.TS.Es.Temporal.TimeZoneLike option -> Fable.Core.TS.Es.Temporal.PlainDate),
+                    plainTimeISO: (Fable.Core.TS.Es.Temporal.TimeZoneLike option -> Fable.Core.TS.Es.Temporal.PlainTime)
+                ) : Now =
+                jsNative
+
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type PluralizeUnit =
+        type PluralizeUnit2 =
+            | [<CompiledName("day")>] Day
+            | [<CompiledName("days")>] Days
+            | [<CompiledName("hour")>] Hour
+            | [<CompiledName("hours")>] Hours
+            | [<CompiledName("microsecond")>] Microsecond
+            | [<CompiledName("microseconds")>] Microseconds
+            | [<CompiledName("millisecond")>] Millisecond
+            | [<CompiledName("milliseconds")>] Milliseconds
+            | [<CompiledName("minute")>] Minute
+            | [<CompiledName("minutes")>] Minutes
+            | [<CompiledName("nanosecond")>] Nanosecond
+            | [<CompiledName("nanoseconds")>] Nanoseconds
+            | [<CompiledName("second")>] Second
+            | [<CompiledName("seconds")>] Seconds
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type PluralizeUnit3 =
             | [<CompiledName("day")>] Day
             | [<CompiledName("days")>] Days
             | [<CompiledName("hour")>] Hour
@@ -23073,7 +23203,7 @@ module Es =
             | [<CompiledName("years")>] Years
 
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type PluralizeUnit2 =
+        type PluralizeUnit4 =
             | [<CompiledName("hour")>] Hour
             | [<CompiledName("hours")>] Hours
             | [<CompiledName("microsecond")>] Microsecond
@@ -23088,7 +23218,7 @@ module Es =
             | [<CompiledName("seconds")>] Seconds
 
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type PluralizeUnit3 =
+        type PluralizeUnit5 =
             | [<CompiledName("microsecond")>] Microsecond
             | [<CompiledName("microseconds")>] Microseconds
             | [<CompiledName("millisecond")>] Millisecond
@@ -23101,7 +23231,7 @@ module Es =
             | [<CompiledName("seconds")>] Seconds
 
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type PluralizeUnit4 =
+        type PluralizeUnit6 =
             | [<CompiledName("microsecond")>] Microsecond
             | [<CompiledName("microseconds")>] Microseconds
             | [<CompiledName("millisecond")>] Millisecond
@@ -23111,23 +23241,1369 @@ module Es =
             | [<CompiledName("second")>] Second
             | [<CompiledName("seconds")>] Seconds
 
-    module TextInfo =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Direction =
-            | [<CompiledName("ltr")>] Ltr
-            | [<CompiledName("rtl")>] Rtl
+        type CalendarLike =
+            U6<
+                string,
+                Fable.Core.TS.Es.Temporal.PlainDate,
+                Fable.Core.TS.Es.Temporal.PlainDateTime,
+                Fable.Core.TS.Es.Temporal.PlainMonthDay,
+                Fable.Core.TS.Es.Temporal.PlainYearMonth,
+                Fable.Core.TS.Es.Temporal.ZonedDateTime
+             >
 
-    module ToStringRoundingOptions =
+        type DurationLike = U3<string, Fable.Core.TS.Es.Temporal.Duration, Fable.Core.TS.Es.Temporal.DurationLikeObject>
+
+        type InstantLike = U3<string, Fable.Core.TS.Es.Temporal.Instant, Fable.Core.TS.Es.Temporal.ZonedDateTime>
+
+        type PlainDateLike =
+            U5<
+                string,
+                Fable.Core.TS.Es.Temporal.DateLikeObject,
+                Fable.Core.TS.Es.Temporal.PlainDate,
+                Fable.Core.TS.Es.Temporal.PlainDateTime,
+                Fable.Core.TS.Es.Temporal.ZonedDateTime
+             >
+
+        type PlainDateTimeLike =
+            U5<
+                string,
+                Fable.Core.TS.Es.Temporal.DateTimeLikeObject,
+                Fable.Core.TS.Es.Temporal.PlainDate,
+                Fable.Core.TS.Es.Temporal.PlainDateTime,
+                Fable.Core.TS.Es.Temporal.ZonedDateTime
+             >
+
+        type PlainMonthDayLike =
+            U3<string, Fable.Core.TS.Es.Temporal.DateLikeObject, Fable.Core.TS.Es.Temporal.PlainMonthDay>
+
+        type PlainTimeLike =
+            U5<
+                string,
+                Fable.Core.TS.Es.Temporal.PlainDateTime,
+                Fable.Core.TS.Es.Temporal.PlainTime,
+                Fable.Core.TS.Es.Temporal.TimeLikeObject,
+                Fable.Core.TS.Es.Temporal.ZonedDateTime
+             >
+
+        type PlainYearMonthLike =
+            U3<string, Fable.Core.TS.Es.Temporal.PlainYearMonth, Fable.Core.TS.Es.Temporal.YearMonthLikeObject>
+
+        type TimeZoneLike = U2<string, Fable.Core.TS.Es.Temporal.ZonedDateTime>
+
+        type ZonedDateTimeLike =
+            U3<string, Fable.Core.TS.Es.Temporal.ZonedDateTime, Fable.Core.TS.Es.Temporal.ZonedDateTimeLikeObject>
+
+        [<Erase>]
+        type PartialTemporalLike<'T> = private PartialTemporalLike__ of obj
+
         [<Interface>]
-        type Base<'Units> =
-            abstract smallestUnit: U2<'Units, string> option with get, set
-            abstract roundingMode: NumberFormatOptions.RoundingMode option with get, set
+        type DateLikeObject =
+            abstract year: float option with get, set
+            abstract era: string option with get, set
+            abstract eraYear: float option with get, set
+            abstract month: float option with get, set
+            abstract monthCode: string option with get, set
+            abstract day: float with get, set
+            abstract calendar: string option with get, set
 
             [<ParamObject; Emit("$0")>]
             static member Create
-                (?smallestUnit: U2<'Units, string>, ?roundingMode: NumberFormatOptions.RoundingMode)
-                : Base<'Units> =
+                (
+                    day: float,
+                    ?year: float,
+                    ?era: string,
+                    ?eraYear: float,
+                    ?month: float,
+                    ?monthCode: string,
+                    ?calendar: string
+                ) : DateLikeObject =
                 jsNative
+
+        [<Interface>]
+        type DateTimeLikeObject =
+            inherit Fable.Core.TS.Es.Temporal.DateLikeObject
+            inherit Fable.Core.TS.Es.Temporal.TimeLikeObject
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    day: float,
+                    ?year: float,
+                    ?era: string,
+                    ?eraYear: float,
+                    ?month: float,
+                    ?monthCode: string,
+                    ?calendar: string,
+                    ?hour: float,
+                    ?minute: float,
+                    ?second: float,
+                    ?millisecond: float,
+                    ?microsecond: float,
+                    ?nanosecond: float
+                ) : DateTimeLikeObject =
+                jsNative
+
+        [<Interface>]
+        type DurationLikeObject =
+            abstract years: float option with get, set
+            abstract months: float option with get, set
+            abstract weeks: float option with get, set
+            abstract days: float option with get, set
+            abstract hours: float option with get, set
+            abstract minutes: float option with get, set
+            abstract seconds: float option with get, set
+            abstract milliseconds: float option with get, set
+            abstract microseconds: float option with get, set
+            abstract nanoseconds: float option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    ?years: float,
+                    ?months: float,
+                    ?weeks: float,
+                    ?days: float,
+                    ?hours: float,
+                    ?minutes: float,
+                    ?seconds: float,
+                    ?milliseconds: float,
+                    ?microseconds: float,
+                    ?nanoseconds: float
+                ) : DurationLikeObject =
+                jsNative
+
+        [<Interface>]
+        type TimeLikeObject =
+            abstract hour: float option with get, set
+            abstract minute: float option with get, set
+            abstract second: float option with get, set
+            abstract millisecond: float option with get, set
+            abstract microsecond: float option with get, set
+            abstract nanosecond: float option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    ?hour: float,
+                    ?minute: float,
+                    ?second: float,
+                    ?millisecond: float,
+                    ?microsecond: float,
+                    ?nanosecond: float
+                ) : TimeLikeObject =
+                jsNative
+
+        [<Interface>]
+        type YearMonthLikeObject =
+            inherit Temporal.YearMonthLikeObject.Base
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (?year: float, ?era: string, ?eraYear: float, ?month: float, ?monthCode: string, ?calendar: string)
+                : YearMonthLikeObject =
+                jsNative
+
+        [<Interface>]
+        type ZonedDateTimeLikeObject =
+            inherit Fable.Core.TS.Es.Temporal.DateTimeLikeObject
+            abstract timeZone: Fable.Core.TS.Es.Temporal.TimeZoneLike with get, set
+            abstract offset: string option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    timeZone: Fable.Core.TS.Es.Temporal.TimeZoneLike,
+                    day: float,
+                    ?offset: string,
+                    ?year: float,
+                    ?era: string,
+                    ?eraYear: float,
+                    ?month: float,
+                    ?monthCode: string,
+                    ?calendar: string,
+                    ?hour: float,
+                    ?minute: float,
+                    ?second: float,
+                    ?millisecond: float,
+                    ?microsecond: float,
+                    ?nanosecond: float
+                ) : ZonedDateTimeLikeObject =
+                jsNative
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type DateUnit =
+            | [<CompiledName("day")>] Day
+            | [<CompiledName("month")>] Month
+            | [<CompiledName("week")>] Week
+            | [<CompiledName("year")>] Year
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type TimeUnit =
+            | [<CompiledName("hour")>] Hour
+            | [<CompiledName("microsecond")>] Microsecond
+            | [<CompiledName("millisecond")>] Millisecond
+            | [<CompiledName("minute")>] Minute
+            | [<CompiledName("nanosecond")>] Nanosecond
+            | [<CompiledName("second")>] Second
+
+        type PluralizeUnit<'T> = U2<'T, string>
+
+        [<Interface>]
+        type DisambiguationOptions =
+            abstract disambiguation: Temporal.ZonedDateTimeFromOptions.Disambiguation option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (?disambiguation: Temporal.ZonedDateTimeFromOptions.Disambiguation)
+                : DisambiguationOptions =
+                jsNative
+
+        [<Interface>]
+        type OverflowOptions =
+            abstract overflow: Temporal.OverflowOptions.Overflow option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create(?overflow: Temporal.OverflowOptions.Overflow) : OverflowOptions = jsNative
+
+        [<Interface>]
+        type TransitionOptions =
+            abstract direction: Temporal.ZonedDateTime.GetTimeZoneTransition.Direction with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (direction: Temporal.ZonedDateTime.GetTimeZoneTransition.Direction)
+                : TransitionOptions =
+                jsNative
+
+        [<Interface>]
+        type RoundingOptions<'Units> =
+            abstract smallestUnit: U2<'Units, string> option with get, set
+            abstract roundingIncrement: float option with get, set
+            abstract roundingMode: Intl.NumberFormatOptions.RoundingMode option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    ?smallestUnit: U2<'Units, string>,
+                    ?roundingIncrement: float,
+                    ?roundingMode: Intl.NumberFormatOptions.RoundingMode
+                ) : RoundingOptions<'Units> =
+                jsNative
+
+        [<Interface>]
+        type RoundingOptionsWithLargestUnit<'Units> =
+            inherit Fable.Core.TS.Es.Temporal.RoundingOptions<'Units>
+            abstract largestUnit: U2<string, 'Units> option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    ?largestUnit: U2<string, 'Units>,
+                    ?smallestUnit: U2<'Units, string>,
+                    ?roundingIncrement: float,
+                    ?roundingMode: Intl.NumberFormatOptions.RoundingMode
+                ) : RoundingOptionsWithLargestUnit<'Units> =
+                jsNative
+
+        [<Interface>]
+        type ToStringRoundingOptions<'Units> =
+            inherit Temporal.ToStringRoundingOptions.Base<'Units>
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (?smallestUnit: U2<'Units, string>, ?roundingMode: Intl.NumberFormatOptions.RoundingMode)
+                : ToStringRoundingOptions<'Units> =
+                jsNative
+
+        [<Interface>]
+        type ToStringRoundingOptionsWithFractionalSeconds<'Units> =
+            inherit Fable.Core.TS.Es.Temporal.ToStringRoundingOptions<'Units>
+            abstract fractionalSecondDigits: Temporal.PlainTimeToStringOptions.FractionalSecondDigits option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    ?fractionalSecondDigits: Temporal.PlainTimeToStringOptions.FractionalSecondDigits,
+                    ?smallestUnit: U2<'Units, string>,
+                    ?roundingMode: Intl.NumberFormatOptions.RoundingMode
+                ) : ToStringRoundingOptionsWithFractionalSeconds<'Units> =
+                jsNative
+
+        [<Interface>]
+        type PlainDateToStringOptions =
+            abstract calendarName: Temporal.PlainDateToStringOptions.CalendarName option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (?calendarName: Temporal.PlainDateToStringOptions.CalendarName)
+                : PlainDateToStringOptions =
+                jsNative
+
+        [<Interface>]
+        type PlainDateToZonedDateTimeOptions =
+            abstract plainTime: Fable.Core.TS.Es.Temporal.PlainTimeLike option with get, set
+            abstract timeZone: Fable.Core.TS.Es.Temporal.TimeZoneLike with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (timeZone: Fable.Core.TS.Es.Temporal.TimeZoneLike, ?plainTime: Fable.Core.TS.Es.Temporal.PlainTimeLike)
+                : PlainDateToZonedDateTimeOptions =
+                jsNative
+
+        type PlainDate =
+            abstract calendarId: string
+            abstract era: string option
+            abstract eraYear: float option
+            abstract year: float
+            abstract month: float
+            abstract monthCode: string
+            abstract day: float
+            abstract dayOfWeek: float
+            abstract dayOfYear: float
+            abstract weekOfYear: float option
+            abstract yearOfWeek: float option
+            abstract daysInWeek: float
+            abstract daysInMonth: float
+            abstract daysInYear: float
+            abstract monthsInYear: float
+            abstract inLeapYear: bool
+            abstract toPlainYearMonth: unit -> Fable.Core.TS.Es.Temporal.PlainYearMonth
+            abstract toPlainMonthDay: unit -> Fable.Core.TS.Es.Temporal.PlainMonthDay
+
+            abstract add:
+                duration: Fable.Core.TS.Es.Temporal.DurationLike * ?options: Fable.Core.TS.Es.Temporal.OverflowOptions ->
+                    Fable.Core.TS.Es.Temporal.PlainDate
+
+            abstract subtract:
+                duration: Fable.Core.TS.Es.Temporal.DurationLike * ?options: Fable.Core.TS.Es.Temporal.OverflowOptions ->
+                    Fable.Core.TS.Es.Temporal.PlainDate
+
+            abstract ``with``:
+                dateLike: Temporal.PlainMonthDay.With.MonthDayLike * ?options: Fable.Core.TS.Es.Temporal.OverflowOptions ->
+                    Fable.Core.TS.Es.Temporal.PlainDate
+
+            abstract withCalendar:
+                calendarLike: Fable.Core.TS.Es.Temporal.CalendarLike -> Fable.Core.TS.Es.Temporal.PlainDate
+
+            abstract until:
+                other: Fable.Core.TS.Es.Temporal.PlainDateLike *
+                ?options: Fable.Core.TS.Es.Temporal.RoundingOptionsWithLargestUnit<Fable.Core.TS.Es.Temporal.DateUnit> ->
+                    Fable.Core.TS.Es.Temporal.Duration
+
+            abstract since:
+                other: Fable.Core.TS.Es.Temporal.PlainDateLike *
+                ?options: Fable.Core.TS.Es.Temporal.RoundingOptionsWithLargestUnit<Fable.Core.TS.Es.Temporal.DateUnit> ->
+                    Fable.Core.TS.Es.Temporal.Duration
+
+            abstract equals: other: Fable.Core.TS.Es.Temporal.PlainDateLike -> bool
+
+            abstract toPlainDateTime:
+                ?time: Fable.Core.TS.Es.Temporal.PlainTimeLike -> Fable.Core.TS.Es.Temporal.PlainDateTime
+
+            abstract toZonedDateTime:
+                timeZone: Fable.Core.TS.Es.Temporal.TimeZoneLike -> Fable.Core.TS.Es.Temporal.ZonedDateTime
+
+            abstract toZonedDateTime:
+                item: Fable.Core.TS.Es.Temporal.PlainDateToZonedDateTimeOptions ->
+                    Fable.Core.TS.Es.Temporal.ZonedDateTime
+
+            abstract toString: ?options: Fable.Core.TS.Es.Temporal.PlainDateToStringOptions -> string
+            abstract toLocaleString: ?locales: Intl.LocalesArgument * ?options: Intl.DateTimeFormatOptions -> string
+            abstract toJSON: unit -> string
+            abstract valueOf: unit -> unit
+
+            [<Emit("$0[Symbol.toStringTag]")>]
+            abstract SymbolToStringTag: string
+
+        type PlainDateConstructor =
+            abstract from:
+                item: Fable.Core.TS.Es.Temporal.PlainDateLike * ?options: Fable.Core.TS.Es.Temporal.OverflowOptions ->
+                    Fable.Core.TS.Es.Temporal.PlainDate
+
+            abstract compare:
+                one: Fable.Core.TS.Es.Temporal.PlainDateLike * two: Fable.Core.TS.Es.Temporal.PlainDateLike -> float
+
+            [<EmitConstructor>]
+            abstract Create:
+                isoYear: float * isoMonth: float * isoDay: float * ?calendar: string ->
+                    Fable.Core.TS.Es.Temporal.PlainDate
+
+        [<Interface>]
+        type PlainTimeToStringOptions =
+            inherit Fable.Core.TS.Es.Temporal.ToStringRoundingOptionsWithFractionalSeconds<
+                Temporal.PlainTimeToStringOptions.Base.Item
+                     >
+
+            abstract smallestUnit: Fable.Core.TS.Es.Temporal.PluralizeUnit5 option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    ?smallestUnit: Fable.Core.TS.Es.Temporal.PluralizeUnit5,
+                    ?roundingMode: Intl.NumberFormatOptions.RoundingMode,
+                    ?fractionalSecondDigits: Temporal.PlainTimeToStringOptions.FractionalSecondDigits
+                ) : PlainTimeToStringOptions =
+                jsNative
+
+        type PlainTime =
+            abstract hour: float
+            abstract minute: float
+            abstract second: float
+            abstract millisecond: float
+            abstract microsecond: float
+            abstract nanosecond: float
+            abstract add: duration: Fable.Core.TS.Es.Temporal.DurationLike -> Fable.Core.TS.Es.Temporal.PlainTime
+            abstract subtract: duration: Fable.Core.TS.Es.Temporal.DurationLike -> Fable.Core.TS.Es.Temporal.PlainTime
+
+            abstract ``with``:
+                timeLike: Temporal.PlainTime.With.TimeLike * ?options: Fable.Core.TS.Es.Temporal.OverflowOptions ->
+                    Fable.Core.TS.Es.Temporal.PlainTime
+
+            abstract until:
+                other: Fable.Core.TS.Es.Temporal.PlainTimeLike *
+                ?options: Fable.Core.TS.Es.Temporal.RoundingOptionsWithLargestUnit<Fable.Core.TS.Es.Temporal.TimeUnit> ->
+                    Fable.Core.TS.Es.Temporal.Duration
+
+            abstract since:
+                other: Fable.Core.TS.Es.Temporal.PlainTimeLike *
+                ?options: Fable.Core.TS.Es.Temporal.RoundingOptionsWithLargestUnit<Fable.Core.TS.Es.Temporal.TimeUnit> ->
+                    Fable.Core.TS.Es.Temporal.Duration
+
+            abstract equals: other: Fable.Core.TS.Es.Temporal.PlainTimeLike -> bool
+            abstract round: roundTo: Fable.Core.TS.Es.Temporal.PluralizeUnit4 -> Fable.Core.TS.Es.Temporal.PlainTime
+
+            abstract round:
+                roundTo: Fable.Core.TS.Es.Temporal.RoundingOptions<Fable.Core.TS.Es.Temporal.TimeUnit> ->
+                    Fable.Core.TS.Es.Temporal.PlainTime
+
+            abstract toString: ?options: Fable.Core.TS.Es.Temporal.PlainTimeToStringOptions -> string
+            abstract toLocaleString: ?locales: Intl.LocalesArgument * ?options: Intl.DateTimeFormatOptions -> string
+            abstract toJSON: unit -> string
+            abstract valueOf: unit -> unit
+
+            [<Emit("$0[Symbol.toStringTag]")>]
+            abstract SymbolToStringTag: string
+
+        type PlainTimeConstructor =
+            abstract from:
+                item: Fable.Core.TS.Es.Temporal.PlainTimeLike * ?options: Fable.Core.TS.Es.Temporal.OverflowOptions ->
+                    Fable.Core.TS.Es.Temporal.PlainTime
+
+            abstract compare:
+                one: Fable.Core.TS.Es.Temporal.PlainTimeLike * two: Fable.Core.TS.Es.Temporal.PlainTimeLike -> float
+
+            [<EmitConstructor>]
+            abstract Create:
+                ?hour: float *
+                ?minute: float *
+                ?second: float *
+                ?millisecond: float *
+                ?microsecond: float *
+                ?nanosecond: float ->
+                    Fable.Core.TS.Es.Temporal.PlainTime
+
+        [<Interface>]
+        type PlainDateTimeToStringOptions =
+            inherit Fable.Core.TS.Es.Temporal.PlainDateToStringOptions
+            inherit Fable.Core.TS.Es.Temporal.PlainTimeToStringOptions
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    ?smallestUnit: Fable.Core.TS.Es.Temporal.PluralizeUnit5,
+                    ?roundingMode: Intl.NumberFormatOptions.RoundingMode,
+                    ?fractionalSecondDigits: Temporal.PlainTimeToStringOptions.FractionalSecondDigits,
+                    ?calendarName: Temporal.PlainDateToStringOptions.CalendarName
+                ) : PlainDateTimeToStringOptions =
+                jsNative
+
+        type PlainDateTime =
+            abstract calendarId: string
+            abstract era: string option
+            abstract eraYear: float option
+            abstract year: float
+            abstract month: float
+            abstract monthCode: string
+            abstract day: float
+            abstract hour: float
+            abstract minute: float
+            abstract second: float
+            abstract millisecond: float
+            abstract microsecond: float
+            abstract nanosecond: float
+            abstract dayOfWeek: float
+            abstract dayOfYear: float
+            abstract weekOfYear: float option
+            abstract yearOfWeek: float option
+            abstract daysInWeek: float
+            abstract daysInMonth: float
+            abstract daysInYear: float
+            abstract monthsInYear: float
+            abstract inLeapYear: bool
+
+            abstract ``with``:
+                dateTimeLike: Temporal.PlainDateTime.With.DateTimeLike *
+                ?options: Fable.Core.TS.Es.Temporal.OverflowOptions ->
+                    Fable.Core.TS.Es.Temporal.PlainDateTime
+
+            abstract withPlainTime:
+                ?plainTime: Fable.Core.TS.Es.Temporal.PlainTimeLike -> Fable.Core.TS.Es.Temporal.PlainDateTime
+
+            abstract withCalendar:
+                calendar: Fable.Core.TS.Es.Temporal.CalendarLike -> Fable.Core.TS.Es.Temporal.PlainDateTime
+
+            abstract add:
+                duration: Fable.Core.TS.Es.Temporal.DurationLike * ?options: Fable.Core.TS.Es.Temporal.OverflowOptions ->
+                    Fable.Core.TS.Es.Temporal.PlainDateTime
+
+            abstract subtract:
+                duration: Fable.Core.TS.Es.Temporal.DurationLike * ?options: Fable.Core.TS.Es.Temporal.OverflowOptions ->
+                    Fable.Core.TS.Es.Temporal.PlainDateTime
+
+            abstract until:
+                other: Fable.Core.TS.Es.Temporal.PlainDateTimeLike *
+                ?options:
+                    Fable.Core.TS.Es.Temporal.RoundingOptionsWithLargestUnit<Temporal.ZonedDateTime.Until.Options.Item> ->
+                    Fable.Core.TS.Es.Temporal.Duration
+
+            abstract since:
+                other: Fable.Core.TS.Es.Temporal.PlainDateTimeLike *
+                ?options:
+                    Fable.Core.TS.Es.Temporal.RoundingOptionsWithLargestUnit<Temporal.ZonedDateTime.Until.Options.Item> ->
+                    Fable.Core.TS.Es.Temporal.Duration
+
+            abstract round: roundTo: Fable.Core.TS.Es.Temporal.PluralizeUnit2 -> Fable.Core.TS.Es.Temporal.PlainDateTime
+
+            abstract round:
+                roundTo: Fable.Core.TS.Es.Temporal.RoundingOptions<Temporal.ZonedDateTime.Round.RoundTo.Item> ->
+                    Fable.Core.TS.Es.Temporal.PlainDateTime
+
+            abstract equals: other: Fable.Core.TS.Es.Temporal.PlainDateTimeLike -> bool
+            abstract toString: ?options: Fable.Core.TS.Es.Temporal.PlainDateTimeToStringOptions -> string
+            abstract toLocaleString: ?locales: Intl.LocalesArgument * ?options: Intl.DateTimeFormatOptions -> string
+            abstract toJSON: unit -> string
+            abstract valueOf: unit -> unit
+
+            abstract toZonedDateTime:
+                timeZone: Fable.Core.TS.Es.Temporal.TimeZoneLike *
+                ?options: Fable.Core.TS.Es.Temporal.DisambiguationOptions ->
+                    Fable.Core.TS.Es.Temporal.ZonedDateTime
+
+            abstract toPlainDate: unit -> Fable.Core.TS.Es.Temporal.PlainDate
+            abstract toPlainTime: unit -> Fable.Core.TS.Es.Temporal.PlainTime
+
+            [<Emit("$0[Symbol.toStringTag]")>]
+            abstract SymbolToStringTag: string
+
+        type PlainDateTimeConstructor =
+            abstract from:
+                item: Fable.Core.TS.Es.Temporal.PlainDateTimeLike * ?options: Fable.Core.TS.Es.Temporal.OverflowOptions ->
+                    Fable.Core.TS.Es.Temporal.PlainDateTime
+
+            abstract compare:
+                one: Fable.Core.TS.Es.Temporal.PlainDateTimeLike * two: Fable.Core.TS.Es.Temporal.PlainDateTimeLike ->
+                    float
+
+            [<EmitConstructor>]
+            abstract Create:
+                isoYear: float *
+                isoMonth: float *
+                isoDay: float *
+                ?hour: float *
+                ?minute: float *
+                ?second: float *
+                ?millisecond: float *
+                ?microsecond: float *
+                ?nanosecond: float *
+                ?calendar: string ->
+                    Fable.Core.TS.Es.Temporal.PlainDateTime
+
+        [<Interface>]
+        type ZonedDateTimeToStringOptions =
+            inherit Fable.Core.TS.Es.Temporal.PlainDateTimeToStringOptions
+            abstract offset: Temporal.ZonedDateTimeToStringOptions.Offset option with get, set
+            abstract timeZoneName: Temporal.ZonedDateTimeToStringOptions.TimeZoneName option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    ?offset: Temporal.ZonedDateTimeToStringOptions.Offset,
+                    ?timeZoneName: Temporal.ZonedDateTimeToStringOptions.TimeZoneName,
+                    ?smallestUnit: Fable.Core.TS.Es.Temporal.PluralizeUnit5,
+                    ?roundingMode: Intl.NumberFormatOptions.RoundingMode,
+                    ?fractionalSecondDigits: Temporal.PlainTimeToStringOptions.FractionalSecondDigits,
+                    ?calendarName: Temporal.PlainDateToStringOptions.CalendarName
+                ) : ZonedDateTimeToStringOptions =
+                jsNative
+
+        [<Interface>]
+        type ZonedDateTimeFromOptions =
+            inherit Fable.Core.TS.Es.Temporal.OverflowOptions
+            inherit Fable.Core.TS.Es.Temporal.DisambiguationOptions
+            abstract offset: Temporal.ZonedDateTimeFromOptions.Offset option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    ?offset: Temporal.ZonedDateTimeFromOptions.Offset,
+                    ?disambiguation: Temporal.ZonedDateTimeFromOptions.Disambiguation,
+                    ?overflow: Temporal.OverflowOptions.Overflow
+                ) : ZonedDateTimeFromOptions =
+                jsNative
+
+        type ZonedDateTime =
+            abstract calendarId: string
+            abstract timeZoneId: string
+            abstract era: string option
+            abstract eraYear: float option
+            abstract year: float
+            abstract month: float
+            abstract monthCode: string
+            abstract day: float
+            abstract hour: float
+            abstract minute: float
+            abstract second: float
+            abstract millisecond: float
+            abstract microsecond: float
+            abstract nanosecond: float
+            abstract epochMilliseconds: float
+            abstract epochNanoseconds: bigint
+            abstract dayOfWeek: float
+            abstract dayOfYear: float
+            abstract weekOfYear: float option
+            abstract yearOfWeek: float option
+            abstract hoursInDay: float
+            abstract daysInWeek: float
+            abstract daysInMonth: float
+            abstract daysInYear: float
+            abstract monthsInYear: float
+            abstract inLeapYear: bool
+            abstract offsetNanoseconds: float
+            abstract offset: string
+
+            abstract ``with``:
+                zonedDateTimeLike: Fable.Core.TS.Es.Temporal.ZonedDateTime.With.ZonedDateTimeLike *
+                ?options: Fable.Core.TS.Es.Temporal.ZonedDateTimeFromOptions ->
+                    Fable.Core.TS.Es.Temporal.ZonedDateTime
+
+            abstract withPlainTime:
+                ?plainTime: Fable.Core.TS.Es.Temporal.PlainTimeLike -> Fable.Core.TS.Es.Temporal.ZonedDateTime
+
+            abstract withTimeZone:
+                timeZone: Fable.Core.TS.Es.Temporal.TimeZoneLike -> Fable.Core.TS.Es.Temporal.ZonedDateTime
+
+            abstract withCalendar:
+                calendar: Fable.Core.TS.Es.Temporal.CalendarLike -> Fable.Core.TS.Es.Temporal.ZonedDateTime
+
+            abstract add:
+                duration: Fable.Core.TS.Es.Temporal.DurationLike * ?options: Fable.Core.TS.Es.Temporal.OverflowOptions ->
+                    Fable.Core.TS.Es.Temporal.ZonedDateTime
+
+            abstract subtract:
+                duration: Fable.Core.TS.Es.Temporal.DurationLike * ?options: Fable.Core.TS.Es.Temporal.OverflowOptions ->
+                    Fable.Core.TS.Es.Temporal.ZonedDateTime
+
+            abstract until:
+                other: Fable.Core.TS.Es.Temporal.ZonedDateTimeLike *
+                ?options:
+                    Fable.Core.TS.Es.Temporal.RoundingOptionsWithLargestUnit<Temporal.ZonedDateTime.Until.Options.Item> ->
+                    Fable.Core.TS.Es.Temporal.Duration
+
+            abstract since:
+                other: Fable.Core.TS.Es.Temporal.ZonedDateTimeLike *
+                ?options:
+                    Fable.Core.TS.Es.Temporal.RoundingOptionsWithLargestUnit<Temporal.ZonedDateTime.Until.Options.Item> ->
+                    Fable.Core.TS.Es.Temporal.Duration
+
+            abstract round: roundTo: Fable.Core.TS.Es.Temporal.PluralizeUnit2 -> Fable.Core.TS.Es.Temporal.ZonedDateTime
+
+            abstract round:
+                roundTo: Fable.Core.TS.Es.Temporal.RoundingOptions<Temporal.ZonedDateTime.Round.RoundTo.Item> ->
+                    Fable.Core.TS.Es.Temporal.ZonedDateTime
+
+            abstract equals: other: Fable.Core.TS.Es.Temporal.ZonedDateTimeLike -> bool
+            abstract toString: ?options: Fable.Core.TS.Es.Temporal.ZonedDateTimeToStringOptions -> string
+            abstract toLocaleString: ?locales: Intl.LocalesArgument * ?options: Intl.DateTimeFormatOptions -> string
+            abstract toJSON: unit -> string
+            abstract valueOf: unit -> unit
+            abstract startOfDay: unit -> Fable.Core.TS.Es.Temporal.ZonedDateTime
+
+            abstract getTimeZoneTransition:
+                direction: Temporal.ZonedDateTime.GetTimeZoneTransition.Direction ->
+                    Fable.Core.TS.Es.Temporal.ZonedDateTime option
+
+            abstract getTimeZoneTransition:
+                direction: Fable.Core.TS.Es.Temporal.TransitionOptions -> Fable.Core.TS.Es.Temporal.ZonedDateTime option
+
+            abstract toInstant: unit -> Fable.Core.TS.Es.Temporal.Instant
+            abstract toPlainDate: unit -> Fable.Core.TS.Es.Temporal.PlainDate
+            abstract toPlainTime: unit -> Fable.Core.TS.Es.Temporal.PlainTime
+            abstract toPlainDateTime: unit -> Fable.Core.TS.Es.Temporal.PlainDateTime
+
+            [<Emit("$0[Symbol.toStringTag]")>]
+            abstract SymbolToStringTag: string
+
+        type ZonedDateTimeConstructor =
+            abstract from:
+                item: Fable.Core.TS.Es.Temporal.ZonedDateTimeLike *
+                ?options: Fable.Core.TS.Es.Temporal.ZonedDateTimeFromOptions ->
+                    Fable.Core.TS.Es.Temporal.ZonedDateTime
+
+            abstract compare:
+                one: Fable.Core.TS.Es.Temporal.ZonedDateTimeLike * two: Fable.Core.TS.Es.Temporal.ZonedDateTimeLike ->
+                    float
+
+            [<EmitConstructor>]
+            abstract Create:
+                epochNanoseconds: bigint * timeZone: string * ?calendar: string ->
+                    Fable.Core.TS.Es.Temporal.ZonedDateTime
+
+        [<Interface>]
+        type DurationRelativeToOptions =
+            abstract relativeTo:
+                U6<
+                    string,
+                    Fable.Core.TS.Es.Temporal.DateLikeObject,
+                    Fable.Core.TS.Es.Temporal.PlainDate,
+                    Fable.Core.TS.Es.Temporal.PlainDateTime,
+                    Fable.Core.TS.Es.Temporal.ZonedDateTime,
+                    Fable.Core.TS.Es.Temporal.ZonedDateTimeLikeObject
+                 > option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (?relativeTo:
+                    U6<
+                        string,
+                        Fable.Core.TS.Es.Temporal.DateLikeObject,
+                        Fable.Core.TS.Es.Temporal.PlainDate,
+                        Fable.Core.TS.Es.Temporal.PlainDateTime,
+                        Fable.Core.TS.Es.Temporal.ZonedDateTime,
+                        Fable.Core.TS.Es.Temporal.ZonedDateTimeLikeObject
+                     >)
+                : DurationRelativeToOptions =
+                jsNative
+
+        [<Interface>]
+        type DurationRoundingOptions =
+            inherit Fable.Core.TS.Es.Temporal.DurationRelativeToOptions
+            inherit Fable.Core.TS.Es.Temporal.RoundingOptionsWithLargestUnit<Temporal.ZonedDateTime.Until.Options.Item>
+            abstract smallestUnit: Fable.Core.TS.Es.Temporal.PluralizeUnit3 option with get, set
+            abstract largestUnit: Temporal.DurationRoundingOptions.LargestUnit option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    ?smallestUnit: Fable.Core.TS.Es.Temporal.PluralizeUnit3,
+                    ?roundingIncrement: float,
+                    ?roundingMode: Intl.NumberFormatOptions.RoundingMode,
+                    ?largestUnit: Temporal.DurationRoundingOptions.LargestUnit,
+                    ?relativeTo:
+                        U6<
+                            string,
+                            Fable.Core.TS.Es.Temporal.DateLikeObject,
+                            Fable.Core.TS.Es.Temporal.PlainDate,
+                            Fable.Core.TS.Es.Temporal.PlainDateTime,
+                            Fable.Core.TS.Es.Temporal.ZonedDateTime,
+                            Fable.Core.TS.Es.Temporal.ZonedDateTimeLikeObject
+                         >
+                ) : DurationRoundingOptions =
+                jsNative
+
+        [<Interface>]
+        type DurationToStringOptions =
+            inherit Fable.Core.TS.Es.Temporal.ToStringRoundingOptionsWithFractionalSeconds<
+                Temporal.DurationToStringOptions.Base.Item
+                     >
+
+            abstract smallestUnit: Fable.Core.TS.Es.Temporal.PluralizeUnit6 option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    ?smallestUnit: Fable.Core.TS.Es.Temporal.PluralizeUnit6,
+                    ?roundingMode: Intl.NumberFormatOptions.RoundingMode,
+                    ?fractionalSecondDigits: Temporal.PlainTimeToStringOptions.FractionalSecondDigits
+                ) : DurationToStringOptions =
+                jsNative
+
+        [<Interface>]
+        type DurationTotalOptions =
+            inherit Fable.Core.TS.Es.Temporal.DurationRelativeToOptions
+            abstract unit: Fable.Core.TS.Es.Temporal.PluralizeUnit3 with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    unit: Fable.Core.TS.Es.Temporal.PluralizeUnit3,
+                    ?relativeTo:
+                        U6<
+                            string,
+                            Fable.Core.TS.Es.Temporal.DateLikeObject,
+                            Fable.Core.TS.Es.Temporal.PlainDate,
+                            Fable.Core.TS.Es.Temporal.PlainDateTime,
+                            Fable.Core.TS.Es.Temporal.ZonedDateTime,
+                            Fable.Core.TS.Es.Temporal.ZonedDateTimeLikeObject
+                         >
+                ) : DurationTotalOptions =
+                jsNative
+
+        type Duration =
+            abstract years: float
+            abstract months: float
+            abstract weeks: float
+            abstract days: float
+            abstract hours: float
+            abstract minutes: float
+            abstract seconds: float
+            abstract milliseconds: float
+            abstract microseconds: float
+            abstract nanoseconds: float
+            abstract sign: float
+            abstract blank: bool
+
+            abstract ``with``:
+                durationLike: Fable.Core.TS.Es.Temporal.Duration.With.DurationLike -> Fable.Core.TS.Es.Temporal.Duration
+
+            abstract negated: unit -> Fable.Core.TS.Es.Temporal.Duration
+            abstract abs: unit -> Fable.Core.TS.Es.Temporal.Duration
+            abstract add: other: Fable.Core.TS.Es.Temporal.DurationLike -> Fable.Core.TS.Es.Temporal.Duration
+            abstract subtract: other: Fable.Core.TS.Es.Temporal.DurationLike -> Fable.Core.TS.Es.Temporal.Duration
+            abstract round: roundTo: Fable.Core.TS.Es.Temporal.PluralizeUnit2 -> Fable.Core.TS.Es.Temporal.Duration
+
+            abstract round:
+                roundTo: Fable.Core.TS.Es.Temporal.DurationRoundingOptions -> Fable.Core.TS.Es.Temporal.Duration
+
+            abstract total: totalOf: Fable.Core.TS.Es.Temporal.PluralizeUnit2 -> float
+            abstract total: totalOf: Fable.Core.TS.Es.Temporal.DurationTotalOptions -> float
+            abstract toString: ?options: Fable.Core.TS.Es.Temporal.DurationToStringOptions -> string
+            abstract toLocaleString: ?locales: Intl.LocalesArgument * ?options: Intl.DurationFormatOptions -> string
+            abstract toJSON: unit -> string
+            abstract valueOf: unit -> unit
+
+            [<Emit("$0[Symbol.toStringTag]")>]
+            abstract SymbolToStringTag: string
+
+        type DurationConstructor =
+            abstract from: item: Fable.Core.TS.Es.Temporal.DurationLike -> Fable.Core.TS.Es.Temporal.Duration
+
+            abstract compare:
+                one: Fable.Core.TS.Es.Temporal.DurationLike *
+                two: Fable.Core.TS.Es.Temporal.DurationLike *
+                ?options: Fable.Core.TS.Es.Temporal.DurationRelativeToOptions ->
+                    float
+
+            [<EmitConstructor>]
+            abstract Create:
+                ?years: float *
+                ?months: float *
+                ?weeks: float *
+                ?days: float *
+                ?hours: float *
+                ?minutes: float *
+                ?seconds: float *
+                ?milliseconds: float *
+                ?microseconds: float *
+                ?nanoseconds: float ->
+                    Fable.Core.TS.Es.Temporal.Duration
+
+        [<Interface>]
+        type InstantToStringOptions =
+            inherit Fable.Core.TS.Es.Temporal.PlainTimeToStringOptions
+            abstract timeZone: Fable.Core.TS.Es.Temporal.TimeZoneLike option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    ?timeZone: Fable.Core.TS.Es.Temporal.TimeZoneLike,
+                    ?smallestUnit: Fable.Core.TS.Es.Temporal.PluralizeUnit5,
+                    ?roundingMode: Intl.NumberFormatOptions.RoundingMode,
+                    ?fractionalSecondDigits: Temporal.PlainTimeToStringOptions.FractionalSecondDigits
+                ) : InstantToStringOptions =
+                jsNative
+
+        type Instant =
+            abstract epochMilliseconds: float
+            abstract epochNanoseconds: bigint
+            abstract add: duration: Fable.Core.TS.Es.Temporal.DurationLike -> Fable.Core.TS.Es.Temporal.Instant
+            abstract subtract: duration: Fable.Core.TS.Es.Temporal.DurationLike -> Fable.Core.TS.Es.Temporal.Instant
+
+            abstract until:
+                other: Fable.Core.TS.Es.Temporal.InstantLike *
+                ?options: Fable.Core.TS.Es.Temporal.RoundingOptionsWithLargestUnit<Fable.Core.TS.Es.Temporal.TimeUnit> ->
+                    Fable.Core.TS.Es.Temporal.Duration
+
+            abstract since:
+                other: Fable.Core.TS.Es.Temporal.InstantLike *
+                ?options: Fable.Core.TS.Es.Temporal.RoundingOptionsWithLargestUnit<Fable.Core.TS.Es.Temporal.TimeUnit> ->
+                    Fable.Core.TS.Es.Temporal.Duration
+
+            abstract round: roundTo: Fable.Core.TS.Es.Temporal.PluralizeUnit4 -> Fable.Core.TS.Es.Temporal.Instant
+
+            abstract round:
+                roundTo: Fable.Core.TS.Es.Temporal.RoundingOptions<Fable.Core.TS.Es.Temporal.TimeUnit> ->
+                    Fable.Core.TS.Es.Temporal.Instant
+
+            abstract equals: other: Fable.Core.TS.Es.Temporal.InstantLike -> bool
+            abstract toString: ?options: Fable.Core.TS.Es.Temporal.InstantToStringOptions -> string
+            abstract toLocaleString: ?locales: Intl.LocalesArgument * ?options: Intl.DateTimeFormatOptions -> string
+            abstract toJSON: unit -> string
+            abstract valueOf: unit -> unit
+
+            abstract toZonedDateTimeISO:
+                timeZone: Fable.Core.TS.Es.Temporal.TimeZoneLike -> Fable.Core.TS.Es.Temporal.ZonedDateTime
+
+            [<Emit("$0[Symbol.toStringTag]")>]
+            abstract SymbolToStringTag: string
+
+        type InstantConstructor =
+            abstract from: item: Fable.Core.TS.Es.Temporal.InstantLike -> Fable.Core.TS.Es.Temporal.Instant
+            abstract fromEpochMilliseconds: epochMilliseconds: float -> Fable.Core.TS.Es.Temporal.Instant
+            abstract fromEpochNanoseconds: epochNanoseconds: bigint -> Fable.Core.TS.Es.Temporal.Instant
+
+            abstract compare:
+                one: Fable.Core.TS.Es.Temporal.InstantLike * two: Fable.Core.TS.Es.Temporal.InstantLike -> float
+
+            [<EmitConstructor>]
+            abstract Create: epochNanoseconds: bigint -> Fable.Core.TS.Es.Temporal.Instant
+
+        [<Interface>]
+        type PlainYearMonthToPlainDateOptions =
+            abstract day: float with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create(day: float) : PlainYearMonthToPlainDateOptions = jsNative
+
+        type PlainYearMonth =
+            abstract calendarId: string
+            abstract era: string option
+            abstract eraYear: float option
+            abstract year: float
+            abstract month: float
+            abstract monthCode: string
+            abstract daysInYear: float
+            abstract daysInMonth: float
+            abstract monthsInYear: float
+            abstract inLeapYear: bool
+
+            abstract ``with``:
+                yearMonthLike: Temporal.PlainYearMonth.With.YearMonthLike *
+                ?options: Fable.Core.TS.Es.Temporal.OverflowOptions ->
+                    Fable.Core.TS.Es.Temporal.PlainYearMonth
+
+            abstract add:
+                duration: Fable.Core.TS.Es.Temporal.DurationLike * ?options: Fable.Core.TS.Es.Temporal.OverflowOptions ->
+                    Fable.Core.TS.Es.Temporal.PlainYearMonth
+
+            abstract subtract:
+                duration: Fable.Core.TS.Es.Temporal.DurationLike * ?options: Fable.Core.TS.Es.Temporal.OverflowOptions ->
+                    Fable.Core.TS.Es.Temporal.PlainYearMonth
+
+            abstract until:
+                other: Fable.Core.TS.Es.Temporal.PlainYearMonthLike *
+                ?options:
+                    Fable.Core.TS.Es.Temporal.RoundingOptionsWithLargestUnit<Temporal.PlainYearMonth.Until.Options.Item> ->
+                    Fable.Core.TS.Es.Temporal.Duration
+
+            abstract since:
+                other: Fable.Core.TS.Es.Temporal.PlainYearMonthLike *
+                ?options:
+                    Fable.Core.TS.Es.Temporal.RoundingOptionsWithLargestUnit<Temporal.PlainYearMonth.Until.Options.Item> ->
+                    Fable.Core.TS.Es.Temporal.Duration
+
+            abstract equals: other: Fable.Core.TS.Es.Temporal.PlainYearMonthLike -> bool
+            abstract toString: ?options: Fable.Core.TS.Es.Temporal.PlainDateToStringOptions -> string
+            abstract toLocaleString: ?locales: Intl.LocalesArgument * ?options: Intl.DateTimeFormatOptions -> string
+            abstract toJSON: unit -> string
+            abstract valueOf: unit -> unit
+
+            abstract toPlainDate:
+                item: Fable.Core.TS.Es.Temporal.PlainYearMonthToPlainDateOptions -> Fable.Core.TS.Es.Temporal.PlainDate
+
+            [<Emit("$0[Symbol.toStringTag]")>]
+            abstract SymbolToStringTag: string
+
+        type PlainYearMonthConstructor =
+            abstract from:
+                item: Fable.Core.TS.Es.Temporal.PlainYearMonthLike * ?options: Fable.Core.TS.Es.Temporal.OverflowOptions ->
+                    Fable.Core.TS.Es.Temporal.PlainYearMonth
+
+            abstract compare:
+                one: Fable.Core.TS.Es.Temporal.PlainYearMonthLike * two: Fable.Core.TS.Es.Temporal.PlainYearMonthLike ->
+                    float
+
+            [<EmitConstructor>]
+            abstract Create:
+                isoYear: float * isoMonth: float * ?calendar: string * ?referenceISODay: float ->
+                    Fable.Core.TS.Es.Temporal.PlainYearMonth
+
+        [<Interface>]
+        type PlainMonthDayToPlainDateOptions =
+            abstract era: string option with get, set
+            abstract eraYear: float option with get, set
+            abstract year: float option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create(?era: string, ?eraYear: float, ?year: float) : PlainMonthDayToPlainDateOptions =
+                jsNative
+
+        type PlainMonthDay =
+            abstract calendarId: string
+            abstract monthCode: string
+            abstract day: float
+
+            abstract ``with``:
+                monthDayLike: Temporal.PlainMonthDay.With.MonthDayLike *
+                ?options: Fable.Core.TS.Es.Temporal.OverflowOptions ->
+                    Fable.Core.TS.Es.Temporal.PlainMonthDay
+
+            abstract equals: other: Fable.Core.TS.Es.Temporal.PlainMonthDayLike -> bool
+            abstract toString: ?options: Fable.Core.TS.Es.Temporal.PlainDateToStringOptions -> string
+            abstract toLocaleString: ?locales: Intl.LocalesArgument * ?options: Intl.DateTimeFormatOptions -> string
+            abstract toJSON: unit -> string
+            abstract valueOf: unit -> unit
+
+            abstract toPlainDate:
+                item: Fable.Core.TS.Es.Temporal.PlainMonthDayToPlainDateOptions -> Fable.Core.TS.Es.Temporal.PlainDate
+
+            [<Emit("$0[Symbol.toStringTag]")>]
+            abstract SymbolToStringTag: string
+
+        type PlainMonthDayConstructor =
+            abstract from:
+                item: Fable.Core.TS.Es.Temporal.PlainMonthDayLike * ?options: Fable.Core.TS.Es.Temporal.OverflowOptions ->
+                    Fable.Core.TS.Es.Temporal.PlainMonthDay
+
+            [<EmitConstructor>]
+            abstract Create:
+                isoMonth: float * isoDay: float * ?calendar: string * ?referenceISOYear: float ->
+                    Fable.Core.TS.Es.Temporal.PlainMonthDay
+
+        module Duration =
+            module With =
+                [<Interface>]
+                type DurationLike =
+                    abstract days: float option with get, set
+                    abstract hours: float option with get, set
+                    abstract microseconds: float option with get, set
+                    abstract milliseconds: float option with get, set
+                    abstract minutes: float option with get, set
+                    abstract months: float option with get, set
+                    abstract nanoseconds: float option with get, set
+                    abstract seconds: float option with get, set
+                    abstract weeks: float option with get, set
+                    abstract years: float option with get, set
+
+                    [<ParamObject; Emit("$0")>]
+                    static member Create
+                        (
+                            ?days: float,
+                            ?hours: float,
+                            ?microseconds: float,
+                            ?milliseconds: float,
+                            ?minutes: float,
+                            ?months: float,
+                            ?nanoseconds: float,
+                            ?seconds: float,
+                            ?weeks: float,
+                            ?years: float
+                        ) : DurationLike =
+                        jsNative
+
+        module DurationRoundingOptions =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type LargestUnit =
+                | [<CompiledName("auto")>] Auto
+                | [<CompiledName("day")>] Day
+                | [<CompiledName("days")>] Days
+                | [<CompiledName("hour")>] Hour
+                | [<CompiledName("hours")>] Hours
+                | [<CompiledName("microsecond")>] Microsecond
+                | [<CompiledName("microseconds")>] Microseconds
+                | [<CompiledName("millisecond")>] Millisecond
+                | [<CompiledName("milliseconds")>] Milliseconds
+                | [<CompiledName("minute")>] Minute
+                | [<CompiledName("minutes")>] Minutes
+                | [<CompiledName("month")>] Month
+                | [<CompiledName("months")>] Months
+                | [<CompiledName("nanosecond")>] Nanosecond
+                | [<CompiledName("nanoseconds")>] Nanoseconds
+                | [<CompiledName("second")>] Second
+                | [<CompiledName("seconds")>] Seconds
+                | [<CompiledName("week")>] Week
+                | [<CompiledName("weeks")>] Weeks
+                | [<CompiledName("year")>] Year
+                | [<CompiledName("years")>] Years
+
+        module DurationToStringOptions =
+            module Base =
+                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                type Item =
+                    | [<CompiledName("microsecond")>] Microsecond
+                    | [<CompiledName("millisecond")>] Millisecond
+                    | [<CompiledName("nanosecond")>] Nanosecond
+                    | [<CompiledName("second")>] Second
+
+        module OverflowOptions =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Overflow =
+                | [<CompiledName("constrain")>] Constrain
+                | [<CompiledName("reject")>] Reject
+
+        module PlainDateTime =
+            module With =
+                [<Interface>]
+                type DateTimeLike =
+                    abstract day: float option with get, set
+                    abstract era: string option with get, set
+                    abstract eraYear: float option with get, set
+                    abstract hour: float option with get, set
+                    abstract microsecond: float option with get, set
+                    abstract millisecond: float option with get, set
+                    abstract minute: float option with get, set
+                    abstract month: float option with get, set
+                    abstract monthCode: string option with get, set
+                    abstract nanosecond: float option with get, set
+                    abstract second: float option with get, set
+                    abstract year: float option with get, set
+
+                    [<ParamObject; Emit("$0")>]
+                    static member Create
+                        (
+                            ?day: float,
+                            ?era: string,
+                            ?eraYear: float,
+                            ?hour: float,
+                            ?microsecond: float,
+                            ?millisecond: float,
+                            ?minute: float,
+                            ?month: float,
+                            ?monthCode: string,
+                            ?nanosecond: float,
+                            ?second: float,
+                            ?year: float
+                        ) : DateTimeLike =
+                        jsNative
+
+        module PlainDateToStringOptions =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type CalendarName =
+                | [<CompiledName("always")>] Always
+                | [<CompiledName("auto")>] Auto
+                | [<CompiledName("critical")>] Critical
+                | [<CompiledName("never")>] Never
+
+        module PlainMonthDay =
+            module With =
+                [<Interface>]
+                type MonthDayLike =
+                    abstract day: float option with get, set
+                    abstract era: string option with get, set
+                    abstract eraYear: float option with get, set
+                    abstract month: float option with get, set
+                    abstract monthCode: string option with get, set
+                    abstract year: float option with get, set
+
+                    [<ParamObject; Emit("$0")>]
+                    static member Create
+                        (?day: float, ?era: string, ?eraYear: float, ?month: float, ?monthCode: string, ?year: float)
+                        : MonthDayLike =
+                        jsNative
+
+        module PlainTime =
+            module With =
+                [<Interface>]
+                type TimeLike =
+                    abstract hour: float option with get, set
+                    abstract microsecond: float option with get, set
+                    abstract millisecond: float option with get, set
+                    abstract minute: float option with get, set
+                    abstract nanosecond: float option with get, set
+                    abstract second: float option with get, set
+
+                    [<ParamObject; Emit("$0")>]
+                    static member Create
+                        (
+                            ?hour: float,
+                            ?microsecond: float,
+                            ?millisecond: float,
+                            ?minute: float,
+                            ?nanosecond: float,
+                            ?second: float
+                        ) : TimeLike =
+                        jsNative
+
+        module PlainTimeToStringOptions =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type FractionalSecondDigits =
+                | [<CompiledName("auto")>] Auto
+                | [<CompiledValue(0)>] N0
+                | [<CompiledValue(1)>] N1
+                | [<CompiledValue(2)>] N2
+                | [<CompiledValue(3)>] N3
+                | [<CompiledValue(4)>] N4
+                | [<CompiledValue(5)>] N5
+                | [<CompiledValue(6)>] N6
+                | [<CompiledValue(7)>] N7
+                | [<CompiledValue(8)>] N8
+                | [<CompiledValue(9)>] N9
+
+            module Base =
+                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                type Item =
+                    | [<CompiledName("microsecond")>] Microsecond
+                    | [<CompiledName("millisecond")>] Millisecond
+                    | [<CompiledName("minute")>] Minute
+                    | [<CompiledName("nanosecond")>] Nanosecond
+                    | [<CompiledName("second")>] Second
+
+        module PlainYearMonth =
+            module Until =
+                module Options =
+                    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                    type Item =
+                        | [<CompiledName("month")>] Month
+                        | [<CompiledName("year")>] Year
+
+            module With =
+                [<Interface>]
+                type YearMonthLike =
+                    abstract era: string option with get, set
+                    abstract eraYear: float option with get, set
+                    abstract month: float option with get, set
+                    abstract monthCode: string option with get, set
+                    abstract year: float option with get, set
+
+                    [<ParamObject; Emit("$0")>]
+                    static member Create
+                        (?era: string, ?eraYear: float, ?month: float, ?monthCode: string, ?year: float)
+                        : YearMonthLike =
+                        jsNative
+
+        module ToStringRoundingOptions =
+            [<Interface>]
+            type Base<'Units> =
+                abstract smallestUnit: U2<'Units, string> option with get, set
+                abstract roundingMode: Intl.NumberFormatOptions.RoundingMode option with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create
+                    (?smallestUnit: U2<'Units, string>, ?roundingMode: Intl.NumberFormatOptions.RoundingMode)
+                    : Base<'Units> =
+                    jsNative
+
+        module YearMonthLikeObject =
+            [<Interface>]
+            type Base =
+                abstract year: float option with get, set
+                abstract era: string option with get, set
+                abstract eraYear: float option with get, set
+                abstract month: float option with get, set
+                abstract monthCode: string option with get, set
+                abstract calendar: string option with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create
+                    (?year: float, ?era: string, ?eraYear: float, ?month: float, ?monthCode: string, ?calendar: string)
+                    : Base =
+                    jsNative
+
+        module ZonedDateTime =
+            module GetTimeZoneTransition =
+                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                type Direction =
+                    | [<CompiledName("next")>] Next
+                    | [<CompiledName("previous")>] Previous
+
+            module Round =
+                module RoundTo =
+                    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                    type Item =
+                        | [<CompiledName("day")>] Day
+                        | [<CompiledName("hour")>] Hour
+                        | [<CompiledName("microsecond")>] Microsecond
+                        | [<CompiledName("millisecond")>] Millisecond
+                        | [<CompiledName("minute")>] Minute
+                        | [<CompiledName("nanosecond")>] Nanosecond
+                        | [<CompiledName("second")>] Second
+
+            module Until =
+                module Options =
+                    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                    type Item =
+                        | [<CompiledName("day")>] Day
+                        | [<CompiledName("hour")>] Hour
+                        | [<CompiledName("microsecond")>] Microsecond
+                        | [<CompiledName("millisecond")>] Millisecond
+                        | [<CompiledName("minute")>] Minute
+                        | [<CompiledName("month")>] Month
+                        | [<CompiledName("nanosecond")>] Nanosecond
+                        | [<CompiledName("second")>] Second
+                        | [<CompiledName("week")>] Week
+                        | [<CompiledName("year")>] Year
+
+            module With =
+                [<Interface>]
+                type ZonedDateTimeLike =
+                    abstract day: float option with get, set
+                    abstract era: string option with get, set
+                    abstract eraYear: float option with get, set
+                    abstract hour: float option with get, set
+                    abstract microsecond: float option with get, set
+                    abstract millisecond: float option with get, set
+                    abstract minute: float option with get, set
+                    abstract month: float option with get, set
+                    abstract monthCode: string option with get, set
+                    abstract nanosecond: float option with get, set
+                    abstract offset: string option with get, set
+                    abstract second: float option with get, set
+                    abstract year: float option with get, set
+
+                    [<ParamObject; Emit("$0")>]
+                    static member Create
+                        (
+                            ?day: float,
+                            ?era: string,
+                            ?eraYear: float,
+                            ?hour: float,
+                            ?microsecond: float,
+                            ?millisecond: float,
+                            ?minute: float,
+                            ?month: float,
+                            ?monthCode: string,
+                            ?nanosecond: float,
+                            ?offset: string,
+                            ?second: float,
+                            ?year: float
+                        ) : ZonedDateTimeLike =
+                        jsNative
+
+        module ZonedDateTimeFromOptions =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Disambiguation =
+                | [<CompiledName("compatible")>] Compatible
+                | [<CompiledName("earlier")>] Earlier
+                | [<CompiledName("later")>] Later
+                | [<CompiledName("reject")>] Reject
+
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Offset =
+                | [<CompiledName("ignore")>] Ignore
+                | [<CompiledName("prefer")>] Prefer
+                | [<CompiledName("reject")>] Reject
+                | [<CompiledName("use")>] Use
+
+        module ZonedDateTimeToStringOptions =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Offset =
+                | [<CompiledName("auto")>] Auto
+                | [<CompiledName("never")>] Never
+
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type TimeZoneName =
+                | [<CompiledName("auto")>] Auto
+                | [<CompiledName("critical")>] Critical
+                | [<CompiledName("never")>] Never
 
     module Uint16Array =
         module Every =
@@ -23550,119 +25026,6 @@ module Es =
             type Mapfn<'T> = delegate of v: 'T * k: float -> float
 
             type Mapfn2<'T> = delegate of v: 'T * k: float -> float
-
-    module YearMonthLikeObject =
-        [<Interface>]
-        type Base =
-            abstract year: float option with get, set
-            abstract era: string option with get, set
-            abstract eraYear: float option with get, set
-            abstract month: float option with get, set
-            abstract monthCode: string option with get, set
-            abstract calendar: string option with get, set
-
-            [<ParamObject; Emit("$0")>]
-            static member Create
-                (?year: float, ?era: string, ?eraYear: float, ?month: float, ?monthCode: string, ?calendar: string)
-                : Base =
-                jsNative
-
-    module ZonedDateTime =
-        module GetTimeZoneTransition =
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type Direction =
-                | [<CompiledName("next")>] Next
-                | [<CompiledName("previous")>] Previous
-
-        module Round =
-            module RoundTo =
-                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                type Item =
-                    | [<CompiledName("day")>] Day
-                    | [<CompiledName("hour")>] Hour
-                    | [<CompiledName("microsecond")>] Microsecond
-                    | [<CompiledName("millisecond")>] Millisecond
-                    | [<CompiledName("minute")>] Minute
-                    | [<CompiledName("nanosecond")>] Nanosecond
-                    | [<CompiledName("second")>] Second
-
-        module Until =
-            module Options =
-                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                type Item =
-                    | [<CompiledName("day")>] Day
-                    | [<CompiledName("hour")>] Hour
-                    | [<CompiledName("microsecond")>] Microsecond
-                    | [<CompiledName("millisecond")>] Millisecond
-                    | [<CompiledName("minute")>] Minute
-                    | [<CompiledName("month")>] Month
-                    | [<CompiledName("nanosecond")>] Nanosecond
-                    | [<CompiledName("second")>] Second
-                    | [<CompiledName("week")>] Week
-                    | [<CompiledName("year")>] Year
-
-        module With =
-            [<Interface>]
-            type ZonedDateTimeLike =
-                abstract day: float option with get, set
-                abstract era: string option with get, set
-                abstract eraYear: float option with get, set
-                abstract hour: float option with get, set
-                abstract microsecond: float option with get, set
-                abstract millisecond: float option with get, set
-                abstract minute: float option with get, set
-                abstract month: float option with get, set
-                abstract monthCode: string option with get, set
-                abstract nanosecond: float option with get, set
-                abstract offset: string option with get, set
-                abstract second: float option with get, set
-                abstract year: float option with get, set
-
-                [<ParamObject; Emit("$0")>]
-                static member Create
-                    (
-                        ?day: float,
-                        ?era: string,
-                        ?eraYear: float,
-                        ?hour: float,
-                        ?microsecond: float,
-                        ?millisecond: float,
-                        ?minute: float,
-                        ?month: float,
-                        ?monthCode: string,
-                        ?nanosecond: float,
-                        ?offset: string,
-                        ?second: float,
-                        ?year: float
-                    ) : ZonedDateTimeLike =
-                    jsNative
-
-    module ZonedDateTimeFromOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Disambiguation =
-            | [<CompiledName("compatible")>] Compatible
-            | [<CompiledName("earlier")>] Earlier
-            | [<CompiledName("later")>] Later
-            | [<CompiledName("reject")>] Reject
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Offset =
-            | [<CompiledName("ignore")>] Ignore
-            | [<CompiledName("prefer")>] Prefer
-            | [<CompiledName("reject")>] Reject
-            | [<CompiledName("use")>] Use
-
-    module ZonedDateTimeToStringOptions =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Offset =
-            | [<CompiledName("auto")>] Auto
-            | [<CompiledName("never")>] Never
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type TimeZoneName =
-            | [<CompiledName("auto")>] Auto
-            | [<CompiledName("critical")>] Critical
-            | [<CompiledName("never")>] Never
 
 module Dom =
     [<Interface>]
@@ -24446,11 +25809,6 @@ module Dom =
             : CanvasRenderingContext2DSettings =
             jsNative
 
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type AddressType =
-        | [<CompiledName("i32")>] I32
-        | [<CompiledName("i64")>] I64
-
     type CSS =
         /// <summary>
         /// The static, read-only <b><c>highlights</c></b> property of the CSS interface provides access to the HighlightRegistry used to style arbitrary text ranges using the CSS Custom Highlight API.
@@ -24739,57 +26097,6 @@ module Dom =
         static member Create(?shadowRoots: ShadowRoot[]) : CaretPositionFromPointOptions = jsNative
 
     [<Interface>]
-    type CompileError =
-        inherit Fable.Core.TS.Es.Error
-
-        [<ParamObject; Emit("$0")>]
-        static member Create(name: string, message: string, ?stack: string, ?cause: obj) : CompileError = jsNative
-
-    type CompileErrorConstructor =
-        [<EmitConstructor>]
-        abstract Create: ?message: string -> CompileError
-
-        [<Emit("$0($1...)")>]
-        abstract Invoke: ?message: string -> CompileError
-
-    [<Interface>]
-    type Exception =
-        /// <summary>
-        /// The read-only <b><c>stack</c></b> property of an object instance of type WebAssembly.Exception may contain a stack trace.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Exception/stack">MDN Reference</a>
-        /// </summary>
-        abstract stack: string option
-        /// <summary>
-        /// The <b><c>getArg()</c></b> prototype method of the Exception object can be used to get the value of a specified item in the exception's data arguments.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Exception/getArg">MDN Reference</a>
-        /// </summary>
-        abstract getArg: exceptionTag: obj * index: float -> obj
-        /// <summary>
-        /// The <b><c>is()</c></b> prototype method of the Exception object can be used to test if the Exception matches a given tag.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Exception/is">MDN Reference</a>
-        /// </summary>
-        abstract is: exceptionTag: obj -> bool
-
-        [<ParamObject; Emit("$0")>]
-        static member Create(getArg: Func<obj, float, obj>, is: (obj -> bool), ?stack: string) : Exception = jsNative
-
-    type ExceptionConstructor =
-        [<EmitConstructor>]
-        abstract Create: exceptionTag: obj * payload: obj[] * ?options: ExceptionOptions -> Exception
-
-    [<Interface>]
-    type ExceptionOptions =
-        abstract traceStack: bool option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create(?traceStack: bool) : ExceptionOptions = jsNative
-
-    type ExportValue = U4<Fable.Core.TS.Es.Function, Global<WebAssembly.Global.Prototype.Item>, Memory, Table>
-
-    [<Interface>]
     type GPUBufferUsage =
         /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract MAP_READ: float
@@ -24981,249 +26288,45 @@ module Dom =
         let TRANSIENT_ATTACHMENT = 32.0
 
     [<Interface>]
-    type Global<'T> =
-        /// <summary>
-        /// The <b><c>value</c></b> property of the WebAssembly.Global object prototype returns the value contained inside the global variable.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Global/value">MDN Reference</a>
-        /// </summary>
-        abstract value: obj with get, set
-        /// <summary>
-        /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Global/valueOf">MDN Reference</a>
-        /// </summary>
-        abstract valueOf: unit -> obj
-
-        [<ParamObject; Emit("$0")>]
-        static member Create(value: obj, valueOf: (unit -> obj)) : Global<'T> = jsNative
-
-    type GlobalConstructor =
-        [<EmitConstructor>]
-        abstract Create<'T> : descriptor: GlobalDescriptor<'T> * ?v: obj -> Global<'T>
-
-    [<Interface>]
-    type GlobalDescriptor<'T> =
-        abstract ``mutable``: bool option with get, set
-        abstract value: 'T with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create(value: 'T, ?``mutable``: bool) : GlobalDescriptor<'T> = jsNative
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type ImportExportKind =
-        | [<CompiledName("function")>] Function
-        | [<CompiledName("global")>] Global
-        | [<CompiledName("memory")>] Memory
-        | [<CompiledName("table")>] Table
-        | [<CompiledName("tag")>] Tag
-
-    type ImportValue = U5<float, Fable.Core.TS.Es.Function, Global<WebAssembly.Global.Prototype.Item>, Memory, Table>
-
-    [<Interface>]
-    type Instance =
-        /// <summary>
-        /// The <b><c>exports</c></b> read-only property of the WebAssembly.Instance object prototype returns an object containing as its members all the functions exported from the WebAssembly module instance, to allow them to be accessed and used by JavaScript.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Instance/exports">MDN Reference</a>
-        /// </summary>
-        abstract exports: JS.Record<string, ExportValue>
-
-        [<ParamObject; Emit("$0")>]
-        static member Create(exports: JS.Record<string, ExportValue>) : Instance = jsNative
-
-    type InstanceConstructor =
-        [<EmitConstructor>]
-        abstract Create: ``module``: obj * ?importObject: JS.Record<string, JS.Record<string, ImportValue>> -> Instance
-
-    [<Interface>]
-    type LinkError =
-        inherit Fable.Core.TS.Es.Error
-
-        [<ParamObject; Emit("$0")>]
-        static member Create(name: string, message: string, ?stack: string, ?cause: obj) : LinkError = jsNative
-
-    type LinkErrorConstructor =
-        [<EmitConstructor>]
-        abstract Create: ?message: string -> LinkError
-
-        [<Emit("$0($1...)")>]
-        abstract Invoke: ?message: string -> LinkError
-
-    [<Interface>]
-    type Memory =
-        /// <summary>
-        /// The read-only <b><c>buffer</c></b> prototype property of the WebAssembly.Memory object returns the buffer contained in the memory. Depending on whether or not the memory was constructed with shared: true, the buffer is either an ArrayBuffer or a SharedArrayBuffer.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Memory/buffer">MDN Reference</a>
-        /// </summary>
-        abstract buffer: Fable.Core.TS.Es.ArrayBuffer
-        /// <summary>
-        /// The <b><c>grow()</c></b> prototype method of the WebAssembly.Memory object increases the size of the memory instance by a specified number of WebAssembly pages.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Memory/grow">MDN Reference</a>
-        /// </summary>
-        abstract grow: delta: float -> float
-        abstract toFixedLengthBuffer: unit -> Fable.Core.TS.Es.ArrayBuffer
-        abstract toResizableBuffer: unit -> Fable.Core.TS.Es.ArrayBuffer
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                buffer: Fable.Core.TS.Es.ArrayBuffer,
-                grow: (float -> float),
-                toFixedLengthBuffer: (unit -> Fable.Core.TS.Es.ArrayBuffer),
-                toResizableBuffer: (unit -> Fable.Core.TS.Es.ArrayBuffer)
-            ) : Memory =
-            jsNative
-
-    type MemoryConstructor =
-        [<EmitConstructor>]
-        abstract Create: descriptor: MemoryDescriptor -> Memory
-
-    [<Interface>]
-    type MemoryDescriptor =
-        abstract address: AddressType option with get, set
-        abstract initial: float with get, set
-        abstract maximum: float option with get, set
-        abstract shared: bool option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create(initial: float, ?address: AddressType, ?maximum: float, ?shared: bool) : MemoryDescriptor =
-            jsNative
-
-    [<Interface>]
-    type ModuleExportDescriptor =
-        abstract kind: ImportExportKind with get, set
-        abstract name: string with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create(kind: ImportExportKind, name: string) : ModuleExportDescriptor = jsNative
-
-    [<Interface>]
-    type ModuleImportDescriptor =
-        abstract kind: ImportExportKind with get, set
-        abstract ``module``: string with get, set
-        abstract name: string with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create(kind: ImportExportKind, ``module``: string, name: string) : ModuleImportDescriptor =
-            jsNative
-
-    [<Interface>]
     type NodeFilter2 =
         abstract acceptNode: node: Node -> float
 
         [<ParamObject; Emit("$0")>]
         static member Create(acceptNode: (Node -> float)) : NodeFilter2 = jsNative
 
-    [<Interface>]
-    type RuntimeError =
-        inherit Fable.Core.TS.Es.Error
-
-        [<ParamObject; Emit("$0")>]
-        static member Create(name: string, message: string, ?stack: string, ?cause: obj) : RuntimeError = jsNative
-
-    type RuntimeErrorConstructor =
-        [<EmitConstructor>]
-        abstract Create: ?message: string -> RuntimeError
-
-        [<Emit("$0($1...)")>]
-        abstract Invoke: ?message: string -> RuntimeError
-
-    [<Interface>]
-    type Table =
-        /// <summary>
-        /// The read-only <b><c>length</c></b> prototype property of the WebAssembly.Table object returns the length of the table, i.e., the number of elements in the table.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Table/length">MDN Reference</a>
-        /// </summary>
-        abstract length: float
-        /// <summary>
-        /// The <b><c>get()</c></b> prototype method of the WebAssembly.Table() object retrieves the element stored at a given index.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Table/get">MDN Reference</a>
-        /// </summary>
-        abstract get: index: float -> obj
-        /// <summary>
-        /// The <b><c>grow()</c></b> prototype method of the WebAssembly.Table object increases the size of the Table instance by a specified number of elements, filled with the provided value.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Table/grow">MDN Reference</a>
-        /// </summary>
-        abstract grow: delta: float * ?value: obj -> float
-        /// <summary>
-        /// The <b><c>set()</c></b> prototype method of the WebAssembly.Table object mutates a reference stored at a given index to a different value.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Table/set">MDN Reference</a>
-        /// </summary>
-        abstract set: index: float * ?value: obj -> unit
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (length: float, get: (float -> obj), grow: Func<float, obj option, float>, set: Action<float, obj option>)
-            : Table =
-            jsNative
-
-    type TableConstructor =
-        [<EmitConstructor>]
-        abstract Create: descriptor: TableDescriptor * ?value: obj -> Table
-
-    [<Interface>]
-    type TableDescriptor =
-        abstract address: AddressType option with get, set
-        abstract element: TableKind with get, set
-        abstract initial: float with get, set
-        abstract maximum: float option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (element: TableKind, initial: float, ?address: AddressType, ?maximum: float)
-            : TableDescriptor =
-            jsNative
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type TableKind =
-        | [<CompiledName("anyfunc")>] Anyfunc
-        | [<CompiledName("externref")>] Externref
-
-    [<Interface>]
-    type TagType =
-        abstract parameters: WebAssembly.Global.Prototype.Item[] with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create(parameters: WebAssembly.Global.Prototype.Item[]) : TagType = jsNative
-
     type WebAssembly =
         /// <summary>
         /// The <b><c>WebAssembly.CompileError</c></b> object indicates an error during WebAssembly decoding or validation.
         /// </summary>
-        abstract CompileError: CompileErrorConstructor with get, set
+        abstract CompileError: WebAssembly.CompileErrorConstructor with get, set
         /// <summary>
         /// The <b><c>WebAssembly.Exception</c></b> object represents a runtime exception thrown from WebAssembly to JavaScript, or thrown from JavaScript to a WebAssembly exception handler.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Exception">MDN Reference</a>
         /// </summary>
-        abstract Exception: ExceptionConstructor with get, set
+        abstract Exception: WebAssembly.ExceptionConstructor with get, set
         /// <summary>
         /// A <b><c>WebAssembly.Global</c></b> object represents a global variable instance, accessible from both JavaScript and importable/exportable across one or more WebAssembly.Module instances. This allows dynamic linking of multiple modules.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Global">MDN Reference</a>
         /// </summary>
-        abstract Global: GlobalConstructor with get, set
+        abstract Global: WebAssembly.GlobalConstructor with get, set
         /// <summary>
         /// A <b><c>WebAssembly.Instance</c></b> object is a stateful, executable instance of a WebAssembly.Module. Instance objects contain all the Exported WebAssembly functions that allow calling into WebAssembly code from JavaScript.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Instance">MDN Reference</a>
         /// </summary>
-        abstract Instance: InstanceConstructor with get, set
+        abstract Instance: WebAssembly.InstanceConstructor with get, set
         /// <summary>
         /// The <b><c>WebAssembly.LinkError</c></b> object indicates an error during module instantiation (besides traps from the start function).
         /// </summary>
-        abstract LinkError: LinkErrorConstructor with get, set
+        abstract LinkError: WebAssembly.LinkErrorConstructor with get, set
         /// <summary>
         /// The <b><c>WebAssembly.Memory</c></b> object is a resizable ArrayBuffer or SharedArrayBuffer that holds raw bytes of memory accessed by a WebAssembly.Instance.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Memory">MDN Reference</a>
         /// </summary>
-        abstract Memory: MemoryConstructor with get, set
+        abstract Memory: WebAssembly.MemoryConstructor with get, set
         /// <summary>
         /// A <b><c>WebAssembly.Module</c></b> object contains stateless WebAssembly code that has already been compiled by the browser — this can be efficiently shared with Workers, and instantiated multiple times.
         /// <br /><br />
@@ -25233,76 +26336,63 @@ module Dom =
         /// <summary>
         /// The <b><c>WebAssembly.RuntimeError</c></b> object is the error type that is thrown whenever WebAssembly specifies a trap.
         /// </summary>
-        abstract RuntimeError: RuntimeErrorConstructor with get, set
+        abstract RuntimeError: WebAssembly.RuntimeErrorConstructor with get, set
         /// <summary>
         /// The <b><c>WebAssembly.Table</c></b> object is a JavaScript wrapper object — an array-like structure representing a WebAssembly table, which stores homogeneous references. A table created by JavaScript or in WebAssembly code will be accessible and mutable from both JavaScript and WebAssembly.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Table">MDN Reference</a>
         /// </summary>
-        abstract Table: TableConstructor with get, set
+        abstract Table: WebAssembly.TableConstructor with get, set
         /// <summary>
         /// The <b><c>WebAssembly.Tag</c></b> object defines a type of a WebAssembly exception that can be thrown to/from WebAssembly code.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Tag">MDN Reference</a>
         /// </summary>
         abstract Tag: WebAssembly.TagConstructor with get, set
-        abstract JSTag: obj with get, set
+        abstract JSTag: WebAssembly.Tag with get, set
+
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/compile_static">MDN Reference</a>
         /// </summary>
-        abstract compile: bytes: AllowSharedBufferSource * ?options: WebAssemblyCompileOptions -> JS.Promise<obj>
+        abstract compile:
+            bytes: AllowSharedBufferSource * ?options: WebAssembly.WebAssemblyCompileOptions ->
+                JS.Promise<WebAssembly.Module>
 
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/compileStreaming_static">MDN Reference</a>
         /// </summary>
         abstract compileStreaming:
-            source: U2<JS.Promise<Response>, Response> * ?options: WebAssemblyCompileOptions -> JS.Promise<obj>
+            source: U2<JS.Promise<Response>, Response> * ?options: WebAssembly.WebAssemblyCompileOptions ->
+                JS.Promise<WebAssembly.Module>
 
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/instantiate_static">MDN Reference</a>
         /// </summary>
         abstract instantiate:
             bytes: AllowSharedBufferSource *
-            ?importObject: JS.Record<string, JS.Record<string, ImportValue>> *
-            ?options: WebAssemblyCompileOptions ->
-                JS.Promise<WebAssemblyInstantiatedSource>
+            ?importObject: WebAssembly.Imports *
+            ?options: WebAssembly.WebAssemblyCompileOptions ->
+                JS.Promise<WebAssembly.WebAssemblyInstantiatedSource>
 
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/instantiate_static">MDN Reference</a>
         /// </summary>
         abstract instantiate:
-            moduleObject: obj * ?importObject: JS.Record<string, JS.Record<string, ImportValue>> -> JS.Promise<Instance>
+            moduleObject: WebAssembly.Module * ?importObject: WebAssembly.Imports -> JS.Promise<WebAssembly.Instance>
 
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/instantiateStreaming_static">MDN Reference</a>
         /// </summary>
         abstract instantiateStreaming:
             source: U2<JS.Promise<Response>, Response> *
-            ?importObject: JS.Record<string, JS.Record<string, ImportValue>> *
-            ?options: WebAssemblyCompileOptions ->
-                JS.Promise<WebAssemblyInstantiatedSource>
+            ?importObject: WebAssembly.Imports *
+            ?options: WebAssembly.WebAssemblyCompileOptions ->
+                JS.Promise<WebAssembly.WebAssemblyInstantiatedSource>
 
         /// <summary>
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/validate_static">MDN Reference</a>
         /// </summary>
-        abstract validate: bytes: AllowSharedBufferSource * ?options: WebAssemblyCompileOptions -> bool
-
-    [<Interface>]
-    type WebAssemblyCompileOptions =
-        abstract builtins: string[] option with get, set
-        abstract importedStringConstants: string option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create(?builtins: string[], ?importedStringConstants: string) : WebAssemblyCompileOptions =
-            jsNative
-
-    [<Interface>]
-    type WebAssemblyInstantiatedSource =
-        abstract instance: Instance with get, set
-        abstract ``module``: obj with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create(instance: Instance, ``module``: obj) : WebAssemblyInstantiatedSource = jsNative
+        abstract validate: bytes: AllowSharedBufferSource * ?options: WebAssembly.WebAssemblyCompileOptions -> bool
 
     [<Interface>]
     type XPathNSResolver2 =
@@ -94763,6 +95853,13 @@ module Dom =
 
     type AutoFillSection = string
 
+    /// <summary>
+    /// A string that is a valid <a href="https://unicode.org/reports/tr35/#Unicode_locale_identifier">Unicode BCP 47 Locale Identifier</a>.
+    /// <br /><br />
+    /// For example: "fa", "es-MX", "zh-Hant-TW".
+    /// <br /><br />
+    /// See <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#locales_argument">MDN - Intl - locales argument</a>.
+    /// </summary>
     type Base64URLString = string
 
     type BigInteger = Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>
@@ -97501,6 +98598,7715 @@ module Dom =
         module ForEach =
             type Callbackfn = delegate of value: string * key: string * parent: GPUSupportedFeatures -> unit
 
+    module GlobalThis =
+        type AacEncoderConfig = Fable.Core.TS.Dom.AacEncoderConfig
+
+        type AddEventListenerOptions = Fable.Core.TS.Dom.AddEventListenerOptions
+
+        type AddressErrors = Fable.Core.TS.Dom.AddressErrors
+
+        type AesCbcParams = Fable.Core.TS.Dom.AesCbcParams
+
+        type AesCtrParams = Fable.Core.TS.Dom.AesCtrParams
+
+        type AesDerivedKeyParams = Fable.Core.TS.Dom.AesDerivedKeyParams
+
+        type AesGcmParams = Fable.Core.TS.Dom.AesGcmParams
+
+        type AesKeyAlgorithm = Fable.Core.TS.Dom.AesKeyAlgorithm
+
+        type AesKeyGenParams = Fable.Core.TS.Dom.AesKeyGenParams
+
+        type Algorithm = Fable.Core.TS.Dom.Algorithm
+
+        type AllAcceptedCredentialsOptions = Fable.Core.TS.Dom.AllAcceptedCredentialsOptions
+
+        type AnalyserOptions = Fable.Core.TS.Dom.AnalyserOptions
+
+        type AnimationEventInit = Fable.Core.TS.Dom.AnimationEventInit
+
+        type AnimationPlaybackEventInit = Fable.Core.TS.Dom.AnimationPlaybackEventInit
+
+        type AssignedNodesOptions = Fable.Core.TS.Dom.AssignedNodesOptions
+
+        type AudioBufferOptions = Fable.Core.TS.Dom.AudioBufferOptions
+
+        type AudioBufferSourceOptions = Fable.Core.TS.Dom.AudioBufferSourceOptions
+
+        type AudioConfiguration = Fable.Core.TS.Dom.AudioConfiguration
+
+        type AudioContextOptions = Fable.Core.TS.Dom.AudioContextOptions
+
+        type AudioDataCopyToOptions = Fable.Core.TS.Dom.AudioDataCopyToOptions
+
+        type AudioDataInit = Fable.Core.TS.Dom.AudioDataInit
+
+        type AudioDecoderConfig = Fable.Core.TS.Dom.AudioDecoderConfig
+
+        type AudioDecoderInit = Fable.Core.TS.Dom.AudioDecoderInit
+
+        type AudioDecoderSupport = Fable.Core.TS.Dom.AudioDecoderSupport
+
+        type AudioEncoderConfig = Fable.Core.TS.Dom.AudioEncoderConfig
+
+        type AudioEncoderInit = Fable.Core.TS.Dom.AudioEncoderInit
+
+        type AudioEncoderSupport = Fable.Core.TS.Dom.AudioEncoderSupport
+
+        type AudioNodeOptions = Fable.Core.TS.Dom.AudioNodeOptions
+
+        type AudioProcessingEventInit = Fable.Core.TS.Dom.AudioProcessingEventInit
+
+        type AudioTimestamp = Fable.Core.TS.Dom.AudioTimestamp
+
+        type AudioWorkletNodeOptions = Fable.Core.TS.Dom.AudioWorkletNodeOptions
+
+        type AuthenticationExtensionsClientInputs = Fable.Core.TS.Dom.AuthenticationExtensionsClientInputs
+
+        type AuthenticationExtensionsClientInputsJSON = Fable.Core.TS.Dom.AuthenticationExtensionsClientInputsJSON
+
+        type AuthenticationExtensionsClientOutputs = Fable.Core.TS.Dom.AuthenticationExtensionsClientOutputs
+
+        type AuthenticationExtensionsClientOutputsJSON = Fable.Core.TS.Dom.AuthenticationExtensionsClientOutputsJSON
+
+        type AuthenticationExtensionsLargeBlobInputs = Fable.Core.TS.Dom.AuthenticationExtensionsLargeBlobInputs
+
+        type AuthenticationExtensionsLargeBlobInputsJSON = Fable.Core.TS.Dom.AuthenticationExtensionsLargeBlobInputsJSON
+
+        type AuthenticationExtensionsLargeBlobOutputs = Fable.Core.TS.Dom.AuthenticationExtensionsLargeBlobOutputs
+
+        type AuthenticationExtensionsLargeBlobOutputsJSON =
+            Fable.Core.TS.Dom.AuthenticationExtensionsLargeBlobOutputsJSON
+
+        type AuthenticationExtensionsPRFInputs = Fable.Core.TS.Dom.AuthenticationExtensionsPRFInputs
+
+        type AuthenticationExtensionsPRFInputsJSON = Fable.Core.TS.Dom.AuthenticationExtensionsPRFInputsJSON
+
+        type AuthenticationExtensionsPRFOutputs = Fable.Core.TS.Dom.AuthenticationExtensionsPRFOutputs
+
+        type AuthenticationExtensionsPRFOutputsJSON = Fable.Core.TS.Dom.AuthenticationExtensionsPRFOutputsJSON
+
+        type AuthenticationExtensionsPRFValues = Fable.Core.TS.Dom.AuthenticationExtensionsPRFValues
+
+        type AuthenticationExtensionsPRFValuesJSON = Fable.Core.TS.Dom.AuthenticationExtensionsPRFValuesJSON
+
+        type AuthenticationResponseJSON = Fable.Core.TS.Dom.AuthenticationResponseJSON
+
+        type AuthenticatorAssertionResponseJSON = Fable.Core.TS.Dom.AuthenticatorAssertionResponseJSON
+
+        type AuthenticatorAttestationResponseJSON = Fable.Core.TS.Dom.AuthenticatorAttestationResponseJSON
+
+        type AuthenticatorSelectionCriteria = Fable.Core.TS.Dom.AuthenticatorSelectionCriteria
+
+        type AvcEncoderConfig = Fable.Core.TS.Dom.AvcEncoderConfig
+
+        type BiquadFilterOptions = Fable.Core.TS.Dom.BiquadFilterOptions
+
+        type BlobEventInit = Fable.Core.TS.Dom.BlobEventInit
+
+        type BlobPropertyBag = Fable.Core.TS.Dom.BlobPropertyBag
+
+        type CSSContainerCondition = Fable.Core.TS.Dom.CSSContainerCondition
+
+        type CSSMatrixComponentOptions = Fable.Core.TS.Dom.CSSMatrixComponentOptions
+
+        type CSSNumericType = Fable.Core.TS.Dom.CSSNumericType
+
+        type CSSStyleSheetInit = Fable.Core.TS.Dom.CSSStyleSheetInit
+
+        type CacheQueryOptions = Fable.Core.TS.Dom.CacheQueryOptions
+
+        type CanvasRenderingContext2DSettings = Fable.Core.TS.Dom.CanvasRenderingContext2DSettings
+
+        type CaretPositionFromPointOptions = Fable.Core.TS.Dom.CaretPositionFromPointOptions
+
+        type ChannelMergerOptions = Fable.Core.TS.Dom.ChannelMergerOptions
+
+        type ChannelSplitterOptions = Fable.Core.TS.Dom.ChannelSplitterOptions
+
+        type CheckVisibilityOptions = Fable.Core.TS.Dom.CheckVisibilityOptions
+
+        type ClientQueryOptions = Fable.Core.TS.Dom.ClientQueryOptions
+
+        type ClipboardEventInit = Fable.Core.TS.Dom.ClipboardEventInit
+
+        type ClipboardItemOptions = Fable.Core.TS.Dom.ClipboardItemOptions
+
+        type CloseEventInit = Fable.Core.TS.Dom.CloseEventInit
+
+        type CloseWatcherOptions = Fable.Core.TS.Dom.CloseWatcherOptions
+
+        type CommandEventInit = Fable.Core.TS.Dom.CommandEventInit
+
+        type CompositionEventInit = Fable.Core.TS.Dom.CompositionEventInit
+
+        type ComputedEffectTiming = Fable.Core.TS.Dom.ComputedEffectTiming
+
+        type ComputedKeyframe = Fable.Core.TS.Dom.ComputedKeyframe
+
+        type ConstantSourceOptions = Fable.Core.TS.Dom.ConstantSourceOptions
+
+        type ConstrainBooleanOrDOMStringParameters = Fable.Core.TS.Dom.ConstrainBooleanOrDOMStringParameters
+
+        type ConstrainBooleanParameters = Fable.Core.TS.Dom.ConstrainBooleanParameters
+
+        type ConstrainDOMStringParameters = Fable.Core.TS.Dom.ConstrainDOMStringParameters
+
+        type ConstrainDoubleRange = Fable.Core.TS.Dom.ConstrainDoubleRange
+
+        type ConstrainULongRange = Fable.Core.TS.Dom.ConstrainULongRange
+
+        type ContentVisibilityAutoStateChangeEventInit = Fable.Core.TS.Dom.ContentVisibilityAutoStateChangeEventInit
+
+        type ConvolverOptions = Fable.Core.TS.Dom.ConvolverOptions
+
+        type CookieChangeEventInit = Fable.Core.TS.Dom.CookieChangeEventInit
+
+        type CookieInit = Fable.Core.TS.Dom.CookieInit
+
+        type CookieListItem = Fable.Core.TS.Dom.CookieListItem
+
+        type CookieStoreDeleteOptions = Fable.Core.TS.Dom.CookieStoreDeleteOptions
+
+        type CookieStoreGetOptions = Fable.Core.TS.Dom.CookieStoreGetOptions
+
+        type CredentialCreationOptions = Fable.Core.TS.Dom.CredentialCreationOptions
+
+        type CredentialPropertiesOutput = Fable.Core.TS.Dom.CredentialPropertiesOutput
+
+        type CredentialRequestOptions = Fable.Core.TS.Dom.CredentialRequestOptions
+
+        type CryptoKeyPair = Fable.Core.TS.Dom.CryptoKeyPair
+
+        type CurrentUserDetailsOptions = Fable.Core.TS.Dom.CurrentUserDetailsOptions
+
+        type CustomEventInit<'T> = Fable.Core.TS.Dom.CustomEventInit<'T>
+
+        type DOMMatrix2DInit = Fable.Core.TS.Dom.DOMMatrix2DInit
+
+        type DOMMatrixInit = Fable.Core.TS.Dom.DOMMatrixInit
+
+        type DOMPointInit = Fable.Core.TS.Dom.DOMPointInit
+
+        type DOMQuadInit = Fable.Core.TS.Dom.DOMQuadInit
+
+        type DOMRectInit = Fable.Core.TS.Dom.DOMRectInit
+
+        type DelayOptions = Fable.Core.TS.Dom.DelayOptions
+
+        type DeviceMotionEventAccelerationInit = Fable.Core.TS.Dom.DeviceMotionEventAccelerationInit
+
+        type DeviceMotionEventInit = Fable.Core.TS.Dom.DeviceMotionEventInit
+
+        type DeviceMotionEventRotationRateInit = Fable.Core.TS.Dom.DeviceMotionEventRotationRateInit
+
+        type DeviceOrientationEventInit = Fable.Core.TS.Dom.DeviceOrientationEventInit
+
+        type DisplayMediaStreamOptions = Fable.Core.TS.Dom.DisplayMediaStreamOptions
+
+        type DocumentPictureInPictureEventInit = Fable.Core.TS.Dom.DocumentPictureInPictureEventInit
+
+        type DocumentPictureInPictureOptions = Fable.Core.TS.Dom.DocumentPictureInPictureOptions
+
+        type DocumentTimelineOptions = Fable.Core.TS.Dom.DocumentTimelineOptions
+
+        type DoubleRange = Fable.Core.TS.Dom.DoubleRange
+
+        type DragEventInit = Fable.Core.TS.Dom.DragEventInit
+
+        type DynamicsCompressorOptions = Fable.Core.TS.Dom.DynamicsCompressorOptions
+
+        type EcKeyAlgorithm = Fable.Core.TS.Dom.EcKeyAlgorithm
+
+        type EcKeyGenParams = Fable.Core.TS.Dom.EcKeyGenParams
+
+        type EcKeyImportParams = Fable.Core.TS.Dom.EcKeyImportParams
+
+        type EcdhKeyDeriveParams = Fable.Core.TS.Dom.EcdhKeyDeriveParams
+
+        type EcdsaParams = Fable.Core.TS.Dom.EcdsaParams
+
+        type EffectTiming = Fable.Core.TS.Dom.EffectTiming
+
+        type ElementCreationOptions = Fable.Core.TS.Dom.ElementCreationOptions
+
+        type ElementDefinitionOptions = Fable.Core.TS.Dom.ElementDefinitionOptions
+
+        type EncodedAudioChunkInit = Fable.Core.TS.Dom.EncodedAudioChunkInit
+
+        type EncodedAudioChunkMetadata = Fable.Core.TS.Dom.EncodedAudioChunkMetadata
+
+        type EncodedVideoChunkInit = Fable.Core.TS.Dom.EncodedVideoChunkInit
+
+        type EncodedVideoChunkMetadata = Fable.Core.TS.Dom.EncodedVideoChunkMetadata
+
+        type ErrorEventInit = Fable.Core.TS.Dom.ErrorEventInit
+
+        type EventInit = Fable.Core.TS.Dom.EventInit
+
+        type EventListenerOptions = Fable.Core.TS.Dom.EventListenerOptions
+
+        type EventModifierInit = Fable.Core.TS.Dom.EventModifierInit
+
+        type EventSourceInit = Fable.Core.TS.Dom.EventSourceInit
+
+        type FilePropertyBag = Fable.Core.TS.Dom.FilePropertyBag
+
+        type FileSystemCreateWritableOptions = Fable.Core.TS.Dom.FileSystemCreateWritableOptions
+
+        type FileSystemFlags = Fable.Core.TS.Dom.FileSystemFlags
+
+        type FileSystemGetDirectoryOptions = Fable.Core.TS.Dom.FileSystemGetDirectoryOptions
+
+        type FileSystemGetFileOptions = Fable.Core.TS.Dom.FileSystemGetFileOptions
+
+        type FileSystemRemoveOptions = Fable.Core.TS.Dom.FileSystemRemoveOptions
+
+        type FocusEventInit = Fable.Core.TS.Dom.FocusEventInit
+
+        type FocusOptions = Fable.Core.TS.Dom.FocusOptions
+
+        type FontFaceDescriptors = Fable.Core.TS.Dom.FontFaceDescriptors
+
+        type FontFaceSetLoadEventInit = Fable.Core.TS.Dom.FontFaceSetLoadEventInit
+
+        type FormDataEventInit = Fable.Core.TS.Dom.FormDataEventInit
+
+        type FullscreenOptions = Fable.Core.TS.Dom.FullscreenOptions
+
+        type GPUBindGroupDescriptor = Fable.Core.TS.Dom.GPUBindGroupDescriptor
+
+        type GPUBindGroupEntry = Fable.Core.TS.Dom.GPUBindGroupEntry
+
+        type GPUBindGroupLayoutDescriptor = Fable.Core.TS.Dom.GPUBindGroupLayoutDescriptor
+
+        type GPUBindGroupLayoutEntry = Fable.Core.TS.Dom.GPUBindGroupLayoutEntry
+
+        type GPUBlendComponent = Fable.Core.TS.Dom.GPUBlendComponent
+
+        type GPUBlendState = Fable.Core.TS.Dom.GPUBlendState
+
+        type GPUBufferBinding = Fable.Core.TS.Dom.GPUBufferBinding
+
+        type GPUBufferBindingLayout = Fable.Core.TS.Dom.GPUBufferBindingLayout
+
+        type GPUBufferDescriptor = Fable.Core.TS.Dom.GPUBufferDescriptor
+
+        type GPUCanvasConfiguration = Fable.Core.TS.Dom.GPUCanvasConfiguration
+
+        type GPUCanvasToneMapping = Fable.Core.TS.Dom.GPUCanvasToneMapping
+
+        type GPUColorDict = Fable.Core.TS.Dom.GPUColorDict
+
+        type GPUColorTargetState = Fable.Core.TS.Dom.GPUColorTargetState
+
+        type GPUCommandBufferDescriptor = Fable.Core.TS.Dom.GPUCommandBufferDescriptor
+
+        type GPUCommandEncoderDescriptor = Fable.Core.TS.Dom.GPUCommandEncoderDescriptor
+
+        type GPUComputePassDescriptor = Fable.Core.TS.Dom.GPUComputePassDescriptor
+
+        type GPUComputePassTimestampWrites = Fable.Core.TS.Dom.GPUComputePassTimestampWrites
+
+        type GPUComputePipelineDescriptor = Fable.Core.TS.Dom.GPUComputePipelineDescriptor
+
+        type GPUCopyExternalImageDestInfo = Fable.Core.TS.Dom.GPUCopyExternalImageDestInfo
+
+        type GPUCopyExternalImageSourceInfo = Fable.Core.TS.Dom.GPUCopyExternalImageSourceInfo
+
+        type GPUDepthStencilState = Fable.Core.TS.Dom.GPUDepthStencilState
+
+        type GPUDeviceDescriptor = Fable.Core.TS.Dom.GPUDeviceDescriptor
+
+        type GPUExtent3DDict = Fable.Core.TS.Dom.GPUExtent3DDict
+
+        type GPUExternalTextureBindingLayout = Fable.Core.TS.Dom.GPUExternalTextureBindingLayout
+
+        type GPUExternalTextureDescriptor = Fable.Core.TS.Dom.GPUExternalTextureDescriptor
+
+        type GPUFragmentState = Fable.Core.TS.Dom.GPUFragmentState
+
+        type GPUMultisampleState = Fable.Core.TS.Dom.GPUMultisampleState
+
+        type GPUObjectDescriptorBase = Fable.Core.TS.Dom.GPUObjectDescriptorBase
+
+        type GPUOrigin2DDict = Fable.Core.TS.Dom.GPUOrigin2DDict
+
+        type GPUOrigin3DDict = Fable.Core.TS.Dom.GPUOrigin3DDict
+
+        type GPUPipelineDescriptorBase = Fable.Core.TS.Dom.GPUPipelineDescriptorBase
+
+        type GPUPipelineErrorInit = Fable.Core.TS.Dom.GPUPipelineErrorInit
+
+        type GPUPipelineLayoutDescriptor = Fable.Core.TS.Dom.GPUPipelineLayoutDescriptor
+
+        type GPUPrimitiveState = Fable.Core.TS.Dom.GPUPrimitiveState
+
+        type GPUProgrammableStage = Fable.Core.TS.Dom.GPUProgrammableStage
+
+        type GPUQuerySetDescriptor = Fable.Core.TS.Dom.GPUQuerySetDescriptor
+
+        type GPUQueueDescriptor = Fable.Core.TS.Dom.GPUQueueDescriptor
+
+        type GPURenderBundleDescriptor = Fable.Core.TS.Dom.GPURenderBundleDescriptor
+
+        type GPURenderBundleEncoderDescriptor = Fable.Core.TS.Dom.GPURenderBundleEncoderDescriptor
+
+        type GPURenderPassColorAttachment = Fable.Core.TS.Dom.GPURenderPassColorAttachment
+
+        type GPURenderPassDepthStencilAttachment = Fable.Core.TS.Dom.GPURenderPassDepthStencilAttachment
+
+        type GPURenderPassDescriptor = Fable.Core.TS.Dom.GPURenderPassDescriptor
+
+        type GPURenderPassLayout = Fable.Core.TS.Dom.GPURenderPassLayout
+
+        type GPURenderPassTimestampWrites = Fable.Core.TS.Dom.GPURenderPassTimestampWrites
+
+        type GPURenderPipelineDescriptor = Fable.Core.TS.Dom.GPURenderPipelineDescriptor
+
+        type GPURequestAdapterOptions = Fable.Core.TS.Dom.GPURequestAdapterOptions
+
+        type GPUSamplerBindingLayout = Fable.Core.TS.Dom.GPUSamplerBindingLayout
+
+        type GPUSamplerDescriptor = Fable.Core.TS.Dom.GPUSamplerDescriptor
+
+        type GPUShaderModuleDescriptor = Fable.Core.TS.Dom.GPUShaderModuleDescriptor
+
+        type GPUStencilFaceState = Fable.Core.TS.Dom.GPUStencilFaceState
+
+        type GPUStorageTextureBindingLayout = Fable.Core.TS.Dom.GPUStorageTextureBindingLayout
+
+        type GPUTexelCopyBufferInfo = Fable.Core.TS.Dom.GPUTexelCopyBufferInfo
+
+        type GPUTexelCopyBufferLayout = Fable.Core.TS.Dom.GPUTexelCopyBufferLayout
+
+        type GPUTexelCopyTextureInfo = Fable.Core.TS.Dom.GPUTexelCopyTextureInfo
+
+        type GPUTextureBindingLayout = Fable.Core.TS.Dom.GPUTextureBindingLayout
+
+        type GPUTextureDescriptor = Fable.Core.TS.Dom.GPUTextureDescriptor
+
+        type GPUTextureViewDescriptor = Fable.Core.TS.Dom.GPUTextureViewDescriptor
+
+        type GPUUncapturedErrorEventInit = Fable.Core.TS.Dom.GPUUncapturedErrorEventInit
+
+        type GPUVertexAttribute = Fable.Core.TS.Dom.GPUVertexAttribute
+
+        type GPUVertexBufferLayout = Fable.Core.TS.Dom.GPUVertexBufferLayout
+
+        type GPUVertexState = Fable.Core.TS.Dom.GPUVertexState
+
+        type GainOptions = Fable.Core.TS.Dom.GainOptions
+
+        type GamepadEffectParameters = Fable.Core.TS.Dom.GamepadEffectParameters
+
+        type GamepadEventInit = Fable.Core.TS.Dom.GamepadEventInit
+
+        type GetAnimationsOptions = Fable.Core.TS.Dom.GetAnimationsOptions
+
+        type GetComposedRangesOptions = Fable.Core.TS.Dom.GetComposedRangesOptions
+
+        type GetHTMLOptions = Fable.Core.TS.Dom.GetHTMLOptions
+
+        type GetNotificationOptions = Fable.Core.TS.Dom.GetNotificationOptions
+
+        type GetRootNodeOptions = Fable.Core.TS.Dom.GetRootNodeOptions
+
+        type HashChangeEventInit = Fable.Core.TS.Dom.HashChangeEventInit
+
+        type HighlightHitResult = Fable.Core.TS.Dom.HighlightHitResult
+
+        type HighlightsFromPointOptions = Fable.Core.TS.Dom.HighlightsFromPointOptions
+
+        type HkdfParams = Fable.Core.TS.Dom.HkdfParams
+
+        type HmacImportParams = Fable.Core.TS.Dom.HmacImportParams
+
+        type HmacKeyAlgorithm = Fable.Core.TS.Dom.HmacKeyAlgorithm
+
+        type HmacKeyGenParams = Fable.Core.TS.Dom.HmacKeyGenParams
+
+        type IDBDatabaseInfo = Fable.Core.TS.Dom.IDBDatabaseInfo
+
+        type IDBIndexParameters = Fable.Core.TS.Dom.IDBIndexParameters
+
+        type IDBObjectStoreParameters = Fable.Core.TS.Dom.IDBObjectStoreParameters
+
+        type IDBTransactionOptions = Fable.Core.TS.Dom.IDBTransactionOptions
+
+        type IDBVersionChangeEventInit = Fable.Core.TS.Dom.IDBVersionChangeEventInit
+
+        type IIRFilterOptions = Fable.Core.TS.Dom.IIRFilterOptions
+
+        type IdleRequestOptions = Fable.Core.TS.Dom.IdleRequestOptions
+
+        type ImageBitmapOptions = Fable.Core.TS.Dom.ImageBitmapOptions
+
+        type ImageBitmapRenderingContextSettings = Fable.Core.TS.Dom.ImageBitmapRenderingContextSettings
+
+        type ImageDataSettings = Fable.Core.TS.Dom.ImageDataSettings
+
+        type ImageDecodeOptions = Fable.Core.TS.Dom.ImageDecodeOptions
+
+        type ImageDecodeResult = Fable.Core.TS.Dom.ImageDecodeResult
+
+        type ImageDecoderInit = Fable.Core.TS.Dom.ImageDecoderInit
+
+        type ImageEncodeOptions = Fable.Core.TS.Dom.ImageEncodeOptions
+
+        type ImportNodeOptions = Fable.Core.TS.Dom.ImportNodeOptions
+
+        type InputEventInit = Fable.Core.TS.Dom.InputEventInit
+
+        type IntersectionObserverInit = Fable.Core.TS.Dom.IntersectionObserverInit
+
+        type JsonWebKey = Fable.Core.TS.Dom.JsonWebKey
+
+        type KeyAlgorithm = Fable.Core.TS.Dom.KeyAlgorithm
+
+        type KeySystemTrackConfiguration = Fable.Core.TS.Dom.KeySystemTrackConfiguration
+
+        type KeyboardEventInit = Fable.Core.TS.Dom.KeyboardEventInit
+
+        type Keyframe = Fable.Core.TS.Dom.Keyframe
+
+        type KeyframeAnimationOptions = Fable.Core.TS.Dom.KeyframeAnimationOptions
+
+        type KeyframeEffectOptions = Fable.Core.TS.Dom.KeyframeEffectOptions
+
+        type LockInfo = Fable.Core.TS.Dom.LockInfo
+
+        type LockManagerSnapshot = Fable.Core.TS.Dom.LockManagerSnapshot
+
+        type LockOptions = Fable.Core.TS.Dom.LockOptions
+
+        type MIDIConnectionEventInit = Fable.Core.TS.Dom.MIDIConnectionEventInit
+
+        type MIDIMessageEventInit = Fable.Core.TS.Dom.MIDIMessageEventInit
+
+        type MIDIOptions = Fable.Core.TS.Dom.MIDIOptions
+
+        type MediaCapabilitiesDecodingInfo = Fable.Core.TS.Dom.MediaCapabilitiesDecodingInfo
+
+        type MediaCapabilitiesEncodingInfo = Fable.Core.TS.Dom.MediaCapabilitiesEncodingInfo
+
+        type MediaCapabilitiesInfo = Fable.Core.TS.Dom.MediaCapabilitiesInfo
+
+        type MediaCapabilitiesKeySystemConfiguration = Fable.Core.TS.Dom.MediaCapabilitiesKeySystemConfiguration
+
+        type MediaConfiguration = Fable.Core.TS.Dom.MediaConfiguration
+
+        type MediaDecodingConfiguration = Fable.Core.TS.Dom.MediaDecodingConfiguration
+
+        type MediaElementAudioSourceOptions = Fable.Core.TS.Dom.MediaElementAudioSourceOptions
+
+        type MediaEncodingConfiguration = Fable.Core.TS.Dom.MediaEncodingConfiguration
+
+        type MediaEncryptedEventInit = Fable.Core.TS.Dom.MediaEncryptedEventInit
+
+        type MediaImage = Fable.Core.TS.Dom.MediaImage
+
+        type MediaKeyMessageEventInit = Fable.Core.TS.Dom.MediaKeyMessageEventInit
+
+        type MediaKeySystemConfiguration = Fable.Core.TS.Dom.MediaKeySystemConfiguration
+
+        type MediaKeySystemMediaCapability = Fable.Core.TS.Dom.MediaKeySystemMediaCapability
+
+        type MediaKeysPolicy = Fable.Core.TS.Dom.MediaKeysPolicy
+
+        type MediaMetadataInit = Fable.Core.TS.Dom.MediaMetadataInit
+
+        type MediaPositionState = Fable.Core.TS.Dom.MediaPositionState
+
+        type MediaQueryListEventInit = Fable.Core.TS.Dom.MediaQueryListEventInit
+
+        type MediaRecorderOptions = Fable.Core.TS.Dom.MediaRecorderOptions
+
+        type MediaSessionActionDetails = Fable.Core.TS.Dom.MediaSessionActionDetails
+
+        type MediaSettingsRange = Fable.Core.TS.Dom.MediaSettingsRange
+
+        type MediaStreamAudioSourceOptions = Fable.Core.TS.Dom.MediaStreamAudioSourceOptions
+
+        type MediaStreamConstraints = Fable.Core.TS.Dom.MediaStreamConstraints
+
+        type MediaStreamTrackEventInit = Fable.Core.TS.Dom.MediaStreamTrackEventInit
+
+        type MediaTrackCapabilities = Fable.Core.TS.Dom.MediaTrackCapabilities
+
+        type MediaTrackConstraintSet = Fable.Core.TS.Dom.MediaTrackConstraintSet
+
+        type MediaTrackConstraints = Fable.Core.TS.Dom.MediaTrackConstraints
+
+        type MediaTrackSettings = Fable.Core.TS.Dom.MediaTrackSettings
+
+        type MediaTrackSupportedConstraints = Fable.Core.TS.Dom.MediaTrackSupportedConstraints
+
+        type MessageEventInit<'T> = Fable.Core.TS.Dom.MessageEventInit<'T>
+
+        type MouseEventInit = Fable.Core.TS.Dom.MouseEventInit
+
+        type MultiCacheQueryOptions = Fable.Core.TS.Dom.MultiCacheQueryOptions
+
+        type MutationObserverInit = Fable.Core.TS.Dom.MutationObserverInit
+
+        type NavigateEventInit = Fable.Core.TS.Dom.NavigateEventInit
+
+        type NavigationCurrentEntryChangeEventInit = Fable.Core.TS.Dom.NavigationCurrentEntryChangeEventInit
+
+        type NavigationInterceptOptions = Fable.Core.TS.Dom.NavigationInterceptOptions
+
+        type NavigationNavigateOptions = Fable.Core.TS.Dom.NavigationNavigateOptions
+
+        type NavigationOptions = Fable.Core.TS.Dom.NavigationOptions
+
+        type NavigationPreloadState = Fable.Core.TS.Dom.NavigationPreloadState
+
+        type NavigationReloadOptions = Fable.Core.TS.Dom.NavigationReloadOptions
+
+        type NavigationResult = Fable.Core.TS.Dom.NavigationResult
+
+        type NavigationUpdateCurrentEntryOptions = Fable.Core.TS.Dom.NavigationUpdateCurrentEntryOptions
+
+        type NotificationAction = Fable.Core.TS.Dom.NotificationAction
+
+        type NotificationOptions = Fable.Core.TS.Dom.NotificationOptions
+
+        type OfflineAudioCompletionEventInit = Fable.Core.TS.Dom.OfflineAudioCompletionEventInit
+
+        type OfflineAudioContextOptions = Fable.Core.TS.Dom.OfflineAudioContextOptions
+
+        type OptionalEffectTiming = Fable.Core.TS.Dom.OptionalEffectTiming
+
+        type OpusEncoderConfig = Fable.Core.TS.Dom.OpusEncoderConfig
+
+        type OscillatorOptions = Fable.Core.TS.Dom.OscillatorOptions
+
+        type PageRevealEventInit = Fable.Core.TS.Dom.PageRevealEventInit
+
+        type PageSwapEventInit = Fable.Core.TS.Dom.PageSwapEventInit
+
+        type PageTransitionEventInit = Fable.Core.TS.Dom.PageTransitionEventInit
+
+        type PannerOptions = Fable.Core.TS.Dom.PannerOptions
+
+        type ParseHTMLUnsafeOptions = Fable.Core.TS.Dom.ParseHTMLUnsafeOptions
+
+        type PayerErrors = Fable.Core.TS.Dom.PayerErrors
+
+        type PaymentCurrencyAmount = Fable.Core.TS.Dom.PaymentCurrencyAmount
+
+        type PaymentDetailsBase = Fable.Core.TS.Dom.PaymentDetailsBase
+
+        type PaymentDetailsInit = Fable.Core.TS.Dom.PaymentDetailsInit
+
+        type PaymentDetailsModifier = Fable.Core.TS.Dom.PaymentDetailsModifier
+
+        type PaymentDetailsUpdate = Fable.Core.TS.Dom.PaymentDetailsUpdate
+
+        type PaymentItem = Fable.Core.TS.Dom.PaymentItem
+
+        type PaymentMethodChangeEventInit = Fable.Core.TS.Dom.PaymentMethodChangeEventInit
+
+        type PaymentMethodData = Fable.Core.TS.Dom.PaymentMethodData
+
+        type PaymentOptions = Fable.Core.TS.Dom.PaymentOptions
+
+        type PaymentRequestUpdateEventInit = Fable.Core.TS.Dom.PaymentRequestUpdateEventInit
+
+        type PaymentShippingOption = Fable.Core.TS.Dom.PaymentShippingOption
+
+        type PaymentValidationErrors = Fable.Core.TS.Dom.PaymentValidationErrors
+
+        type Pbkdf2Params = Fable.Core.TS.Dom.Pbkdf2Params
+
+        type PerformanceMarkOptions = Fable.Core.TS.Dom.PerformanceMarkOptions
+
+        type PerformanceMeasureOptions = Fable.Core.TS.Dom.PerformanceMeasureOptions
+
+        type PerformanceObserverInit = Fable.Core.TS.Dom.PerformanceObserverInit
+
+        type PeriodicWaveConstraints = Fable.Core.TS.Dom.PeriodicWaveConstraints
+
+        type PeriodicWaveOptions = Fable.Core.TS.Dom.PeriodicWaveOptions
+
+        type PermissionDescriptor = Fable.Core.TS.Dom.PermissionDescriptor
+
+        type PhotoCapabilities = Fable.Core.TS.Dom.PhotoCapabilities
+
+        type PhotoSettings = Fable.Core.TS.Dom.PhotoSettings
+
+        type PictureInPictureEventInit = Fable.Core.TS.Dom.PictureInPictureEventInit
+
+        type PlaneLayout = Fable.Core.TS.Dom.PlaneLayout
+
+        type PointerEventInit = Fable.Core.TS.Dom.PointerEventInit
+
+        type PointerLockOptions = Fable.Core.TS.Dom.PointerLockOptions
+
+        type PopStateEventInit = Fable.Core.TS.Dom.PopStateEventInit
+
+        type PositionOptions = Fable.Core.TS.Dom.PositionOptions
+
+        type ProgressEventInit = Fable.Core.TS.Dom.ProgressEventInit
+
+        type PromiseRejectionEventInit = Fable.Core.TS.Dom.PromiseRejectionEventInit
+
+        type PropertyDefinition = Fable.Core.TS.Dom.PropertyDefinition
+
+        type PropertyIndexedKeyframes = Fable.Core.TS.Dom.PropertyIndexedKeyframes
+
+        type PublicKeyCredentialCreationOptions = Fable.Core.TS.Dom.PublicKeyCredentialCreationOptions
+
+        type PublicKeyCredentialCreationOptionsJSON = Fable.Core.TS.Dom.PublicKeyCredentialCreationOptionsJSON
+
+        type PublicKeyCredentialDescriptor = Fable.Core.TS.Dom.PublicKeyCredentialDescriptor
+
+        type PublicKeyCredentialDescriptorJSON = Fable.Core.TS.Dom.PublicKeyCredentialDescriptorJSON
+
+        type PublicKeyCredentialEntity = Fable.Core.TS.Dom.PublicKeyCredentialEntity
+
+        type PublicKeyCredentialParameters = Fable.Core.TS.Dom.PublicKeyCredentialParameters
+
+        type PublicKeyCredentialRequestOptions = Fable.Core.TS.Dom.PublicKeyCredentialRequestOptions
+
+        type PublicKeyCredentialRequestOptionsJSON = Fable.Core.TS.Dom.PublicKeyCredentialRequestOptionsJSON
+
+        type PublicKeyCredentialRpEntity = Fable.Core.TS.Dom.PublicKeyCredentialRpEntity
+
+        type PublicKeyCredentialUserEntity = Fable.Core.TS.Dom.PublicKeyCredentialUserEntity
+
+        type PublicKeyCredentialUserEntityJSON = Fable.Core.TS.Dom.PublicKeyCredentialUserEntityJSON
+
+        type PushSubscriptionJSON = Fable.Core.TS.Dom.PushSubscriptionJSON
+
+        type PushSubscriptionOptionsInit = Fable.Core.TS.Dom.PushSubscriptionOptionsInit
+
+        type QueuingStrategy<'T> = Fable.Core.TS.Dom.QueuingStrategy<'T>
+
+        type QueuingStrategyInit = Fable.Core.TS.Dom.QueuingStrategyInit
+
+        type RTCAnswerOptions = Fable.Core.TS.Dom.RTCAnswerOptions
+
+        type RTCCertificateExpiration = Fable.Core.TS.Dom.RTCCertificateExpiration
+
+        type RTCConfiguration = Fable.Core.TS.Dom.RTCConfiguration
+
+        type RTCDTMFToneChangeEventInit = Fable.Core.TS.Dom.RTCDTMFToneChangeEventInit
+
+        type RTCDataChannelEventInit = Fable.Core.TS.Dom.RTCDataChannelEventInit
+
+        type RTCDataChannelInit = Fable.Core.TS.Dom.RTCDataChannelInit
+
+        type RTCDtlsFingerprint = Fable.Core.TS.Dom.RTCDtlsFingerprint
+
+        type RTCEncodedAudioFrameMetadata = Fable.Core.TS.Dom.RTCEncodedAudioFrameMetadata
+
+        type RTCEncodedFrameMetadata = Fable.Core.TS.Dom.RTCEncodedFrameMetadata
+
+        type RTCEncodedVideoFrameMetadata = Fable.Core.TS.Dom.RTCEncodedVideoFrameMetadata
+
+        type RTCErrorEventInit = Fable.Core.TS.Dom.RTCErrorEventInit
+
+        type RTCErrorInit = Fable.Core.TS.Dom.RTCErrorInit
+
+        type RTCIceCandidateInit = Fable.Core.TS.Dom.RTCIceCandidateInit
+
+        type RTCIceCandidatePairStats = Fable.Core.TS.Dom.RTCIceCandidatePairStats
+
+        type RTCIceServer = Fable.Core.TS.Dom.RTCIceServer
+
+        type RTCInboundRtpStreamStats = Fable.Core.TS.Dom.RTCInboundRtpStreamStats
+
+        type RTCLocalIceCandidateInit = Fable.Core.TS.Dom.RTCLocalIceCandidateInit
+
+        type RTCLocalSessionDescriptionInit = Fable.Core.TS.Dom.RTCLocalSessionDescriptionInit
+
+        type RTCOfferAnswerOptions = Fable.Core.TS.Dom.RTCOfferAnswerOptions
+
+        type RTCOfferOptions = Fable.Core.TS.Dom.RTCOfferOptions
+
+        type RTCOutboundRtpStreamStats = Fable.Core.TS.Dom.RTCOutboundRtpStreamStats
+
+        type RTCPeerConnectionIceErrorEventInit = Fable.Core.TS.Dom.RTCPeerConnectionIceErrorEventInit
+
+        type RTCPeerConnectionIceEventInit = Fable.Core.TS.Dom.RTCPeerConnectionIceEventInit
+
+        type RTCReceivedRtpStreamStats = Fable.Core.TS.Dom.RTCReceivedRtpStreamStats
+
+        type RTCRtcpParameters = Fable.Core.TS.Dom.RTCRtcpParameters
+
+        type RTCRtpCapabilities = Fable.Core.TS.Dom.RTCRtpCapabilities
+
+        type RTCRtpCodec = Fable.Core.TS.Dom.RTCRtpCodec
+
+        type RTCRtpCodecParameters = Fable.Core.TS.Dom.RTCRtpCodecParameters
+
+        type RTCRtpCodingParameters = Fable.Core.TS.Dom.RTCRtpCodingParameters
+
+        type RTCRtpContributingSource = Fable.Core.TS.Dom.RTCRtpContributingSource
+
+        type RTCRtpEncodingParameters = Fable.Core.TS.Dom.RTCRtpEncodingParameters
+
+        type RTCRtpHeaderExtensionCapability = Fable.Core.TS.Dom.RTCRtpHeaderExtensionCapability
+
+        type RTCRtpHeaderExtensionParameters = Fable.Core.TS.Dom.RTCRtpHeaderExtensionParameters
+
+        type RTCRtpParameters = Fable.Core.TS.Dom.RTCRtpParameters
+
+        type RTCRtpReceiveParameters = Fable.Core.TS.Dom.RTCRtpReceiveParameters
+
+        type RTCRtpSendParameters = Fable.Core.TS.Dom.RTCRtpSendParameters
+
+        type RTCRtpStreamStats = Fable.Core.TS.Dom.RTCRtpStreamStats
+
+        type RTCRtpSynchronizationSource = Fable.Core.TS.Dom.RTCRtpSynchronizationSource
+
+        type RTCRtpTransceiverInit = Fable.Core.TS.Dom.RTCRtpTransceiverInit
+
+        type RTCSentRtpStreamStats = Fable.Core.TS.Dom.RTCSentRtpStreamStats
+
+        type RTCSessionDescriptionInit = Fable.Core.TS.Dom.RTCSessionDescriptionInit
+
+        type RTCSetParameterOptions = Fable.Core.TS.Dom.RTCSetParameterOptions
+
+        type RTCStats = Fable.Core.TS.Dom.RTCStats
+
+        type RTCTrackEventInit = Fable.Core.TS.Dom.RTCTrackEventInit
+
+        type RTCTransportStats = Fable.Core.TS.Dom.RTCTransportStats
+
+        type ReadableStreamBYOBReaderReadOptions = Fable.Core.TS.Dom.ReadableStreamBYOBReaderReadOptions
+
+        type ReadableStreamGetReaderOptions = Fable.Core.TS.Dom.ReadableStreamGetReaderOptions
+
+        type ReadableStreamIteratorOptions = Fable.Core.TS.Dom.ReadableStreamIteratorOptions
+
+        type ReadableStreamReadDoneResult<'T> = Fable.Core.TS.Dom.ReadableStreamReadDoneResult<'T>
+
+        type ReadableStreamReadValueResult<'T> = Fable.Core.TS.Dom.ReadableStreamReadValueResult<'T>
+
+        type ReadableWritablePair<'R, 'W> = Fable.Core.TS.Dom.ReadableWritablePair<'R, 'W>
+
+        type RegistrationOptions = Fable.Core.TS.Dom.RegistrationOptions
+
+        type RegistrationResponseJSON = Fable.Core.TS.Dom.RegistrationResponseJSON
+
+        type Report = Fable.Core.TS.Dom.Report
+
+        type ReportBody = Fable.Core.TS.Dom.ReportBody
+
+        type ReportingObserverOptions = Fable.Core.TS.Dom.ReportingObserverOptions
+
+        type RequestInit = Fable.Core.TS.Dom.RequestInit
+
+        type ResizeObserverOptions = Fable.Core.TS.Dom.ResizeObserverOptions
+
+        type ResponseInit = Fable.Core.TS.Dom.ResponseInit
+
+        type RsaHashedImportParams = Fable.Core.TS.Dom.RsaHashedImportParams
+
+        type RsaHashedKeyAlgorithm = Fable.Core.TS.Dom.RsaHashedKeyAlgorithm
+
+        type RsaHashedKeyGenParams = Fable.Core.TS.Dom.RsaHashedKeyGenParams
+
+        type RsaKeyAlgorithm = Fable.Core.TS.Dom.RsaKeyAlgorithm
+
+        type RsaKeyGenParams = Fable.Core.TS.Dom.RsaKeyGenParams
+
+        type RsaOaepParams = Fable.Core.TS.Dom.RsaOaepParams
+
+        type RsaOtherPrimesInfo = Fable.Core.TS.Dom.RsaOtherPrimesInfo
+
+        type RsaPssParams = Fable.Core.TS.Dom.RsaPssParams
+
+        type SVGBoundingBoxOptions = Fable.Core.TS.Dom.SVGBoundingBoxOptions
+
+        type SanitizerAttributeNamespace = Fable.Core.TS.Dom.SanitizerAttributeNamespace
+
+        type SanitizerConfig = Fable.Core.TS.Dom.SanitizerConfig
+
+        type SanitizerElementNamespace = Fable.Core.TS.Dom.SanitizerElementNamespace
+
+        type SanitizerElementNamespaceWithAttributes = Fable.Core.TS.Dom.SanitizerElementNamespaceWithAttributes
+
+        type SanitizerProcessingInstruction = Fable.Core.TS.Dom.SanitizerProcessingInstruction
+
+        type SchedulerPostTaskOptions = Fable.Core.TS.Dom.SchedulerPostTaskOptions
+
+        type ScrollIntoViewOptions = Fable.Core.TS.Dom.ScrollIntoViewOptions
+
+        type ScrollOptions = Fable.Core.TS.Dom.ScrollOptions
+
+        type ScrollTimelineOptions = Fable.Core.TS.Dom.ScrollTimelineOptions
+
+        type ScrollToOptions = Fable.Core.TS.Dom.ScrollToOptions
+
+        type SecurityPolicyViolationEventInit = Fable.Core.TS.Dom.SecurityPolicyViolationEventInit
+
+        type SerialInputSignals = Fable.Core.TS.Dom.SerialInputSignals
+
+        type SerialOptions = Fable.Core.TS.Dom.SerialOptions
+
+        type SerialOutputSignals = Fable.Core.TS.Dom.SerialOutputSignals
+
+        type SerialPortFilter = Fable.Core.TS.Dom.SerialPortFilter
+
+        type SerialPortInfo = Fable.Core.TS.Dom.SerialPortInfo
+
+        type SerialPortRequestOptions = Fable.Core.TS.Dom.SerialPortRequestOptions
+
+        type SetHTMLOptions = Fable.Core.TS.Dom.SetHTMLOptions
+
+        type SetHTMLUnsafeOptions = Fable.Core.TS.Dom.SetHTMLUnsafeOptions
+
+        type ShadowRootInit = Fable.Core.TS.Dom.ShadowRootInit
+
+        type ShareData = Fable.Core.TS.Dom.ShareData
+
+        type ShowPopoverOptions = Fable.Core.TS.Dom.ShowPopoverOptions
+
+        type SpeechRecognitionErrorEventInit = Fable.Core.TS.Dom.SpeechRecognitionErrorEventInit
+
+        type SpeechRecognitionEventInit = Fable.Core.TS.Dom.SpeechRecognitionEventInit
+
+        type SpeechSynthesisErrorEventInit = Fable.Core.TS.Dom.SpeechSynthesisErrorEventInit
+
+        type SpeechSynthesisEventInit = Fable.Core.TS.Dom.SpeechSynthesisEventInit
+
+        type StartViewTransitionOptions = Fable.Core.TS.Dom.StartViewTransitionOptions
+
+        type StaticRangeInit = Fable.Core.TS.Dom.StaticRangeInit
+
+        type StereoPannerOptions = Fable.Core.TS.Dom.StereoPannerOptions
+
+        type StorageEstimate = Fable.Core.TS.Dom.StorageEstimate
+
+        type StorageEventInit = Fable.Core.TS.Dom.StorageEventInit
+
+        type StreamPipeOptions = Fable.Core.TS.Dom.StreamPipeOptions
+
+        type StructuredSerializeOptions = Fable.Core.TS.Dom.StructuredSerializeOptions
+
+        type SubmitEventInit = Fable.Core.TS.Dom.SubmitEventInit
+
+        type SvcOutputMetadata = Fable.Core.TS.Dom.SvcOutputMetadata
+
+        type TaskControllerInit = Fable.Core.TS.Dom.TaskControllerInit
+
+        type TaskPriorityChangeEventInit = Fable.Core.TS.Dom.TaskPriorityChangeEventInit
+
+        type TaskSignalAnyInit = Fable.Core.TS.Dom.TaskSignalAnyInit
+
+        type TextDecodeOptions = Fable.Core.TS.Dom.TextDecodeOptions
+
+        type TextDecoderOptions = Fable.Core.TS.Dom.TextDecoderOptions
+
+        type TextEncoderEncodeIntoResult = Fable.Core.TS.Dom.TextEncoderEncodeIntoResult
+
+        type TimelineRangeOffset = Fable.Core.TS.Dom.TimelineRangeOffset
+
+        type ToggleEventInit = Fable.Core.TS.Dom.ToggleEventInit
+
+        type TogglePopoverOptions = Fable.Core.TS.Dom.TogglePopoverOptions
+
+        type TouchEventInit = Fable.Core.TS.Dom.TouchEventInit
+
+        type TouchInit = Fable.Core.TS.Dom.TouchInit
+
+        type TrackEventInit = Fable.Core.TS.Dom.TrackEventInit
+
+        type Transformer<'I, 'O> = Fable.Core.TS.Dom.Transformer<'I, 'O>
+
+        type TransitionEventInit = Fable.Core.TS.Dom.TransitionEventInit
+
+        type UIEventInit = Fable.Core.TS.Dom.UIEventInit
+
+        type ULongRange = Fable.Core.TS.Dom.ULongRange
+
+        type URLPatternComponentResult = Fable.Core.TS.Dom.URLPatternComponentResult
+
+        type URLPatternInit = Fable.Core.TS.Dom.URLPatternInit
+
+        type URLPatternOptions = Fable.Core.TS.Dom.URLPatternOptions
+
+        type URLPatternResult = Fable.Core.TS.Dom.URLPatternResult
+
+        type UnderlyingByteSource = Fable.Core.TS.Dom.UnderlyingByteSource
+
+        type UnderlyingDefaultSource<'R> = Fable.Core.TS.Dom.UnderlyingDefaultSource<'R>
+
+        type UnderlyingSink<'W> = Fable.Core.TS.Dom.UnderlyingSink<'W>
+
+        type UnderlyingSource<'R> = Fable.Core.TS.Dom.UnderlyingSource<'R>
+
+        type UnknownCredentialOptions = Fable.Core.TS.Dom.UnknownCredentialOptions
+
+        type ValidityStateFlags = Fable.Core.TS.Dom.ValidityStateFlags
+
+        type VideoColorSpaceInit = Fable.Core.TS.Dom.VideoColorSpaceInit
+
+        type VideoConfiguration = Fable.Core.TS.Dom.VideoConfiguration
+
+        type VideoDecoderConfig = Fable.Core.TS.Dom.VideoDecoderConfig
+
+        type VideoDecoderInit = Fable.Core.TS.Dom.VideoDecoderInit
+
+        type VideoDecoderSupport = Fable.Core.TS.Dom.VideoDecoderSupport
+
+        type VideoEncoderConfig = Fable.Core.TS.Dom.VideoEncoderConfig
+
+        type VideoEncoderEncodeOptions = Fable.Core.TS.Dom.VideoEncoderEncodeOptions
+
+        type VideoEncoderEncodeOptionsForAvc = Fable.Core.TS.Dom.VideoEncoderEncodeOptionsForAvc
+
+        type VideoEncoderInit = Fable.Core.TS.Dom.VideoEncoderInit
+
+        type VideoEncoderSupport = Fable.Core.TS.Dom.VideoEncoderSupport
+
+        type VideoFrameBufferInit = Fable.Core.TS.Dom.VideoFrameBufferInit
+
+        type VideoFrameCallbackMetadata = Fable.Core.TS.Dom.VideoFrameCallbackMetadata
+
+        type VideoFrameCopyToOptions = Fable.Core.TS.Dom.VideoFrameCopyToOptions
+
+        type VideoFrameInit = Fable.Core.TS.Dom.VideoFrameInit
+
+        type ViewTimelineOptions = Fable.Core.TS.Dom.ViewTimelineOptions
+
+        type WaveShaperOptions = Fable.Core.TS.Dom.WaveShaperOptions
+
+        type WebGLContextAttributes = Fable.Core.TS.Dom.WebGLContextAttributes
+
+        type WebGLContextEventInit = Fable.Core.TS.Dom.WebGLContextEventInit
+
+        type WebTransportCloseInfo = Fable.Core.TS.Dom.WebTransportCloseInfo
+
+        type WebTransportConnectionStats = Fable.Core.TS.Dom.WebTransportConnectionStats
+
+        type WebTransportDatagramStats = Fable.Core.TS.Dom.WebTransportDatagramStats
+
+        type WebTransportErrorOptions = Fable.Core.TS.Dom.WebTransportErrorOptions
+
+        type WebTransportHash = Fable.Core.TS.Dom.WebTransportHash
+
+        type WebTransportOptions = Fable.Core.TS.Dom.WebTransportOptions
+
+        type WebTransportReceiveStreamStats = Fable.Core.TS.Dom.WebTransportReceiveStreamStats
+
+        type WebTransportSendOptions = Fable.Core.TS.Dom.WebTransportSendOptions
+
+        type WebTransportSendStreamOptions = Fable.Core.TS.Dom.WebTransportSendStreamOptions
+
+        type WebTransportSendStreamStats = Fable.Core.TS.Dom.WebTransportSendStreamStats
+
+        type WheelEventInit = Fable.Core.TS.Dom.WheelEventInit
+
+        type WindowPostMessageOptions = Fable.Core.TS.Dom.WindowPostMessageOptions
+
+        type WorkerOptions = Fable.Core.TS.Dom.WorkerOptions
+
+        type WorkletOptions = Fable.Core.TS.Dom.WorkletOptions
+
+        type WriteParams = Fable.Core.TS.Dom.WriteParams
+
+        type NodeFilter = U2<(Fable.Core.TS.Dom.Node -> float), NodeFilter2>
+
+        type XPathNSResolver = U2<(string option -> string option), XPathNSResolver2>
+
+        /// <summary>
+        /// The <b><c>ANGLE_instanced_arrays</c></b> extension is part of the WebGL API and allows to draw the same object, or groups of similar objects multiple times, if they share the same vertex data, primitive count and type.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ANGLE_instanced_arrays">MDN Reference</a>
+        /// </summary>
+        type ANGLE_instanced_arrays = Fable.Core.TS.Dom.ANGLE_instanced_arrays
+
+        type ARIAMixin = Fable.Core.TS.Dom.ARIAMixin
+
+        /// <summary>
+        /// The <b><c>AbortController</c></b> interface represents a controller object that allows you to abort one or more Web requests as and when desired.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/AbortController">MDN Reference</a>
+        /// </summary>
+        type AbortController = Fable.Core.TS.Dom.AbortController
+
+        type AbortSignalEventMap = Fable.Core.TS.Dom.AbortSignalEventMap
+
+        /// <summary>
+        /// The <b><c>AbortSignal</c></b> interface represents a signal object that allows you to communicate with an asynchronous operation (such as a fetch request) and abort it if required via an AbortController object.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/AbortSignal">MDN Reference</a>
+        /// </summary>
+        type AbortSignal = Fable.Core.TS.Dom.AbortSignal
+
+        /// <summary>
+        /// The <b><c>AbstractRange</c></b> abstract interface is the base class upon which all DOM range types are defined. A range is an object that indicates the start and end points of a section of content within the document.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/AbstractRange">MDN Reference</a>
+        /// </summary>
+        type AbstractRange = Fable.Core.TS.Dom.AbstractRange
+
+        type AbstractWorkerEventMap = Fable.Core.TS.Dom.AbstractWorkerEventMap
+
+        type AbstractWorker = Fable.Core.TS.Dom.AbstractWorker
+
+        /// <summary>
+        /// The <b><c>AnalyserNode</c></b> interface represents a node able to provide real-time frequency and time-domain analysis information. It is an AudioNode that passes the audio stream unchanged from the input to the output, but allows you to take the generated data, process it, and create audio visualizations.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/AnalyserNode">MDN Reference</a>
+        /// </summary>
+        type AnalyserNode = Fable.Core.TS.Dom.AnalyserNode
+
+        type Animatable = Fable.Core.TS.Dom.Animatable
+
+        type AnimationEventMap = Fable.Core.TS.Dom.AnimationEventMap
+
+        /// <summary>
+        /// The <b><c>Animation</c></b> interface of the Web Animations API represents a single animation player and provides playback controls and a timeline for an animation node or source.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Animation">MDN Reference</a>
+        /// </summary>
+        type Animation = Fable.Core.TS.Dom.Animation
+
+        /// <summary>
+        /// The <b><c>AnimationEffect</c></b> interface of the Web Animations API is an interface representing animation effects.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/AnimationEffect">MDN Reference</a>
+        /// </summary>
+        type AnimationEffect = Fable.Core.TS.Dom.AnimationEffect
+
+        /// <summary>
+        /// The <b><c>AnimationEvent</c></b> interface represents events providing information related to animations.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/AnimationEvent">MDN Reference</a>
+        /// </summary>
+        type AnimationEvent = Fable.Core.TS.Dom.AnimationEvent
+
+        type AnimationFrameProvider = Fable.Core.TS.Dom.AnimationFrameProvider
+
+        /// <summary>
+        /// The <b><c>AnimationPlaybackEvent</c></b> interface of the Web Animations API represents animation events.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/AnimationPlaybackEvent">MDN Reference</a>
+        /// </summary>
+        type AnimationPlaybackEvent = Fable.Core.TS.Dom.AnimationPlaybackEvent
+
+        /// <summary>
+        /// The <b><c>AnimationTimeline</c></b> interface of the Web Animations API represents the timeline of an animation. This interface exists to define timeline features, inherited by other timeline types:
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/AnimationTimeline">MDN Reference</a>
+        /// </summary>
+        type AnimationTimeline = Fable.Core.TS.Dom.AnimationTimeline
+
+        /// <summary>
+        /// The <b><c>Attr</c></b> interface represents one of an element's attributes as an object. In most situations, you will directly retrieve the attribute value as a string (e.g., Element.getAttribute()), but some cases may require interacting with Attr instances (e.g., Element.getAttributeNode()).
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Attr">MDN Reference</a>
+        /// </summary>
+        type Attr = Fable.Core.TS.Dom.Attr
+
+        /// <summary>
+        /// The <b><c>AudioBuffer</c></b> interface represents a short audio asset residing in memory, created from an audio file using the AudioContext.decodeAudioData() method, or from raw data using AudioContext.createBuffer(). Once put into an AudioBuffer, the audio can then be played by being passed into an AudioBufferSourceNode.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/AudioBuffer">MDN Reference</a>
+        /// </summary>
+        type AudioBuffer = Fable.Core.TS.Dom.AudioBuffer
+
+        /// <summary>
+        /// The <b><c>AudioBufferSourceNode</c></b> interface is an AudioScheduledSourceNode which represents an audio source consisting of in-memory audio data, stored in an AudioBuffer.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/AudioBufferSourceNode">MDN Reference</a>
+        /// </summary>
+        type AudioBufferSourceNode = Fable.Core.TS.Dom.AudioBufferSourceNode
+
+        /// <summary>
+        /// The <b><c>AudioContext</c></b> interface represents an audio-processing graph built from audio modules linked together, each represented by an AudioNode.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/AudioContext">MDN Reference</a>
+        /// </summary>
+        type AudioContext = Fable.Core.TS.Dom.AudioContext
+
+        /// <summary>
+        /// The <b><c>AudioData</c></b> interface of the WebCodecs API represents an audio sample.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/AudioData">MDN Reference</a>
+        /// </summary>
+        type AudioData = Fable.Core.TS.Dom.AudioData
+
+        type AudioDecoderEventMap = Fable.Core.TS.Dom.AudioDecoderEventMap
+
+        /// <summary>
+        /// The <b><c>AudioDecoder</c></b> interface of the WebCodecs API decodes chunks of audio.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/AudioDecoder">MDN Reference</a>
+        /// </summary>
+        type AudioDecoder = Fable.Core.TS.Dom.AudioDecoder
+
+        /// <summary>
+        /// The <b><c>AudioDestinationNode</c></b> interface represents the end destination of an audio graph in a given context — usually the speakers of your device. It can also be the node that will "record" the audio data when used with an OfflineAudioContext.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/AudioDestinationNode">MDN Reference</a>
+        /// </summary>
+        type AudioDestinationNode = Fable.Core.TS.Dom.AudioDestinationNode
+
+        type AudioEncoderEventMap = Fable.Core.TS.Dom.AudioEncoderEventMap
+
+        /// <summary>
+        /// The <b><c>AudioEncoder</c></b> interface of the WebCodecs API encodes AudioData objects.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/AudioEncoder">MDN Reference</a>
+        /// </summary>
+        type AudioEncoder = Fable.Core.TS.Dom.AudioEncoder
+
+        /// <summary>
+        /// The <b><c>AudioListener</c></b> interface represents the position and orientation of the unique person listening to the audio scene, and is used in audio spatialization. All PannerNodes spatialize in relation to the AudioListener stored in the BaseAudioContext.listener attribute.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/AudioListener">MDN Reference</a>
+        /// </summary>
+        type AudioListener = Fable.Core.TS.Dom.AudioListener
+
+        /// <summary>
+        /// The <b><c>AudioNode</c></b> interface is a generic interface for representing an audio processing module.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/AudioNode">MDN Reference</a>
+        /// </summary>
+        type AudioNode = Fable.Core.TS.Dom.AudioNode
+
+        /// <summary>
+        /// The Web Audio API's <b><c>AudioParam</c></b> interface represents an audio-related parameter, usually a parameter of an AudioNode (such as GainNode.gain).
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/AudioParam">MDN Reference</a>
+        /// </summary>
+        type AudioParam = Fable.Core.TS.Dom.AudioParam
+
+        /// <summary>
+        /// The <b><c>AudioParamMap</c></b> interface of the Web Audio API represents an iterable and read-only set of multiple audio parameters.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/AudioParamMap">MDN Reference</a>
+        /// </summary>
+        type AudioParamMap = Fable.Core.TS.Dom.AudioParamMap
+
+        /// <summary>
+        /// The <b><c>AudioProcessingEvent</c></b> interface of the Web Audio API represents events that occur when a ScriptProcessorNode input buffer is ready to be processed.
+        /// </summary>
+        /// <remarks>
+        /// @deprecated
+        /// As of the August 29 2014 Web Audio API spec publication, this feature has been marked as deprecated, and is soon to be replaced by AudioWorklet.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/AudioProcessingEvent">MDN Reference</a>
+        /// </remarks>
+        /// <remarks>@deprecated</remarks>
+        type AudioProcessingEvent = Fable.Core.TS.Dom.AudioProcessingEvent
+
+        type AudioScheduledSourceNodeEventMap = Fable.Core.TS.Dom.AudioScheduledSourceNodeEventMap
+
+        /// <summary>
+        /// The <b><c>AudioScheduledSourceNode</c></b> interface—part of the Web Audio API—is a parent interface for several types of audio source node interfaces which share the ability to be started and stopped, optionally at specified times. Specifically, this interface defines the start() and stop() methods, as well as the ended event.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/AudioScheduledSourceNode">MDN Reference</a>
+        /// </summary>
+        type AudioScheduledSourceNode = Fable.Core.TS.Dom.AudioScheduledSourceNode
+
+        /// <summary>
+        /// The <b><c>AudioWorklet</c></b> interface of the Web Audio API is used to supply custom audio processing scripts that execute in a separate thread to provide very low latency audio processing.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/AudioWorklet">MDN Reference</a>
+        /// </summary>
+        type AudioWorklet = Fable.Core.TS.Dom.AudioWorklet
+
+        type AudioWorkletNodeEventMap = Fable.Core.TS.Dom.AudioWorkletNodeEventMap
+
+        /// <summary>
+        /// The <b><c>AudioWorkletNode</c></b> interface of the Web Audio API represents a base class for a user-defined AudioNode, which can be connected to an audio routing graph along with other nodes. It has an associated AudioWorkletProcessor, which does the actual audio processing in a Web Audio rendering thread.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/AudioWorkletNode">MDN Reference</a>
+        /// </summary>
+        type AudioWorkletNode = Fable.Core.TS.Dom.AudioWorkletNode
+
+        /// <summary>
+        /// The <b><c>AuthenticatorAssertionResponse</c></b> interface of the Web Authentication API contains a digital signature from the private key of a particular WebAuthn credential. The relying party's server can verify this signature to authenticate a user, for example when they sign in.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/AuthenticatorAssertionResponse">MDN Reference</a>
+        /// </summary>
+        type AuthenticatorAssertionResponse = Fable.Core.TS.Dom.AuthenticatorAssertionResponse
+
+        /// <summary>
+        /// The <b><c>AuthenticatorAttestationResponse</c></b> interface of the Web Authentication API is the result of a WebAuthn credential registration. It contains information about the credential that the server needs to perform WebAuthn assertions, such as its credential ID and public key.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/AuthenticatorAttestationResponse">MDN Reference</a>
+        /// </summary>
+        type AuthenticatorAttestationResponse = Fable.Core.TS.Dom.AuthenticatorAttestationResponse
+
+        /// <summary>
+        /// The <b><c>AuthenticatorResponse</c></b> interface of the Web Authentication API is the base interface for interfaces that provide a cryptographic root of trust for a key pair. The child interfaces include information from the browser such as the challenge origin and either may be returned from PublicKeyCredential.response.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/AuthenticatorResponse">MDN Reference</a>
+        /// </summary>
+        type AuthenticatorResponse = Fable.Core.TS.Dom.AuthenticatorResponse
+
+        /// <summary>
+        /// The <b><c>BarProp</c></b> interface of the Document Object Model represents the web browser user interface elements that are exposed to scripts in web pages. Each of the following interface elements are represented by a BarProp object.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/BarProp">MDN Reference</a>
+        /// </summary>
+        type BarProp = Fable.Core.TS.Dom.BarProp
+
+        type BaseAudioContextEventMap = Fable.Core.TS.Dom.BaseAudioContextEventMap
+
+        /// <summary>
+        /// The <b><c>BaseAudioContext</c></b> interface of the Web Audio API acts as a base definition for online and offline audio-processing graphs, as represented by AudioContext and OfflineAudioContext respectively. You wouldn't use BaseAudioContext directly — you'd use its features via one of these two inheriting interfaces.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/BaseAudioContext">MDN Reference</a>
+        /// </summary>
+        type BaseAudioContext = Fable.Core.TS.Dom.BaseAudioContext
+
+        /// <summary>
+        /// The <b><c>BeforeUnloadEvent</c></b> interface represents the event object for the beforeunload event, which is fired when the current window, contained document, and associated resources are about to be unloaded.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/BeforeUnloadEvent">MDN Reference</a>
+        /// </summary>
+        type BeforeUnloadEvent = Fable.Core.TS.Dom.BeforeUnloadEvent
+
+        /// <summary>
+        /// The <b><c>BiquadFilterNode</c></b> interface represents a simple low-order filter, and is created using the BaseAudioContext/createBiquadFilter method. It is an AudioNode that can represent different kinds of filters, tone control devices, and graphic equalizers. A BiquadFilterNode always has exactly one input and one output.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/BiquadFilterNode">MDN Reference</a>
+        /// </summary>
+        type BiquadFilterNode = Fable.Core.TS.Dom.BiquadFilterNode
+
+        /// <summary>
+        /// The <b><c>Blob</c></b> interface represents a blob, which is a file-like object of immutable, raw data; they can be read as text or binary data, or converted into a ReadableStream so its methods can be used for processing the data.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Blob">MDN Reference</a>
+        /// </summary>
+        type Blob = Fable.Core.TS.Dom.Blob
+
+        /// <summary>
+        /// The <b><c>BlobEvent</c></b> interface of the MediaStream Recording API represents events associated with a Blob. These blobs are typically, but not necessarily, associated with media content.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/BlobEvent">MDN Reference</a>
+        /// </summary>
+        type BlobEvent = Fable.Core.TS.Dom.BlobEvent
+
+        type Body = Fable.Core.TS.Dom.Body
+
+        type BroadcastChannelEventMap = Fable.Core.TS.Dom.BroadcastChannelEventMap
+
+        /// <summary>
+        /// The <b><c>BroadcastChannel</c></b> interface represents a named channel that any browsing context of a given origin can subscribe to. It allows communication between different documents (in different windows, tabs, frames or iframes) of the same origin. Messages are broadcasted via a message event fired at all BroadcastChannel objects listening to the channel, except the object that sent the message.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/BroadcastChannel">MDN Reference</a>
+        /// </summary>
+        type BroadcastChannel = Fable.Core.TS.Dom.BroadcastChannel
+
+        /// <summary>
+        /// The <b><c>ByteLengthQueuingStrategy</c></b> interface of the Streams API provides a built-in byte length queuing strategy that can be used when constructing streams.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ByteLengthQueuingStrategy">MDN Reference</a>
+        /// </summary>
+        type ByteLengthQueuingStrategy = Fable.Core.TS.Dom.ByteLengthQueuingStrategy
+
+        /// <summary>
+        /// The <b><c>CDATASection</c></b> interface represents a CDATA section that can be used within XML to include extended portions of unescaped text. When inside a CDATA section, the symbols &lt; and &amp; don't need escaping as they normally do.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CDATASection">MDN Reference</a>
+        /// </summary>
+        type CDATASection = Fable.Core.TS.Dom.CDATASection
+
+        /// <summary>
+        /// The <b><c>CSSAnimation</c></b> interface of the Web Animations API represents an Animation object.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSAnimation">MDN Reference</a>
+        /// </summary>
+        type CSSAnimation = Fable.Core.TS.Dom.CSSAnimation
+
+        /// <summary>
+        /// An object implementing the <b><c>CSSConditionRule</c></b> interface represents a single condition CSS at-rule, which consists of a condition and a statement block.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSConditionRule">MDN Reference</a>
+        /// </summary>
+        type CSSConditionRule = Fable.Core.TS.Dom.CSSConditionRule
+
+        /// <summary>
+        /// The <b><c>CSSContainerRule</c></b> interface represents a single CSS
+        /// </summary>
+        /// <remarks>
+        /// @container
+        /// rule.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSContainerRule">MDN Reference</a>
+        /// </remarks>
+        type CSSContainerRule = Fable.Core.TS.Dom.CSSContainerRule
+
+        /// <summary>
+        /// The <b><c>CSSCounterStyleRule</c></b> interface represents an
+        /// </summary>
+        /// <remarks>
+        /// @counter-style
+        /// at-rule.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSCounterStyleRule">MDN Reference</a>
+        /// </remarks>
+        type CSSCounterStyleRule = Fable.Core.TS.Dom.CSSCounterStyleRule
+
+        /// <summary>
+        /// The <b><c>CSSFontFaceDescriptors</c></b> interface represents a CSS declaration block for an
+        /// </summary>
+        /// <remarks>
+        /// @font-face
+        /// at-rule.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSFontFaceDescriptors">MDN Reference</a>
+        /// </remarks>
+        type CSSFontFaceDescriptors = Fable.Core.TS.Dom.CSSFontFaceDescriptors
+
+        /// <summary>
+        /// The <b><c>CSSFontFaceRule</c></b> interface represents an
+        /// </summary>
+        /// <remarks>
+        /// @font-face
+        /// at-rule.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSFontFaceRule">MDN Reference</a>
+        /// </remarks>
+        type CSSFontFaceRule = Fable.Core.TS.Dom.CSSFontFaceRule
+
+        /// <summary>
+        /// The <b><c>CSSFontFeatureValuesRule</c></b> interface represents an
+        /// </summary>
+        /// <remarks>
+        /// @font-feature-values
+        /// at-rule. The values of its instance properties can be accessed with the CSSFontFeatureValuesMap interface.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSFontFeatureValuesRule">MDN Reference</a>
+        /// </remarks>
+        type CSSFontFeatureValuesRule = Fable.Core.TS.Dom.CSSFontFeatureValuesRule
+
+        /// <summary>
+        /// The <b><c>CSSFontPaletteValuesRule</c></b> interface represents an
+        /// </summary>
+        /// <remarks>
+        /// @font-palette-values
+        /// at-rule.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSFontPaletteValuesRule">MDN Reference</a>
+        /// </remarks>
+        type CSSFontPaletteValuesRule = Fable.Core.TS.Dom.CSSFontPaletteValuesRule
+
+        /// <summary>
+        /// The <b><c>CSSGroupingRule</c></b> interface of the CSS Object Model represents any CSS at-rule that contains other rules nested within it.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSGroupingRule">MDN Reference</a>
+        /// </summary>
+        type CSSGroupingRule = Fable.Core.TS.Dom.CSSGroupingRule
+
+        /// <summary>
+        /// The <b><c>CSSImageValue</c></b> interface of the CSS Typed Object Model API represents values for properties that take an image, for example background-image, list-style-image, or border-image-source.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSImageValue">MDN Reference</a>
+        /// </summary>
+        type CSSImageValue = Fable.Core.TS.Dom.CSSImageValue
+
+        /// <summary>
+        /// The <b><c>CSSImportRule</c></b> interface represents an
+        /// </summary>
+        /// <remarks>@import ://developer.mozilla.org/docs/Web/API/CSSImportRule)</remarks>
+        type CSSImportRule = Fable.Core.TS.Dom.CSSImportRule
+
+        /// <summary>
+        /// The <b><c>CSSKeyframeRule</c></b> interface describes an object representing a set of styles for a given keyframe. It corresponds to the contents of a single keyframe of a
+        /// </summary>
+        /// <remarks>
+        /// @keyframes
+        /// at-rule.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSKeyframeRule">MDN Reference</a>
+        /// </remarks>
+        type CSSKeyframeRule = Fable.Core.TS.Dom.CSSKeyframeRule
+
+        /// <summary>
+        /// The <b><c>CSSKeyframesRule</c></b> interface describes an object representing a complete set of keyframes for a CSS animation. It corresponds to the contents of a whole
+        /// </summary>
+        /// <remarks>
+        /// @keyframes
+        /// at-rule.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSKeyframesRule">MDN Reference</a>
+        /// </remarks>
+        type CSSKeyframesRule = Fable.Core.TS.Dom.CSSKeyframesRule
+
+        /// <summary>
+        /// The <b><c>CSSKeywordValue</c></b> interface of the CSS Typed Object Model API creates an object to represent CSS keywords and other identifiers.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSKeywordValue">MDN Reference</a>
+        /// </summary>
+        type CSSKeywordValue = Fable.Core.TS.Dom.CSSKeywordValue
+
+        /// <summary>
+        /// The <b><c>CSSLayerBlockRule</c></b> represents a
+        /// </summary>
+        /// <remarks>
+        /// @layer
+        /// block rule.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSLayerBlockRule">MDN Reference</a>
+        /// </remarks>
+        type CSSLayerBlockRule = Fable.Core.TS.Dom.CSSLayerBlockRule
+
+        /// <summary>
+        /// The <b><c>CSSLayerStatementRule</c></b> represents a
+        /// </summary>
+        /// <remarks>
+        /// @layer
+        /// statement rule. Unlike CSSLayerBlockRule, it doesn't contain other rules and merely defines one or several layers by providing their names.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSLayerStatementRule">MDN Reference</a>
+        /// </remarks>
+        type CSSLayerStatementRule = Fable.Core.TS.Dom.CSSLayerStatementRule
+
+        /// <summary>
+        /// The <b><c>CSSMathClamp</c></b> interface of the CSS Typed Object Model API represents the CSS clamp() function. It inherits properties and methods from its parent CSSNumericValue.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSMathClamp">MDN Reference</a>
+        /// </summary>
+        type CSSMathClamp = Fable.Core.TS.Dom.CSSMathClamp
+
+        /// <summary>
+        /// The <b><c>CSSMathInvert</c></b> interface of the CSS Typed Object Model API represents a CSS calc() used as calc(1 / &lt;value&gt;). It inherits properties and methods from its parent CSSNumericValue.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSMathInvert">MDN Reference</a>
+        /// </summary>
+        type CSSMathInvert = Fable.Core.TS.Dom.CSSMathInvert
+
+        /// <summary>
+        /// The <b><c>CSSMathMax</c></b> interface of the CSS Typed Object Model API represents the CSS max() function. It inherits properties and methods from its parent CSSNumericValue.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSMathMax">MDN Reference</a>
+        /// </summary>
+        type CSSMathMax = Fable.Core.TS.Dom.CSSMathMax
+
+        /// <summary>
+        /// The <b><c>CSSMathMin</c></b> interface of the CSS Typed Object Model API represents the CSS min() function. It inherits properties and methods from its parent CSSNumericValue.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSMathMin">MDN Reference</a>
+        /// </summary>
+        type CSSMathMin = Fable.Core.TS.Dom.CSSMathMin
+
+        /// <summary>
+        /// The <b><c>CSSMathNegate</c></b> interface of the CSS Typed Object Model API negates the value passed into it. It inherits properties and methods from its parent CSSNumericValue.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSMathNegate">MDN Reference</a>
+        /// </summary>
+        type CSSMathNegate = Fable.Core.TS.Dom.CSSMathNegate
+
+        /// <summary>
+        /// The <b><c>CSSMathProduct</c></b> interface of the CSS Typed Object Model API represents the result obtained by calling add(), sub(), or toSum() on CSSNumericValue. It inherits properties and methods from its parent CSSNumericValue.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSMathProduct">MDN Reference</a>
+        /// </summary>
+        type CSSMathProduct = Fable.Core.TS.Dom.CSSMathProduct
+
+        /// <summary>
+        /// The <b><c>CSSMathSum</c></b> interface of the CSS Typed Object Model API represents the result obtained by calling add(), sub(), or toSum() on CSSNumericValue.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSMathSum">MDN Reference</a>
+        /// </summary>
+        type CSSMathSum = Fable.Core.TS.Dom.CSSMathSum
+
+        /// <summary>
+        /// The <b><c>CSSMathValue</c></b> interface of the CSS Typed Object Model API a base class for classes representing complex numeric values.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSMathValue">MDN Reference</a>
+        /// </summary>
+        type CSSMathValue = Fable.Core.TS.Dom.CSSMathValue
+
+        /// <summary>
+        /// The <b><c>CSSMatrixComponent</c></b> interface of the CSS Typed Object Model API represents the matrix() and matrix3d() values of the individual transform property in CSS. It inherits properties and methods from its parent CSSTransformValue.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSMatrixComponent">MDN Reference</a>
+        /// </summary>
+        type CSSMatrixComponent = Fable.Core.TS.Dom.CSSMatrixComponent
+
+        /// <summary>
+        /// The <b><c>CSSMediaRule</c></b> interface represents a single CSS
+        /// </summary>
+        /// <remarks>
+        /// @media
+        /// rule.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSMediaRule">MDN Reference</a>
+        /// </remarks>
+        type CSSMediaRule = Fable.Core.TS.Dom.CSSMediaRule
+
+        /// <summary>
+        /// The <b><c>CSSNamespaceRule</c></b> interface describes an object representing a single CSS
+        /// </summary>
+        /// <remarks>
+        /// @namespace
+        /// at-rule.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSNamespaceRule">MDN Reference</a>
+        /// </remarks>
+        type CSSNamespaceRule = Fable.Core.TS.Dom.CSSNamespaceRule
+
+        /// <summary>
+        /// The <b><c>CSSNestedDeclarations</c></b> interface of the CSS Rule API is used to group nested CSSRules.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSNestedDeclarations">MDN Reference</a>
+        /// </summary>
+        type CSSNestedDeclarations = Fable.Core.TS.Dom.CSSNestedDeclarations
+
+        /// <summary>
+        /// The <b><c>CSSNumericArray</c></b> interface of the CSS Typed Object Model API contains a list of CSSNumericValue objects.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSNumericArray">MDN Reference</a>
+        /// </summary>
+        type CSSNumericArray = Fable.Core.TS.Dom.CSSNumericArray
+
+        /// <summary>
+        /// The <b><c>CSSNumericValue</c></b> interface of the CSS Typed Object Model API represents operations that all numeric values can perform.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSNumericValue">MDN Reference</a>
+        /// </summary>
+        type CSSNumericValue = Fable.Core.TS.Dom.CSSNumericValue
+
+        /// <summary>
+        /// The <b><c>CSSPageDescriptors</c></b> interface represents a CSS declaration block for an
+        /// </summary>
+        /// <remarks>
+        /// @page
+        /// at-rule.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSPageDescriptors">MDN Reference</a>
+        /// </remarks>
+        type CSSPageDescriptors = Fable.Core.TS.Dom.CSSPageDescriptors
+
+        /// <summary>
+        /// <b><c>CSSPageRule</c></b> represents a single CSS
+        /// </summary>
+        /// <remarks>
+        /// @page
+        /// rule.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSPageRule">MDN Reference</a>
+        /// </remarks>
+        type CSSPageRule = Fable.Core.TS.Dom.CSSPageRule
+
+        /// <summary>
+        /// The <b><c>CSSPerspective</c></b> interface of the CSS Typed Object Model API represents the perspective() value of the individual transform property in CSS. It inherits properties and methods from its parent CSSTransformValue.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSPerspective">MDN Reference</a>
+        /// </summary>
+        type CSSPerspective = Fable.Core.TS.Dom.CSSPerspective
+
+        /// <summary>
+        /// The <b><c>CSSPositionTryDescriptors</c></b> interface defines properties that represent the list of CSS descriptors that can be set in the body of a
+        /// </summary>
+        /// <remarks>
+        /// @position-try
+        /// at-rule.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSPositionTryDescriptors">MDN Reference</a>
+        /// </remarks>
+        type CSSPositionTryDescriptors = Fable.Core.TS.Dom.CSSPositionTryDescriptors
+
+        /// <summary>
+        /// The <b><c>CSSPositionTryRule</c></b> interface describes an object representing a
+        /// </summary>
+        /// <remarks>
+        /// @position-try
+        /// at-rule.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSPositionTryRule">MDN Reference</a>
+        /// </remarks>
+        type CSSPositionTryRule = Fable.Core.TS.Dom.CSSPositionTryRule
+
+        /// <summary>
+        /// The <b><c>CSSPropertyRule</c></b> interface of the CSS Properties and Values API represents a single CSS
+        /// </summary>
+        /// <remarks>
+        /// @property
+        /// rule.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSPropertyRule">MDN Reference</a>
+        /// </remarks>
+        type CSSPropertyRule = Fable.Core.TS.Dom.CSSPropertyRule
+
+        /// <summary>
+        /// The <b><c>CSSRotate</c></b> interface of the CSS Typed Object Model API represents the rotate value of the individual transform property in CSS. It inherits properties and methods from its parent CSSTransformValue.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSRotate">MDN Reference</a>
+        /// </summary>
+        type CSSRotate = Fable.Core.TS.Dom.CSSRotate
+
+        /// <summary>
+        /// The <b><c>CSSRule</c></b> interface represents a single CSS rule. There are several types of rules which inherit properties from CSSRule.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSRule">MDN Reference</a>
+        /// </summary>
+        type CSSRule = Fable.Core.TS.Dom.CSSRule
+
+        /// <summary>
+        /// A <b><c>CSSRuleList</c></b> represents an ordered collection of read-only CSSRule objects.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSRuleList">MDN Reference</a>
+        /// </summary>
+        type CSSRuleList = Fable.Core.TS.Dom.CSSRuleList
+
+        /// <summary>
+        /// The <b><c>CSSScale</c></b> interface of the CSS Typed Object Model API represents the scale() and scale3d() values of the individual transform property in CSS. It inherits properties and methods from its parent CSSTransformValue.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSScale">MDN Reference</a>
+        /// </summary>
+        type CSSScale = Fable.Core.TS.Dom.CSSScale
+
+        /// <summary>
+        /// The <b><c>CSSScopeRule</c></b> interface of the CSS Object Model represents a CSS
+        /// </summary>
+        /// <remarks>
+        /// @scope
+        /// at-rule.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSScopeRule">MDN Reference</a>
+        /// </remarks>
+        type CSSScopeRule = Fable.Core.TS.Dom.CSSScopeRule
+
+        /// <summary>
+        /// The <b><c>CSSSkew</c></b> interface of the CSS Typed Object Model API is part of the CSSTransformValue interface. It represents the skew() value of the individual transform property in CSS.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSSkew">MDN Reference</a>
+        /// </summary>
+        type CSSSkew = Fable.Core.TS.Dom.CSSSkew
+
+        /// <summary>
+        /// The <b><c>CSSSkewX</c></b> interface of the CSS Typed Object Model API represents the skewX() value of the individual transform property in CSS. It inherits properties and methods from its parent CSSTransformValue.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSSkewX">MDN Reference</a>
+        /// </summary>
+        type CSSSkewX = Fable.Core.TS.Dom.CSSSkewX
+
+        /// <summary>
+        /// The <b><c>CSSSkewY</c></b> interface of the CSS Typed Object Model API represents the skewY() value of the individual transform property in CSS. It inherits properties and methods from its parent CSSTransformValue.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSSkewY">MDN Reference</a>
+        /// </summary>
+        type CSSSkewY = Fable.Core.TS.Dom.CSSSkewY
+
+        /// <summary>
+        /// The <b><c>CSSStartingStyleRule</c></b> interface of the CSS Object Model represents a CSS
+        /// </summary>
+        /// <remarks>
+        /// @starting-style
+        /// at-rule.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSStartingStyleRule">MDN Reference</a>
+        /// </remarks>
+        type CSSStartingStyleRule = Fable.Core.TS.Dom.CSSStartingStyleRule
+
+        /// <summary>
+        /// The <b><c>CSSStyleDeclaration</c></b> interface is the base class for objects that represent CSS declaration blocks with different supported sets of CSS style information:
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSStyleDeclaration">MDN Reference</a>
+        /// </summary>
+        type CSSStyleDeclarationBase = Fable.Core.TS.Dom.CSSStyleDeclarationBase
+
+        type CSSStyleDeclaration = Fable.Core.TS.Dom.CSSStyleDeclaration
+
+        /// <summary>
+        /// The <b><c>CSSStyleProperties</c></b> interface of the CSS Object Model (CSSOM) represents inline or computed styles available on an element, or the styles associated with a CSS style rule.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSStyleProperties">MDN Reference</a>
+        /// </summary>
+        type CSSStyleProperties = Fable.Core.TS.Dom.CSSStyleProperties
+
+        /// <summary>
+        /// The <b><c>CSSStyleRule</c></b> interface represents a single CSS style rule.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSStyleRule">MDN Reference</a>
+        /// </summary>
+        type CSSStyleRule = Fable.Core.TS.Dom.CSSStyleRule
+
+        /// <summary>
+        /// The <b><c>CSSStyleSheet</c></b> interface represents a single CSS stylesheet, and lets you inspect and modify the list of rules contained in the stylesheet. It inherits properties and methods from its parent, StyleSheet.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSStyleSheet">MDN Reference</a>
+        /// </summary>
+        type CSSStyleSheet = Fable.Core.TS.Dom.CSSStyleSheet
+
+        /// <summary>
+        /// The <b><c>CSSStyleValue</c></b> interface of the CSS Typed Object Model API is the base class of all CSS values accessible through the Typed OM API. An instance of this class may be used anywhere a string is expected.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSStyleValue">MDN Reference</a>
+        /// </summary>
+        type CSSStyleValue = Fable.Core.TS.Dom.CSSStyleValue
+
+        /// <summary>
+        /// The <b><c>CSSSupportsRule</c></b> interface represents a single CSS
+        /// </summary>
+        /// <remarks>
+        /// @supports
+        /// at-rule.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSSupportsRule">MDN Reference</a>
+        /// </remarks>
+        type CSSSupportsRule = Fable.Core.TS.Dom.CSSSupportsRule
+
+        /// <summary>
+        /// The <b><c>CSSTransformComponent</c></b> interface of the CSS Typed Object Model API is part of the CSSTransformValue interface.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSTransformComponent">MDN Reference</a>
+        /// </summary>
+        type CSSTransformComponent = Fable.Core.TS.Dom.CSSTransformComponent
+
+        /// <summary>
+        /// The <b><c>CSSTransformValue</c></b> interface of the CSS Typed Object Model API represents transform-list values as used by the CSS transform property.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSTransformValue">MDN Reference</a>
+        /// </summary>
+        type CSSTransformValue = Fable.Core.TS.Dom.CSSTransformValue
+
+        /// <summary>
+        /// The <b><c>CSSTransition</c></b> interface of the Web Animations API represents an Animation object used for a CSS Transition.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSTransition">MDN Reference</a>
+        /// </summary>
+        type CSSTransition = Fable.Core.TS.Dom.CSSTransition
+
+        /// <summary>
+        /// The <b><c>CSSTranslate</c></b> interface of the CSS Typed Object Model API represents the translate() value of the individual transform property in CSS. It inherits properties and methods from its parent CSSTransformValue.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSTranslate">MDN Reference</a>
+        /// </summary>
+        type CSSTranslate = Fable.Core.TS.Dom.CSSTranslate
+
+        /// <summary>
+        /// The <b><c>CSSUnitValue</c></b> interface of the CSS Typed Object Model API represents values that contain a single unit type.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSUnitValue">MDN Reference</a>
+        /// </summary>
+        type CSSUnitValue = Fable.Core.TS.Dom.CSSUnitValue
+
+        /// <summary>
+        /// The <b><c>CSSUnparsedValue</c></b> interface of the CSS Typed Object Model API represents property values that reference custom properties. It consists of a list of string fragments and variable references.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSUnparsedValue">MDN Reference</a>
+        /// </summary>
+        type CSSUnparsedValue = Fable.Core.TS.Dom.CSSUnparsedValue
+
+        /// <summary>
+        /// The <b><c>CSSVariableReferenceValue</c></b> interface of the CSS Typed Object Model API allows you to create a custom name for a built-in CSS value. This object functionality is sometimes called a "CSS variable" and serves the same purpose as the var() function. The custom name must begin with two dashes.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSVariableReferenceValue">MDN Reference</a>
+        /// </summary>
+        type CSSVariableReferenceValue = Fable.Core.TS.Dom.CSSVariableReferenceValue
+
+        /// <summary>
+        /// The <b><c>CSSViewTransitionRule</c></b> interface represents a CSS
+        /// </summary>
+        /// <remarks>
+        /// @view-transition
+        /// at-rule.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CSSViewTransitionRule">MDN Reference</a>
+        /// </remarks>
+        type CSSViewTransitionRule = Fable.Core.TS.Dom.CSSViewTransitionRule
+
+        /// <summary>
+        /// The <b><c>Cache</c></b> interface provides a persistent storage mechanism for Request / Response object pairs that are cached in long lived memory. How long a Cache object lives is browser dependent, but a single origin's scripts can typically rely on the presence of a previously populated Cache object. Note that the Cache interface is exposed to windowed scopes as well as workers. You don't have to use it in conjunction with service workers, even though it is defined in the service worker spec.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Cache">MDN Reference</a>
+        /// </summary>
+        type Cache = Fable.Core.TS.Dom.Cache
+
+        /// <summary>
+        /// The <b><c>CacheStorage</c></b> interface represents the storage for Cache objects.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CacheStorage">MDN Reference</a>
+        /// </summary>
+        type CacheStorage = Fable.Core.TS.Dom.CacheStorage
+
+        /// <summary>
+        /// The <b><c>CanvasCaptureMediaStreamTrack</c></b> interface of the Media Capture and Streams API represents the video track contained in a MediaStream being generated from a &lt;canvas&gt; following a call to HTMLCanvasElement.captureStream().
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CanvasCaptureMediaStreamTrack">MDN Reference</a>
+        /// </summary>
+        type CanvasCaptureMediaStreamTrack = Fable.Core.TS.Dom.CanvasCaptureMediaStreamTrack
+
+        type CanvasCompositing = Fable.Core.TS.Dom.CanvasCompositing
+
+        type CanvasDrawImage = Fable.Core.TS.Dom.CanvasDrawImage
+
+        type CanvasDrawPath = Fable.Core.TS.Dom.CanvasDrawPath
+
+        type CanvasFillStrokeStyles = Fable.Core.TS.Dom.CanvasFillStrokeStyles
+
+        type CanvasFilters = Fable.Core.TS.Dom.CanvasFilters
+
+        /// <summary>
+        /// The <b><c>CanvasGradient</c></b> interface represents an opaque object describing a gradient. It is returned by the methods CanvasRenderingContext2D.createLinearGradient(), CanvasRenderingContext2D.createConicGradient() or CanvasRenderingContext2D.createRadialGradient().
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CanvasGradient">MDN Reference</a>
+        /// </summary>
+        type CanvasGradient = Fable.Core.TS.Dom.CanvasGradient
+
+        type CanvasImageData = Fable.Core.TS.Dom.CanvasImageData
+
+        type CanvasImageSmoothing = Fable.Core.TS.Dom.CanvasImageSmoothing
+
+        type CanvasPath = Fable.Core.TS.Dom.CanvasPath
+
+        type CanvasPathDrawingStyles = Fable.Core.TS.Dom.CanvasPathDrawingStyles
+
+        /// <summary>
+        /// The <b><c>CanvasPattern</c></b> interface represents an opaque object describing a pattern, based on an image, a canvas, or a video, created by the CanvasRenderingContext2D.createPattern() method.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CanvasPattern">MDN Reference</a>
+        /// </summary>
+        type CanvasPattern = Fable.Core.TS.Dom.CanvasPattern
+
+        type CanvasRect = Fable.Core.TS.Dom.CanvasRect
+
+        /// <summary>
+        /// The <b><c>CanvasRenderingContext2D</c></b> interface, part of the Canvas API, provides the 2D rendering context for the drawing surface of a &lt;canvas&gt; element. It is used for drawing shapes, text, images, and other objects.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CanvasRenderingContext2D">MDN Reference</a>
+        /// </summary>
+        type CanvasRenderingContext2D = Fable.Core.TS.Dom.CanvasRenderingContext2D
+
+        type CanvasSettings = Fable.Core.TS.Dom.CanvasSettings
+
+        type CanvasShadowStyles = Fable.Core.TS.Dom.CanvasShadowStyles
+
+        type CanvasState = Fable.Core.TS.Dom.CanvasState
+
+        type CanvasText = Fable.Core.TS.Dom.CanvasText
+
+        type CanvasTextDrawingStyles = Fable.Core.TS.Dom.CanvasTextDrawingStyles
+
+        type CanvasTransform = Fable.Core.TS.Dom.CanvasTransform
+
+        type CanvasUserInterface = Fable.Core.TS.Dom.CanvasUserInterface
+
+        /// <summary>
+        /// The <b><c>CaretPosition</c></b> interface represents the caret position, an indicator for the text insertion point. You can get a CaretPosition using the Document.caretPositionFromPoint() method.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CaretPosition">MDN Reference</a>
+        /// </summary>
+        type CaretPosition = Fable.Core.TS.Dom.CaretPosition
+
+        /// <summary>
+        /// The <b><c>ChannelMergerNode</c></b> interface, often used in conjunction with its opposite, ChannelSplitterNode, reunites different mono inputs into a single output. Each input is used to fill a channel of the output. This is useful for accessing each channel separately, e.g., for performing channel mixing where gain must be separately controlled on each channel.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ChannelMergerNode">MDN Reference</a>
+        /// </summary>
+        type ChannelMergerNode = Fable.Core.TS.Dom.ChannelMergerNode
+
+        /// <summary>
+        /// The <b><c>ChannelSplitterNode</c></b> interface, often used in conjunction with its opposite, ChannelMergerNode, separates the different channels of an audio source into a set of mono outputs. This is useful for accessing each channel separately, e.g., for performing channel mixing where gain must be separately controlled on each channel.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ChannelSplitterNode">MDN Reference</a>
+        /// </summary>
+        type ChannelSplitterNode = Fable.Core.TS.Dom.ChannelSplitterNode
+
+        /// <summary>
+        /// The <b><c>CharacterData</c></b> abstract interface represents a Node object that contains characters. This is an abstract interface, meaning there aren't any objects of type CharacterData: it is implemented by other interfaces like Text, Comment, CDATASection, or ProcessingInstruction, which aren't abstract.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CharacterData">MDN Reference</a>
+        /// </summary>
+        type CharacterData = Fable.Core.TS.Dom.CharacterData
+
+        type ChildNode = Fable.Core.TS.Dom.ChildNode
+
+        /// <remarks>@deprecated</remarks>
+        type ClientRect = Fable.Core.TS.Dom.ClientRect
+
+        /// <summary>
+        /// The <b><c>Clipboard</c></b> interface of the Clipboard API provides read and write access to the contents of the system clipboard. This allows a web application to implement cut, copy, and paste features.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Clipboard">MDN Reference</a>
+        /// </summary>
+        type Clipboard = Fable.Core.TS.Dom.Clipboard
+
+        /// <summary>
+        /// The <b><c>ClipboardEvent</c></b> interface of the Clipboard API represents events providing information related to modification of the clipboard, that is cut, copy, and paste events.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ClipboardEvent">MDN Reference</a>
+        /// </summary>
+        type ClipboardEvent = Fable.Core.TS.Dom.ClipboardEvent
+
+        /// <summary>
+        /// The <b><c>ClipboardItem</c></b> interface of the Clipboard API represents a single item format, used when reading or writing clipboard data using Clipboard.read() and Clipboard.write() respectively.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ClipboardItem">MDN Reference</a>
+        /// </summary>
+        type ClipboardItem = Fable.Core.TS.Dom.ClipboardItem
+
+        /// <summary>
+        /// A <b><c>CloseEvent</c></b> is sent to clients using WebSockets when the connection is closed. This is delivered to the listener indicated by the WebSocket object's onclose attribute.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CloseEvent">MDN Reference</a>
+        /// </summary>
+        type CloseEvent = Fable.Core.TS.Dom.CloseEvent
+
+        type CloseWatcherEventMap = Fable.Core.TS.Dom.CloseWatcherEventMap
+
+        /// <summary>
+        /// The <b><c>CloseWatcher</c></b> interface allows a custom UI component with open and close semantics to respond to device-specific close actions in the same way as a built-in component.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CloseWatcher">MDN Reference</a>
+        /// </summary>
+        type CloseWatcher = Fable.Core.TS.Dom.CloseWatcher
+
+        /// <summary>
+        /// The <b><c>CommandEvent</c></b> interface represents an event notifying the user when a button element with valid commandForElement and command attributes is about to invoke an interactive element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CommandEvent">MDN Reference</a>
+        /// </summary>
+        type CommandEvent = Fable.Core.TS.Dom.CommandEvent
+
+        /// <summary>
+        /// The <b><c>Comment</c></b> interface represents textual notations within markup; although it is generally not visually shown, such comments are available to be read in the source view.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Comment">MDN Reference</a>
+        /// </summary>
+        type Comment = Fable.Core.TS.Dom.Comment
+
+        /// <summary>
+        /// The DOM <b><c>CompositionEvent</c></b> represents events that occur due to the user indirectly entering text.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CompositionEvent">MDN Reference</a>
+        /// </summary>
+        type CompositionEvent = Fable.Core.TS.Dom.CompositionEvent
+
+        /// <summary>
+        /// The <b><c>CompressionStream</c></b> interface of the Compression Streams API compresses a stream of data. It implements the same shape as a TransformStream, allowing it to be used in ReadableStream.pipeThrough() and similar methods.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CompressionStream">MDN Reference</a>
+        /// </summary>
+        type CompressionStream = Fable.Core.TS.Dom.CompressionStream
+
+        /// <summary>
+        /// The <b><c>ConstantSourceNode</c></b> interface—part of the Web Audio API—represents an audio source (based upon AudioScheduledSourceNode) whose output is single unchanging value. This makes it useful for cases in which you need a constant value coming in from an audio source. In addition, it can be used like a constructible AudioParam by automating the value of its offset or by connecting another node to it; see Controlling multiple parameters with ConstantSourceNode.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ConstantSourceNode">MDN Reference</a>
+        /// </summary>
+        type ConstantSourceNode = Fable.Core.TS.Dom.ConstantSourceNode
+
+        /// <summary>
+        /// The <b><c>ContentVisibilityAutoStateChangeEvent</c></b> interface is the event object for the contentvisibilityautostatechange event, which fires on any element with content-visibility: auto set on it when it starts or stops being relevant to the user and skipping its contents.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ContentVisibilityAutoStateChangeEvent">MDN Reference</a>
+        /// </summary>
+        type ContentVisibilityAutoStateChangeEvent = Fable.Core.TS.Dom.ContentVisibilityAutoStateChangeEvent
+
+        /// <summary>
+        /// The <b><c>ConvolverNode</c></b> interface is an AudioNode that performs a Linear Convolution on a given AudioBuffer, often used to achieve a reverb effect. A ConvolverNode always has exactly one input and one output.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ConvolverNode">MDN Reference</a>
+        /// </summary>
+        type ConvolverNode = Fable.Core.TS.Dom.ConvolverNode
+
+        /// <summary>
+        /// The <b><c>CookieChangeEvent</c></b> interface of the Cookie Store API is the event type of the change event fired at a CookieStore when any cookies are created or deleted.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CookieChangeEvent">MDN Reference</a>
+        /// </summary>
+        type CookieChangeEvent = Fable.Core.TS.Dom.CookieChangeEvent
+
+        type CookieStoreEventMap = Fable.Core.TS.Dom.CookieStoreEventMap
+
+        /// <summary>
+        /// The <b><c>CookieStore</c></b> interface of the Cookie Store API provides methods for getting and setting cookies asynchronously from either a page or a service worker.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CookieStore">MDN Reference</a>
+        /// </summary>
+        type CookieStore = Fable.Core.TS.Dom.CookieStore
+
+        /// <summary>
+        /// The <b><c>CookieStoreManager</c></b> interface of the Cookie Store API allows service workers to subscribe to cookie change events. Call subscribe() on a particular service worker registration to receive change events.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CookieStoreManager">MDN Reference</a>
+        /// </summary>
+        type CookieStoreManager = Fable.Core.TS.Dom.CookieStoreManager
+
+        /// <summary>
+        /// The <b><c>CountQueuingStrategy</c></b> interface of the Streams API provides a built-in chunk counting queuing strategy that can be used when constructing streams.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CountQueuingStrategy">MDN Reference</a>
+        /// </summary>
+        type CountQueuingStrategy = Fable.Core.TS.Dom.CountQueuingStrategy
+
+        /// <summary>
+        /// The <b><c>Credential</c></b> interface of the Credential Management API provides information about an entity (usually a user) normally as a prerequisite to a trust decision.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Credential">MDN Reference</a>
+        /// </summary>
+        type Credential = Fable.Core.TS.Dom.Credential
+
+        /// <summary>
+        /// The <b><c>CredentialsContainer</c></b> interface of the Credential Management API exposes methods to request credentials and notify the user agent when events such as successful sign in or sign out happen. This interface is accessible from Navigator.credentials.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CredentialsContainer">MDN Reference</a>
+        /// </summary>
+        type CredentialsContainer = Fable.Core.TS.Dom.CredentialsContainer
+
+        /// <summary>
+        /// The <b><c>Crypto</c></b> interface represents basic cryptography features available in the current context. It allows access to a cryptographically strong random number generator and to cryptographic primitives.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Crypto">MDN Reference</a>
+        /// </summary>
+        type Crypto = Fable.Core.TS.Dom.Crypto
+
+        /// <summary>
+        /// The <b><c>CryptoKey</c></b> interface of the Web Crypto API represents a cryptographic key obtained from one of the SubtleCrypto methods generateKey(), deriveKey(), importKey(), or unwrapKey().
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CryptoKey">MDN Reference</a>
+        /// </summary>
+        type CryptoKey = Fable.Core.TS.Dom.CryptoKey
+
+        /// <summary>
+        /// The <b><c>CustomElementRegistry</c></b> interface provides methods for registering custom elements and querying registered elements. To get an instance of it, use the window.customElements property. To create a scoped registry, use the CustomElementRegistry() constructor.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CustomElementRegistry">MDN Reference</a>
+        /// </summary>
+        type CustomElementRegistry = Fable.Core.TS.Dom.CustomElementRegistry
+
+        /// <summary>
+        /// The <b><c>CustomEvent</c></b> interface can be used to attach custom data to an event generated by an application.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CustomEvent">MDN Reference</a>
+        /// </summary>
+        type CustomEvent<'T> = Fable.Core.TS.Dom.CustomEvent<'T>
+
+        /// <summary>
+        /// The <b><c>CustomStateSet</c></b> interface of the Document Object Model stores a list of states for an autonomous custom element, and allows states to be added and removed from the set.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/CustomStateSet">MDN Reference</a>
+        /// </summary>
+        type CustomStateSet = Fable.Core.TS.Dom.CustomStateSet
+
+        /// <summary>
+        /// The <b><c>DOMException</c></b> interface represents an abnormal event (called an exception) that occurs as a result of calling a method or accessing a property of a web API. This is how error conditions are described in web APIs.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DOMException">MDN Reference</a>
+        /// </summary>
+        type DOMException = Fable.Core.TS.Dom.DOMException
+
+        /// <summary>
+        /// The <b><c>DOMImplementation</c></b> interface represents an object providing methods which are not dependent on any particular document. Such an object is returned by the Document.implementation property.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DOMImplementation">MDN Reference</a>
+        /// </summary>
+        type DOMImplementation = Fable.Core.TS.Dom.DOMImplementation
+
+        /// <summary>
+        /// The <b><c>DOMMatrix</c></b> interface represents 4×4 matrices, suitable for 2D and 3D operations including rotation and translation. It is a mutable version of the DOMMatrixReadOnly interface. The interface is available inside web workers.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DOMMatrix">MDN Reference</a>
+        /// </summary>
+        type DOMMatrix = Fable.Core.TS.Dom.DOMMatrix
+
+        type SVGMatrix = Fable.Core.TS.Dom.DOMMatrix
+
+        type WebKitCSSMatrix = Fable.Core.TS.Dom.DOMMatrix
+
+        /// <summary>
+        /// The <b><c>DOMMatrixReadOnly</c></b> interface represents a read-only 4×4 matrix, suitable for 2D and 3D operations. The DOMMatrix interface — which is based upon DOMMatrixReadOnly—adds mutability, allowing you to alter the matrix after creating it.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DOMMatrixReadOnly">MDN Reference</a>
+        /// </summary>
+        type DOMMatrixReadOnly = Fable.Core.TS.Dom.DOMMatrixReadOnly
+
+        /// <summary>
+        /// The <b><c>DOMParser</c></b> interface provides the ability to parse XML or HTML source code from a string into a DOM Document.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DOMParser">MDN Reference</a>
+        /// </summary>
+        type DOMParser = Fable.Core.TS.Dom.DOMParser
+
+        /// <summary>
+        /// A <b><c>DOMPoint</c></b> object represents a 2D or 3D point in a coordinate system; it includes values for the coordinates in up to three dimensions, as well as an optional perspective value. DOMPoint is based on DOMPointReadOnly but allows its properties' values to be changed.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DOMPoint">MDN Reference</a>
+        /// </summary>
+        type DOMPoint = Fable.Core.TS.Dom.DOMPoint
+
+        type SVGPoint = Fable.Core.TS.Dom.DOMPoint
+
+        /// <summary>
+        /// The <b><c>DOMPointReadOnly</c></b> interface specifies the coordinate and perspective fields used by DOMPoint to define a 2D or 3D point in a coordinate system.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DOMPointReadOnly">MDN Reference</a>
+        /// </summary>
+        type DOMPointReadOnly = Fable.Core.TS.Dom.DOMPointReadOnly
+
+        /// <summary>
+        /// A <b><c>DOMQuad</c></b> is a collection of four DOMPoints defining the corners of an arbitrary quadrilateral. Returning DOMQuads lets getBoxQuads() return accurate information even when arbitrary 2D or 3D transforms are present. It has a handy bounds attribute returning a DOMRectReadOnly for those cases where you just want an axis-aligned bounding rectangle.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DOMQuad">MDN Reference</a>
+        /// </summary>
+        type DOMQuad = Fable.Core.TS.Dom.DOMQuad
+
+        /// <summary>
+        /// A <b><c>DOMRect</c></b> describes the size and position of a rectangle.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DOMRect">MDN Reference</a>
+        /// </summary>
+        type DOMRect = Fable.Core.TS.Dom.DOMRect
+
+        type SVGRect = Fable.Core.TS.Dom.DOMRect
+
+        /// <summary>
+        /// The <b><c>DOMRectList</c></b> interface represents a collection of DOMRect objects, typically used to hold the rectangles associated with a particular element, like bounding boxes returned by methods such as getClientRects(). It provides access to each rectangle in the list via its index, along with a length property that indicates the total number of rectangles in the list.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DOMRectList">MDN Reference</a>
+        /// </summary>
+        type DOMRectList = Fable.Core.TS.Dom.DOMRectList
+
+        /// <summary>
+        /// The <b><c>DOMRectReadOnly</c></b> interface specifies the standard properties (also used by DOMRect) to define a rectangle whose properties are immutable.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DOMRectReadOnly">MDN Reference</a>
+        /// </summary>
+        type DOMRectReadOnly = Fable.Core.TS.Dom.DOMRectReadOnly
+
+        /// <summary>
+        /// The <b><c>DOMStringList</c></b> interface is a legacy type returned by some APIs and represents a non-modifiable list of strings (DOMString).
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DOMStringList">MDN Reference</a>
+        /// </summary>
+        type DOMStringList = Fable.Core.TS.Dom.DOMStringList
+
+        /// <summary>
+        /// The <b><c>DOMStringMap</c></b> interface is used for the HTMLElement.dataset attribute, to represent data for custom attributes added to elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DOMStringMap">MDN Reference</a>
+        /// </summary>
+        type DOMStringMap = Fable.Core.TS.Dom.DOMStringMap
+
+        /// <summary>
+        /// The <b><c>DOMTokenList</c></b> interface represents a set of space-separated tokens. Such a set is returned by Element.classList or HTMLLinkElement.relList, and many others.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DOMTokenList">MDN Reference</a>
+        /// </summary>
+        type DOMTokenList = Fable.Core.TS.Dom.DOMTokenList
+
+        /// <summary>
+        /// The <b><c>DataTransfer</c></b> object is used to hold any data transferred between contexts, such as a drag and drop operation, or clipboard read/write. It may hold one or more data items, each of one or more data types.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DataTransfer">MDN Reference</a>
+        /// </summary>
+        type DataTransfer = Fable.Core.TS.Dom.DataTransfer
+
+        /// <summary>
+        /// The <b><c>DataTransferItem</c></b> object represents one drag data item. During a drag operation, each DragEvent has a dataTransfer property which contains a list of drag data items. Each item in the list is a DataTransferItem object.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DataTransferItem">MDN Reference</a>
+        /// </summary>
+        type DataTransferItem = Fable.Core.TS.Dom.DataTransferItem
+
+        /// <summary>
+        /// The <b><c>DataTransferItemList</c></b> object is a list of DataTransferItem objects representing items being dragged. During a drag operation, each DragEvent has a dataTransfer property and that property is a DataTransferItemList.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DataTransferItemList">MDN Reference</a>
+        /// </summary>
+        type DataTransferItemList = Fable.Core.TS.Dom.DataTransferItemList
+
+        /// <summary>
+        /// The <b><c>DecompressionStream</c></b> interface of the Compression Streams API decompresses a stream of data. It implements the same shape as a TransformStream, allowing it to be used in ReadableStream.pipeThrough() and similar methods.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DecompressionStream">MDN Reference</a>
+        /// </summary>
+        type DecompressionStream = Fable.Core.TS.Dom.DecompressionStream
+
+        /// <summary>
+        /// The <b><c>DelayNode</c></b> interface represents a delay-line; an AudioNode audio-processing module that causes a delay between the arrival of an input data and its propagation to the output.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DelayNode">MDN Reference</a>
+        /// </summary>
+        type DelayNode = Fable.Core.TS.Dom.DelayNode
+
+        /// <summary>
+        /// The <b><c>DeviceMotionEvent</c></b> interface of the Device Orientation Events provides web developers with information about the speed of changes for the device's position and orientation.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DeviceMotionEvent">MDN Reference</a>
+        /// </summary>
+        type DeviceMotionEvent = Fable.Core.TS.Dom.DeviceMotionEvent
+
+        /// <summary>
+        /// The <b><c>DeviceMotionEventAcceleration</c></b> interface of the Device Orientation Events provides information about the amount of acceleration the device is experiencing along all three axes.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DeviceMotionEventAcceleration">MDN Reference</a>
+        /// </summary>
+        type DeviceMotionEventAcceleration = Fable.Core.TS.Dom.DeviceMotionEventAcceleration
+
+        /// <summary>
+        /// A <b><c>DeviceMotionEventRotationRate</c></b> interface of the Device Orientation Events provides information about the rate at which the device is rotating around all three axes.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DeviceMotionEventRotationRate">MDN Reference</a>
+        /// </summary>
+        type DeviceMotionEventRotationRate = Fable.Core.TS.Dom.DeviceMotionEventRotationRate
+
+        /// <summary>
+        /// The <b><c>DeviceOrientationEvent</c></b> interface of the Device Orientation Events provides web developers with information from the physical orientation of the device running the web page.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DeviceOrientationEvent">MDN Reference</a>
+        /// </summary>
+        type DeviceOrientationEvent = Fable.Core.TS.Dom.DeviceOrientationEvent
+
+        /// <summary>
+        /// Available only in secure contexts.
+        /// </summary>
+        type DigitalCredential = Fable.Core.TS.Dom.DigitalCredential
+
+        type DocumentEventMap = Fable.Core.TS.Dom.DocumentEventMap
+
+        /// <summary>
+        /// The <b><c>Document</c></b> interface represents any web page loaded in the browser and serves as an entry point into the web page's content, which is the DOM tree.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Document">MDN Reference</a>
+        /// </summary>
+        type Document = Fable.Core.TS.Dom.Document
+
+        /// <summary>
+        /// The <b><c>DocumentFragment</c></b> interface represents a minimal document object that has no parent.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DocumentFragment">MDN Reference</a>
+        /// </summary>
+        type DocumentFragment = Fable.Core.TS.Dom.DocumentFragment
+
+        type DocumentOrShadowRoot = Fable.Core.TS.Dom.DocumentOrShadowRoot
+
+        type DocumentPictureInPictureEventMap = Fable.Core.TS.Dom.DocumentPictureInPictureEventMap
+
+        /// <summary>
+        /// The <b><c>DocumentPictureInPicture</c></b> interface of the Document Picture-in-Picture API is the entry point for creating and handling document picture-in-picture windows.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DocumentPictureInPicture">MDN Reference</a>
+        /// </summary>
+        type DocumentPictureInPicture = Fable.Core.TS.Dom.DocumentPictureInPicture
+
+        /// <summary>
+        /// The <b><c>DocumentPictureInPictureEvent</c></b> interface of the Document Picture-in-Picture API is the event object for the enter event, which fires when the Picture-in-Picture window is opened.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DocumentPictureInPictureEvent">MDN Reference</a>
+        /// </summary>
+        type DocumentPictureInPictureEvent = Fable.Core.TS.Dom.DocumentPictureInPictureEvent
+
+        /// <summary>
+        /// The <b><c>DocumentTimeline</c></b> interface of the Web Animations API represents animation timelines, including the default document timeline (accessed via Document.timeline).
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DocumentTimeline">MDN Reference</a>
+        /// </summary>
+        type DocumentTimeline = Fable.Core.TS.Dom.DocumentTimeline
+
+        /// <summary>
+        /// The <b><c>DocumentType</c></b> interface represents a Node containing a doctype.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DocumentType">MDN Reference</a>
+        /// </summary>
+        type DocumentType = Fable.Core.TS.Dom.DocumentType
+
+        /// <summary>
+        /// The <b><c>DragEvent</c></b> interface is a DOM event that represents a drag and drop interaction. The user initiates a drag by placing a pointer device (such as a mouse) on the touch surface and then dragging the pointer to a new location (such as another DOM element). Applications are free to interpret a drag and drop interaction in an application-specific way.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DragEvent">MDN Reference</a>
+        /// </summary>
+        type DragEvent = Fable.Core.TS.Dom.DragEvent
+
+        /// <summary>
+        /// The <b><c>DynamicsCompressorNode</c></b> interface provides a compression effect, which lowers the volume of the loudest parts of the signal in order to help prevent clipping and distortion that can occur when multiple sounds are played and multiplexed together at once. This is often used in musical production and game audio. DynamicsCompressorNode is an AudioNode that has exactly one input and one output.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/DynamicsCompressorNode">MDN Reference</a>
+        /// </summary>
+        type DynamicsCompressorNode = Fable.Core.TS.Dom.DynamicsCompressorNode
+
+        /// <summary>
+        /// The <b><c>EXT_blend_minmax</c></b> extension is part of the WebGL API and extends blending capabilities by adding two new blend equations: the minimum or maximum color components of the source and destination colors.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EXT_blend_minmax">MDN Reference</a>
+        /// </summary>
+        type EXT_blend_minmax = Fable.Core.TS.Dom.EXT_blend_minmax
+
+        /// <summary>
+        /// The <b><c>EXT_color_buffer_float</c></b> extension is part of WebGL and adds the ability to render a variety of floating point formats.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EXT_color_buffer_float">MDN Reference</a>
+        /// </summary>
+        type EXT_color_buffer_float = Fable.Core.TS.Dom.EXT_color_buffer_float
+
+        /// <summary>
+        /// The <b><c>EXT_color_buffer_half_float</c></b> extension is part of the WebGL API and adds the ability to render to 16-bit floating-point color buffers.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EXT_color_buffer_half_float">MDN Reference</a>
+        /// </summary>
+        type EXT_color_buffer_half_float = Fable.Core.TS.Dom.EXT_color_buffer_half_float
+
+        /// <summary>
+        /// The WebGL API's <b><c>EXT_float_blend</c></b> extension allows blending and draw buffers with 32-bit floating-point components.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EXT_float_blend">MDN Reference</a>
+        /// </summary>
+        type EXT_float_blend = Fable.Core.TS.Dom.EXT_float_blend
+
+        /// <summary>
+        /// The <b><c>EXT_frag_depth</c></b> extension is part of the WebGL API and enables to set a depth value of a fragment from within the fragment shader.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EXT_frag_depth">MDN Reference</a>
+        /// </summary>
+        type EXT_frag_depth = Fable.Core.TS.Dom.EXT_frag_depth
+
+        /// <summary>
+        /// The <b><c>EXT_sRGB</c></b> extension is part of the WebGL API and adds sRGB support to textures and framebuffer objects.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EXT_sRGB">MDN Reference</a>
+        /// </summary>
+        type EXT_sRGB = Fable.Core.TS.Dom.EXT_sRGB
+
+        /// <summary>
+        /// The <b><c>EXT_shader_texture_lod</c></b> extension is part of the WebGL API and adds additional texture functions to the OpenGL ES Shading Language which provide the shader writer with explicit control of LOD (Level of detail).
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EXT_shader_texture_lod">MDN Reference</a>
+        /// </summary>
+        type EXT_shader_texture_lod = Fable.Core.TS.Dom.EXT_shader_texture_lod
+
+        /// <summary>
+        /// The <b><c>EXT_texture_compression_bptc</c></b> extension is part of the WebGL API and exposes 4 BPTC compressed texture formats. These compression formats are called BC7 and BC6H in Microsoft's DirectX API.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EXT_texture_compression_bptc">MDN Reference</a>
+        /// </summary>
+        type EXT_texture_compression_bptc = Fable.Core.TS.Dom.EXT_texture_compression_bptc
+
+        /// <summary>
+        /// The <b><c>EXT_texture_compression_rgtc</c></b> extension is part of the WebGL API and exposes 4 RGTC compressed texture formats. RGTC is a block-based texture compression format suited for unsigned and signed red and red-green textures (Red-Green Texture Compression).
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EXT_texture_compression_rgtc">MDN Reference</a>
+        /// </summary>
+        type EXT_texture_compression_rgtc = Fable.Core.TS.Dom.EXT_texture_compression_rgtc
+
+        /// <summary>
+        /// The <b><c>EXT_texture_filter_anisotropic</c></b> extension is part of the WebGL API and exposes two constants for anisotropic filtering (AF).
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EXT_texture_filter_anisotropic">MDN Reference</a>
+        /// </summary>
+        type EXT_texture_filter_anisotropic = Fable.Core.TS.Dom.EXT_texture_filter_anisotropic
+
+        /// <summary>
+        /// The <b><c>EXT_texture_norm16</c></b> extension is part of the WebGL API and provides a set of new 16-bit signed normalized and unsigned normalized formats (fixed-point texture, renderbuffer and texture buffer).
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EXT_texture_norm16">MDN Reference</a>
+        /// </summary>
+        type EXT_texture_norm16 = Fable.Core.TS.Dom.EXT_texture_norm16
+
+        type ElementEventMap = Fable.Core.TS.Dom.ElementEventMap
+
+        /// <summary>
+        /// <b><c>Element</c></b> is the most general base class from which all element objects (i.e., objects that represent elements) in a Document inherit. It only has methods and properties common to all kinds of elements. More specific classes inherit from Element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Element">MDN Reference</a>
+        /// </summary>
+        type Element = Fable.Core.TS.Dom.Element
+
+        type ElementCSSInlineStyle = Fable.Core.TS.Dom.ElementCSSInlineStyle
+
+        type ElementContentEditable = Fable.Core.TS.Dom.ElementContentEditable
+
+        /// <summary>
+        /// The <b><c>ElementInternals</c></b> interface of the Document Object Model gives web developers a way to allow custom elements to fully participate in HTML forms. It provides utilities for working with these elements in the same way you would work with any standard HTML form element, and also exposes the Accessibility Object Model to the element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ElementInternals">MDN Reference</a>
+        /// </summary>
+        type ElementInternals = Fable.Core.TS.Dom.ElementInternals
+
+        /// <summary>
+        /// The <b><c>EncodedAudioChunk</c></b> interface of the WebCodecs API represents a chunk of encoded audio data.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EncodedAudioChunk">MDN Reference</a>
+        /// </summary>
+        type EncodedAudioChunk = Fable.Core.TS.Dom.EncodedAudioChunk
+
+        /// <summary>
+        /// The <b><c>EncodedVideoChunk</c></b> interface of the WebCodecs API represents a chunk of encoded video data.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EncodedVideoChunk">MDN Reference</a>
+        /// </summary>
+        type EncodedVideoChunk = Fable.Core.TS.Dom.EncodedVideoChunk
+
+        /// <summary>
+        /// The <b><c>ErrorEvent</c></b> interface represents events providing information related to errors in scripts or in files.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ErrorEvent">MDN Reference</a>
+        /// </summary>
+        type ErrorEvent = Fable.Core.TS.Dom.ErrorEvent
+
+        /// <summary>
+        /// The <b><c>Event</c></b> interface represents an event which takes place on an EventTarget.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Event">MDN Reference</a>
+        /// </summary>
+        type Event = Fable.Core.TS.Dom.Event
+
+        /// <summary>
+        /// The <b><c>EventCounts</c></b> interface of the Performance API provides the number of events that have been dispatched for each event type.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EventCounts">MDN Reference</a>
+        /// </summary>
+        type EventCounts = Fable.Core.TS.Dom.EventCounts
+
+        type EventListener = Fable.Core.TS.Dom.EventListener
+
+        type EventListenerObject = Fable.Core.TS.Dom.EventListenerObject
+
+        type EventSourceEventMap = Fable.Core.TS.Dom.EventSourceEventMap
+
+        /// <summary>
+        /// The <b><c>EventSource</c></b> interface is web content's interface to server-sent events.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EventSource">MDN Reference</a>
+        /// </summary>
+        type EventSource = Fable.Core.TS.Dom.EventSource
+
+        /// <summary>
+        /// The <b><c>EventTarget</c></b> interface is implemented by objects that can receive events and may have listeners for them. In other words, any target of events implements the three methods associated with this interface.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget">MDN Reference</a>
+        /// </summary>
+        type EventTarget = Fable.Core.TS.Dom.EventTarget
+
+        /// <remarks>@deprecated</remarks>
+        /// <remarks>@deprecated</remarks>
+        type External = Fable.Core.TS.Dom.External
+
+        /// <summary>
+        /// The <b><c>File</c></b> interface provides information about files and allows JavaScript in a web page to access their content.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/File">MDN Reference</a>
+        /// </summary>
+        type File = Fable.Core.TS.Dom.File
+
+        /// <summary>
+        /// The <b><c>FileList</c></b> interface represents an object of this type returned by the files property of the HTML &lt;input&gt; element; this lets you access the list of files selected with the &lt;input type="file"&gt; element. It's also used for a list of files dropped into web content when using the drag and drop API; see the DataTransfer object for details on this usage.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/FileList">MDN Reference</a>
+        /// </summary>
+        type FileList = Fable.Core.TS.Dom.FileList
+
+        type FileReaderEventMap = Fable.Core.TS.Dom.FileReaderEventMap
+
+        /// <summary>
+        /// The <b><c>FileReader</c></b> interface lets web applications asynchronously read the contents of files (or raw data buffers) stored on the user's computer, using File or Blob objects to specify the file or data to read.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/FileReader">MDN Reference</a>
+        /// </summary>
+        type FileReader = Fable.Core.TS.Dom.FileReader
+
+        /// <summary>
+        /// The File and Directory Entries API interface <b><c>FileSystem</c></b> is used to represent a file system. These objects can be obtained from the filesystem property on any file system entry. Some browsers offer additional APIs to create and manage file systems, such as Chrome's requestFileSystem() method.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/FileSystem">MDN Reference</a>
+        /// </summary>
+        type FileSystem = Fable.Core.TS.Dom.FileSystem
+
+        /// <summary>
+        /// The <b><c>FileSystemDirectoryEntry</c></b> interface of the File and Directory Entries API represents a directory in a file system. It provides methods which make it possible to access and manipulate the files in a directory, as well as to access the entries within the directory.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/FileSystemDirectoryEntry">MDN Reference</a>
+        /// </summary>
+        type FileSystemDirectoryEntry = Fable.Core.TS.Dom.FileSystemDirectoryEntry
+
+        /// <summary>
+        /// The <b><c>FileSystemDirectoryHandle</c></b> interface of the File System API provides a handle to a file system directory.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/FileSystemDirectoryHandle">MDN Reference</a>
+        /// </summary>
+        type FileSystemDirectoryHandle = Fable.Core.TS.Dom.FileSystemDirectoryHandle
+
+        /// <summary>
+        /// The <b><c>FileSystemDirectoryReader</c></b> interface of the File and Directory Entries API lets you access the FileSystemFileEntry-based objects (generally FileSystemFileEntry or FileSystemDirectoryEntry) representing each entry in a directory.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/FileSystemDirectoryReader">MDN Reference</a>
+        /// </summary>
+        type FileSystemDirectoryReader = Fable.Core.TS.Dom.FileSystemDirectoryReader
+
+        /// <summary>
+        /// The <b><c>FileSystemEntry</c></b> interface of the File and Directory Entries API represents a single entry in a file system. The entry can be a file or a directory (directories are represented by the FileSystemDirectoryEntry interface). It includes methods for working with files—including copying, moving, removing, and reading files—as well as information about a file it points to—including the file name and its path from the root to the entry.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/FileSystemEntry">MDN Reference</a>
+        /// </summary>
+        type FileSystemEntry = Fable.Core.TS.Dom.FileSystemEntry
+
+        /// <summary>
+        /// The <b><c>FileSystemFileEntry</c></b> interface of the File and Directory Entries API represents a file in a file system. It offers properties describing the file's attributes, as well as the file() method, which creates a File object that can be used to read the file.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/FileSystemFileEntry">MDN Reference</a>
+        /// </summary>
+        type FileSystemFileEntry = Fable.Core.TS.Dom.FileSystemFileEntry
+
+        /// <summary>
+        /// The <b><c>FileSystemFileHandle</c></b> interface of the File System API represents a handle to a file system entry. The interface is accessed through the window.showOpenFilePicker() method.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/FileSystemFileHandle">MDN Reference</a>
+        /// </summary>
+        type FileSystemFileHandle = Fable.Core.TS.Dom.FileSystemFileHandle
+
+        /// <summary>
+        /// The <b><c>FileSystemHandle</c></b> interface of the File System API is an object which represents a file or directory entry. Multiple handles can represent the same entry. For the most part you do not work with FileSystemHandle directly but rather its child interfaces FileSystemFileHandle and FileSystemDirectoryHandle.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/FileSystemHandle">MDN Reference</a>
+        /// </summary>
+        type FileSystemHandle = Fable.Core.TS.Dom.FileSystemHandle
+
+        /// <summary>
+        /// The <b><c>FileSystemWritableFileStream</c></b> interface of the File System API is a WritableStream object with additional convenience methods, which operates on a single file on disk. The interface is accessed through the FileSystemFileHandle.createWritable() method.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/FileSystemWritableFileStream">MDN Reference</a>
+        /// </summary>
+        type FileSystemWritableFileStream = Fable.Core.TS.Dom.FileSystemWritableFileStream
+
+        /// <summary>
+        /// The <b><c>FocusEvent</c></b> interface represents focus-related events, including focus, blur, focusin, and focusout.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/FocusEvent">MDN Reference</a>
+        /// </summary>
+        type FocusEvent = Fable.Core.TS.Dom.FocusEvent
+
+        /// <summary>
+        /// The <b><c>FontFace</c></b> interface of the CSS Font Loading API represents a single usable font face.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/FontFace">MDN Reference</a>
+        /// </summary>
+        type FontFace = Fable.Core.TS.Dom.FontFace
+
+        type FontFaceSetEventMap = Fable.Core.TS.Dom.FontFaceSetEventMap
+
+        /// <summary>
+        /// The <b><c>FontFaceSet</c></b> interface of the CSS Font Loading API manages the loading of font-faces and querying of their download status.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/FontFaceSet">MDN Reference</a>
+        /// </summary>
+        type FontFaceSet = Fable.Core.TS.Dom.FontFaceSet
+
+        /// <summary>
+        /// The <b><c>FontFaceSetLoadEvent</c></b> interface of the CSS Font Loading API represents events fired at a FontFaceSet after it starts loading font faces.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/FontFaceSetLoadEvent">MDN Reference</a>
+        /// </summary>
+        type FontFaceSetLoadEvent = Fable.Core.TS.Dom.FontFaceSetLoadEvent
+
+        type FontFaceSource = Fable.Core.TS.Dom.FontFaceSource
+
+        /// <summary>
+        /// The <b><c>FormData</c></b> interface provides a way to construct a set of key/value pairs representing form fields and their values, which can be sent using the fetch(), XMLHttpRequest.send() or navigator.sendBeacon() methods. It uses the same format a form would use if the encoding type were set to "multipart/form-data".
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/FormData">MDN Reference</a>
+        /// </summary>
+        type FormData = Fable.Core.TS.Dom.FormData
+
+        /// <summary>
+        /// The <b><c>FormDataEvent</c></b> interface represents a formdata event — such an event is fired on an HTMLFormElement object after the entry list representing the form's data is constructed. This happens when the form is submitted, but can also be triggered by the invocation of a FormData() constructor.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/FormDataEvent">MDN Reference</a>
+        /// </summary>
+        type FormDataEvent = Fable.Core.TS.Dom.FormDataEvent
+
+        /// <summary>
+        /// The <b><c>FragmentDirective</c></b> interface is an object exposed to allow code to check whether or not a browser supports text fragments.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/FragmentDirective">MDN Reference</a>
+        /// </summary>
+        type FragmentDirective = Fable.Core.TS.Dom.FragmentDirective
+
+        /// <summary>
+        /// The <b><c>GPU</c></b> interface of the WebGPU API is the starting point for using WebGPU. It can be used to return a GPUAdapter from which you can request devices, configure features and limits, and more.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPU">MDN Reference</a>
+        /// </summary>
+        type GPU = Fable.Core.TS.Dom.GPU
+
+        /// <summary>
+        /// The <b><c>GPUAdapter</c></b> interface of the WebGPU API represents a GPU adapter. From this you can request a GPUDevice, adapter info, features, and limits.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPUAdapter">MDN Reference</a>
+        /// </summary>
+        type GPUAdapter = Fable.Core.TS.Dom.GPUAdapter
+
+        /// <summary>
+        /// The <b><c>GPUAdapterInfo</c></b> interface of the WebGPU API contains identifying information about a GPUAdapter.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPUAdapterInfo">MDN Reference</a>
+        /// </summary>
+        type GPUAdapterInfo = Fable.Core.TS.Dom.GPUAdapterInfo
+
+        /// <summary>
+        /// The <b><c>GPUBindGroup</c></b> interface of the WebGPU API is based on a GPUBindGroupLayout and defines a set of resources to be bound together in a group and how those resources are used in shader stages.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPUBindGroup">MDN Reference</a>
+        /// </summary>
+        type GPUBindGroup = Fable.Core.TS.Dom.GPUBindGroup
+
+        /// <summary>
+        /// The <b><c>GPUBindGroupLayout</c></b> interface of the WebGPU API defines the structure and purpose of related GPU resources such as buffers that will be used in a pipeline, and is used as a template when creating GPUBindGroups.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPUBindGroupLayout">MDN Reference</a>
+        /// </summary>
+        type GPUBindGroupLayout = Fable.Core.TS.Dom.GPUBindGroupLayout
+
+        type GPUBindingCommandsMixin = Fable.Core.TS.Dom.GPUBindingCommandsMixin
+
+        /// <summary>
+        /// The <b><c>GPUBuffer</c></b> interface of the WebGPU API represents a block of memory that can be used to store raw data to use in GPU operations.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPUBuffer">MDN Reference</a>
+        /// </summary>
+        type GPUBuffer = Fable.Core.TS.Dom.GPUBuffer
+
+        /// <summary>
+        /// The <b><c>GPUCanvasContext</c></b> interface of the WebGPU API represents the WebGPU rendering context of a &lt;canvas&gt; element, returned via an HTMLCanvasElement.getContext() call with a contextType of "webgpu".
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPUCanvasContext">MDN Reference</a>
+        /// </summary>
+        type GPUCanvasContext = Fable.Core.TS.Dom.GPUCanvasContext
+
+        /// <summary>
+        /// The <b><c>GPUCommandBuffer</c></b> interface of the WebGPU API represents a pre-recorded list of GPU commands that can be submitted to a GPUQueue for execution.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPUCommandBuffer">MDN Reference</a>
+        /// </summary>
+        type GPUCommandBuffer = Fable.Core.TS.Dom.GPUCommandBuffer
+
+        /// <summary>
+        /// The <b><c>GPUCommandEncoder</c></b> interface of the WebGPU API represents an encoder that collects a sequence of GPU commands to be issued to the GPU.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPUCommandEncoder">MDN Reference</a>
+        /// </summary>
+        type GPUCommandEncoder = Fable.Core.TS.Dom.GPUCommandEncoder
+
+        /// <summary>
+        /// The <b><c>GPUCompilationInfo</c></b> interface of the WebGPU API represents an array of GPUCompilationMessage objects generated by the GPU shader module compiler to help diagnose problems with shader code.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPUCompilationInfo">MDN Reference</a>
+        /// </summary>
+        type GPUCompilationInfo = Fable.Core.TS.Dom.GPUCompilationInfo
+
+        /// <summary>
+        /// The <b><c>GPUCompilationMessage</c></b> interface of the WebGPU API represents a single informational, warning, or error message generated by the GPU shader module compiler.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPUCompilationMessage">MDN Reference</a>
+        /// </summary>
+        type GPUCompilationMessage = Fable.Core.TS.Dom.GPUCompilationMessage
+
+        /// <summary>
+        /// The <b><c>GPUComputePassEncoder</c></b> interface of the WebGPU API encodes commands related to controlling the compute shader stage, as issued by a GPUComputePipeline. It forms part of the overall encoding activity of a GPUCommandEncoder.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPUComputePassEncoder">MDN Reference</a>
+        /// </summary>
+        type GPUComputePassEncoder = Fable.Core.TS.Dom.GPUComputePassEncoder
+
+        /// <summary>
+        /// The <b><c>GPUComputePipeline</c></b> interface of the WebGPU API represents a pipeline that controls the compute shader stage and can be used in a GPUComputePassEncoder.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPUComputePipeline">MDN Reference</a>
+        /// </summary>
+        type GPUComputePipeline = Fable.Core.TS.Dom.GPUComputePipeline
+
+        type GPUDebugCommandsMixin = Fable.Core.TS.Dom.GPUDebugCommandsMixin
+
+        type GPUDeviceEventMap = Fable.Core.TS.Dom.GPUDeviceEventMap
+
+        /// <summary>
+        /// The <b><c>GPUDevice</c></b> interface of the WebGPU API represents a logical GPU device. This is the main interface through which the majority of WebGPU functionality is accessed.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPUDevice">MDN Reference</a>
+        /// </summary>
+        type GPUDevice = Fable.Core.TS.Dom.GPUDevice
+
+        /// <summary>
+        /// The <b><c>GPUDeviceLostInfo</c></b> interface of the WebGPU API represents the object returned when the GPUDevice.lost Promise resolves. This provides information as to why a device has been lost.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPUDeviceLostInfo">MDN Reference</a>
+        /// </summary>
+        type GPUDeviceLostInfo = Fable.Core.TS.Dom.GPUDeviceLostInfo
+
+        /// <summary>
+        /// The <b><c>GPUError</c></b> interface of the WebGPU API is the base interface for errors surfaced by GPUDevice.popErrorScope and the uncapturederror event.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPUError">MDN Reference</a>
+        /// </summary>
+        type GPUError = Fable.Core.TS.Dom.GPUError
+
+        /// <summary>
+        /// The <b><c>GPUExternalTexture</c></b> interface of the WebGPU API represents a wrapper object containing an HTMLVideoElement snapshot that can be used as a texture in GPU rendering operations.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPUExternalTexture">MDN Reference</a>
+        /// </summary>
+        type GPUExternalTexture = Fable.Core.TS.Dom.GPUExternalTexture
+
+        /// <summary>
+        /// The <b><c>GPUInternalError</c></b> interface of the WebGPU API describes an application error indicating that an operation failed for a system or implementation-specific reason, even when all validation requirements were satisfied.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPUInternalError">MDN Reference</a>
+        /// </summary>
+        type GPUInternalError = Fable.Core.TS.Dom.GPUInternalError
+
+        type GPUObjectBase = Fable.Core.TS.Dom.GPUObjectBase
+
+        /// <summary>
+        /// The <b><c>GPUOutOfMemoryError</c></b> interface of the WebGPU API describes an out-of-memory (oom) error indicating that there was not enough free memory to complete the requested operation.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPUOutOfMemoryError">MDN Reference</a>
+        /// </summary>
+        type GPUOutOfMemoryError = Fable.Core.TS.Dom.GPUOutOfMemoryError
+
+        type GPUPipelineBase = Fable.Core.TS.Dom.GPUPipelineBase
+
+        /// <summary>
+        /// The <b><c>GPUPipelineError</c></b> interface of the WebGPU API describes a pipeline failure. This is the value received when a Promise returned by a GPUDevice.createComputePipelineAsync() or GPUDevice.createRenderPipelineAsync() call rejects.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPUPipelineError">MDN Reference</a>
+        /// </summary>
+        type GPUPipelineError = Fable.Core.TS.Dom.GPUPipelineError
+
+        /// <summary>
+        /// The <b><c>GPUPipelineLayout</c></b> interface of the WebGPU API defines the GPUBindGroupLayouts used by a pipeline. GPUBindGroups used with the pipeline during command encoding must have compatible GPUBindGroupLayouts.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPUPipelineLayout">MDN Reference</a>
+        /// </summary>
+        type GPUPipelineLayout = Fable.Core.TS.Dom.GPUPipelineLayout
+
+        /// <summary>
+        /// The <b><c>GPUQuerySet</c></b> interface of the WebGPU API is used to record the results of queries on passes, such as occlusion or timestamp queries.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPUQuerySet">MDN Reference</a>
+        /// </summary>
+        type GPUQuerySet = Fable.Core.TS.Dom.GPUQuerySet
+
+        /// <summary>
+        /// The <b><c>GPUQueue</c></b> interface of the WebGPU API controls execution of encoded commands on the GPU.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPUQueue">MDN Reference</a>
+        /// </summary>
+        type GPUQueue = Fable.Core.TS.Dom.GPUQueue
+
+        /// <summary>
+        /// The <b><c>GPURenderBundle</c></b> interface of the WebGPU API represents a container for pre-recorded bundles of commands.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPURenderBundle">MDN Reference</a>
+        /// </summary>
+        type GPURenderBundle = Fable.Core.TS.Dom.GPURenderBundle
+
+        /// <summary>
+        /// The <b><c>GPURenderBundleEncoder</c></b> interface of the WebGPU API is used to pre-record bundles of commands.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPURenderBundleEncoder">MDN Reference</a>
+        /// </summary>
+        type GPURenderBundleEncoder = Fable.Core.TS.Dom.GPURenderBundleEncoder
+
+        type GPURenderCommandsMixin = Fable.Core.TS.Dom.GPURenderCommandsMixin
+
+        /// <summary>
+        /// The <b><c>GPURenderPassEncoder</c></b> interface of the WebGPU API encodes commands related to controlling the vertex and fragment shader stages, as issued by a GPURenderPipeline. It forms part of the overall encoding activity of a GPUCommandEncoder.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPURenderPassEncoder">MDN Reference</a>
+        /// </summary>
+        type GPURenderPassEncoder = Fable.Core.TS.Dom.GPURenderPassEncoder
+
+        /// <summary>
+        /// The <b><c>GPURenderPipeline</c></b> interface of the WebGPU API represents a pipeline that controls the vertex and fragment shader stages and can be used in a GPURenderPassEncoder or GPURenderBundleEncoder.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPURenderPipeline">MDN Reference</a>
+        /// </summary>
+        type GPURenderPipeline = Fable.Core.TS.Dom.GPURenderPipeline
+
+        /// <summary>
+        /// The <b><c>GPUSampler</c></b> interface of the WebGPU API represents an object that can control how shaders transform and filter texture resource data.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPUSampler">MDN Reference</a>
+        /// </summary>
+        type GPUSampler = Fable.Core.TS.Dom.GPUSampler
+
+        /// <summary>
+        /// The <b><c>GPUShaderModule</c></b> interface of the WebGPU API represents an internal shader module object, a container for WGSL shader code that can be submitted to the GPU for execution by a pipeline.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPUShaderModule">MDN Reference</a>
+        /// </summary>
+        type GPUShaderModule = Fable.Core.TS.Dom.GPUShaderModule
+
+        /// <summary>
+        /// The <b><c>GPUSupportedFeatures</c></b> interface of the WebGPU API is a Set-like object that describes additional functionality supported by a GPUAdapter.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPUSupportedFeatures">MDN Reference</a>
+        /// </summary>
+        type GPUSupportedFeatures = Fable.Core.TS.Dom.GPUSupportedFeatures
+
+        /// <summary>
+        /// The <b><c>GPUSupportedLimits</c></b> interface of the WebGPU API describes the limits supported by a GPUAdapter.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPUSupportedLimits">MDN Reference</a>
+        /// </summary>
+        type GPUSupportedLimits = Fable.Core.TS.Dom.GPUSupportedLimits
+
+        /// <summary>
+        /// The <b><c>GPUTexture</c></b> interface of the WebGPU API represents a container used to store 1D, 2D, or 3D arrays of data, such as images, to use in GPU rendering operations.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPUTexture">MDN Reference</a>
+        /// </summary>
+        type GPUTexture = Fable.Core.TS.Dom.GPUTexture
+
+        /// <summary>
+        /// The <b><c>GPUTextureView</c></b> interface of the WebGPU API represents a view into a subset of the texture resources defined by a particular GPUTexture.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPUTextureView">MDN Reference</a>
+        /// </summary>
+        type GPUTextureView = Fable.Core.TS.Dom.GPUTextureView
+
+        /// <summary>
+        /// The <b><c>GPUUncapturedErrorEvent</c></b> interface of the WebGPU API is the event object type for the GPUDevice uncapturederror event, used for telemetry and to report unexpected errors.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPUUncapturedErrorEvent">MDN Reference</a>
+        /// </summary>
+        type GPUUncapturedErrorEvent = Fable.Core.TS.Dom.GPUUncapturedErrorEvent
+
+        /// <summary>
+        /// The <b><c>GPUValidationError</c></b> interface of the WebGPU API describes an application error indicating that an operation did not pass the WebGPU API's validation constraints.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GPUValidationError">MDN Reference</a>
+        /// </summary>
+        type GPUValidationError = Fable.Core.TS.Dom.GPUValidationError
+
+        /// <summary>
+        /// The <b><c>GainNode</c></b> interface represents a change in volume. It is an AudioNode audio-processing module that causes a given gain to be applied to the input data before its propagation to the output. A GainNode always has exactly one input and one output, both with the same number of channels.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GainNode">MDN Reference</a>
+        /// </summary>
+        type GainNode = Fable.Core.TS.Dom.GainNode
+
+        /// <summary>
+        /// The <b><c>Gamepad</c></b> interface of the Gamepad API defines an individual gamepad or other controller, allowing access to information such as button presses, axis positions, and id.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Gamepad">MDN Reference</a>
+        /// </summary>
+        type Gamepad = Fable.Core.TS.Dom.Gamepad
+
+        /// <summary>
+        /// The <b><c>GamepadButton</c></b> interface defines an individual button of a gamepad or other controller, allowing access to the current state of different types of buttons available on the control device.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GamepadButton">MDN Reference</a>
+        /// </summary>
+        type GamepadButton = Fable.Core.TS.Dom.GamepadButton
+
+        /// <summary>
+        /// The <b><c>GamepadEvent</c></b> interface of the Gamepad API contains references to gamepads connected to the system, which is what the gamepad events gamepadconnected and gamepaddisconnected are fired in response to.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GamepadEvent">MDN Reference</a>
+        /// </summary>
+        type GamepadEvent = Fable.Core.TS.Dom.GamepadEvent
+
+        /// <summary>
+        /// The <b><c>GamepadHapticActuator</c></b> interface of the Gamepad API represents hardware in the controller designed to provide haptic feedback to the user (if available), most commonly vibration hardware.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GamepadHapticActuator">MDN Reference</a>
+        /// </summary>
+        type GamepadHapticActuator = Fable.Core.TS.Dom.GamepadHapticActuator
+
+        type GenericTransformStream = Fable.Core.TS.Dom.GenericTransformStream
+
+        /// <summary>
+        /// The <b><c>Geolocation</c></b> interface represents an object able to obtain the position of the device programmatically. It gives Web content access to the location of the device. This allows a website or app to offer customized results based on the user's location.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Geolocation">MDN Reference</a>
+        /// </summary>
+        type Geolocation = Fable.Core.TS.Dom.Geolocation
+
+        /// <summary>
+        /// The <b><c>GeolocationCoordinates</c></b> interface represents the position and altitude of the device on Earth, as well as the accuracy with which these properties are calculated. The geographic position information is provided in terms of World Geodetic System coordinates (WGS84).
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GeolocationCoordinates">MDN Reference</a>
+        /// </summary>
+        type GeolocationCoordinates = Fable.Core.TS.Dom.GeolocationCoordinates
+
+        /// <summary>
+        /// The <b><c>GeolocationPosition</c></b> interface represents the position of the concerned device at a given time. The position, represented by a GeolocationCoordinates object, comprehends the 2D position of the device, on a spheroid representing the Earth, but also its altitude and its speed.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GeolocationPosition">MDN Reference</a>
+        /// </summary>
+        type GeolocationPosition = Fable.Core.TS.Dom.GeolocationPosition
+
+        /// <summary>
+        /// The <b><c>GeolocationPositionError</c></b> interface represents the reason of an error occurring when using the geolocating device.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/GeolocationPositionError">MDN Reference</a>
+        /// </summary>
+        type GeolocationPositionError = Fable.Core.TS.Dom.GeolocationPositionError
+
+        type GlobalEventHandlersEventMap = Fable.Core.TS.Dom.GlobalEventHandlersEventMap
+
+        type GlobalEventHandlers = Fable.Core.TS.Dom.GlobalEventHandlers
+
+        /// <summary>
+        /// The <b><c>HTMLAllCollection</c></b> interface represents a collection of all of the document's elements, accessible by index (like an array) and by the element's id. It is returned by the document.all property.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAllCollection">MDN Reference</a>
+        /// </summary>
+        type HTMLAllCollection = Fable.Core.TS.Dom.HTMLAllCollection
+
+        /// <summary>
+        /// The <b><c>HTMLAnchorElement</c></b> interface represents hyperlink elements and provides special properties and methods (beyond those of the regular HTMLElement object interface that they inherit from) for manipulating the layout and presentation of such elements. This interface corresponds to &lt;a&gt; element; not to be confused with &lt;link&gt;, which is represented by HTMLLinkElement.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAnchorElement">MDN Reference</a>
+        /// </summary>
+        type HTMLAnchorElement = Fable.Core.TS.Dom.HTMLAnchorElement
+
+        /// <summary>
+        /// The <b><c>HTMLAreaElement</c></b> interface provides special properties and methods (beyond those of the regular object HTMLElement interface it also has available to it by inheritance) for manipulating the layout and presentation of &lt;area&gt; elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAreaElement">MDN Reference</a>
+        /// </summary>
+        type HTMLAreaElement = Fable.Core.TS.Dom.HTMLAreaElement
+
+        /// <summary>
+        /// The <b><c>HTMLAudioElement</c></b> interface provides access to the properties of &lt;audio&gt; elements, as well as methods to manipulate them.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLAudioElement">MDN Reference</a>
+        /// </summary>
+        type HTMLAudioElement = Fable.Core.TS.Dom.HTMLAudioElement
+
+        /// <summary>
+        /// The <b><c>HTMLBRElement</c></b> interface represents an HTML line break element (&lt;br&gt;). It inherits from HTMLElement.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLBRElement">MDN Reference</a>
+        /// </summary>
+        type HTMLBRElement = Fable.Core.TS.Dom.HTMLBRElement
+
+        /// <summary>
+        /// The <b><c>HTMLBaseElement</c></b> interface contains the base URI for a document. This object inherits all of the properties and methods as described in the HTMLElement interface.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLBaseElement">MDN Reference</a>
+        /// </summary>
+        type HTMLBaseElement = Fable.Core.TS.Dom.HTMLBaseElement
+
+        type HTMLBodyElementEventMap = Fable.Core.TS.Dom.HTMLBodyElementEventMap
+
+        /// <summary>
+        /// The <b><c>HTMLBodyElement</c></b> interface provides special properties (beyond those inherited from the regular HTMLElement interface) for manipulating &lt;body&gt; elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLBodyElement">MDN Reference</a>
+        /// </summary>
+        type HTMLBodyElement = Fable.Core.TS.Dom.HTMLBodyElement
+
+        /// <summary>
+        /// The <b><c>HTMLButtonElement</c></b> interface provides properties and methods (beyond the regular HTMLElement interface it also has available to it by inheritance) for manipulating &lt;button&gt; elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLButtonElement">MDN Reference</a>
+        /// </summary>
+        type HTMLButtonElement = Fable.Core.TS.Dom.HTMLButtonElement
+
+        /// <summary>
+        /// The <b><c>HTMLCanvasElement</c></b> interface provides properties and methods for manipulating the layout and presentation of &lt;canvas&gt; elements. The HTMLCanvasElement interface also inherits the properties and methods of the HTMLElement interface.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLCanvasElement">MDN Reference</a>
+        /// </summary>
+        type HTMLCanvasElement = Fable.Core.TS.Dom.HTMLCanvasElement
+
+        /// <summary>
+        /// The <b><c>HTMLCollection</c></b> interface represents a generic collection (array-like object similar to arguments) of elements (in document order) and offers methods and properties for selecting from the list.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLCollection">MDN Reference</a>
+        /// </summary>
+        type HTMLCollectionBase = Fable.Core.TS.Dom.HTMLCollectionBase
+
+        type HTMLCollection = Fable.Core.TS.Dom.HTMLCollection
+
+        type HTMLCollectionOf<'T when 'T :> Fable.Core.TS.Dom.Element> = Fable.Core.TS.Dom.HTMLCollectionOf<'T>
+
+        /// <summary>
+        /// The <b><c>HTMLDListElement</c></b> interface provides special properties (beyond those of the regular HTMLElement interface it also has available to it by inheritance) for manipulating definition list (&lt;dl&gt;) elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLDListElement">MDN Reference</a>
+        /// </summary>
+        type HTMLDListElement = Fable.Core.TS.Dom.HTMLDListElement
+
+        /// <summary>
+        /// The <b><c>HTMLDataElement</c></b> interface provides special properties (beyond the regular HTMLElement interface it also has available to it by inheritance) for manipulating &lt;data&gt; elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLDataElement">MDN Reference</a>
+        /// </summary>
+        type HTMLDataElement = Fable.Core.TS.Dom.HTMLDataElement
+
+        /// <summary>
+        /// The <b><c>HTMLDataListElement</c></b> interface provides special properties (beyond the HTMLElement object interface it also has available to it by inheritance) to manipulate &lt;datalist&gt; elements and their content.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLDataListElement">MDN Reference</a>
+        /// </summary>
+        type HTMLDataListElement = Fable.Core.TS.Dom.HTMLDataListElement
+
+        /// <summary>
+        /// The <b><c>HTMLDetailsElement</c></b> interface provides special properties (beyond the regular HTMLElement interface it also has available to it by inheritance) for manipulating &lt;details&gt; elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLDetailsElement">MDN Reference</a>
+        /// </summary>
+        type HTMLDetailsElement = Fable.Core.TS.Dom.HTMLDetailsElement
+
+        /// <summary>
+        /// The <b><c>HTMLDialogElement</c></b> interface provides methods to manipulate &lt;dialog&gt; elements. It inherits properties and methods from the HTMLElement interface.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLDialogElement">MDN Reference</a>
+        /// </summary>
+        type HTMLDialogElement = Fable.Core.TS.Dom.HTMLDialogElement
+
+        /// <remarks>@deprecated</remarks>
+        /// <remarks>@deprecated</remarks>
+        type HTMLDirectoryElement = Fable.Core.TS.Dom.HTMLDirectoryElement
+
+        /// <summary>
+        /// The <b><c>HTMLDivElement</c></b> interface provides special properties (beyond the regular HTMLElement interface it also has available to it by inheritance) for manipulating &lt;div&gt; elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLDivElement">MDN Reference</a>
+        /// </summary>
+        type HTMLDivElement = Fable.Core.TS.Dom.HTMLDivElement
+
+        /// <summary>
+        /// For historical reasons, Window objects have a <b><c>window.HTMLDocument</c></b> property whose value is the Document interface. So you can think of HTMLDocument as an alias for Document, and you can find documentation for HTMLDocument members under the documentation for the Document interface.
+        /// </summary>
+        type HTMLDocument = Fable.Core.TS.Dom.HTMLDocument
+
+        type HTMLElementEventMap = Fable.Core.TS.Dom.HTMLElementEventMap
+
+        /// <summary>
+        /// The <b><c>HTMLElement</c></b> interface represents any HTML element. Some elements directly implement this interface, while others implement it via an interface that inherits it.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLElement">MDN Reference</a>
+        /// </summary>
+        type HTMLElement = Fable.Core.TS.Dom.HTMLElement
+
+        /// <summary>
+        /// The <b><c>HTMLEmbedElement</c></b> interface provides special properties (beyond the regular HTMLElement interface it also has available to it by inheritance) for manipulating &lt;embed&gt; elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLEmbedElement">MDN Reference</a>
+        /// </summary>
+        type HTMLEmbedElement = Fable.Core.TS.Dom.HTMLEmbedElement
+
+        /// <summary>
+        /// The <b><c>HTMLFieldSetElement</c></b> interface provides special properties and methods (beyond the regular HTMLElement interface it also has available to it by inheritance) for manipulating the layout and presentation of &lt;fieldset&gt; elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLFieldSetElement">MDN Reference</a>
+        /// </summary>
+        type HTMLFieldSetElement = Fable.Core.TS.Dom.HTMLFieldSetElement
+
+        /// <summary>
+        /// Implements the document object model (DOM) representation of the font element. The HTML Font Element &lt;font&gt; defines the font size, font face and color of text.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/HTMLFontElement">MDN Reference</a></remarks>
+        /// <remarks>@deprecated</remarks>
+        type HTMLFontElement = Fable.Core.TS.Dom.HTMLFontElement
+
+        /// <summary>
+        /// The <b><c>HTMLFormControlsCollection</c></b> interface represents a collection of HTML form control elements, returned by the HTMLFormElement interface's elements property.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLFormControlsCollection">MDN Reference</a>
+        /// </summary>
+        type HTMLFormControlsCollection = Fable.Core.TS.Dom.HTMLFormControlsCollection
+
+        /// <summary>
+        /// The <b><c>HTMLFormElement</c></b> interface represents a &lt;form&gt; element in the DOM. It allows access to—and, in some cases, modification of—aspects of the form, as well as access to its component elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLFormElement">MDN Reference</a>
+        /// </summary>
+        type HTMLFormElement = Fable.Core.TS.Dom.HTMLFormElement
+
+        /// <remarks>@deprecated</remarks>
+        /// <remarks>@deprecated</remarks>
+        type HTMLFrameElement = Fable.Core.TS.Dom.HTMLFrameElement
+
+        type HTMLFrameSetElementEventMap = Fable.Core.TS.Dom.HTMLFrameSetElementEventMap
+
+        /// <summary>
+        /// The <b><c>HTMLFrameSetElement</c></b> interface provides special properties (beyond those of the regular HTMLElement interface they also inherit) for manipulating &lt;frameset&gt; elements.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/HTMLFrameSetElement">MDN Reference</a></remarks>
+        /// <remarks>@deprecated</remarks>
+        type HTMLFrameSetElement = Fable.Core.TS.Dom.HTMLFrameSetElement
+
+        /// <summary>
+        /// The <b><c>HTMLHRElement</c></b> interface provides special properties (beyond those of the HTMLElement interface it also has available to it by inheritance) for manipulating &lt;hr&gt; elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLHRElement">MDN Reference</a>
+        /// </summary>
+        type HTMLHRElement = Fable.Core.TS.Dom.HTMLHRElement
+
+        /// <summary>
+        /// The <b><c>HTMLHeadElement</c></b> interface contains the descriptive information, or metadata, for a document. This object inherits all of the properties and methods described in the HTMLElement interface.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLHeadElement">MDN Reference</a>
+        /// </summary>
+        type HTMLHeadElement = Fable.Core.TS.Dom.HTMLHeadElement
+
+        /// <summary>
+        /// The <b><c>HTMLHeadingElement</c></b> interface represents the different heading elements, &lt;h1&gt; through &lt;h6&gt;. It inherits methods and properties from the HTMLElement interface.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLHeadingElement">MDN Reference</a>
+        /// </summary>
+        type HTMLHeadingElement = Fable.Core.TS.Dom.HTMLHeadingElement
+
+        /// <summary>
+        /// The <b><c>HTMLHtmlElement</c></b> interface serves as the root node for a given HTML document. This object inherits the properties and methods described in the HTMLElement interface.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLHtmlElement">MDN Reference</a>
+        /// </summary>
+        type HTMLHtmlElement = Fable.Core.TS.Dom.HTMLHtmlElement
+
+        type HTMLHyperlinkElementUtils = Fable.Core.TS.Dom.HTMLHyperlinkElementUtils
+
+        /// <summary>
+        /// The <b><c>HTMLIFrameElement</c></b> interface provides special properties and methods (beyond those of the HTMLElement interface it also has available to it by inheritance) for manipulating the layout and presentation of inline frame elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLIFrameElement">MDN Reference</a>
+        /// </summary>
+        type HTMLIFrameElement = Fable.Core.TS.Dom.HTMLIFrameElement
+
+        /// <summary>
+        /// The <b><c>HTMLImageElement</c></b> interface represents an HTML &lt;img&gt; element, providing the properties and methods used to manipulate image elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLImageElement">MDN Reference</a>
+        /// </summary>
+        type HTMLImageElement = Fable.Core.TS.Dom.HTMLImageElement
+
+        /// <summary>
+        /// The <b><c>HTMLInputElement</c></b> interface provides special properties and methods for manipulating the options, layout, and presentation of &lt;input&gt; elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLInputElement">MDN Reference</a>
+        /// </summary>
+        type HTMLInputElement = Fable.Core.TS.Dom.HTMLInputElement
+
+        /// <summary>
+        /// The <b><c>HTMLLIElement</c></b> interface exposes specific properties and methods (beyond those defined by regular HTMLElement interface it also has available to it by inheritance) for manipulating list elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLLIElement">MDN Reference</a>
+        /// </summary>
+        type HTMLLIElement = Fable.Core.TS.Dom.HTMLLIElement
+
+        /// <summary>
+        /// The <b><c>HTMLLabelElement</c></b> interface gives access to properties specific to &lt;label&gt; elements. It inherits methods and properties from the base HTMLElement interface.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLLabelElement">MDN Reference</a>
+        /// </summary>
+        type HTMLLabelElement = Fable.Core.TS.Dom.HTMLLabelElement
+
+        /// <summary>
+        /// The <b><c>HTMLLegendElement</c></b> is an interface allowing to access properties of the &lt;legend&gt; elements. It inherits properties and methods from the HTMLElement interface.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLLegendElement">MDN Reference</a>
+        /// </summary>
+        type HTMLLegendElement = Fable.Core.TS.Dom.HTMLLegendElement
+
+        /// <summary>
+        /// The <b><c>HTMLLinkElement</c></b> interface represents reference information for external resources and the relationship of those resources to a document and vice versa (corresponds to &lt;link&gt; element; not to be confused with &lt;a&gt;, which is represented by HTMLAnchorElement). This object inherits all of the properties and methods of the HTMLElement interface.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLLinkElement">MDN Reference</a>
+        /// </summary>
+        type HTMLLinkElement = Fable.Core.TS.Dom.HTMLLinkElement
+
+        /// <summary>
+        /// The <b><c>HTMLMapElement</c></b> interface provides special properties and methods (beyond those of the regular object HTMLElement interface it also has available to it by inheritance) for manipulating the layout and presentation of map elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMapElement">MDN Reference</a>
+        /// </summary>
+        type HTMLMapElement = Fable.Core.TS.Dom.HTMLMapElement
+
+        /// <summary>
+        /// The <b><c>HTMLMarqueeElement</c></b> interface provides methods to manipulate &lt;marquee&gt; elements.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/HTMLMarqueeElement">MDN Reference</a></remarks>
+        /// <remarks>@deprecated</remarks>
+        type HTMLMarqueeElement = Fable.Core.TS.Dom.HTMLMarqueeElement
+
+        type HTMLMediaElementEventMap = Fable.Core.TS.Dom.HTMLMediaElementEventMap
+
+        /// <summary>
+        /// The <b><c>HTMLMediaElement</c></b> interface adds to HTMLElement the properties and methods needed to support basic media-related capabilities that are common to audio and video.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMediaElement">MDN Reference</a>
+        /// </summary>
+        type HTMLMediaElement = Fable.Core.TS.Dom.HTMLMediaElement
+
+        /// <summary>
+        /// The <b><c>HTMLMenuElement</c></b> interface provides additional properties (beyond those inherited from the HTMLElement interface) for manipulating a &lt;menu&gt; element. &lt;menu&gt; is a semantic alternative to the &lt;ul&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMenuElement">MDN Reference</a>
+        /// </summary>
+        type HTMLMenuElement = Fable.Core.TS.Dom.HTMLMenuElement
+
+        /// <summary>
+        /// The <b><c>HTMLMetaElement</c></b> interface contains descriptive metadata about a document provided in HTML as &lt;meta&gt; elements. This interface inherits all of the properties and methods described in the HTMLElement interface.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMetaElement">MDN Reference</a>
+        /// </summary>
+        type HTMLMetaElement = Fable.Core.TS.Dom.HTMLMetaElement
+
+        /// <summary>
+        /// The HTML &lt;meter&gt; elements expose the <b><c>HTMLMeterElement</c></b> interface, which provides special properties and methods (beyond the HTMLElement object interface they also have available to them by inheritance) for manipulating the layout and presentation of &lt;meter&gt; elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLMeterElement">MDN Reference</a>
+        /// </summary>
+        type HTMLMeterElement = Fable.Core.TS.Dom.HTMLMeterElement
+
+        /// <summary>
+        /// The <b><c>HTMLModElement</c></b> interface provides special properties (beyond the regular methods and properties available through the HTMLElement interface they also have available to them by inheritance) for manipulating modification elements, that is &lt;del&gt; and &lt;ins&gt;.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLModElement">MDN Reference</a>
+        /// </summary>
+        type HTMLModElement = Fable.Core.TS.Dom.HTMLModElement
+
+        /// <summary>
+        /// The <b><c>HTMLOListElement</c></b> interface provides special properties (beyond those defined on the regular HTMLElement interface it also has available to it by inheritance) for manipulating ordered list elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLOListElement">MDN Reference</a>
+        /// </summary>
+        type HTMLOListElement = Fable.Core.TS.Dom.HTMLOListElement
+
+        /// <summary>
+        /// The <b><c>HTMLObjectElement</c></b> interface provides special properties and methods (beyond those on the HTMLElement interface it also has available to it by inheritance) for manipulating the layout and presentation of &lt;object&gt; element, representing external resources.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLObjectElement">MDN Reference</a>
+        /// </summary>
+        type HTMLObjectElement = Fable.Core.TS.Dom.HTMLObjectElement
+
+        /// <summary>
+        /// The <b><c>HTMLOptGroupElement</c></b> interface provides special properties and methods (beyond the regular HTMLElement object interface they also have available to them by inheritance) for manipulating the layout and presentation of &lt;optgroup&gt; elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLOptGroupElement">MDN Reference</a>
+        /// </summary>
+        type HTMLOptGroupElement = Fable.Core.TS.Dom.HTMLOptGroupElement
+
+        /// <summary>
+        /// The <b><c>HTMLOptionElement</c></b> interface represents &lt;option&gt; elements and inherits all properties and methods of the HTMLElement interface.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLOptionElement">MDN Reference</a>
+        /// </summary>
+        type HTMLOptionElement = Fable.Core.TS.Dom.HTMLOptionElement
+
+        /// <summary>
+        /// The <b><c>HTMLOptionsCollection</c></b> interface represents a collection of &lt;option&gt; HTML elements (in document order) and offers methods and properties for selecting from the list as well as optionally altering its items. This object is returned only by the options property of select.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLOptionsCollection">MDN Reference</a>
+        /// </summary>
+        type HTMLOptionsCollection = Fable.Core.TS.Dom.HTMLOptionsCollection
+
+        type HTMLOrSVGElement = Fable.Core.TS.Dom.HTMLOrSVGElement
+
+        type HTMLOrSVGOrMathMLElement = Fable.Core.TS.Dom.HTMLOrSVGOrMathMLElement
+
+        /// <summary>
+        /// The <b><c>HTMLOutputElement</c></b> interface provides properties and methods (beyond those inherited from HTMLElement) for manipulating the layout and presentation of &lt;output&gt; elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLOutputElement">MDN Reference</a>
+        /// </summary>
+        type HTMLOutputElement = Fable.Core.TS.Dom.HTMLOutputElement
+
+        /// <summary>
+        /// The <b><c>HTMLParagraphElement</c></b> interface provides special properties (beyond those of the regular HTMLElement object interface it inherits) for manipulating &lt;p&gt; elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLParagraphElement">MDN Reference</a>
+        /// </summary>
+        type HTMLParagraphElement = Fable.Core.TS.Dom.HTMLParagraphElement
+
+        /// <summary>
+        /// The <b><c>HTMLParamElement</c></b> interface provides special properties (beyond those of the regular HTMLElement object interface it inherits) for manipulating &lt;param&gt; elements, representing a pair of a key and a value that acts as a parameter for an &lt;object&gt; element.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/HTMLParamElement">MDN Reference</a></remarks>
+        /// <remarks>@deprecated</remarks>
+        type HTMLParamElement = Fable.Core.TS.Dom.HTMLParamElement
+
+        /// <summary>
+        /// The <b><c>HTMLPictureElement</c></b> interface represents a &lt;picture&gt; HTML element. It doesn't implement specific properties or methods.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLPictureElement">MDN Reference</a>
+        /// </summary>
+        type HTMLPictureElement = Fable.Core.TS.Dom.HTMLPictureElement
+
+        /// <summary>
+        /// The <b><c>HTMLPreElement</c></b> interface exposes specific properties and methods (beyond those of the HTMLElement interface it also has available to it by inheritance) for manipulating a block of preformatted text (&lt;pre&gt;).
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLPreElement">MDN Reference</a>
+        /// </summary>
+        type HTMLPreElement = Fable.Core.TS.Dom.HTMLPreElement
+
+        /// <summary>
+        /// The <b><c>HTMLProgressElement</c></b> interface provides special properties and methods (beyond the regular HTMLElement interface it also has available to it by inheritance) for manipulating the layout and presentation of &lt;progress&gt; elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLProgressElement">MDN Reference</a>
+        /// </summary>
+        type HTMLProgressElement = Fable.Core.TS.Dom.HTMLProgressElement
+
+        /// <summary>
+        /// The <b><c>HTMLQuoteElement</c></b> interface provides special properties and methods (beyond the regular HTMLElement interface it also has available to it by inheritance) for manipulating quoting elements, like &lt;blockquote&gt; and &lt;q&gt;, but not the &lt;cite&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLQuoteElement">MDN Reference</a>
+        /// </summary>
+        type HTMLQuoteElement = Fable.Core.TS.Dom.HTMLQuoteElement
+
+        /// <summary>
+        /// HTML &lt;script&gt; elements expose the <b><c>HTMLScriptElement</c></b> interface, which provides special properties and methods for manipulating the behavior and execution of &lt;script&gt; elements (beyond the inherited HTMLElement interface).
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLScriptElement">MDN Reference</a>
+        /// </summary>
+        type HTMLScriptElement = Fable.Core.TS.Dom.HTMLScriptElement
+
+        /// <summary>
+        /// The <b><c>HTMLSelectElement</c></b> interface represents a &lt;select&gt; HTML Element. These elements also share all of the properties and methods of other HTML elements via the HTMLElement interface.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLSelectElement">MDN Reference</a>
+        /// </summary>
+        type HTMLSelectElement = Fable.Core.TS.Dom.HTMLSelectElement
+
+        /// <summary>
+        /// The <b><c>HTMLSlotElement</c></b> interface of the Shadow DOM API enables access to the name and assigned nodes of an HTML &lt;slot&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLSlotElement">MDN Reference</a>
+        /// </summary>
+        type HTMLSlotElement = Fable.Core.TS.Dom.HTMLSlotElement
+
+        /// <summary>
+        /// The <b><c>HTMLSourceElement</c></b> interface provides special properties (beyond the regular HTMLElement object interface it also has available to it by inheritance) for manipulating &lt;source&gt; elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLSourceElement">MDN Reference</a>
+        /// </summary>
+        type HTMLSourceElement = Fable.Core.TS.Dom.HTMLSourceElement
+
+        /// <summary>
+        /// The <b><c>HTMLSpanElement</c></b> interface represents a &lt;span&gt; element and derives from the HTMLElement interface, but without implementing any additional properties or methods.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLSpanElement">MDN Reference</a>
+        /// </summary>
+        type HTMLSpanElement = Fable.Core.TS.Dom.HTMLSpanElement
+
+        /// <summary>
+        /// The <b><c>HTMLStyleElement</c></b> interface represents a &lt;style&gt; element. It inherits properties and methods from its parent, HTMLElement.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLStyleElement">MDN Reference</a>
+        /// </summary>
+        type HTMLStyleElement = Fable.Core.TS.Dom.HTMLStyleElement
+
+        /// <summary>
+        /// The <b><c>HTMLTableCaptionElement</c></b> interface provides special properties (beyond the regular HTMLElement interface it also has available to it by inheritance) for manipulating table &lt;caption&gt; elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLTableCaptionElement">MDN Reference</a>
+        /// </summary>
+        type HTMLTableCaptionElement = Fable.Core.TS.Dom.HTMLTableCaptionElement
+
+        /// <summary>
+        /// The <b><c>HTMLTableCellElement</c></b> interface provides special properties and methods (beyond the regular HTMLElement interface it also has available to it by inheritance) for manipulating the layout and presentation of table cells, either header cells (&lt;th&gt;) or data cells (&lt;td&gt;), in an HTML document.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLTableCellElement">MDN Reference</a>
+        /// </summary>
+        type HTMLTableCellElement = Fable.Core.TS.Dom.HTMLTableCellElement
+
+        /// <summary>
+        /// The <b><c>HTMLTableColElement</c></b> interface provides properties for manipulating single or grouped table column elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLTableColElement">MDN Reference</a>
+        /// </summary>
+        type HTMLTableColElement = Fable.Core.TS.Dom.HTMLTableColElement
+
+        /// <remarks>@deprecated prefer HTMLTableCellElement</remarks>
+        type HTMLTableDataCellElement = Fable.Core.TS.Dom.HTMLTableDataCellElement
+
+        /// <summary>
+        /// The <b><c>HTMLTableElement</c></b> interface provides special properties and methods (beyond the regular HTMLElement object interface it also has available to it by inheritance) for manipulating the layout and presentation of tables in an HTML document.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLTableElement">MDN Reference</a>
+        /// </summary>
+        type HTMLTableElement = Fable.Core.TS.Dom.HTMLTableElement
+
+        /// <remarks>@deprecated prefer HTMLTableCellElement</remarks>
+        type HTMLTableHeaderCellElement = Fable.Core.TS.Dom.HTMLTableHeaderCellElement
+
+        /// <summary>
+        /// The <b><c>HTMLTableRowElement</c></b> interface provides special properties and methods (beyond the HTMLElement interface it also has available to it by inheritance) for manipulating the layout and presentation of rows in an HTML table.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLTableRowElement">MDN Reference</a>
+        /// </summary>
+        type HTMLTableRowElement = Fable.Core.TS.Dom.HTMLTableRowElement
+
+        /// <summary>
+        /// The <b><c>HTMLTableSectionElement</c></b> interface provides special properties and methods (beyond the HTMLElement interface it also has available to it by inheritance) for manipulating the layout and presentation of sections, that is headers, footers and bodies (&lt;thead&gt;, &lt;tfoot&gt;, and &lt;tbody&gt;, respectively) in an HTML table.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLTableSectionElement">MDN Reference</a>
+        /// </summary>
+        type HTMLTableSectionElement = Fable.Core.TS.Dom.HTMLTableSectionElement
+
+        /// <summary>
+        /// The <b><c>HTMLTemplateElement</c></b> interface enables access to the contents of an HTML &lt;template&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLTemplateElement">MDN Reference</a>
+        /// </summary>
+        type HTMLTemplateElement = Fable.Core.TS.Dom.HTMLTemplateElement
+
+        /// <summary>
+        /// The <b><c>HTMLTextAreaElement</c></b> interface provides properties and methods for manipulating the layout and presentation of &lt;textarea&gt; elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLTextAreaElement">MDN Reference</a>
+        /// </summary>
+        type HTMLTextAreaElement = Fable.Core.TS.Dom.HTMLTextAreaElement
+
+        /// <summary>
+        /// The <b><c>HTMLTimeElement</c></b> interface provides special properties (beyond the regular HTMLElement interface it also has available to it by inheritance) for manipulating &lt;time&gt; elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLTimeElement">MDN Reference</a>
+        /// </summary>
+        type HTMLTimeElement = Fable.Core.TS.Dom.HTMLTimeElement
+
+        /// <summary>
+        /// The <b><c>HTMLTitleElement</c></b> interface is implemented by a document's &lt;title&gt;. This element inherits all of the properties and methods of the HTMLElement interface.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLTitleElement">MDN Reference</a>
+        /// </summary>
+        type HTMLTitleElement = Fable.Core.TS.Dom.HTMLTitleElement
+
+        /// <summary>
+        /// The <b><c>HTMLTrackElement</c></b> interface represents an HTML &lt;track&gt; element within the DOM. This element can be used as a child of either &lt;audio&gt; or &lt;video&gt; to specify a text track containing information such as closed captions or subtitles.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLTrackElement">MDN Reference</a>
+        /// </summary>
+        type HTMLTrackElement = Fable.Core.TS.Dom.HTMLTrackElement
+
+        /// <summary>
+        /// The <b><c>HTMLUListElement</c></b> interface provides special properties (beyond those defined on the regular HTMLElement interface it also has available to it by inheritance) for manipulating unordered list (&lt;ul&gt;) elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLUListElement">MDN Reference</a>
+        /// </summary>
+        type HTMLUListElement = Fable.Core.TS.Dom.HTMLUListElement
+
+        /// <summary>
+        /// The <b><c>HTMLUnknownElement</c></b> interface represents an invalid HTML element and derives from the HTMLElement interface, but without implementing any additional properties or methods.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLUnknownElement">MDN Reference</a>
+        /// </summary>
+        type HTMLUnknownElement = Fable.Core.TS.Dom.HTMLUnknownElement
+
+        type HTMLVideoElementEventMap = Fable.Core.TS.Dom.HTMLVideoElementEventMap
+
+        /// <summary>
+        /// Implemented by the &lt;video&gt; element, the <b><c>HTMLVideoElement</c></b> interface provides special properties and methods for manipulating video objects. It also inherits properties and methods of HTMLMediaElement and HTMLElement.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HTMLVideoElement">MDN Reference</a>
+        /// </summary>
+        type HTMLVideoElement = Fable.Core.TS.Dom.HTMLVideoElement
+
+        /// <summary>
+        /// The <b><c>HashChangeEvent</c></b> interface represents events that fire when the fragment identifier of the URL has changed.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HashChangeEvent">MDN Reference</a>
+        /// </summary>
+        type HashChangeEvent = Fable.Core.TS.Dom.HashChangeEvent
+
+        /// <summary>
+        /// The <b><c>Headers</c></b> interface of the Fetch API allows you to perform various actions on HTTP request and response headers. These actions include retrieving, setting, adding to, and removing headers from the list of the request's headers.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Headers">MDN Reference</a>
+        /// </summary>
+        type Headers = Fable.Core.TS.Dom.Headers
+
+        /// <summary>
+        /// The <b><c>Highlight</c></b> interface of the CSS Custom Highlight API is used to represent a collection of AbstractRange instances to be styled using the API.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Highlight">MDN Reference</a>
+        /// </summary>
+        type Highlight = Fable.Core.TS.Dom.Highlight
+
+        /// <summary>
+        /// The <b><c>HighlightRegistry</c></b> interface of the CSS Custom Highlight API is used to register Highlight objects to be styled using the API. It is accessed via CSS.highlights.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/HighlightRegistry">MDN Reference</a>
+        /// </summary>
+        type HighlightRegistry = Fable.Core.TS.Dom.HighlightRegistry
+
+        /// <summary>
+        /// The <b><c>History</c></b> interface of the History API allows manipulation of the browser session history, that is the pages visited in the tab or frame that the current page is loaded in.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/History">MDN Reference</a>
+        /// </summary>
+        type History = Fable.Core.TS.Dom.History
+
+        type HyperlinkElementUtils = Fable.Core.TS.Dom.HyperlinkElementUtils
+
+        /// <summary>
+        /// The <b><c>IDBCursor</c></b> interface of the IndexedDB API represents a cursor for traversing or iterating over multiple records in a database.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/IDBCursor">MDN Reference</a>
+        /// </summary>
+        type IDBCursor = Fable.Core.TS.Dom.IDBCursor
+
+        /// <summary>
+        /// The <b><c>IDBCursorWithValue</c></b> interface of the IndexedDB API represents a cursor for traversing or iterating over multiple records in a database. It is the same as the IDBCursor, except that it includes the value property.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/IDBCursorWithValue">MDN Reference</a>
+        /// </summary>
+        type IDBCursorWithValue = Fable.Core.TS.Dom.IDBCursorWithValue
+
+        type IDBDatabaseEventMap = Fable.Core.TS.Dom.IDBDatabaseEventMap
+
+        /// <summary>
+        /// The <b><c>IDBDatabase</c></b> interface of the IndexedDB API provides a connection to a database; you can use an IDBDatabase object to open a transaction on your database then create, manipulate, and delete objects (data) in that database. The interface provides the only way to get and manage versions of the database.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/IDBDatabase">MDN Reference</a>
+        /// </summary>
+        type IDBDatabase = Fable.Core.TS.Dom.IDBDatabase
+
+        /// <summary>
+        /// The <b><c>IDBFactory</c></b> interface of the IndexedDB API lets applications asynchronously access the indexed databases. The object that implements the interface is window.indexedDB. You open — that is, create and access — and delete a database with this object, and not directly with IDBFactory.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/IDBFactory">MDN Reference</a>
+        /// </summary>
+        type IDBFactory = Fable.Core.TS.Dom.IDBFactory
+
+        /// <summary>
+        /// <b><c>IDBIndex</c></b> interface of the IndexedDB API provides asynchronous access to an index in a database. An index is a kind of object store for looking up records in another object store, called the referenced object store. You use this interface to retrieve data.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/IDBIndex">MDN Reference</a>
+        /// </summary>
+        type IDBIndex = Fable.Core.TS.Dom.IDBIndex
+
+        /// <summary>
+        /// The <b><c>IDBKeyRange</c></b> interface of the IndexedDB API represents a continuous interval over some data type that is used for keys. Records can be retrieved from IDBObjectStore and IDBIndex objects using keys or a range of keys. You can limit the range using lower and upper bounds. For example, you can iterate over all values of a key in the value range A–Z.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/IDBKeyRange">MDN Reference</a>
+        /// </summary>
+        type IDBKeyRange = Fable.Core.TS.Dom.IDBKeyRange
+
+        /// <summary>
+        /// The <b><c>IDBObjectStore</c></b> interface of the IndexedDB API represents an object store in a database. Records within an object store are sorted according to their keys. This sorting enables fast insertion, look-up, and ordered retrieval.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/IDBObjectStore">MDN Reference</a>
+        /// </summary>
+        type IDBObjectStore = Fable.Core.TS.Dom.IDBObjectStore
+
+        type IDBOpenDBRequestEventMap = Fable.Core.TS.Dom.IDBOpenDBRequestEventMap
+
+        /// <summary>
+        /// The <b><c>IDBOpenDBRequest</c></b> interface of the IndexedDB API provides access to the results of requests to open or delete databases (performed using IDBFactory.open and IDBFactory.deleteDatabase), using specific event handler attributes.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/IDBOpenDBRequest">MDN Reference</a>
+        /// </summary>
+        type IDBOpenDBRequest = Fable.Core.TS.Dom.IDBOpenDBRequest
+
+        type IDBRequestEventMap = Fable.Core.TS.Dom.IDBRequestEventMap
+
+        /// <summary>
+        /// The <b><c>IDBRequest</c></b> interface of the IndexedDB API provides access to results of asynchronous requests to databases and database objects using event handler attributes. Each reading and writing operation on a database is done using a request.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/IDBRequest">MDN Reference</a>
+        /// </summary>
+        type IDBRequest<'T> = Fable.Core.TS.Dom.IDBRequest<'T>
+
+        type IDBTransactionEventMap = Fable.Core.TS.Dom.IDBTransactionEventMap
+
+        /// <summary>
+        /// The <b><c>IDBTransaction</c></b> interface of the IndexedDB API provides a static, asynchronous transaction on a database using event handler attributes. All reading and writing of data is done within transactions. You use IDBDatabase to start transactions, IDBTransaction to set the mode of the transaction (e.g., is it readonly or readwrite), and you access an IDBObjectStore to make a request. You can also use an IDBTransaction object to abort transactions.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/IDBTransaction">MDN Reference</a>
+        /// </summary>
+        type IDBTransaction = Fable.Core.TS.Dom.IDBTransaction
+
+        /// <summary>
+        /// The <b><c>IDBVersionChangeEvent</c></b> interface of the IndexedDB API indicates that the version of the database has changed, as the result of an onupgradeneeded event handler function.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/IDBVersionChangeEvent">MDN Reference</a>
+        /// </summary>
+        type IDBVersionChangeEvent = Fable.Core.TS.Dom.IDBVersionChangeEvent
+
+        /// <summary>
+        /// The <b><c>IIRFilterNode</c></b> interface of the Web Audio API is an AudioNode processor which implements a general infinite impulse response (IIR) filter; this type of filter can be used to implement tone control devices and graphic equalizers as well. It lets the parameters of the filter response be specified, so that it can be tuned as needed.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/IIRFilterNode">MDN Reference</a>
+        /// </summary>
+        type IIRFilterNode = Fable.Core.TS.Dom.IIRFilterNode
+
+        /// <summary>
+        /// The <b><c>IdleDeadline</c></b> interface is used as the data type of the input parameter to idle callbacks established by calling Window.requestIdleCallback(). It offers a method, timeRemaining(), which lets you determine how much longer the user agent estimates it will remain idle and a property, didTimeout, which lets you determine if your callback is executing because its timeout duration expired.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/IdleDeadline">MDN Reference</a>
+        /// </summary>
+        type IdleDeadline = Fable.Core.TS.Dom.IdleDeadline
+
+        /// <summary>
+        /// The <b><c>ImageBitmap</c></b> interface represents a bitmap image which can be drawn to a &lt;canvas&gt; without undue latency. It can be created from a variety of source objects using the Window.createImageBitmap() or WorkerGlobalScope.createImageBitmap() factory method. ImageBitmap provides an asynchronous and resource efficient pathway to prepare textures for rendering in WebGL.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ImageBitmap">MDN Reference</a>
+        /// </summary>
+        type ImageBitmap = Fable.Core.TS.Dom.ImageBitmap
+
+        /// <summary>
+        /// The <b><c>ImageBitmapRenderingContext</c></b> interface is a canvas rendering context that provides the functionality to replace the canvas's contents with the given ImageBitmap. Its context id (the first argument to HTMLCanvasElement.getContext() or OffscreenCanvas.getContext()) is "bitmaprenderer".
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ImageBitmapRenderingContext">MDN Reference</a>
+        /// </summary>
+        type ImageBitmapRenderingContext = Fable.Core.TS.Dom.ImageBitmapRenderingContext
+
+        /// <summary>
+        /// The <b><c>ImageCapture</c></b> interface of the MediaStream Image Capture API provides methods to enable the capture of images or photos from a camera or other photographic device. It provides an interface for capturing images from a photographic device referenced through a valid MediaStreamTrack.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ImageCapture">MDN Reference</a>
+        /// </summary>
+        type ImageCapture = Fable.Core.TS.Dom.ImageCapture
+
+        /// <summary>
+        /// The <b><c>ImageData</c></b> interface represents the underlying pixel data of an area of a &lt;canvas&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ImageData">MDN Reference</a>
+        /// </summary>
+        type ImageData = Fable.Core.TS.Dom.ImageData
+
+        /// <summary>
+        /// The <b><c>ImageDecoder</c></b> interface of the WebCodecs API provides a way to unpack and decode encoded image data.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ImageDecoder">MDN Reference</a>
+        /// </summary>
+        type ImageDecoder = Fable.Core.TS.Dom.ImageDecoder
+
+        /// <summary>
+        /// The <b><c>ImageTrack</c></b> interface of the WebCodecs API represents an individual image track.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ImageTrack">MDN Reference</a>
+        /// </summary>
+        type ImageTrack = Fable.Core.TS.Dom.ImageTrack
+
+        /// <summary>
+        /// The <b><c>ImageTrackList</c></b> interface of the WebCodecs API represents a list of image tracks.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ImageTrackList">MDN Reference</a>
+        /// </summary>
+        type ImageTrackList = Fable.Core.TS.Dom.ImageTrackList
+
+        /// <summary>
+        /// The <b><c>InputDeviceInfo</c></b> interface of the Media Capture and Streams API gives access to the capabilities of the input device that it represents.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/InputDeviceInfo">MDN Reference</a>
+        /// </summary>
+        type InputDeviceInfo = Fable.Core.TS.Dom.InputDeviceInfo
+
+        /// <summary>
+        /// The <b><c>InputEvent</c></b> interface represents an event notifying the user of editable content changes.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/InputEvent">MDN Reference</a>
+        /// </summary>
+        type InputEvent = Fable.Core.TS.Dom.InputEvent
+
+        /// <summary>
+        /// The <b><c>IntersectionObserver</c></b> interface of the Intersection Observer API provides a way to asynchronously observe changes in the intersection of a target element with an ancestor element or with a top-level document's viewport. The ancestor element or viewport is referred to as the root.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/IntersectionObserver">MDN Reference</a>
+        /// </summary>
+        type IntersectionObserver = Fable.Core.TS.Dom.IntersectionObserver
+
+        /// <summary>
+        /// The <b><c>IntersectionObserverEntry</c></b> interface of the Intersection Observer API describes the intersection between the target element and its root container at a specific moment of transition.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/IntersectionObserverEntry">MDN Reference</a>
+        /// </summary>
+        type IntersectionObserverEntry = Fable.Core.TS.Dom.IntersectionObserverEntry
+
+        /// <summary>
+        /// The <b><c>KHR_parallel_shader_compile</c></b> extension is part of the WebGL API and enables a non-blocking poll operation, so that compile/link status availability (COMPLETION_STATUS_KHR) can be queried without potentially incurring stalls. In other words you can check the status of your shaders compiling without blocking the runtime.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/KHR_parallel_shader_compile">MDN Reference</a>
+        /// </summary>
+        type KHR_parallel_shader_compile = Fable.Core.TS.Dom.KHR_parallel_shader_compile
+
+        /// <summary>
+        /// <b><c>KeyboardEvent</c></b> objects describe a user interaction with the keyboard; each event describes a single interaction between the user and a key (or combination of a key with modifier keys) on the keyboard. The event type (keydown, keypress, or keyup) identifies what kind of keyboard activity occurred.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/KeyboardEvent">MDN Reference</a>
+        /// </summary>
+        type KeyboardEvent = Fable.Core.TS.Dom.KeyboardEvent
+
+        /// <summary>
+        /// The <b><c>KeyframeEffect</c></b> interface of the Web Animations API lets us create sets of animatable properties and values, called keyframes. These can then be played using the Animation() constructor.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/KeyframeEffect">MDN Reference</a>
+        /// </summary>
+        type KeyframeEffect = Fable.Core.TS.Dom.KeyframeEffect
+
+        /// <summary>
+        /// The <b><c>LargestContentfulPaint</c></b> interface provides timing information about the largest image or text paint before user input on a web page.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/LargestContentfulPaint">MDN Reference</a>
+        /// </summary>
+        type LargestContentfulPaint = Fable.Core.TS.Dom.LargestContentfulPaint
+
+        type LinkStyle = Fable.Core.TS.Dom.LinkStyle
+
+        /// <summary>
+        /// The <b><c>Location</c></b> interface represents the location (URL) of the object it is linked to. Changes done on it are reflected on the object it relates to. Both the Document and Window interface have such a linked Location, accessible via Document.location and Window.location respectively.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Location">MDN Reference</a>
+        /// </summary>
+        type Location = Fable.Core.TS.Dom.Location
+
+        /// <summary>
+        /// The <b><c>Lock</c></b> interface of the Web Locks API provides the name and mode of a lock. This may be a newly requested lock that is received in the callback to LockManager.request(), or a record of an active or queued lock returned by LockManager.query().
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Lock">MDN Reference</a>
+        /// </summary>
+        type Lock = Fable.Core.TS.Dom.Lock
+
+        /// <summary>
+        /// The <b><c>LockManager</c></b> interface of the Web Locks API provides methods for requesting a new Lock object and querying for an existing Lock object. To get an instance of LockManager, call navigator.locks.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/LockManager">MDN Reference</a>
+        /// </summary>
+        type LockManager = Fable.Core.TS.Dom.LockManager
+
+        type MIDIAccessEventMap = Fable.Core.TS.Dom.MIDIAccessEventMap
+
+        /// <summary>
+        /// The <b><c>MIDIAccess</c></b> interface of the Web MIDI API provides methods for listing MIDI input and output devices, and obtaining access to those devices.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MIDIAccess">MDN Reference</a>
+        /// </summary>
+        type MIDIAccess = Fable.Core.TS.Dom.MIDIAccess
+
+        /// <summary>
+        /// The <b><c>MIDIConnectionEvent</c></b> interface of the Web MIDI API is the event passed to the statechange event of the MIDIAccess interface and the statechange event of the MIDIPort interface. This occurs any time a new port becomes available, or when a previously available port becomes unavailable. For example, this event is fired whenever a MIDI device is either plugged in to or unplugged from a computer.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MIDIConnectionEvent">MDN Reference</a>
+        /// </summary>
+        type MIDIConnectionEvent = Fable.Core.TS.Dom.MIDIConnectionEvent
+
+        type MIDIInputEventMap = Fable.Core.TS.Dom.MIDIInputEventMap
+
+        /// <summary>
+        /// The <b><c>MIDIInput</c></b> interface of the Web MIDI API receives messages from a MIDI input port.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MIDIInput">MDN Reference</a>
+        /// </summary>
+        type MIDIInput = Fable.Core.TS.Dom.MIDIInput
+
+        /// <summary>
+        /// The <b><c>MIDIInputMap</c></b> read-only interface of the Web MIDI API provides the set of MIDI input ports that are currently available.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MIDIInputMap">MDN Reference</a>
+        /// </summary>
+        type MIDIInputMap = Fable.Core.TS.Dom.MIDIInputMap
+
+        /// <summary>
+        /// The <b><c>MIDIMessageEvent</c></b> interface of the Web MIDI API represents the event passed to the midimessage event of the MIDIInput interface. A midimessage event is fired every time a MIDI message is sent from a device represented by a MIDIInput, for example when a MIDI keyboard key is pressed, a knob is tweaked, or a slider is moved.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MIDIMessageEvent">MDN Reference</a>
+        /// </summary>
+        type MIDIMessageEvent = Fable.Core.TS.Dom.MIDIMessageEvent
+
+        /// <summary>
+        /// The <b><c>MIDIOutput</c></b> interface of the Web MIDI API provides methods to add messages to the queue of an output device, and to clear the queue of messages.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MIDIOutput">MDN Reference</a>
+        /// </summary>
+        type MIDIOutput = Fable.Core.TS.Dom.MIDIOutput
+
+        /// <summary>
+        /// The <b><c>MIDIOutputMap</c></b> read-only interface of the Web MIDI API provides the set of MIDI output ports that are currently available.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MIDIOutputMap">MDN Reference</a>
+        /// </summary>
+        type MIDIOutputMap = Fable.Core.TS.Dom.MIDIOutputMap
+
+        type MIDIPortEventMap = Fable.Core.TS.Dom.MIDIPortEventMap
+
+        /// <summary>
+        /// The <b><c>MIDIPort</c></b> interface of the Web MIDI API represents a MIDI input or output port.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MIDIPort">MDN Reference</a>
+        /// </summary>
+        type MIDIPort = Fable.Core.TS.Dom.MIDIPort
+
+        type MathMLElementEventMap = Fable.Core.TS.Dom.MathMLElementEventMap
+
+        /// <summary>
+        /// The <b><c>MathMLElement</c></b> interface represents any MathML element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MathMLElement">MDN Reference</a>
+        /// </summary>
+        type MathMLElement = Fable.Core.TS.Dom.MathMLElement
+
+        /// <summary>
+        /// The <b><c>MediaCapabilities</c></b> interface of the Media Capabilities API provides information about the decoding abilities of the device, system and browser. The API can be used to query the browser about the decoding abilities of the device based on codecs, profile, resolution, and bitrates. The information can be used to serve optimal media streams to the user and determine if playback should be smooth and power efficient.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MediaCapabilities">MDN Reference</a>
+        /// </summary>
+        type MediaCapabilities = Fable.Core.TS.Dom.MediaCapabilities
+
+        /// <summary>
+        /// The <b><c>MediaDeviceInfo</c></b> interface of the Media Capture and Streams API contains information that describes a single media input or output device.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MediaDeviceInfo">MDN Reference</a>
+        /// </summary>
+        type MediaDeviceInfo = Fable.Core.TS.Dom.MediaDeviceInfo
+
+        type MediaDevicesEventMap = Fable.Core.TS.Dom.MediaDevicesEventMap
+
+        /// <summary>
+        /// The <b><c>MediaDevices</c></b> interface of the Media Capture and Streams API provides access to connected media input devices like cameras and microphones, as well as screen sharing. In essence, it lets you obtain access to any hardware source of media data.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MediaDevices">MDN Reference</a>
+        /// </summary>
+        type MediaDevices = Fable.Core.TS.Dom.MediaDevices
+
+        /// <summary>
+        /// The <b><c>MediaElementAudioSourceNode</c></b> interface represents an audio source consisting of an HTML &lt;audio&gt; or &lt;video&gt; element. It is an AudioNode that acts as an audio source.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MediaElementAudioSourceNode">MDN Reference</a>
+        /// </summary>
+        type MediaElementAudioSourceNode = Fable.Core.TS.Dom.MediaElementAudioSourceNode
+
+        /// <summary>
+        /// The <b><c>MediaEncryptedEvent</c></b> interface of the Encrypted Media Extensions API contains the information associated with an encrypted event sent to a HTMLMediaElement when some initialization data is encountered in the media.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MediaEncryptedEvent">MDN Reference</a>
+        /// </summary>
+        type MediaEncryptedEvent = Fable.Core.TS.Dom.MediaEncryptedEvent
+
+        /// <summary>
+        /// The <b><c>MediaError</c></b> interface represents an error which occurred while handling media in an HTML media element based on HTMLMediaElement, such as &lt;audio&gt; or &lt;video&gt;.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MediaError">MDN Reference</a>
+        /// </summary>
+        type MediaError = Fable.Core.TS.Dom.MediaError
+
+        /// <summary>
+        /// The <b><c>MediaKeyMessageEvent</c></b> interface of the Encrypted Media Extensions API contains the content and related data when the content decryption module generates a message for the session.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MediaKeyMessageEvent">MDN Reference</a>
+        /// </summary>
+        type MediaKeyMessageEvent = Fable.Core.TS.Dom.MediaKeyMessageEvent
+
+        type MediaKeySessionEventMap = Fable.Core.TS.Dom.MediaKeySessionEventMap
+
+        /// <summary>
+        /// The <b><c>MediaKeySession</c></b> interface of the Encrypted Media Extensions API represents a context for message exchange with a content decryption module (CDM).
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MediaKeySession">MDN Reference</a>
+        /// </summary>
+        type MediaKeySession = Fable.Core.TS.Dom.MediaKeySession
+
+        /// <summary>
+        /// The <b><c>MediaKeyStatusMap</c></b> interface of the Encrypted Media Extensions API is a read-only map of media key statuses by key IDs.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MediaKeyStatusMap">MDN Reference</a>
+        /// </summary>
+        type MediaKeyStatusMap = Fable.Core.TS.Dom.MediaKeyStatusMap
+
+        /// <summary>
+        /// The <b><c>MediaKeySystemAccess</c></b> interface of the Encrypted Media Extensions API provides access to a Key System for decryption and/or a content protection provider. You can request an instance of this object using the Navigator.requestMediaKeySystemAccess() method.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MediaKeySystemAccess">MDN Reference</a>
+        /// </summary>
+        type MediaKeySystemAccess = Fable.Core.TS.Dom.MediaKeySystemAccess
+
+        /// <summary>
+        /// The <b><c>MediaKeys</c></b> interface of Encrypted Media Extensions API represents a set of keys that an associated HTMLMediaElement can use for decryption of media data during playback.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MediaKeys">MDN Reference</a>
+        /// </summary>
+        type MediaKeys = Fable.Core.TS.Dom.MediaKeys
+
+        /// <summary>
+        /// The <b><c>MediaList</c></b> interface represents the media queries of a stylesheet, e.g., those set using a &lt;link&gt; element's media attribute.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MediaList">MDN Reference</a>
+        /// </summary>
+        type MediaList = Fable.Core.TS.Dom.MediaList
+
+        /// <summary>
+        /// The <b><c>MediaMetadata</c></b> interface of the Media Session API allows a web page to provide rich media metadata for display in a platform UI.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MediaMetadata">MDN Reference</a>
+        /// </summary>
+        type MediaMetadata = Fable.Core.TS.Dom.MediaMetadata
+
+        type MediaQueryListEventMap = Fable.Core.TS.Dom.MediaQueryListEventMap
+
+        /// <summary>
+        /// A <b><c>MediaQueryList</c></b> object stores information on a media query applied to a document, with support for both immediate and event-driven matching against the state of the document.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MediaQueryList">MDN Reference</a>
+        /// </summary>
+        type MediaQueryList = Fable.Core.TS.Dom.MediaQueryList
+
+        /// <summary>
+        /// The <b><c>MediaQueryListEvent</c></b> object stores information on the changes that have happened to a MediaQueryList object — instances are available as the event object on a function referenced by a change event.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MediaQueryListEvent">MDN Reference</a>
+        /// </summary>
+        type MediaQueryListEvent = Fable.Core.TS.Dom.MediaQueryListEvent
+
+        type MediaRecorderEventMap = Fable.Core.TS.Dom.MediaRecorderEventMap
+
+        /// <summary>
+        /// The <b><c>MediaRecorder</c></b> interface of the MediaStream Recording API provides functionality to easily record media. It is created using the MediaRecorder() constructor.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MediaRecorder">MDN Reference</a>
+        /// </summary>
+        type MediaRecorder = Fable.Core.TS.Dom.MediaRecorder
+
+        /// <summary>
+        /// The <b><c>MediaSession</c></b> interface of the Media Session API allows a web page to provide custom behaviors for standard media playback interactions, and to report metadata that can be sent by the user agent to the device or operating system for presentation in standardized user interface elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MediaSession">MDN Reference</a>
+        /// </summary>
+        type MediaSession = Fable.Core.TS.Dom.MediaSession
+
+        type MediaSourceEventMap = Fable.Core.TS.Dom.MediaSourceEventMap
+
+        /// <summary>
+        /// The <b><c>MediaSource</c></b> interface of the Media Source Extensions API represents a source of media data for an HTMLMediaElement object. A MediaSource object can be attached to a HTMLMediaElement to be played in the user agent.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MediaSource">MDN Reference</a>
+        /// </summary>
+        type MediaSource = Fable.Core.TS.Dom.MediaSource
+
+        /// <summary>
+        /// The <b><c>MediaSourceHandle</c></b> interface of the Media Source Extensions API is a proxy for a MediaSource that can be transferred from a dedicated worker back to the main thread and attached to a media element via its HTMLMediaElement.srcObject property. MediaSource objects are not transferable because they are event targets, hence the need for MediaSourceHandles.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MediaSourceHandle">MDN Reference</a>
+        /// </summary>
+        type MediaSourceHandle = Fable.Core.TS.Dom.MediaSourceHandle
+
+        type MediaStreamEventMap = Fable.Core.TS.Dom.MediaStreamEventMap
+
+        /// <summary>
+        /// The <b><c>MediaStream</c></b> interface of the Media Capture and Streams API represents a stream of media content. A stream consists of several tracks, such as video or audio tracks. Each track is specified as an instance of MediaStreamTrack.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MediaStream">MDN Reference</a>
+        /// </summary>
+        type MediaStream = Fable.Core.TS.Dom.MediaStream
+
+        /// <summary>
+        /// The <b><c>MediaStreamAudioDestinationNode</c></b> interface represents an audio destination consisting of a WebRTC MediaStream with a single AudioMediaStreamTrack, which can be used in a similar way to a MediaStream obtained from navigator.mediaDevices.getUserMedia().
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MediaStreamAudioDestinationNode">MDN Reference</a>
+        /// </summary>
+        type MediaStreamAudioDestinationNode = Fable.Core.TS.Dom.MediaStreamAudioDestinationNode
+
+        /// <summary>
+        /// The <b><c>MediaStreamAudioSourceNode</c></b> interface is a type of AudioNode which operates as an audio source whose media is received from a MediaStream obtained using the WebRTC or Media Capture and Streams APIs.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MediaStreamAudioSourceNode">MDN Reference</a>
+        /// </summary>
+        type MediaStreamAudioSourceNode = Fable.Core.TS.Dom.MediaStreamAudioSourceNode
+
+        type MediaStreamTrackEventMap = Fable.Core.TS.Dom.MediaStreamTrackEventMap
+
+        /// <summary>
+        /// The <b><c>MediaStreamTrack</c></b> interface of the Media Capture and Streams API represents a single media track within a stream; typically, these are audio or video tracks, but other track types may exist as well.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MediaStreamTrack">MDN Reference</a>
+        /// </summary>
+        type MediaStreamTrack = Fable.Core.TS.Dom.MediaStreamTrack
+
+        /// <summary>
+        /// The <b><c>MediaStreamTrackEvent</c></b> interface of the Media Capture and Streams API represents events which indicate that a MediaStream has had tracks added to or removed from the stream through calls to Media Capture and Streams API methods. These events are sent to the stream when these changes occur.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MediaStreamTrackEvent">MDN Reference</a>
+        /// </summary>
+        type MediaStreamTrackEvent = Fable.Core.TS.Dom.MediaStreamTrackEvent
+
+        /// <summary>
+        /// The <b><c>MessageChannel</c></b> interface of the Channel Messaging API allows us to create a new message channel and send data through it via its two MessagePort properties.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MessageChannel">MDN Reference</a>
+        /// </summary>
+        type MessageChannel = Fable.Core.TS.Dom.MessageChannel
+
+        /// <summary>
+        /// The <b><c>MessageEvent</c></b> interface represents a message received by a target object.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MessageEvent">MDN Reference</a>
+        /// </summary>
+        type MessageEvent<'T> = Fable.Core.TS.Dom.MessageEvent<'T>
+
+        type MessageEventTargetEventMap = Fable.Core.TS.Dom.MessageEventTargetEventMap
+
+        type MessageEventTarget<'T> = Fable.Core.TS.Dom.MessageEventTarget<'T>
+
+        type MessagePortEventMap = Fable.Core.TS.Dom.MessagePortEventMap
+
+        /// <summary>
+        /// The <b><c>MessagePort</c></b> interface of the Channel Messaging API represents one of the two ports of a MessageChannel, allowing messages to be sent from one port and listening out for them arriving at the other.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MessagePort">MDN Reference</a>
+        /// </summary>
+        type MessagePort = Fable.Core.TS.Dom.MessagePort
+
+        /// <summary>
+        /// The <b><c>MimeType</c></b> interface provides contains information about a MIME type associated with a particular plugin. Navigator.mimeTypes returns an array of this object.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/MimeType">MDN Reference</a></remarks>
+        /// <remarks>@deprecated</remarks>
+        type MimeType = Fable.Core.TS.Dom.MimeType
+
+        /// <summary>
+        /// The <b><c>MimeTypeArray</c></b> interface returns an array of MimeType instances, each of which contains information about a supported browser plugins. This object is returned by the deprecated Navigator.mimeTypes property.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/MimeTypeArray">MDN Reference</a></remarks>
+        /// <remarks>@deprecated</remarks>
+        type MimeTypeArray = Fable.Core.TS.Dom.MimeTypeArray
+
+        /// <summary>
+        /// The <b><c>MouseEvent</c></b> interface represents events that occur due to the user interacting with a pointing device (such as a mouse). Common events using this interface include click, dblclick, mouseup, mousedown.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MouseEvent">MDN Reference</a>
+        /// </summary>
+        type MouseEvent = Fable.Core.TS.Dom.MouseEvent
+
+        /// <summary>
+        /// The <b><c>MutationObserver</c></b> interface provides the ability to watch for changes being made to the DOM tree. It is designed as a replacement for the older Mutation Events feature, which was part of the DOM3 Events specification.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MutationObserver">MDN Reference</a>
+        /// </summary>
+        type MutationObserver = Fable.Core.TS.Dom.MutationObserver
+
+        /// <summary>
+        /// The <b><c>MutationRecord</c></b> is a read-only interface that represents an individual DOM mutation observed by a MutationObserver. It is the object inside the array passed to the callback of a MutationObserver.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/MutationRecord">MDN Reference</a>
+        /// </summary>
+        type MutationRecord = Fable.Core.TS.Dom.MutationRecord
+
+        /// <summary>
+        /// The <b><c>NamedNodeMap</c></b> interface represents a collection of Attr objects. Objects inside a NamedNodeMap are not in any particular order, unlike NodeList, although they may be accessed by an index as in an array.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/NamedNodeMap">MDN Reference</a>
+        /// </summary>
+        type NamedNodeMap = Fable.Core.TS.Dom.NamedNodeMap
+
+        /// <summary>
+        /// The <b><c>NavigateEvent</c></b> interface of the Navigation API is the event object for the navigate event, which fires when any type of navigation is initiated (this includes usage of History API features like History.go()). NavigateEvent provides access to information about that navigation, and allows developers to intercept and control the navigation handling.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/NavigateEvent">MDN Reference</a>
+        /// </summary>
+        type NavigateEvent = Fable.Core.TS.Dom.NavigateEvent
+
+        type NavigationEventMap = Fable.Core.TS.Dom.NavigationEventMap
+
+        /// <summary>
+        /// The <b><c>Navigation</c></b> interface of the Navigation API allows control over all navigation actions for the current window in one central place, including initiating navigations programmatically, examining navigation history entries, and managing navigations as they happen.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Navigation">MDN Reference</a>
+        /// </summary>
+        type Navigation = Fable.Core.TS.Dom.Navigation
+
+        /// <summary>
+        /// The <b><c>NavigationActivation</c></b> interface of the Navigation API represents a recent cross-document navigation. It contains the navigation type and outgoing and inbound document history entries.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/NavigationActivation">MDN Reference</a>
+        /// </summary>
+        type NavigationActivation = Fable.Core.TS.Dom.NavigationActivation
+
+        /// <summary>
+        /// The <b><c>NavigationCurrentEntryChangeEvent</c></b> interface of the Navigation API is the event object for the currententrychange event, which fires when the Navigation.currentEntry has changed.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/NavigationCurrentEntryChangeEvent">MDN Reference</a>
+        /// </summary>
+        type NavigationCurrentEntryChangeEvent = Fable.Core.TS.Dom.NavigationCurrentEntryChangeEvent
+
+        /// <summary>
+        /// The <b><c>NavigationDestination</c></b> interface of the Navigation API represents the destination being navigated to in the current navigation.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/NavigationDestination">MDN Reference</a>
+        /// </summary>
+        type NavigationDestination = Fable.Core.TS.Dom.NavigationDestination
+
+        type NavigationHistoryEntryEventMap = Fable.Core.TS.Dom.NavigationHistoryEntryEventMap
+
+        /// <summary>
+        /// The <b><c>NavigationHistoryEntry</c></b> interface of the Navigation API represents a single navigation history entry.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/NavigationHistoryEntry">MDN Reference</a>
+        /// </summary>
+        type NavigationHistoryEntry = Fable.Core.TS.Dom.NavigationHistoryEntry
+
+        /// <summary>
+        /// The <b><c>NavigationPrecommitController</c></b> interface of the Navigation API is passed as an argument to a navigation precommit handler callback.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/NavigationPrecommitController">MDN Reference</a>
+        /// </summary>
+        type NavigationPrecommitController = Fable.Core.TS.Dom.NavigationPrecommitController
+
+        /// <summary>
+        /// The <b><c>NavigationPreloadManager</c></b> interface of the Service Worker API provides methods for managing the preloading of resources in parallel with service worker bootup.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/NavigationPreloadManager">MDN Reference</a>
+        /// </summary>
+        type NavigationPreloadManager = Fable.Core.TS.Dom.NavigationPreloadManager
+
+        /// <summary>
+        /// The <b><c>NavigationTransition</c></b> interface of the Navigation API represents an ongoing navigation — a navigation that hasn't yet reached the navigatesuccess or navigateerror stage.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/NavigationTransition">MDN Reference</a>
+        /// </summary>
+        type NavigationTransition = Fable.Core.TS.Dom.NavigationTransition
+
+        /// <summary>
+        /// The <b><c>Navigator</c></b> interface represents the state and the identity of the user agent. It allows scripts to query it and to register themselves to carry on some activities.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Navigator">MDN Reference</a>
+        /// </summary>
+        type Navigator = Fable.Core.TS.Dom.Navigator
+
+        type NavigatorAutomationInformation = Fable.Core.TS.Dom.NavigatorAutomationInformation
+
+        /// <summary>
+        /// Available only in secure contexts.
+        /// </summary>
+        type NavigatorBadge = Fable.Core.TS.Dom.NavigatorBadge
+
+        type NavigatorConcurrentHardware = Fable.Core.TS.Dom.NavigatorConcurrentHardware
+
+        type NavigatorContentUtils = Fable.Core.TS.Dom.NavigatorContentUtils
+
+        type NavigatorCookies = Fable.Core.TS.Dom.NavigatorCookies
+
+        type NavigatorGPU = Fable.Core.TS.Dom.NavigatorGPU
+
+        type NavigatorID = Fable.Core.TS.Dom.NavigatorID
+
+        type NavigatorLanguage = Fable.Core.TS.Dom.NavigatorLanguage
+
+        /// <summary>
+        /// Available only in secure contexts.
+        /// </summary>
+        type NavigatorLocks = Fable.Core.TS.Dom.NavigatorLocks
+
+        /// <summary>
+        /// The <b><c>NavigatorLogin</c></b> interface of the Federated Credential Management (FedCM) API defines login functionality for federated identity providers (IdPs). Specifically, it enables a federated identity provider (IdP) to set its login status when a user signs into or out of the IdP.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/NavigatorLogin">MDN Reference</a>
+        /// </summary>
+        type NavigatorLogin = Fable.Core.TS.Dom.NavigatorLogin
+
+        type NavigatorOnLine = Fable.Core.TS.Dom.NavigatorOnLine
+
+        type NavigatorPlugins = Fable.Core.TS.Dom.NavigatorPlugins
+
+        /// <summary>
+        /// Available only in secure contexts.
+        /// </summary>
+        type NavigatorStorage = Fable.Core.TS.Dom.NavigatorStorage
+
+        /// <summary>
+        /// The DOM <b><c>Node</c></b> interface is an abstract base class upon which many other DOM API objects are based, thus letting those object types be used similarly and often interchangeably. As an abstract class, there is no such thing as a plain Node object. All objects that implement Node functionality are based on one of its subclasses. Most notable are Document, Element, and DocumentFragment.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Node">MDN Reference</a>
+        /// </summary>
+        type Node = Fable.Core.TS.Dom.Node
+
+        /// <summary>
+        /// The <b><c>NodeIterator</c></b> interface represents an iterator to traverse nodes of a DOM subtree in document order.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/NodeIterator">MDN Reference</a>
+        /// </summary>
+        type NodeIterator = Fable.Core.TS.Dom.NodeIterator
+
+        /// <summary>
+        /// <b><c>NodeList</c></b> objects are collections of nodes, usually returned by properties such as Node.childNodes and methods such as document.querySelectorAll().
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/NodeList">MDN Reference</a>
+        /// </summary>
+        type NodeList = Fable.Core.TS.Dom.NodeList
+
+        type NodeListOf<'TNode when 'TNode :> Fable.Core.TS.Dom.Node> = Fable.Core.TS.Dom.NodeListOf<'TNode>
+
+        type NonDocumentTypeChildNode = Fable.Core.TS.Dom.NonDocumentTypeChildNode
+
+        type NonElementParentNode = Fable.Core.TS.Dom.NonElementParentNode
+
+        type NotificationEventMap = Fable.Core.TS.Dom.NotificationEventMap
+
+        /// <summary>
+        /// The <b><c>Notification</c></b> interface of the Notifications API is used to configure and display desktop notifications to the user.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Notification">MDN Reference</a>
+        /// </summary>
+        type Notification = Fable.Core.TS.Dom.Notification
+
+        /// <summary>
+        /// The <b><c>OES_draw_buffers_indexed</c></b> extension is part of the WebGL API and enables the use of different blend options when writing to multiple color buffers simultaneously.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/OES_draw_buffers_indexed">MDN Reference</a>
+        /// </summary>
+        type OES_draw_buffers_indexed = Fable.Core.TS.Dom.OES_draw_buffers_indexed
+
+        /// <summary>
+        /// The <b><c>OES_element_index_uint</c></b> extension is part of the WebGL API and adds support for gl.UNSIGNED_INT types to WebGLRenderingContext.drawElements().
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/OES_element_index_uint">MDN Reference</a>
+        /// </summary>
+        type OES_element_index_uint = Fable.Core.TS.Dom.OES_element_index_uint
+
+        /// <summary>
+        /// The <b><c>OES_fbo_render_mipmap</c></b> extension is part of the WebGL API and makes it possible to attach any level of a texture to a framebuffer object.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/OES_fbo_render_mipmap">MDN Reference</a>
+        /// </summary>
+        type OES_fbo_render_mipmap = Fable.Core.TS.Dom.OES_fbo_render_mipmap
+
+        /// <summary>
+        /// The <b><c>OES_standard_derivatives</c></b> extension is part of the WebGL API and adds the GLSL derivative functions dFdx, dFdy, and fwidth.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/OES_standard_derivatives">MDN Reference</a>
+        /// </summary>
+        type OES_standard_derivatives = Fable.Core.TS.Dom.OES_standard_derivatives
+
+        /// <summary>
+        /// The <b><c>OES_texture_float</c></b> extension is part of the WebGL API and exposes floating-point pixel types for textures.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/OES_texture_float">MDN Reference</a>
+        /// </summary>
+        type OES_texture_float = Fable.Core.TS.Dom.OES_texture_float
+
+        /// <summary>
+        /// The <b><c>OES_texture_float_linear</c></b> extension is part of the WebGL API and allows linear filtering with floating-point pixel types for textures.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/OES_texture_float_linear">MDN Reference</a>
+        /// </summary>
+        type OES_texture_float_linear = Fable.Core.TS.Dom.OES_texture_float_linear
+
+        /// <summary>
+        /// The <b><c>OES_texture_half_float</c></b> extension is part of the WebGL API and adds texture formats with 16- (aka half float) and 32-bit floating-point components.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/OES_texture_half_float">MDN Reference</a>
+        /// </summary>
+        type OES_texture_half_float = Fable.Core.TS.Dom.OES_texture_half_float
+
+        /// <summary>
+        /// The <b><c>OES_texture_half_float_linear</c></b> extension is part of the WebGL API and allows linear filtering with half floating-point pixel types for textures.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/OES_texture_half_float_linear">MDN Reference</a>
+        /// </summary>
+        type OES_texture_half_float_linear = Fable.Core.TS.Dom.OES_texture_half_float_linear
+
+        /// <summary>
+        /// The <b><c>OES_vertex_array_object</c></b> extension is part of the WebGL API and provides vertex array objects (VAOs) which encapsulate vertex array states. These objects keep pointers to vertex data and provide names for different sets of vertex data.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/OES_vertex_array_object">MDN Reference</a>
+        /// </summary>
+        type OES_vertex_array_object = Fable.Core.TS.Dom.OES_vertex_array_object
+
+        /// <summary>
+        /// The <b><c>OVR_multiview2</c></b> extension is part of the WebGL API and adds support for rendering into multiple views simultaneously. This especially useful for virtual reality (VR) and WebXR.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/OVR_multiview2">MDN Reference</a>
+        /// </summary>
+        type OVR_multiview2 = Fable.Core.TS.Dom.OVR_multiview2
+
+        /// <summary>
+        /// The Web Audio API <b><c>OfflineAudioCompletionEvent</c></b> interface represents events that occur when the processing of an OfflineAudioContext is terminated. The complete event uses this interface.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/OfflineAudioCompletionEvent">MDN Reference</a>
+        /// </summary>
+        type OfflineAudioCompletionEvent = Fable.Core.TS.Dom.OfflineAudioCompletionEvent
+
+        type OfflineAudioContextEventMap = Fable.Core.TS.Dom.OfflineAudioContextEventMap
+
+        /// <summary>
+        /// The <b><c>OfflineAudioContext</c></b> interface is an AudioContext interface representing an audio-processing graph built from linked together AudioNodes. In contrast with a standard AudioContext, an OfflineAudioContext doesn't render the audio to the device hardware; instead, it generates it, as fast as it can, and outputs the result to an AudioBuffer.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/OfflineAudioContext">MDN Reference</a>
+        /// </summary>
+        type OfflineAudioContext = Fable.Core.TS.Dom.OfflineAudioContext
+
+        type OffscreenCanvasEventMap = Fable.Core.TS.Dom.OffscreenCanvasEventMap
+
+        /// <summary>
+        /// When using the &lt;canvas&gt; element or the Canvas API, rendering, animation, and user interaction usually happen on the main execution thread of a web application. The computation relating to canvas animations and rendering can have a significant impact on application performance.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/OffscreenCanvas">MDN Reference</a>
+        /// </summary>
+        type OffscreenCanvas = Fable.Core.TS.Dom.OffscreenCanvas
+
+        /// <summary>
+        /// The <b><c>OffscreenCanvasRenderingContext2D</c></b> interface is a CanvasRenderingContext2D rendering context for drawing to the bitmap of an OffscreenCanvas object. It is similar to the CanvasRenderingContext2D object, with the following differences:
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/OffscreenCanvasRenderingContext2D">MDN Reference</a>
+        /// </summary>
+        type OffscreenCanvasRenderingContext2D = Fable.Core.TS.Dom.OffscreenCanvasRenderingContext2D
+
+        type Origin = Fable.Core.TS.Dom.Origin
+
+        /// <summary>
+        /// The <b><c>OscillatorNode</c></b> interface represents a periodic waveform, such as a sine wave. It is an AudioScheduledSourceNode audio-processing module that causes a specified frequency of a given wave to be created—in effect, a constant tone.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/OscillatorNode">MDN Reference</a>
+        /// </summary>
+        type OscillatorNode = Fable.Core.TS.Dom.OscillatorNode
+
+        /// <summary>
+        /// The <b><c>OverconstrainedError</c></b> interface of the Media Capture and Streams API indicates that the set of desired capabilities for the current MediaStreamTrack cannot currently be met. When this event is thrown on a MediaStreamTrack, it is muted until either the current constraints can be established or until satisfiable constraints are applied.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/OverconstrainedError">MDN Reference</a>
+        /// </summary>
+        type OverconstrainedError = Fable.Core.TS.Dom.OverconstrainedError
+
+        /// <summary>
+        /// The <b><c>PageRevealEvent</c></b> event object is made available inside handler functions for the pagereveal event.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PageRevealEvent">MDN Reference</a>
+        /// </summary>
+        type PageRevealEvent = Fable.Core.TS.Dom.PageRevealEvent
+
+        /// <summary>
+        /// The <b><c>PageSwapEvent</c></b> event object is made available inside handler functions for the pageswap event.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PageSwapEvent">MDN Reference</a>
+        /// </summary>
+        type PageSwapEvent = Fable.Core.TS.Dom.PageSwapEvent
+
+        /// <summary>
+        /// The <b><c>PageTransitionEvent</c></b> event object is available inside handler functions for the pageshow and pagehide events, fired when a document is being loaded or unloaded.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PageTransitionEvent">MDN Reference</a>
+        /// </summary>
+        type PageTransitionEvent = Fable.Core.TS.Dom.PageTransitionEvent
+
+        type PaintTimingMixin = Fable.Core.TS.Dom.PaintTimingMixin
+
+        /// <summary>
+        /// The <b><c>PannerNode</c></b> interface defines an audio-processing object that represents the location, direction, and behavior of an audio source signal in a simulated physical space. This AudioNode uses right-hand Cartesian coordinates to describe the source's position as a vector and its orientation as a 3D directional cone.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PannerNode">MDN Reference</a>
+        /// </summary>
+        type PannerNode = Fable.Core.TS.Dom.PannerNode
+
+        type ParentNode = Fable.Core.TS.Dom.ParentNode
+
+        /// <summary>
+        /// The <b><c>Path2D</c></b> interface of the Canvas 2D API is used to declare a path that can then be used on a CanvasRenderingContext2D object. The path methods of the CanvasRenderingContext2D interface are also present on this interface, which gives you the convenience of being able to retain and replay your path whenever desired.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Path2D">MDN Reference</a>
+        /// </summary>
+        type Path2D = Fable.Core.TS.Dom.Path2D
+
+        /// <summary>
+        /// The <b><c>ContactAddress</c></b> interface of the Contact Picker API represents a physical address. Instances of this interface are retrieved from the address property of the objects returned by ContactsManager.getProperties().
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ContactAddress">MDN Reference</a>
+        /// </summary>
+        type PaymentAddress = Fable.Core.TS.Dom.PaymentAddress
+
+        /// <summary>
+        /// The <b><c>PaymentMethodChangeEvent</c></b> interface of the Payment Request API describes the paymentmethodchange event which is fired by some payment handlers when the user switches payment instruments (e.g., a user selects a "store" card to make a purchase while using Apple Pay).
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PaymentMethodChangeEvent">MDN Reference</a>
+        /// </summary>
+        type PaymentMethodChangeEvent = Fable.Core.TS.Dom.PaymentMethodChangeEvent
+
+        type PaymentRequestEventMap = Fable.Core.TS.Dom.PaymentRequestEventMap
+
+        /// <summary>
+        /// The Payment Request API's <b><c>PaymentRequest</c></b> interface is the primary access point into the API, and lets web content and apps accept payments from the end user on behalf of the operator of the site or the publisher of the app.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PaymentRequest">MDN Reference</a>
+        /// </summary>
+        type PaymentRequest = Fable.Core.TS.Dom.PaymentRequest
+
+        /// <summary>
+        /// The <b><c>PaymentRequestUpdateEvent</c></b> interface is used for events sent to a PaymentRequest instance when changes are made to shipping-related information for a pending PaymentRequest. Those events are:
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PaymentRequestUpdateEvent">MDN Reference</a>
+        /// </summary>
+        type PaymentRequestUpdateEvent = Fable.Core.TS.Dom.PaymentRequestUpdateEvent
+
+        type PaymentResponseEventMap = Fable.Core.TS.Dom.PaymentResponseEventMap
+
+        /// <summary>
+        /// The <b><c>PaymentResponse</c></b> interface of the Payment Request API is returned after a user selects a payment method and approves a payment request.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PaymentResponse">MDN Reference</a>
+        /// </summary>
+        type PaymentResponse = Fable.Core.TS.Dom.PaymentResponse
+
+        type PerformanceEventMap = Fable.Core.TS.Dom.PerformanceEventMap
+
+        /// <summary>
+        /// The <b><c>Performance</c></b> interface provides access to performance-related information for the current page.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Performance">MDN Reference</a>
+        /// </summary>
+        type Performance = Fable.Core.TS.Dom.Performance
+
+        /// <summary>
+        /// The <b><c>PerformanceEntry</c></b> object encapsulates a single performance metric that is part of the browser's performance timeline.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceEntry">MDN Reference</a>
+        /// </summary>
+        type PerformanceEntry = Fable.Core.TS.Dom.PerformanceEntry
+
+        /// <summary>
+        /// The <b><c>PerformanceEventTiming</c></b> interface of the Event Timing API provides insights into the latency of certain event types triggered by user interaction.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceEventTiming">MDN Reference</a>
+        /// </summary>
+        type PerformanceEventTiming = Fable.Core.TS.Dom.PerformanceEventTiming
+
+        /// <summary>
+        /// <b><c>PerformanceMark</c></b> is an interface for PerformanceEntry objects with an entryType of "mark".
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceMark">MDN Reference</a>
+        /// </summary>
+        type PerformanceMark = Fable.Core.TS.Dom.PerformanceMark
+
+        /// <summary>
+        /// <b><c>PerformanceMeasure</c></b> is an abstract interface for PerformanceEntry objects with an entryType of "measure". Entries of this type are created by calling performance.measure() to add a named DOMHighResTimeStamp (the measure) between two marks to the browser's performance timeline.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceMeasure">MDN Reference</a>
+        /// </summary>
+        type PerformanceMeasure = Fable.Core.TS.Dom.PerformanceMeasure
+
+        /// <summary>
+        /// The legacy <b><c>PerformanceNavigation</c></b> interface represents information about how the navigation to the current document was done.
+        /// </summary>
+        /// <remarks>
+        /// @deprecated
+        /// This interface is deprecated in the Navigation Timing Level 2 specification. Please use the PerformanceNavigationTiming interface instead.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceNavigation">MDN Reference</a>
+        /// </remarks>
+        /// <remarks>@deprecated</remarks>
+        type PerformanceNavigation = Fable.Core.TS.Dom.PerformanceNavigation
+
+        /// <summary>
+        /// The <b><c>PerformanceNavigationTiming</c></b> interface provides methods and properties to store and retrieve metrics regarding the browser's document navigation events. For example, this interface can be used to determine how much time it takes to load or unload a document.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceNavigationTiming">MDN Reference</a>
+        /// </summary>
+        type PerformanceNavigationTiming = Fable.Core.TS.Dom.PerformanceNavigationTiming
+
+        /// <summary>
+        /// The <b><c>PerformanceObserver</c></b> interface is used to observe performance measurement events and be notified of new performance entries as they are recorded in the browser's performance timeline.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceObserver">MDN Reference</a>
+        /// </summary>
+        type PerformanceObserver = Fable.Core.TS.Dom.PerformanceObserver
+
+        /// <summary>
+        /// The <b><c>PerformanceObserverEntryList</c></b> interface is a list of performance events that were explicitly observed via the observe() method.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceObserverEntryList">MDN Reference</a>
+        /// </summary>
+        type PerformanceObserverEntryList = Fable.Core.TS.Dom.PerformanceObserverEntryList
+
+        /// <summary>
+        /// The <b><c>PerformancePaintTiming</c></b> interface provides timing information about "paint" (also called "render") operations during web page construction. "Paint" refers to conversion of the render tree to on-screen pixels.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PerformancePaintTiming">MDN Reference</a>
+        /// </summary>
+        type PerformancePaintTiming = Fable.Core.TS.Dom.PerformancePaintTiming
+
+        /// <summary>
+        /// The <b><c>PerformanceResourceTiming</c></b> interface enables retrieval and analysis of detailed network timing data regarding the loading of an application's resources. An application can use the timing metrics to determine, for example, the length of time it takes to fetch a specific resource, such as an XMLHttpRequest, &lt;SVG&gt;, image, or script.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceResourceTiming">MDN Reference</a>
+        /// </summary>
+        type PerformanceResourceTiming = Fable.Core.TS.Dom.PerformanceResourceTiming
+
+        /// <summary>
+        /// The <b><c>PerformanceServerTiming</c></b> interface surfaces server metrics that are sent with the response in the Server-Timing HTTP header.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceServerTiming">MDN Reference</a>
+        /// </summary>
+        type PerformanceServerTiming = Fable.Core.TS.Dom.PerformanceServerTiming
+
+        /// <summary>
+        /// The <b><c>PerformanceTiming</c></b> interface is a legacy interface kept for backwards compatibility and contains properties that offer performance timing information for various events which occur during the loading and use of the current page. You get a PerformanceTiming object describing your page using the window.performance.timing property.
+        /// </summary>
+        /// <remarks>
+        /// @deprecated
+        /// This interface is deprecated in the Navigation Timing Level 2 specification. Please use the PerformanceNavigationTiming interface instead.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PerformanceTiming">MDN Reference</a>
+        /// </remarks>
+        /// <remarks>@deprecated</remarks>
+        type PerformanceTiming = Fable.Core.TS.Dom.PerformanceTiming
+
+        /// <summary>
+        /// The <b><c>PeriodicWave</c></b> interface defines a periodic waveform that can be used to shape the output of an OscillatorNode.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PeriodicWave">MDN Reference</a>
+        /// </summary>
+        type PeriodicWave = Fable.Core.TS.Dom.PeriodicWave
+
+        type PermissionStatusEventMap = Fable.Core.TS.Dom.PermissionStatusEventMap
+
+        /// <summary>
+        /// The <b><c>PermissionStatus</c></b> interface of the Permissions API provides the state of an object and an event handler for monitoring changes to said state.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PermissionStatus">MDN Reference</a>
+        /// </summary>
+        type PermissionStatus = Fable.Core.TS.Dom.PermissionStatus
+
+        /// <summary>
+        /// The <b><c>Permissions</c></b> interface of the Permissions API provides the core Permission API functionality, such as methods for querying and revoking permissions
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Permissions">MDN Reference</a>
+        /// </summary>
+        type Permissions = Fable.Core.TS.Dom.Permissions
+
+        /// <summary>
+        /// The <b><c>PictureInPictureEvent</c></b> interface represents picture-in-picture-related events, including enterpictureinpicture, leavepictureinpicture and resize.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PictureInPictureEvent">MDN Reference</a>
+        /// </summary>
+        type PictureInPictureEvent = Fable.Core.TS.Dom.PictureInPictureEvent
+
+        type PictureInPictureWindowEventMap = Fable.Core.TS.Dom.PictureInPictureWindowEventMap
+
+        /// <summary>
+        /// The <b><c>PictureInPictureWindow</c></b> interface represents an object able to programmatically obtain the width and height and resize event of the floating video window.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PictureInPictureWindow">MDN Reference</a>
+        /// </summary>
+        type PictureInPictureWindow = Fable.Core.TS.Dom.PictureInPictureWindow
+
+        /// <summary>
+        /// The <b><c>Plugin</c></b> interface provides information about a browser plugin.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/Plugin">MDN Reference</a></remarks>
+        /// <remarks>@deprecated</remarks>
+        type Plugin = Fable.Core.TS.Dom.Plugin
+
+        /// <summary>
+        /// The <b><c>PluginArray</c></b> interface is used to store a list of Plugin objects; it's returned by the navigator.plugins property. The PluginArray is not a JavaScript array, but has the length property and supports accessing individual items using bracket notation (plugins[2]), as well as via item(index) and namedItem("name") methods.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/PluginArray">MDN Reference</a></remarks>
+        /// <remarks>@deprecated</remarks>
+        type PluginArray = Fable.Core.TS.Dom.PluginArray
+
+        /// <summary>
+        /// The <b><c>PointerEvent</c></b> interface represents the state of a DOM event produced by a pointer such as the geometry of the contact point, the device type that generated the event, the amount of pressure that was applied on the contact surface, etc.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PointerEvent">MDN Reference</a>
+        /// </summary>
+        type PointerEvent = Fable.Core.TS.Dom.PointerEvent
+
+        /// <summary>
+        /// <b><c>PopStateEvent</c></b> is an interface for the popstate event.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PopStateEvent">MDN Reference</a>
+        /// </summary>
+        type PopStateEvent = Fable.Core.TS.Dom.PopStateEvent
+
+        type PopoverTargetAttributes = Fable.Core.TS.Dom.PopoverTargetAttributes
+
+        /// <summary>
+        /// The <b><c>ProcessingInstruction</c></b> interface represents a processing instruction; that is, a Node which embeds an instruction targeting a specific application but that can be ignored by any other applications which don't recognize the instruction.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ProcessingInstruction">MDN Reference</a>
+        /// </summary>
+        type ProcessingInstruction = Fable.Core.TS.Dom.ProcessingInstruction
+
+        /// <summary>
+        /// The <b><c>ProgressEvent</c></b> interface represents events that measure the progress of an underlying process, like an HTTP request (e.g., an XMLHttpRequest, or the loading of the underlying resource of an &lt;img&gt;, &lt;audio&gt;, &lt;video&gt;, &lt;style&gt; or &lt;link&gt;).
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ProgressEvent">MDN Reference</a>
+        /// </summary>
+        type ProgressEvent<'T when 'T :> Fable.Core.TS.Dom.EventTarget> = Fable.Core.TS.Dom.ProgressEvent<'T>
+
+        /// <summary>
+        /// The <b><c>PromiseRejectionEvent</c></b> interface represents events which are sent to the global script context when JavaScript Promises are rejected. These events are particularly useful for telemetry and debugging purposes.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PromiseRejectionEvent">MDN Reference</a>
+        /// </summary>
+        type PromiseRejectionEvent = Fable.Core.TS.Dom.PromiseRejectionEvent
+
+        /// <summary>
+        /// The <b><c>PublicKeyCredential</c></b> interface provides information about a public key / private key pair, which is a credential for logging in to a service using an un-phishable and data-breach resistant asymmetric key pair instead of a password. It inherits from Credential, and is part of the Web Authentication API extension to the Credential Management API.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PublicKeyCredential">MDN Reference</a>
+        /// </summary>
+        type PublicKeyCredential = Fable.Core.TS.Dom.PublicKeyCredential
+
+        /// <summary>
+        /// The <b><c>PushManager</c></b> interface of the Push API provides a way to receive notifications from third-party servers as well as request URLs for push notifications.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PushManager">MDN Reference</a>
+        /// </summary>
+        type PushManager = Fable.Core.TS.Dom.PushManager
+
+        /// <summary>
+        /// Available only in secure contexts.
+        /// </summary>
+        type PushManagerAttribute = Fable.Core.TS.Dom.PushManagerAttribute
+
+        /// <summary>
+        /// The <b><c>PushSubscription</c></b> interface of the Push API provides a subscription's URL endpoint along with the public key and secrets that should be used for encrypting push messages to this subscription. This information must be passed to the application server, using any desired application-specific method.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PushSubscription">MDN Reference</a>
+        /// </summary>
+        type PushSubscription = Fable.Core.TS.Dom.PushSubscription
+
+        /// <summary>
+        /// The <b><c>PushSubscriptionOptions</c></b> interface of the Push API represents the options associated with a push subscription.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/PushSubscriptionOptions">MDN Reference</a>
+        /// </summary>
+        type PushSubscriptionOptions = Fable.Core.TS.Dom.PushSubscriptionOptions
+
+        /// <summary>
+        /// The <b><c>RTCCertificate</c></b> interface of the WebRTC API provides an object representing a certificate that an RTCPeerConnection uses to authenticate.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/RTCCertificate">MDN Reference</a>
+        /// </summary>
+        type RTCCertificate = Fable.Core.TS.Dom.RTCCertificate
+
+        type RTCDTMFSenderEventMap = Fable.Core.TS.Dom.RTCDTMFSenderEventMap
+
+        /// <summary>
+        /// The <b><c>RTCDTMFSender</c></b> interface provides a mechanism for transmitting DTMF codes on a WebRTC RTCPeerConnection. You gain access to the connection's RTCDTMFSender through the RTCRtpSender.dtmf property on the audio track you wish to send DTMF with.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/RTCDTMFSender">MDN Reference</a>
+        /// </summary>
+        type RTCDTMFSender = Fable.Core.TS.Dom.RTCDTMFSender
+
+        /// <summary>
+        /// The <b><c>RTCDTMFToneChangeEvent</c></b> interface represents events sent to indicate that DTMF tones have started or finished playing. This interface is used by the tonechange event.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/RTCDTMFToneChangeEvent">MDN Reference</a>
+        /// </summary>
+        type RTCDTMFToneChangeEvent = Fable.Core.TS.Dom.RTCDTMFToneChangeEvent
+
+        type RTCDataChannelEventMap = Fable.Core.TS.Dom.RTCDataChannelEventMap
+
+        /// <summary>
+        /// The <b><c>RTCDataChannel</c></b> interface represents a network channel which can be used for bidirectional peer-to-peer transfers of arbitrary data. Every data channel is associated with an RTCPeerConnection, and each peer connection can have up to a theoretical maximum of 65,534 data channels (the actual limit may vary from browser to browser).
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/RTCDataChannel">MDN Reference</a>
+        /// </summary>
+        type RTCDataChannel = Fable.Core.TS.Dom.RTCDataChannel
+
+        /// <summary>
+        /// The <b><c>RTCDataChannelEvent</c></b> interface represents an event related to a specific RTCDataChannel.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/RTCDataChannelEvent">MDN Reference</a>
+        /// </summary>
+        type RTCDataChannelEvent = Fable.Core.TS.Dom.RTCDataChannelEvent
+
+        type RTCDtlsTransportEventMap = Fable.Core.TS.Dom.RTCDtlsTransportEventMap
+
+        /// <summary>
+        /// The <b><c>RTCDtlsTransport</c></b> interface provides access to information about the Datagram Transport Layer Security (DTLS) transport over which a RTCPeerConnection's RTP and RTCP packets are sent and received by its RTCRtpSender and RTCRtpReceiver objects.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/RTCDtlsTransport">MDN Reference</a>
+        /// </summary>
+        type RTCDtlsTransport = Fable.Core.TS.Dom.RTCDtlsTransport
+
+        /// <summary>
+        /// The <b><c>RTCEncodedAudioFrame</c></b> of the WebRTC API represents an encoded audio frame in the WebRTC receiver or sender pipeline, which may be modified using a WebRTC Encoded Transform.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/RTCEncodedAudioFrame">MDN Reference</a>
+        /// </summary>
+        type RTCEncodedAudioFrame = Fable.Core.TS.Dom.RTCEncodedAudioFrame
+
+        /// <summary>
+        /// The <b><c>RTCEncodedVideoFrame</c></b> of the WebRTC API represents an encoded video frame in the WebRTC receiver or sender pipeline, which may be modified using a WebRTC Encoded Transform.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/RTCEncodedVideoFrame">MDN Reference</a>
+        /// </summary>
+        type RTCEncodedVideoFrame = Fable.Core.TS.Dom.RTCEncodedVideoFrame
+
+        /// <summary>
+        /// The <b><c>RTCError</c></b> interface describes an error which has occurred while handling WebRTC operations. It's based upon the standard DOMException interface that describes general DOM errors.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/RTCError">MDN Reference</a>
+        /// </summary>
+        type RTCError = Fable.Core.TS.Dom.RTCError
+
+        /// <summary>
+        /// The WebRTC API's <b><c>RTCErrorEvent</c></b> interface represents an error sent to a WebRTC object. It's based on the standard Event interface, but adds RTC-specific information describing the error, as shown below.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/RTCErrorEvent">MDN Reference</a>
+        /// </summary>
+        type RTCErrorEvent = Fable.Core.TS.Dom.RTCErrorEvent
+
+        /// <summary>
+        /// The <b><c>RTCIceCandidate</c></b> interface—part of the WebRTC API—represents a candidate Interactive Connectivity Establishment (ICE) configuration which may be used to establish an RTCPeerConnection.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/RTCIceCandidate">MDN Reference</a>
+        /// </summary>
+        type RTCIceCandidate = Fable.Core.TS.Dom.RTCIceCandidate
+
+        /// <summary>
+        /// The <b><c>RTCIceCandidatePair</c></b> dictionary describes a pair of ICE candidates which together comprise a description of a viable connection between two WebRTC endpoints. It is used as the return value from RTCIceTransport.getSelectedCandidatePair() to identify the currently-selected candidate pair identified by the ICE agent.
+        /// </summary>
+        type RTCIceCandidatePair = Fable.Core.TS.Dom.RTCIceCandidatePair
+
+        type RTCIceTransportEventMap = Fable.Core.TS.Dom.RTCIceTransportEventMap
+
+        /// <summary>
+        /// The <b><c>RTCIceTransport</c></b> interface provides access to information about the ICE transport layer over which the data is being sent and received. This is particularly useful if you need to access state information about the connection.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/RTCIceTransport">MDN Reference</a>
+        /// </summary>
+        type RTCIceTransport = Fable.Core.TS.Dom.RTCIceTransport
+
+        type RTCPeerConnectionEventMap = Fable.Core.TS.Dom.RTCPeerConnectionEventMap
+
+        /// <summary>
+        /// The <b><c>RTCPeerConnection</c></b> interface represents a WebRTC connection between the local computer and a remote peer. It provides methods to connect to a remote peer, maintain and monitor the connection, and close the connection once it's no longer needed.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/RTCPeerConnection">MDN Reference</a>
+        /// </summary>
+        type RTCPeerConnection = Fable.Core.TS.Dom.RTCPeerConnection
+
+        /// <summary>
+        /// The <b><c>RTCPeerConnectionIceErrorEvent</c></b> interface—based upon the Event interface—provides details pertaining to an ICE error announced by sending an icecandidateerror event to the RTCPeerConnection object.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/RTCPeerConnectionIceErrorEvent">MDN Reference</a>
+        /// </summary>
+        type RTCPeerConnectionIceErrorEvent = Fable.Core.TS.Dom.RTCPeerConnectionIceErrorEvent
+
+        /// <summary>
+        /// The <b><c>RTCPeerConnectionIceEvent</c></b> interface represents events that occur in relation to ICE candidates with the target, usually an RTCPeerConnection.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/RTCPeerConnectionIceEvent">MDN Reference</a>
+        /// </summary>
+        type RTCPeerConnectionIceEvent = Fable.Core.TS.Dom.RTCPeerConnectionIceEvent
+
+        /// <summary>
+        /// The <b><c>RTCRtpReceiver</c></b> interface of the WebRTC API manages the reception and decoding of data for a MediaStreamTrack on an RTCPeerConnection.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/RTCRtpReceiver">MDN Reference</a>
+        /// </summary>
+        type RTCRtpReceiver = Fable.Core.TS.Dom.RTCRtpReceiver
+
+        /// <summary>
+        /// The <b><c>RTCRtpScriptTransform</c></b> interface of the WebRTC API is used to insert a WebRTC Encoded Transform (a TransformStream running in a worker thread) into the WebRTC sender and receiver pipelines.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/RTCRtpScriptTransform">MDN Reference</a>
+        /// </summary>
+        type RTCRtpScriptTransform = Fable.Core.TS.Dom.RTCRtpScriptTransform
+
+        /// <summary>
+        /// The <b><c>RTCRtpSender</c></b> interface provides the ability to control and obtain details about how a particular MediaStreamTrack is encoded and sent to a remote peer.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/RTCRtpSender">MDN Reference</a>
+        /// </summary>
+        type RTCRtpSender = Fable.Core.TS.Dom.RTCRtpSender
+
+        /// <summary>
+        /// The WebRTC interface <b><c>RTCRtpTransceiver</c></b> describes a permanent pairing of an RTCRtpSender and an RTCRtpReceiver, along with some shared state.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/RTCRtpTransceiver">MDN Reference</a>
+        /// </summary>
+        type RTCRtpTransceiver = Fable.Core.TS.Dom.RTCRtpTransceiver
+
+        type RTCSctpTransportEventMap = Fable.Core.TS.Dom.RTCSctpTransportEventMap
+
+        /// <summary>
+        /// The <b><c>RTCSctpTransport</c></b> interface provides information which describes a Stream Control Transmission Protocol (SCTP) transport. This provides information about limitations of the transport, but also provides a way to access the underlying Datagram Transport Layer Security (DTLS) transport over which SCTP packets for all of an RTCPeerConnection's data channels are sent and received.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/RTCSctpTransport">MDN Reference</a>
+        /// </summary>
+        type RTCSctpTransport = Fable.Core.TS.Dom.RTCSctpTransport
+
+        /// <summary>
+        /// The <b><c>RTCSessionDescription</c></b> interface describes one end of a connection—or potential connection—and how it's configured. Each RTCSessionDescription consists of a description type indicating which part of the offer/answer negotiation process it describes and of the SDP descriptor of the session.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/RTCSessionDescription">MDN Reference</a>
+        /// </summary>
+        type RTCSessionDescription = Fable.Core.TS.Dom.RTCSessionDescription
+
+        /// <summary>
+        /// The <b><c>RTCStatsReport</c></b> interface of the WebRTC API provides a statistics report for a RTCPeerConnection, RTCRtpSender, or RTCRtpReceiver.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/RTCStatsReport">MDN Reference</a>
+        /// </summary>
+        type RTCStatsReport = Fable.Core.TS.Dom.RTCStatsReport
+
+        /// <summary>
+        /// The WebRTC API interface <b><c>RTCTrackEvent</c></b> represents the track event, which is sent when a new MediaStreamTrack is added to an RTCRtpReceiver which is part of the RTCPeerConnection.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/RTCTrackEvent">MDN Reference</a>
+        /// </summary>
+        type RTCTrackEvent = Fable.Core.TS.Dom.RTCTrackEvent
+
+        /// <summary>
+        /// The <b><c>RadioNodeList</c></b> interface represents a collection of elements in a &lt;form&gt; returned by a call to HTMLFormControlsCollection.namedItem().
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/RadioNodeList">MDN Reference</a>
+        /// </summary>
+        type RadioNodeList = Fable.Core.TS.Dom.RadioNodeList
+
+        /// <summary>
+        /// The <b><c>Range</c></b> interface represents a fragment of a document that can contain nodes and parts of text nodes.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Range">MDN Reference</a>
+        /// </summary>
+        type Range = Fable.Core.TS.Dom.Range
+
+        /// <summary>
+        /// The <b><c>ReadableByteStreamController</c></b> interface of the Streams API represents a controller for a readable byte stream. It allows control of the state and internal queue of a ReadableStream with an underlying byte source, and enables efficient zero-copy transfer of data from the underlying source to a consumer when the stream's internal queue is empty.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableByteStreamController">MDN Reference</a>
+        /// </summary>
+        type ReadableByteStreamController = Fable.Core.TS.Dom.ReadableByteStreamController
+
+        /// <summary>
+        /// The <b><c>ReadableStream</c></b> interface of the Streams API represents a readable stream of byte data. The Fetch API offers a concrete instance of a ReadableStream through the body property of a Response object.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStream">MDN Reference</a>
+        /// </summary>
+        type ReadableStream<'R> = Fable.Core.TS.Dom.ReadableStream<'R>
+
+        /// <summary>
+        /// The <b><c>ReadableStreamBYOBReader</c></b> interface of the Streams API defines a reader for a ReadableStream that supports zero-copy reading from an underlying byte source. It is used for efficient copying from underlying sources where the data is delivered as an "anonymous" sequence of bytes, such as files.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamBYOBReader">MDN Reference</a>
+        /// </summary>
+        type ReadableStreamBYOBReader = Fable.Core.TS.Dom.ReadableStreamBYOBReader
+
+        /// <summary>
+        /// The <b><c>ReadableStreamBYOBRequest</c></b> interface of the Streams API represents a "pull request" for data from an underlying source that will made as a zero-copy transfer to a consumer (bypassing the stream's internal queues).
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamBYOBRequest">MDN Reference</a>
+        /// </summary>
+        type ReadableStreamBYOBRequest = Fable.Core.TS.Dom.ReadableStreamBYOBRequest
+
+        /// <summary>
+        /// The <b><c>ReadableStreamDefaultController</c></b> interface of the Streams API represents a controller allowing control of a ReadableStream's state and internal queue. Default controllers are for streams that are not byte streams.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultController">MDN Reference</a>
+        /// </summary>
+        type ReadableStreamDefaultController<'R> = Fable.Core.TS.Dom.ReadableStreamDefaultController<'R>
+
+        /// <summary>
+        /// The <b><c>ReadableStreamDefaultReader</c></b> interface of the Streams API represents a default reader that can be used to read stream data supplied from a network (such as a fetch request).
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultReader">MDN Reference</a>
+        /// </summary>
+        type ReadableStreamDefaultReader<'R> = Fable.Core.TS.Dom.ReadableStreamDefaultReader<'R>
+
+        type ReadableStreamGenericReader = Fable.Core.TS.Dom.ReadableStreamGenericReader
+
+        type RemotePlaybackEventMap = Fable.Core.TS.Dom.RemotePlaybackEventMap
+
+        /// <summary>
+        /// The <b><c>RemotePlayback</c></b> interface of the Remote Playback API allows the page to detect availability of remote playback devices, then connect to and control playing on these devices.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/RemotePlayback">MDN Reference</a>
+        /// </summary>
+        type RemotePlayback = Fable.Core.TS.Dom.RemotePlayback
+
+        /// <summary>
+        /// The <b><c>ReportingObserver</c></b> interface of the Reporting API allows you to collect and access reports.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ReportingObserver">MDN Reference</a>
+        /// </summary>
+        type ReportingObserver = Fable.Core.TS.Dom.ReportingObserver
+
+        /// <summary>
+        /// The <b><c>Request</c></b> interface of the Fetch API represents a resource request.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Request">MDN Reference</a>
+        /// </summary>
+        type Request = Fable.Core.TS.Dom.Request
+
+        /// <summary>
+        /// The <b><c>ResizeObserver</c></b> interface reports changes to the dimensions of an Element's content or border box, or the bounding box of an SVGElement.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ResizeObserver">MDN Reference</a>
+        /// </summary>
+        type ResizeObserver = Fable.Core.TS.Dom.ResizeObserver
+
+        /// <summary>
+        /// The <b><c>ResizeObserverEntry</c></b> interface represents the object passed to the ResizeObserver() constructor's callback function, which allows you to access the new dimensions of the Element or SVGElement being observed.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ResizeObserverEntry">MDN Reference</a>
+        /// </summary>
+        type ResizeObserverEntry = Fable.Core.TS.Dom.ResizeObserverEntry
+
+        /// <summary>
+        /// The <b><c>ResizeObserverSize</c></b> interface of the Resize Observer API is used by the ResizeObserverEntry interface to access the box sizing properties of the element being observed.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ResizeObserverSize">MDN Reference</a>
+        /// </summary>
+        type ResizeObserverSize = Fable.Core.TS.Dom.ResizeObserverSize
+
+        /// <summary>
+        /// The <b><c>Response</c></b> interface of the Fetch API represents the response to a request.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Response">MDN Reference</a>
+        /// </summary>
+        type Response = Fable.Core.TS.Dom.Response
+
+        /// <summary>
+        /// The <b><c>SVGAElement</c></b> interface provides access to the properties of an &lt;a&gt; element, as well as methods to manipulate them.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGAElement">MDN Reference</a>
+        /// </summary>
+        type SVGAElement = Fable.Core.TS.Dom.SVGAElement
+
+        /// <summary>
+        /// The <b><c>SVGAngle</c></b> interface is used to represent a value that can be an &lt;angle&gt; or &lt;number&gt; value.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGAngle">MDN Reference</a>
+        /// </summary>
+        type SVGAngle = Fable.Core.TS.Dom.SVGAngle
+
+        /// <summary>
+        /// The <b><c>SVGAnimateElement</c></b> interface corresponds to the &lt;animate&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGAnimateElement">MDN Reference</a>
+        /// </summary>
+        type SVGAnimateElement = Fable.Core.TS.Dom.SVGAnimateElement
+
+        /// <summary>
+        /// The <b><c>SVGAnimateMotionElement</c></b> interface corresponds to the &lt;animateMotion&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGAnimateMotionElement">MDN Reference</a>
+        /// </summary>
+        type SVGAnimateMotionElement = Fable.Core.TS.Dom.SVGAnimateMotionElement
+
+        /// <summary>
+        /// The <b><c>SVGAnimateTransformElement</c></b> interface corresponds to the &lt;animateTransform&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGAnimateTransformElement">MDN Reference</a>
+        /// </summary>
+        type SVGAnimateTransformElement = Fable.Core.TS.Dom.SVGAnimateTransformElement
+
+        /// <summary>
+        /// The <b><c>SVGAnimatedAngle</c></b> interface is used for attributes of basic type &lt;angle&gt; which can be animated.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGAnimatedAngle">MDN Reference</a>
+        /// </summary>
+        type SVGAnimatedAngle = Fable.Core.TS.Dom.SVGAnimatedAngle
+
+        /// <summary>
+        /// The <b><c>SVGAnimatedBoolean</c></b> interface is used for attributes of type boolean which can be animated.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGAnimatedBoolean">MDN Reference</a>
+        /// </summary>
+        type SVGAnimatedBoolean = Fable.Core.TS.Dom.SVGAnimatedBoolean
+
+        /// <summary>
+        /// The <b><c>SVGAnimatedEnumeration</c></b> interface describes attribute values which are constants from a particular enumeration and which can be animated.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGAnimatedEnumeration">MDN Reference</a>
+        /// </summary>
+        type SVGAnimatedEnumeration = Fable.Core.TS.Dom.SVGAnimatedEnumeration
+
+        /// <summary>
+        /// The <b><c>SVGAnimatedInteger</c></b> interface is used for attributes of basic type &lt;integer&gt; which can be animated.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGAnimatedInteger">MDN Reference</a>
+        /// </summary>
+        type SVGAnimatedInteger = Fable.Core.TS.Dom.SVGAnimatedInteger
+
+        /// <summary>
+        /// The <b><c>SVGAnimatedLength</c></b> interface represents attributes of type &lt;length&gt; which can be animated.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGAnimatedLength">MDN Reference</a>
+        /// </summary>
+        type SVGAnimatedLength = Fable.Core.TS.Dom.SVGAnimatedLength
+
+        /// <summary>
+        /// The <b><c>SVGAnimatedLengthList</c></b> interface is used for attributes of type SVGLengthList which can be animated.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGAnimatedLengthList">MDN Reference</a>
+        /// </summary>
+        type SVGAnimatedLengthList = Fable.Core.TS.Dom.SVGAnimatedLengthList
+
+        /// <summary>
+        /// The <b><c>SVGAnimatedNumber</c></b> interface represents attributes of type &lt;number&gt; which can be animated.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGAnimatedNumber">MDN Reference</a>
+        /// </summary>
+        type SVGAnimatedNumber = Fable.Core.TS.Dom.SVGAnimatedNumber
+
+        /// <summary>
+        /// The <b><c>SVGAnimatedNumberList</c></b> interface represents a list of attributes of type &lt;number&gt; which can be animated.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGAnimatedNumberList">MDN Reference</a>
+        /// </summary>
+        type SVGAnimatedNumberList = Fable.Core.TS.Dom.SVGAnimatedNumberList
+
+        type SVGAnimatedPoints = Fable.Core.TS.Dom.SVGAnimatedPoints
+
+        /// <summary>
+        /// The <b><c>SVGAnimatedPreserveAspectRatio</c></b> interface represents attributes of type SVGPreserveAspectRatio which can be animated.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGAnimatedPreserveAspectRatio">MDN Reference</a>
+        /// </summary>
+        type SVGAnimatedPreserveAspectRatio = Fable.Core.TS.Dom.SVGAnimatedPreserveAspectRatio
+
+        /// <summary>
+        /// The <b><c>SVGAnimatedRect</c></b> interface represents an SVGRect attribute that can be animated.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGAnimatedRect">MDN Reference</a>
+        /// </summary>
+        type SVGAnimatedRect = Fable.Core.TS.Dom.SVGAnimatedRect
+
+        /// <summary>
+        /// The <b><c>SVGAnimatedString</c></b> interface represents string attributes which can be animated from each SVG declaration. You need to create SVG attribute before doing anything else, everything should be declared inside this.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGAnimatedString">MDN Reference</a>
+        /// </summary>
+        type SVGAnimatedString = Fable.Core.TS.Dom.SVGAnimatedString
+
+        /// <summary>
+        /// The <b><c>SVGAnimatedTransformList</c></b> interface represents attributes which take a list of numbers and which can be animated.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGAnimatedTransformList">MDN Reference</a>
+        /// </summary>
+        type SVGAnimatedTransformList = Fable.Core.TS.Dom.SVGAnimatedTransformList
+
+        /// <summary>
+        /// The <b><c>SVGAnimationElement</c></b> interface is the base interface for all of the animation element interfaces: SVGAnimateElement, SVGSetElement, SVGAnimateColorElement, SVGAnimateMotionElement and SVGAnimateTransformElement.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGAnimationElement">MDN Reference</a>
+        /// </summary>
+        type SVGAnimationElement = Fable.Core.TS.Dom.SVGAnimationElement
+
+        /// <summary>
+        /// The <b><c>SVGCircleElement</c></b> interface is an interface for the &lt;circle&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGCircleElement">MDN Reference</a>
+        /// </summary>
+        type SVGCircleElement = Fable.Core.TS.Dom.SVGCircleElement
+
+        /// <summary>
+        /// The <b><c>SVGClipPathElement</c></b> interface provides access to the properties of &lt;clipPath&gt; elements, as well as methods to manipulate them.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGClipPathElement">MDN Reference</a>
+        /// </summary>
+        type SVGClipPathElement = Fable.Core.TS.Dom.SVGClipPathElement
+
+        /// <summary>
+        /// The <b><c>SVGComponentTransferFunctionElement</c></b> interface represents a base interface used by the component transfer function interfaces.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGComponentTransferFunctionElement">MDN Reference</a>
+        /// </summary>
+        type SVGComponentTransferFunctionElement = Fable.Core.TS.Dom.SVGComponentTransferFunctionElement
+
+        /// <summary>
+        /// The <b><c>SVGDefsElement</c></b> interface corresponds to the &lt;defs&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGDefsElement">MDN Reference</a>
+        /// </summary>
+        type SVGDefsElement = Fable.Core.TS.Dom.SVGDefsElement
+
+        /// <summary>
+        /// The <b><c>SVGDescElement</c></b> interface corresponds to the &lt;desc&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGDescElement">MDN Reference</a>
+        /// </summary>
+        type SVGDescElement = Fable.Core.TS.Dom.SVGDescElement
+
+        type SVGElementEventMap = Fable.Core.TS.Dom.SVGElementEventMap
+
+        /// <summary>
+        /// All of the SVG DOM interfaces that correspond directly to elements in the SVG language derive from the <b><c>SVGElement</c></b> interface.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGElement">MDN Reference</a>
+        /// </summary>
+        type SVGElement = Fable.Core.TS.Dom.SVGElement
+
+        /// <summary>
+        /// The <b><c>SVGEllipseElement</c></b> interface provides access to the properties of &lt;ellipse&gt; elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGEllipseElement">MDN Reference</a>
+        /// </summary>
+        type SVGEllipseElement = Fable.Core.TS.Dom.SVGEllipseElement
+
+        /// <summary>
+        /// The <b><c>SVGFEBlendElement</c></b> interface corresponds to the &lt;feBlend&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEBlendElement">MDN Reference</a>
+        /// </summary>
+        type SVGFEBlendElement = Fable.Core.TS.Dom.SVGFEBlendElement
+
+        /// <summary>
+        /// The <b><c>SVGFEColorMatrixElement</c></b> interface corresponds to the &lt;feColorMatrix&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEColorMatrixElement">MDN Reference</a>
+        /// </summary>
+        type SVGFEColorMatrixElement = Fable.Core.TS.Dom.SVGFEColorMatrixElement
+
+        /// <summary>
+        /// The <b><c>SVGFEComponentTransferElement</c></b> interface corresponds to the &lt;feComponentTransfer&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEComponentTransferElement">MDN Reference</a>
+        /// </summary>
+        type SVGFEComponentTransferElement = Fable.Core.TS.Dom.SVGFEComponentTransferElement
+
+        /// <summary>
+        /// The <b><c>SVGFECompositeElement</c></b> interface corresponds to the &lt;feComposite&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFECompositeElement">MDN Reference</a>
+        /// </summary>
+        type SVGFECompositeElement = Fable.Core.TS.Dom.SVGFECompositeElement
+
+        /// <summary>
+        /// The <b><c>SVGFEConvolveMatrixElement</c></b> interface corresponds to the &lt;feConvolveMatrix&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEConvolveMatrixElement">MDN Reference</a>
+        /// </summary>
+        type SVGFEConvolveMatrixElement = Fable.Core.TS.Dom.SVGFEConvolveMatrixElement
+
+        /// <summary>
+        /// The <b><c>SVGFEDiffuseLightingElement</c></b> interface corresponds to the &lt;feDiffuseLighting&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEDiffuseLightingElement">MDN Reference</a>
+        /// </summary>
+        type SVGFEDiffuseLightingElement = Fable.Core.TS.Dom.SVGFEDiffuseLightingElement
+
+        /// <summary>
+        /// The <b><c>SVGFEDisplacementMapElement</c></b> interface corresponds to the &lt;feDisplacementMap&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEDisplacementMapElement">MDN Reference</a>
+        /// </summary>
+        type SVGFEDisplacementMapElement = Fable.Core.TS.Dom.SVGFEDisplacementMapElement
+
+        /// <summary>
+        /// The <b><c>SVGFEDistantLightElement</c></b> interface corresponds to the &lt;feDistantLight&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEDistantLightElement">MDN Reference</a>
+        /// </summary>
+        type SVGFEDistantLightElement = Fable.Core.TS.Dom.SVGFEDistantLightElement
+
+        /// <summary>
+        /// The <b><c>SVGFEDropShadowElement</c></b> interface corresponds to the &lt;feDropShadow&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEDropShadowElement">MDN Reference</a>
+        /// </summary>
+        type SVGFEDropShadowElement = Fable.Core.TS.Dom.SVGFEDropShadowElement
+
+        /// <summary>
+        /// The <b><c>SVGFEFloodElement</c></b> interface corresponds to the &lt;feFlood&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEFloodElement">MDN Reference</a>
+        /// </summary>
+        type SVGFEFloodElement = Fable.Core.TS.Dom.SVGFEFloodElement
+
+        /// <summary>
+        /// The <b><c>SVGFEFuncAElement</c></b> interface corresponds to the &lt;feFuncA&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEFuncAElement">MDN Reference</a>
+        /// </summary>
+        type SVGFEFuncAElement = Fable.Core.TS.Dom.SVGFEFuncAElement
+
+        /// <summary>
+        /// The <b><c>SVGFEFuncBElement</c></b> interface corresponds to the &lt;feFuncB&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEFuncBElement">MDN Reference</a>
+        /// </summary>
+        type SVGFEFuncBElement = Fable.Core.TS.Dom.SVGFEFuncBElement
+
+        /// <summary>
+        /// The <b><c>SVGFEFuncGElement</c></b> interface corresponds to the &lt;feFuncG&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEFuncGElement">MDN Reference</a>
+        /// </summary>
+        type SVGFEFuncGElement = Fable.Core.TS.Dom.SVGFEFuncGElement
+
+        /// <summary>
+        /// The <b><c>SVGFEFuncRElement</c></b> interface corresponds to the &lt;feFuncR&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEFuncRElement">MDN Reference</a>
+        /// </summary>
+        type SVGFEFuncRElement = Fable.Core.TS.Dom.SVGFEFuncRElement
+
+        /// <summary>
+        /// The <b><c>SVGFEGaussianBlurElement</c></b> interface corresponds to the &lt;feGaussianBlur&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEGaussianBlurElement">MDN Reference</a>
+        /// </summary>
+        type SVGFEGaussianBlurElement = Fable.Core.TS.Dom.SVGFEGaussianBlurElement
+
+        /// <summary>
+        /// The <b><c>SVGFEImageElement</c></b> interface corresponds to the &lt;feImage&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEImageElement">MDN Reference</a>
+        /// </summary>
+        type SVGFEImageElement = Fable.Core.TS.Dom.SVGFEImageElement
+
+        /// <summary>
+        /// The <b><c>SVGFEMergeElement</c></b> interface corresponds to the &lt;feMerge&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEMergeElement">MDN Reference</a>
+        /// </summary>
+        type SVGFEMergeElement = Fable.Core.TS.Dom.SVGFEMergeElement
+
+        /// <summary>
+        /// The <b><c>SVGFEMergeNodeElement</c></b> interface corresponds to the &lt;feMergeNode&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEMergeNodeElement">MDN Reference</a>
+        /// </summary>
+        type SVGFEMergeNodeElement = Fable.Core.TS.Dom.SVGFEMergeNodeElement
+
+        /// <summary>
+        /// The <b><c>SVGFEMorphologyElement</c></b> interface corresponds to the &lt;feMorphology&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEMorphologyElement">MDN Reference</a>
+        /// </summary>
+        type SVGFEMorphologyElement = Fable.Core.TS.Dom.SVGFEMorphologyElement
+
+        /// <summary>
+        /// The <b><c>SVGFEOffsetElement</c></b> interface corresponds to the &lt;feOffset&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEOffsetElement">MDN Reference</a>
+        /// </summary>
+        type SVGFEOffsetElement = Fable.Core.TS.Dom.SVGFEOffsetElement
+
+        /// <summary>
+        /// The <b><c>SVGFEPointLightElement</c></b> interface corresponds to the &lt;fePointLight&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFEPointLightElement">MDN Reference</a>
+        /// </summary>
+        type SVGFEPointLightElement = Fable.Core.TS.Dom.SVGFEPointLightElement
+
+        /// <summary>
+        /// The <b><c>SVGFESpecularLightingElement</c></b> interface corresponds to the &lt;feSpecularLighting&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFESpecularLightingElement">MDN Reference</a>
+        /// </summary>
+        type SVGFESpecularLightingElement = Fable.Core.TS.Dom.SVGFESpecularLightingElement
+
+        /// <summary>
+        /// The <b><c>SVGFESpotLightElement</c></b> interface corresponds to the &lt;feSpotLight&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFESpotLightElement">MDN Reference</a>
+        /// </summary>
+        type SVGFESpotLightElement = Fable.Core.TS.Dom.SVGFESpotLightElement
+
+        /// <summary>
+        /// The <b><c>SVGFETileElement</c></b> interface corresponds to the &lt;feTile&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFETileElement">MDN Reference</a>
+        /// </summary>
+        type SVGFETileElement = Fable.Core.TS.Dom.SVGFETileElement
+
+        /// <summary>
+        /// The <b><c>SVGFETurbulenceElement</c></b> interface corresponds to the &lt;feTurbulence&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFETurbulenceElement">MDN Reference</a>
+        /// </summary>
+        type SVGFETurbulenceElement = Fable.Core.TS.Dom.SVGFETurbulenceElement
+
+        /// <summary>
+        /// The <b><c>SVGFilterElement</c></b> interface provides access to the properties of &lt;filter&gt; elements, as well as methods to manipulate them.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGFilterElement">MDN Reference</a>
+        /// </summary>
+        type SVGFilterElement = Fable.Core.TS.Dom.SVGFilterElement
+
+        type SVGFilterPrimitiveStandardAttributes = Fable.Core.TS.Dom.SVGFilterPrimitiveStandardAttributes
+
+        type SVGFitToViewBox = Fable.Core.TS.Dom.SVGFitToViewBox
+
+        /// <summary>
+        /// The <b><c>SVGForeignObjectElement</c></b> interface provides access to the properties of &lt;foreignObject&gt; elements, as well as methods to manipulate them.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGForeignObjectElement">MDN Reference</a>
+        /// </summary>
+        type SVGForeignObjectElement = Fable.Core.TS.Dom.SVGForeignObjectElement
+
+        /// <summary>
+        /// The <b><c>SVGGElement</c></b> interface corresponds to the &lt;g&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGElement">MDN Reference</a>
+        /// </summary>
+        type SVGGElement = Fable.Core.TS.Dom.SVGGElement
+
+        /// <summary>
+        /// The <b><c>SVGGeometryElement</c></b> interface represents SVG elements whose rendering is defined by geometry with an equivalent path, and which can be filled and stroked. This includes paths and the basic shapes.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGeometryElement">MDN Reference</a>
+        /// </summary>
+        type SVGGeometryElement = Fable.Core.TS.Dom.SVGGeometryElement
+
+        /// <summary>
+        /// The SVGGradient interface is a base interface used by SVGLinearGradientElement and SVGRadialGradientElement.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGradientElement">MDN Reference</a>
+        /// </summary>
+        type SVGGradientElement = Fable.Core.TS.Dom.SVGGradientElement
+
+        /// <summary>
+        /// The <b><c>SVGGraphicsElement</c></b> interface represents SVG elements whose primary purpose is to directly render graphics into a group.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGGraphicsElement">MDN Reference</a>
+        /// </summary>
+        type SVGGraphicsElement = Fable.Core.TS.Dom.SVGGraphicsElement
+
+        /// <summary>
+        /// The <b><c>SVGImageElement</c></b> interface corresponds to the &lt;image&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGImageElement">MDN Reference</a>
+        /// </summary>
+        type SVGImageElement = Fable.Core.TS.Dom.SVGImageElement
+
+        /// <summary>
+        /// The <b><c>SVGLength</c></b> interface correspond to the &lt;length&gt; basic data type.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGLength">MDN Reference</a>
+        /// </summary>
+        type SVGLength = Fable.Core.TS.Dom.SVGLength
+
+        /// <summary>
+        /// The <b><c>SVGLengthList</c></b> interface defines a list of SVGLength objects. It is used for the baseVal and animVal properties of SVGAnimatedLengthList.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGLengthList">MDN Reference</a>
+        /// </summary>
+        type SVGLengthList = Fable.Core.TS.Dom.SVGLengthList
+
+        /// <summary>
+        /// The <b><c>SVGLineElement</c></b> interface provides access to the properties of &lt;line&gt; elements, as well as methods to manipulate them.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGLineElement">MDN Reference</a>
+        /// </summary>
+        type SVGLineElement = Fable.Core.TS.Dom.SVGLineElement
+
+        /// <summary>
+        /// The <b><c>SVGLinearGradientElement</c></b> interface corresponds to the &lt;linearGradient&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGLinearGradientElement">MDN Reference</a>
+        /// </summary>
+        type SVGLinearGradientElement = Fable.Core.TS.Dom.SVGLinearGradientElement
+
+        /// <summary>
+        /// The <b><c>SVGMPathElement</c></b> interface corresponds to the &lt;mpath&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGMPathElement">MDN Reference</a>
+        /// </summary>
+        type SVGMPathElement = Fable.Core.TS.Dom.SVGMPathElement
+
+        /// <summary>
+        /// The <b><c>SVGMarkerElement</c></b> interface provides access to the properties of &lt;marker&gt; elements, as well as methods to manipulate them. The &lt;marker&gt; element defines the graphics used for drawing marks on a shape.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGMarkerElement">MDN Reference</a>
+        /// </summary>
+        type SVGMarkerElement = Fable.Core.TS.Dom.SVGMarkerElement
+
+        /// <summary>
+        /// The <b><c>SVGMaskElement</c></b> interface provides access to the properties of &lt;mask&gt; elements, as well as methods to manipulate them.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGMaskElement">MDN Reference</a>
+        /// </summary>
+        type SVGMaskElement = Fable.Core.TS.Dom.SVGMaskElement
+
+        /// <summary>
+        /// The <b><c>SVGMetadataElement</c></b> interface corresponds to the &lt;metadata&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGMetadataElement">MDN Reference</a>
+        /// </summary>
+        type SVGMetadataElement = Fable.Core.TS.Dom.SVGMetadataElement
+
+        /// <summary>
+        /// The <b><c>SVGNumber</c></b> interface corresponds to the &lt;number&gt; basic data type.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGNumber">MDN Reference</a>
+        /// </summary>
+        type SVGNumber = Fable.Core.TS.Dom.SVGNumber
+
+        /// <summary>
+        /// The <b><c>SVGNumberList</c></b> interface defines a list of numbers.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGNumberList">MDN Reference</a>
+        /// </summary>
+        type SVGNumberList = Fable.Core.TS.Dom.SVGNumberList
+
+        /// <summary>
+        /// The <b><c>SVGPathElement</c></b> interface corresponds to the &lt;path&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGPathElement">MDN Reference</a>
+        /// </summary>
+        type SVGPathElement = Fable.Core.TS.Dom.SVGPathElement
+
+        /// <summary>
+        /// The <b><c>SVGPatternElement</c></b> interface corresponds to the &lt;pattern&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGPatternElement">MDN Reference</a>
+        /// </summary>
+        type SVGPatternElement = Fable.Core.TS.Dom.SVGPatternElement
+
+        /// <summary>
+        /// The <b><c>SVGPointList</c></b> interface represents a list of DOMPoint objects.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGPointList">MDN Reference</a>
+        /// </summary>
+        type SVGPointList = Fable.Core.TS.Dom.SVGPointList
+
+        /// <summary>
+        /// The <b><c>SVGPolygonElement</c></b> interface provides access to the properties of &lt;polygon&gt; elements, as well as methods to manipulate them.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGPolygonElement">MDN Reference</a>
+        /// </summary>
+        type SVGPolygonElement = Fable.Core.TS.Dom.SVGPolygonElement
+
+        /// <summary>
+        /// The <b><c>SVGPolylineElement</c></b> interface provides access to the properties of &lt;polyline&gt; elements, as well as methods to manipulate them.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGPolylineElement">MDN Reference</a>
+        /// </summary>
+        type SVGPolylineElement = Fable.Core.TS.Dom.SVGPolylineElement
+
+        /// <summary>
+        /// The <b><c>SVGPreserveAspectRatio</c></b> interface corresponds to the preserveAspectRatio attribute.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGPreserveAspectRatio">MDN Reference</a>
+        /// </summary>
+        type SVGPreserveAspectRatio = Fable.Core.TS.Dom.SVGPreserveAspectRatio
+
+        /// <summary>
+        /// The <b><c>SVGRadialGradientElement</c></b> interface corresponds to the &lt;RadialGradient&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGRadialGradientElement">MDN Reference</a>
+        /// </summary>
+        type SVGRadialGradientElement = Fable.Core.TS.Dom.SVGRadialGradientElement
+
+        /// <summary>
+        /// The <b><c>SVGRectElement</c></b> interface provides access to the properties of &lt;rect&gt; elements, as well as methods to manipulate them.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGRectElement">MDN Reference</a>
+        /// </summary>
+        type SVGRectElement = Fable.Core.TS.Dom.SVGRectElement
+
+        type SVGSVGElementEventMap = Fable.Core.TS.Dom.SVGSVGElementEventMap
+
+        /// <summary>
+        /// The <b><c>SVGSVGElement</c></b> interface provides access to the properties of &lt;svg&gt; elements, as well as methods to manipulate them. This interface contains also various miscellaneous commonly-used utility methods, such as matrix operations and the ability to control the time of redraw on visual rendering devices.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGSVGElement">MDN Reference</a>
+        /// </summary>
+        type SVGSVGElement = Fable.Core.TS.Dom.SVGSVGElement
+
+        /// <summary>
+        /// The <b><c>SVGScriptElement</c></b> interface corresponds to the SVG &lt;script&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGScriptElement">MDN Reference</a>
+        /// </summary>
+        type SVGScriptElement = Fable.Core.TS.Dom.SVGScriptElement
+
+        /// <summary>
+        /// The <b><c>SVGSetElement</c></b> interface corresponds to the &lt;set&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGSetElement">MDN Reference</a>
+        /// </summary>
+        type SVGSetElement = Fable.Core.TS.Dom.SVGSetElement
+
+        /// <summary>
+        /// The <b><c>SVGStopElement</c></b> interface corresponds to the &lt;stop&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGStopElement">MDN Reference</a>
+        /// </summary>
+        type SVGStopElement = Fable.Core.TS.Dom.SVGStopElement
+
+        /// <summary>
+        /// The <b><c>SVGStringList</c></b> interface defines a list of strings.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGStringList">MDN Reference</a>
+        /// </summary>
+        type SVGStringList = Fable.Core.TS.Dom.SVGStringList
+
+        /// <summary>
+        /// The <b><c>SVGStyleElement</c></b> interface corresponds to the SVG &lt;style&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGStyleElement">MDN Reference</a>
+        /// </summary>
+        type SVGStyleElement = Fable.Core.TS.Dom.SVGStyleElement
+
+        /// <summary>
+        /// The <b><c>SVGSwitchElement</c></b> interface corresponds to the &lt;switch&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGSwitchElement">MDN Reference</a>
+        /// </summary>
+        type SVGSwitchElement = Fable.Core.TS.Dom.SVGSwitchElement
+
+        /// <summary>
+        /// The <b><c>SVGSymbolElement</c></b> interface corresponds to the &lt;symbol&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGSymbolElement">MDN Reference</a>
+        /// </summary>
+        type SVGSymbolElement = Fable.Core.TS.Dom.SVGSymbolElement
+
+        /// <summary>
+        /// The <b><c>SVGTSpanElement</c></b> interface represents a &lt;tspan&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGTSpanElement">MDN Reference</a>
+        /// </summary>
+        type SVGTSpanElement = Fable.Core.TS.Dom.SVGTSpanElement
+
+        type SVGTests = Fable.Core.TS.Dom.SVGTests
+
+        /// <summary>
+        /// The <b><c>SVGTextContentElement</c></b> interface is implemented by elements that support rendering child text content. It is inherited by various text-related interfaces, such as SVGTextElement, SVGTSpanElement, and SVGTextPathElement.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGTextContentElement">MDN Reference</a>
+        /// </summary>
+        type SVGTextContentElement = Fable.Core.TS.Dom.SVGTextContentElement
+
+        /// <summary>
+        /// The <b><c>SVGTextElement</c></b> interface corresponds to the &lt;text&gt; elements.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGTextElement">MDN Reference</a>
+        /// </summary>
+        type SVGTextElement = Fable.Core.TS.Dom.SVGTextElement
+
+        /// <summary>
+        /// The <b><c>SVGTextPathElement</c></b> interface corresponds to the &lt;textPath&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGTextPathElement">MDN Reference</a>
+        /// </summary>
+        type SVGTextPathElement = Fable.Core.TS.Dom.SVGTextPathElement
+
+        /// <summary>
+        /// The <b><c>SVGTextPositioningElement</c></b> interface is implemented by elements that support attributes that position individual text glyphs. It is inherited by SVGTextElement and SVGTSpanElement.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGTextPositioningElement">MDN Reference</a>
+        /// </summary>
+        type SVGTextPositioningElement = Fable.Core.TS.Dom.SVGTextPositioningElement
+
+        /// <summary>
+        /// The <b><c>SVGTitleElement</c></b> interface corresponds to the &lt;title&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGTitleElement">MDN Reference</a>
+        /// </summary>
+        type SVGTitleElement = Fable.Core.TS.Dom.SVGTitleElement
+
+        /// <summary>
+        /// The <b><c>SVGTransform</c></b> interface reflects one of the component transformations within an SVGTransformList; thus, an SVGTransform object corresponds to a single component (e.g., scale(…) or matrix(…)) within a transform attribute.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGTransform">MDN Reference</a>
+        /// </summary>
+        type SVGTransform = Fable.Core.TS.Dom.SVGTransform
+
+        /// <summary>
+        /// The <b><c>SVGTransformList</c></b> interface defines a list of SVGTransform objects.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGTransformList">MDN Reference</a>
+        /// </summary>
+        type SVGTransformList = Fable.Core.TS.Dom.SVGTransformList
+
+        type SVGURIReference = Fable.Core.TS.Dom.SVGURIReference
+
+        /// <summary>
+        /// The <b><c>SVGUnitTypes</c></b> interface defines a commonly used set of constants used for reflecting gradientUnits, patternContentUnits and other similar attributes.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGUnitTypes">MDN Reference</a>
+        /// </summary>
+        type SVGUnitTypes = Fable.Core.TS.Dom.SVGUnitTypes
+
+        /// <summary>
+        /// The <b><c>SVGUseElement</c></b> interface corresponds to the &lt;use&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGUseElement">MDN Reference</a>
+        /// </summary>
+        type SVGUseElement = Fable.Core.TS.Dom.SVGUseElement
+
+        /// <summary>
+        /// The <b><c>SVGViewElement</c></b> interface provides access to the properties of &lt;view&gt; elements, as well as methods to manipulate them.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SVGViewElement">MDN Reference</a>
+        /// </summary>
+        type SVGViewElement = Fable.Core.TS.Dom.SVGViewElement
+
+        /// <summary>
+        /// The <b><c>Sanitizer</c></b> interface of the HTML Sanitizer API defines a configuration object that specifies what elements, attributes and comments are allowed or should be removed when inserting strings of HTML into an Element or ShadowRoot, or when parsing an HTML string into a Document.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Sanitizer">MDN Reference</a>
+        /// </summary>
+        type Sanitizer = Fable.Core.TS.Dom.Sanitizer
+
+        /// <summary>
+        /// The <b><c>Scheduler</c></b> interface of the Prioritized Task Scheduling API provides methods for scheduling prioritized tasks.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Scheduler">MDN Reference</a>
+        /// </summary>
+        type Scheduler = Fable.Core.TS.Dom.Scheduler
+
+        /// <summary>
+        /// The <b><c>Screen</c></b> interface represents a screen, usually the one on which the current window is being rendered, and is obtained using window.screen.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Screen">MDN Reference</a>
+        /// </summary>
+        type Screen = Fable.Core.TS.Dom.Screen
+
+        type ScreenOrientationEventMap = Fable.Core.TS.Dom.ScreenOrientationEventMap
+
+        /// <summary>
+        /// The <b><c>ScreenOrientation</c></b> interface of the Screen Orientation API provides information about the current orientation of the document.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ScreenOrientation">MDN Reference</a>
+        /// </summary>
+        type ScreenOrientation = Fable.Core.TS.Dom.ScreenOrientation
+
+        type ScriptProcessorNodeEventMap = Fable.Core.TS.Dom.ScriptProcessorNodeEventMap
+
+        /// <summary>
+        /// The <b><c>ScriptProcessorNode</c></b> interface allows the generation, processing, or analyzing of audio using JavaScript.
+        /// </summary>
+        /// <remarks>
+        /// @deprecated
+        /// As of the August 29 2014 Web Audio API spec publication, this feature has been marked as deprecated, and was replaced by AudioWorklet (see AudioWorkletNode).
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ScriptProcessorNode">MDN Reference</a>
+        /// </remarks>
+        /// <remarks>@deprecated</remarks>
+        type ScriptProcessorNode = Fable.Core.TS.Dom.ScriptProcessorNode
+
+        /// <summary>
+        /// The <b><c>ScrollTimeline</c></b> interface of the Web Animations API represents a scroll progress timeline (see CSS scroll-driven animations for more details).
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ScrollTimeline">MDN Reference</a>
+        /// </summary>
+        type ScrollTimeline = Fable.Core.TS.Dom.ScrollTimeline
+
+        /// <summary>
+        /// The <b><c>SecurityPolicyViolationEvent</c></b> interface inherits from Event, and represents the event object of a securitypolicyviolation event sent on an Element, Document, or worker when its Content Security Policy (CSP) is violated.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SecurityPolicyViolationEvent">MDN Reference</a>
+        /// </summary>
+        type SecurityPolicyViolationEvent = Fable.Core.TS.Dom.SecurityPolicyViolationEvent
+
+        /// <summary>
+        /// A <b><c>Selection</c></b> object represents the range of text selected by the user or the current position of the caret. Each document is associated with a unique selection object, which can be retrieved by document.getSelection() or window.getSelection() and then be examined and modified.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Selection">MDN Reference</a>
+        /// </summary>
+        type Selection = Fable.Core.TS.Dom.Selection
+
+        /// <summary>
+        /// The <b><c>Serial</c></b> interface of the Web Serial API provides attributes and methods for finding and connecting to serial ports from a web page.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Serial">MDN Reference</a>
+        /// </summary>
+        type Serial = Fable.Core.TS.Dom.Serial
+
+        type SerialPortEventMap = Fable.Core.TS.Dom.SerialPortEventMap
+
+        /// <summary>
+        /// The <b><c>SerialPort</c></b> interface of the Web Serial API provides access to a serial port on the host device.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SerialPort">MDN Reference</a>
+        /// </summary>
+        type SerialPort = Fable.Core.TS.Dom.SerialPort
+
+        type ServiceWorkerEventMap = Fable.Core.TS.Dom.ServiceWorkerEventMap
+
+        /// <summary>
+        /// The <b><c>ServiceWorker</c></b> interface of the Service Worker API provides a reference to a service worker. Multiple browsing contexts (e.g., pages, workers, etc.) can be associated with the same service worker, each through a unique ServiceWorker object.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ServiceWorker">MDN Reference</a>
+        /// </summary>
+        type ServiceWorker = Fable.Core.TS.Dom.ServiceWorker
+
+        type ServiceWorkerContainerEventMap = Fable.Core.TS.Dom.ServiceWorkerContainerEventMap
+
+        /// <summary>
+        /// The <b><c>ServiceWorkerContainer</c></b> interface of the Service Worker API provides an object representing the service worker as an overall unit in the network ecosystem, including facilities to register, unregister and update service workers, and access the state of service workers and their registrations.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ServiceWorkerContainer">MDN Reference</a>
+        /// </summary>
+        type ServiceWorkerContainer = Fable.Core.TS.Dom.ServiceWorkerContainer
+
+        type ServiceWorkerRegistrationEventMap = Fable.Core.TS.Dom.ServiceWorkerRegistrationEventMap
+
+        /// <summary>
+        /// The <b><c>ServiceWorkerRegistration</c></b> interface of the Service Worker API represents the service worker registration. You register a service worker to control one or more pages that share the same origin.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ServiceWorkerRegistration">MDN Reference</a>
+        /// </summary>
+        type ServiceWorkerRegistration = Fable.Core.TS.Dom.ServiceWorkerRegistration
+
+        type ShadowRootEventMap = Fable.Core.TS.Dom.ShadowRootEventMap
+
+        /// <summary>
+        /// The <b><c>ShadowRoot</c></b> interface of the Shadow DOM API is the root node of a DOM subtree that is rendered separately from a document's main DOM tree.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ShadowRoot">MDN Reference</a>
+        /// </summary>
+        type ShadowRoot = Fable.Core.TS.Dom.ShadowRoot
+
+        /// <summary>
+        /// The <b><c>SharedWorker</c></b> interface represents a specific kind of worker that can be accessed from several browsing contexts, such as multiple windows or iframes. Shared workers implement a different interface than dedicated workers, have a different global scope (SharedWorkerGlobalScope), and their constructor is not exposed in DedicatedWorkerGlobalScope, so they cannot be instantiated from dedicated workers.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SharedWorker">MDN Reference</a>
+        /// </summary>
+        type SharedWorker = Fable.Core.TS.Dom.SharedWorker
+
+        type Slottable = Fable.Core.TS.Dom.Slottable
+
+        type SourceBufferEventMap = Fable.Core.TS.Dom.SourceBufferEventMap
+
+        /// <summary>
+        /// The <b><c>SourceBuffer</c></b> interface represents a chunk of media to be passed into an HTMLMediaElement and played, via a MediaSource object. This can be made up of one or several media segments.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SourceBuffer">MDN Reference</a>
+        /// </summary>
+        type SourceBuffer = Fable.Core.TS.Dom.SourceBuffer
+
+        type SourceBufferListEventMap = Fable.Core.TS.Dom.SourceBufferListEventMap
+
+        /// <summary>
+        /// The <b><c>SourceBufferList</c></b> interface represents a simple container list for multiple SourceBuffer objects.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SourceBufferList">MDN Reference</a>
+        /// </summary>
+        type SourceBufferList = Fable.Core.TS.Dom.SourceBufferList
+
+        /// <summary>
+        /// The <b><c>SpeechRecognitionAlternative</c></b> interface of the Web Speech API represents a single word that has been recognized by the speech recognition service.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SpeechRecognitionAlternative">MDN Reference</a>
+        /// </summary>
+        type SpeechRecognitionAlternative = Fable.Core.TS.Dom.SpeechRecognitionAlternative
+
+        /// <summary>
+        /// The <b><c>SpeechRecognitionErrorEvent</c></b> interface of the Web Speech API represents error messages from the recognition service.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SpeechRecognitionErrorEvent">MDN Reference</a>
+        /// </summary>
+        type SpeechRecognitionErrorEvent = Fable.Core.TS.Dom.SpeechRecognitionErrorEvent
+
+        /// <summary>
+        /// The <b><c>SpeechRecognitionEvent</c></b> interface of the Web Speech API represents the event object for the result and nomatch events, and contains all the data associated with an interim or final speech recognition result.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SpeechRecognitionEvent">MDN Reference</a>
+        /// </summary>
+        type SpeechRecognitionEvent = Fable.Core.TS.Dom.SpeechRecognitionEvent
+
+        /// <summary>
+        /// The <b><c>SpeechRecognitionResult</c></b> interface of the Web Speech API represents a single recognition match, which may contain multiple SpeechRecognitionAlternative objects.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SpeechRecognitionResult">MDN Reference</a>
+        /// </summary>
+        type SpeechRecognitionResult = Fable.Core.TS.Dom.SpeechRecognitionResult
+
+        /// <summary>
+        /// The <b><c>SpeechRecognitionResultList</c></b> interface of the Web Speech API represents a list of SpeechRecognitionResult objects, or a single one if results are being captured in non-continuous mode.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SpeechRecognitionResultList">MDN Reference</a>
+        /// </summary>
+        type SpeechRecognitionResultList = Fable.Core.TS.Dom.SpeechRecognitionResultList
+
+        type SpeechSynthesisEventMap = Fable.Core.TS.Dom.SpeechSynthesisEventMap
+
+        /// <summary>
+        /// The <b><c>SpeechSynthesis</c></b> interface of the Web Speech API is the controller interface for the speech service; this can be used to retrieve information about the synthesis voices available on the device, start and pause speech, and other commands besides.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SpeechSynthesis">MDN Reference</a>
+        /// </summary>
+        type SpeechSynthesis = Fable.Core.TS.Dom.SpeechSynthesis
+
+        /// <summary>
+        /// The <b><c>SpeechSynthesisErrorEvent</c></b> interface of the Web Speech API contains information about any errors that occur while processing SpeechSynthesisUtterance objects in the speech service.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SpeechSynthesisErrorEvent">MDN Reference</a>
+        /// </summary>
+        type SpeechSynthesisErrorEvent = Fable.Core.TS.Dom.SpeechSynthesisErrorEvent
+
+        /// <summary>
+        /// The <b><c>SpeechSynthesisEvent</c></b> interface of the Web Speech API contains information about the current state of SpeechSynthesisUtterance objects that have been processed in the speech service.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SpeechSynthesisEvent">MDN Reference</a>
+        /// </summary>
+        type SpeechSynthesisEvent = Fable.Core.TS.Dom.SpeechSynthesisEvent
+
+        type SpeechSynthesisUtteranceEventMap = Fable.Core.TS.Dom.SpeechSynthesisUtteranceEventMap
+
+        /// <summary>
+        /// The <b><c>SpeechSynthesisUtterance</c></b> interface of the Web Speech API represents a speech request. It contains the content the speech service should read and information about how to read it (e.g., language, pitch and volume.)
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SpeechSynthesisUtterance">MDN Reference</a>
+        /// </summary>
+        type SpeechSynthesisUtterance = Fable.Core.TS.Dom.SpeechSynthesisUtterance
+
+        /// <summary>
+        /// The <b><c>SpeechSynthesisVoice</c></b> interface of the Web Speech API represents a voice that the system supports. Every SpeechSynthesisVoice has its own relative speech service including information about language, name and URI.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SpeechSynthesisVoice">MDN Reference</a>
+        /// </summary>
+        type SpeechSynthesisVoice = Fable.Core.TS.Dom.SpeechSynthesisVoice
+
+        /// <summary>
+        /// The DOM <b><c>StaticRange</c></b> interface extends AbstractRange to provide a method to specify a range of content in the DOM whose contents don't update to reflect changes which occur within the DOM tree.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/StaticRange">MDN Reference</a>
+        /// </summary>
+        type StaticRange = Fable.Core.TS.Dom.StaticRange
+
+        /// <summary>
+        /// The <b><c>StereoPannerNode</c></b> interface of the Web Audio API represents a simple stereo panner node that can be used to pan an audio stream left or right. It is an AudioNode audio-processing module that positions an incoming audio stream in a stereo image using a low-cost equal-power panning algorithm.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/StereoPannerNode">MDN Reference</a>
+        /// </summary>
+        type StereoPannerNode = Fable.Core.TS.Dom.StereoPannerNode
+
+        /// <summary>
+        /// The <b><c>Storage</c></b> interface of the Web Storage API provides access to a particular domain's session or local storage. It allows, for example, the addition, modification, or deletion of stored data items.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Storage">MDN Reference</a>
+        /// </summary>
+        type Storage = Fable.Core.TS.Dom.Storage
+
+        /// <summary>
+        /// The <b><c>StorageEvent</c></b> interface is implemented by the storage event, which is sent to a window when a storage area the window has access to is changed within the context of another document.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/StorageEvent">MDN Reference</a>
+        /// </summary>
+        type StorageEvent = Fable.Core.TS.Dom.StorageEvent
+
+        /// <summary>
+        /// The <b><c>StorageManager</c></b> interface of the Storage API provides an interface for managing persistence permissions and estimating available storage. You can get a reference to this interface using either navigator.storage or WorkerNavigator.storage.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/StorageManager">MDN Reference</a>
+        /// </summary>
+        type StorageManager = Fable.Core.TS.Dom.StorageManager
+
+        /// <summary>
+        /// The <b><c>StylePropertyMap</c></b> interface of the CSS Typed Object Model API provides a representation of a CSS declaration block that is an alternative to CSSStyleDeclaration.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/StylePropertyMap">MDN Reference</a>
+        /// </summary>
+        type StylePropertyMap = Fable.Core.TS.Dom.StylePropertyMap
+
+        /// <summary>
+        /// The <b><c>StylePropertyMapReadOnly</c></b> interface of the CSS Typed Object Model API provides a read-only representation of a CSS declaration block that is an alternative to CSSStyleDeclaration. Retrieve an instance of this interface using Element.computedStyleMap().
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/StylePropertyMapReadOnly">MDN Reference</a>
+        /// </summary>
+        type StylePropertyMapReadOnly = Fable.Core.TS.Dom.StylePropertyMapReadOnly
+
+        /// <summary>
+        /// An object implementing the <b><c>StyleSheet</c></b> interface represents a single style sheet. CSS style sheets will further implement the more specialized CSSStyleSheet interface.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/StyleSheet">MDN Reference</a>
+        /// </summary>
+        type StyleSheet = Fable.Core.TS.Dom.StyleSheet
+
+        /// <summary>
+        /// The <b><c>StyleSheetList</c></b> interface represents a list of CSSStyleSheet objects. An instance of this object can be returned by Document.styleSheets.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/StyleSheetList">MDN Reference</a>
+        /// </summary>
+        type StyleSheetList = Fable.Core.TS.Dom.StyleSheetList
+
+        /// <summary>
+        /// The <b><c>SubmitEvent</c></b> interface defines the object used to represent an HTML form's submit event. This event is fired at the &lt;form&gt; when the form's submit action is invoked.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SubmitEvent">MDN Reference</a>
+        /// </summary>
+        type SubmitEvent = Fable.Core.TS.Dom.SubmitEvent
+
+        /// <summary>
+        /// The <b><c>SubtleCrypto</c></b> interface of the Web Crypto API provides a number of low-level cryptographic functions.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/SubtleCrypto">MDN Reference</a>
+        /// </summary>
+        type SubtleCrypto = Fable.Core.TS.Dom.SubtleCrypto
+
+        /// <summary>
+        /// The <b><c>TaskController</c></b> interface of the Prioritized Task Scheduling API represents a controller object that can be used to both abort and change the priority of one or more prioritized tasks. If there is no need to change task priorities, then AbortController can be used instead.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/TaskController">MDN Reference</a>
+        /// </summary>
+        type TaskController = Fable.Core.TS.Dom.TaskController
+
+        /// <summary>
+        /// The <b><c>TaskPriorityChangeEvent</c></b> is the interface for the prioritychange event.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/TaskPriorityChangeEvent">MDN Reference</a>
+        /// </summary>
+        type TaskPriorityChangeEvent = Fable.Core.TS.Dom.TaskPriorityChangeEvent
+
+        type TaskSignalEventMap = Fable.Core.TS.Dom.TaskSignalEventMap
+
+        /// <summary>
+        /// The <b><c>TaskSignal</c></b> interface of the Prioritized Task Scheduling API represents a signal object that allows you to communicate with a prioritized task, and abort it or change the priority (if required) via a TaskController object.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/TaskSignal">MDN Reference</a>
+        /// </summary>
+        type TaskSignal = Fable.Core.TS.Dom.TaskSignal
+
+        /// <summary>
+        /// The <b><c>Text</c></b> interface represents a text node in a DOM tree.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Text">MDN Reference</a>
+        /// </summary>
+        type Text = Fable.Core.TS.Dom.Text
+
+        /// <summary>
+        /// The <b><c>TextDecoder</c></b> interface represents a decoder for a specific text encoding, such as UTF-8, ISO-8859-2, or GBK. A decoder takes an array of bytes as input and returns a JavaScript string.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/TextDecoder">MDN Reference</a>
+        /// </summary>
+        type TextDecoder = Fable.Core.TS.Dom.TextDecoder
+
+        type TextDecoderCommon = Fable.Core.TS.Dom.TextDecoderCommon
+
+        /// <summary>
+        /// The <b><c>TextDecoderStream</c></b> interface of the Encoding API converts a stream of text in a binary encoding, such as UTF-8 etc., to a stream of strings. It is the streaming equivalent of TextDecoder. It implements the same shape as a TransformStream, allowing it to be used in ReadableStream.pipeThrough() and similar methods.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/TextDecoderStream">MDN Reference</a>
+        /// </summary>
+        type TextDecoderStream = Fable.Core.TS.Dom.TextDecoderStream
+
+        /// <summary>
+        /// The <b><c>TextEncoder</c></b> interface enables you to encode a JavaScript string using UTF-8.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/TextEncoder">MDN Reference</a>
+        /// </summary>
+        type TextEncoder = Fable.Core.TS.Dom.TextEncoder
+
+        type TextEncoderCommon = Fable.Core.TS.Dom.TextEncoderCommon
+
+        /// <summary>
+        /// The <b><c>TextEncoderStream</c></b> interface of the Encoding API converts a stream of strings into bytes in the UTF-8 encoding. It is the streaming equivalent of TextEncoder. It implements the same shape as a TransformStream, allowing it to be used in ReadableStream.pipeThrough() and similar methods.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/TextEncoderStream">MDN Reference</a>
+        /// </summary>
+        type TextEncoderStream = Fable.Core.TS.Dom.TextEncoderStream
+
+        /// <summary>
+        /// The <b><c>TextEvent</c></b> interface is a legacy UI event interface for reporting changes to text UI elements.
+        /// </summary>
+        /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/TextEvent">MDN Reference</a></remarks>
+        /// <remarks>@deprecated</remarks>
+        type TextEvent = Fable.Core.TS.Dom.TextEvent
+
+        /// <summary>
+        /// The <b><c>TextMetrics</c></b> interface represents the dimensions of a piece of text in the canvas; a TextMetrics instance can be retrieved using the CanvasRenderingContext2D.measureText() method.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/TextMetrics">MDN Reference</a>
+        /// </summary>
+        type TextMetrics = Fable.Core.TS.Dom.TextMetrics
+
+        type TextTrackEventMap = Fable.Core.TS.Dom.TextTrackEventMap
+
+        /// <summary>
+        /// The <b><c>TextTrack</c></b> interface of the WebVTT API represents a text track associated with a media element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/TextTrack">MDN Reference</a>
+        /// </summary>
+        type TextTrack = Fable.Core.TS.Dom.TextTrack
+
+        type TextTrackCueEventMap = Fable.Core.TS.Dom.TextTrackCueEventMap
+
+        /// <summary>
+        /// The <b><c>TextTrackCue</c></b> interface of the WebVTT API is the abstract base class for the various derived cue types, such as VTTCue and DataCue; you will work with these derived types rather than the base class.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/TextTrackCue">MDN Reference</a>
+        /// </summary>
+        type TextTrackCue = Fable.Core.TS.Dom.TextTrackCue
+
+        /// <summary>
+        /// The <b><c>TextTrackCueList</c></b> interface of the WebVTT API is an array-like object that represents a dynamically updating list of TextTrackCue objects.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/TextTrackCueList">MDN Reference</a>
+        /// </summary>
+        type TextTrackCueList = Fable.Core.TS.Dom.TextTrackCueList
+
+        type TextTrackListEventMap = Fable.Core.TS.Dom.TextTrackListEventMap
+
+        /// <summary>
+        /// The <b><c>TextTrackList</c></b> interface is used to represent a list of the text tracks defined for the associated video or audio element, with each track represented by a separate TextTrack object in the list.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/TextTrackList">MDN Reference</a>
+        /// </summary>
+        type TextTrackList = Fable.Core.TS.Dom.TextTrackList
+
+        /// <summary>
+        /// When loading a media resource for use by an &lt;audio&gt; or &lt;video&gt; element, the <b><c>TimeRanges</c></b> interface is used for representing the time ranges of the media resource that have been buffered, the time ranges that have been played, and the time ranges that are seekable.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/TimeRanges">MDN Reference</a>
+        /// </summary>
+        type TimeRanges = Fable.Core.TS.Dom.TimeRanges
+
+        /// <summary>
+        /// The <b><c>ToggleEvent</c></b> interface represents an event that fires when a popover element is toggled between being shown and hidden.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ToggleEvent">MDN Reference</a>
+        /// </summary>
+        type ToggleEvent = Fable.Core.TS.Dom.ToggleEvent
+
+        /// <summary>
+        /// The <b><c>Touch</c></b> interface represents a single contact point on a touch-sensitive device. The contact point is commonly a finger or stylus and the device may be a touchscreen or trackpad.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Touch">MDN Reference</a>
+        /// </summary>
+        type Touch = Fable.Core.TS.Dom.Touch
+
+        /// <summary>
+        /// The <b><c>TouchEvent</c></b> interface represents an UIEvent which is sent when the state of contacts with a touch-sensitive surface changes. This surface can be a touch screen or trackpad, for example. The event can describe one or more points of contact with the screen and includes support for detecting movement, addition and removal of contact points, and so forth.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/TouchEvent">MDN Reference</a>
+        /// </summary>
+        type TouchEvent = Fable.Core.TS.Dom.TouchEvent
+
+        /// <summary>
+        /// The <b><c>TouchList</c></b> interface represents a list of contact points on a touch surface. For example, if the user has three fingers on the touch surface (such as a screen or trackpad), the corresponding TouchList object would have one Touch object for each finger, for a total of three entries.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/TouchList">MDN Reference</a>
+        /// </summary>
+        type TouchList = Fable.Core.TS.Dom.TouchList
+
+        /// <summary>
+        /// The <b><c>TrackEvent</c></b> interface of the HTML DOM API is used for events which represent changes to a set of available tracks on an HTML media element; these events are addtrack and removetrack.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/TrackEvent">MDN Reference</a>
+        /// </summary>
+        type TrackEvent = Fable.Core.TS.Dom.TrackEvent
+
+        /// <summary>
+        /// The <b><c>TransformStream</c></b> interface of the Streams API represents a concrete implementation of the pipe chain transform stream concept.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStream">MDN Reference</a>
+        /// </summary>
+        type TransformStream<'I, 'O> = Fable.Core.TS.Dom.TransformStream<'I, 'O>
+
+        /// <summary>
+        /// The <b><c>TransformStreamDefaultController</c></b> interface of the Streams API provides methods to manipulate the associated ReadableStream and WritableStream.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStreamDefaultController">MDN Reference</a>
+        /// </summary>
+        type TransformStreamDefaultController<'O> = Fable.Core.TS.Dom.TransformStreamDefaultController<'O>
+
+        /// <summary>
+        /// The <b><c>TransitionEvent</c></b> interface represents events providing information related to transitions.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/TransitionEvent">MDN Reference</a>
+        /// </summary>
+        type TransitionEvent = Fable.Core.TS.Dom.TransitionEvent
+
+        /// <summary>
+        /// The <b><c>TreeWalker</c></b> object represents the nodes of a document subtree and a position within them.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/TreeWalker">MDN Reference</a>
+        /// </summary>
+        type TreeWalker = Fable.Core.TS.Dom.TreeWalker
+
+        /// <summary>
+        /// The <b><c>UIEvent</c></b> interface represents simple user interface events. It is part of the UI Events API, which includes various event types and interfaces related to user interactions.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/UIEvent">MDN Reference</a>
+        /// </summary>
+        type UIEvent = Fable.Core.TS.Dom.UIEvent
+
+        /// <summary>
+        /// The <b><c>URL</c></b> interface is used to parse, construct, normalize, and encode URLs. It works by providing properties which allow you to easily read and modify the components of a URL.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/URL">MDN Reference</a>
+        /// </summary>
+        type URL = Fable.Core.TS.Dom.URL
+
+        type webkitURL = Fable.Core.TS.Dom.URL
+
+        /// <summary>
+        /// The <b><c>URLPattern</c></b> interface of the URL Pattern API matches URLs or parts of URLs against a pattern. The pattern can contain capturing groups that extract parts of the matched URL.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/URLPattern">MDN Reference</a>
+        /// </summary>
+        type URLPattern = Fable.Core.TS.Dom.URLPattern
+
+        /// <summary>
+        /// The <b><c>URLSearchParams</c></b> interface defines utility methods to work with the query string of a URL.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/URLSearchParams">MDN Reference</a>
+        /// </summary>
+        type URLSearchParams = Fable.Core.TS.Dom.URLSearchParams
+
+        /// <summary>
+        /// The <b><c>UserActivation</c></b> interface provides information about whether a user is currently interacting with the page, or has completed an interaction since page load.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/UserActivation">MDN Reference</a>
+        /// </summary>
+        type UserActivation = Fable.Core.TS.Dom.UserActivation
+
+        /// <summary>
+        /// The <b><c>VTTCue</c></b> interface of the WebVTT API represents a cue that can be added to the text track associated with a particular video (or other media).
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/VTTCue">MDN Reference</a>
+        /// </summary>
+        type VTTCue = Fable.Core.TS.Dom.VTTCue
+
+        /// <summary>
+        /// The <b><c>VTTRegion</c></b> interface of the WebVTT API describes a portion of the video to render a VTTCue onto.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/VTTRegion">MDN Reference</a>
+        /// </summary>
+        type VTTRegion = Fable.Core.TS.Dom.VTTRegion
+
+        /// <summary>
+        /// The <b><c>ValidityState</c></b> interface represents the validity states that an element can be in, with respect to constraint validation. Together, they help explain why an element's value fails to validate, if it's not valid.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ValidityState">MDN Reference</a>
+        /// </summary>
+        type ValidityState = Fable.Core.TS.Dom.ValidityState
+
+        /// <summary>
+        /// The <b><c>VideoColorSpace</c></b> interface of the WebCodecs API represents the color space of a video.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/VideoColorSpace">MDN Reference</a>
+        /// </summary>
+        type VideoColorSpace = Fable.Core.TS.Dom.VideoColorSpace
+
+        type VideoDecoderEventMap = Fable.Core.TS.Dom.VideoDecoderEventMap
+
+        /// <summary>
+        /// The <b><c>VideoDecoder</c></b> interface of the WebCodecs API decodes chunks of video.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/VideoDecoder">MDN Reference</a>
+        /// </summary>
+        type VideoDecoder = Fable.Core.TS.Dom.VideoDecoder
+
+        type VideoEncoderEventMap = Fable.Core.TS.Dom.VideoEncoderEventMap
+
+        /// <summary>
+        /// The <b><c>VideoEncoder</c></b> interface of the WebCodecs API encodes VideoFrame objects into EncodedVideoChunks.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/VideoEncoder">MDN Reference</a>
+        /// </summary>
+        type VideoEncoder = Fable.Core.TS.Dom.VideoEncoder
+
+        /// <summary>
+        /// The <b><c>VideoFrame</c></b> interface of the Web Codecs API represents a frame of a video.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/VideoFrame">MDN Reference</a>
+        /// </summary>
+        type VideoFrame = Fable.Core.TS.Dom.VideoFrame
+
+        /// <summary>
+        /// A <b><c>VideoPlaybackQuality</c></b> object is returned by the HTMLVideoElement.getVideoPlaybackQuality() method and contains metrics that can be used to determine the playback quality of a video.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/VideoPlaybackQuality">MDN Reference</a>
+        /// </summary>
+        type VideoPlaybackQuality = Fable.Core.TS.Dom.VideoPlaybackQuality
+
+        /// <summary>
+        /// The <b><c>ViewTimeline</c></b> interface of the Web Animations API represents a view progress timeline (see CSS scroll-driven animations for more details).
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ViewTimeline">MDN Reference</a>
+        /// </summary>
+        type ViewTimeline = Fable.Core.TS.Dom.ViewTimeline
+
+        /// <summary>
+        /// The <b><c>ViewTransition</c></b> interface of the View Transition API represents an active view transition, and provides functionality to react to the transition reaching different states (e.g., ready to run the animation, or animation finished) or skip the transition altogether.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ViewTransition">MDN Reference</a>
+        /// </summary>
+        type ViewTransition = Fable.Core.TS.Dom.ViewTransition
+
+        /// <summary>
+        /// The <b><c>ViewTransitionTypeSet</c></b> interface of the View Transition API is a set-like object representing the types of an active view transition. This enables the types to be queried or modified on-the-fly during a transition.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/ViewTransitionTypeSet">MDN Reference</a>
+        /// </summary>
+        type ViewTransitionTypeSet = Fable.Core.TS.Dom.ViewTransitionTypeSet
+
+        type VisualViewportEventMap = Fable.Core.TS.Dom.VisualViewportEventMap
+
+        /// <summary>
+        /// The <b><c>VisualViewport</c></b> interface of the CSSOM view API represents the visual viewport for a given window. For a page containing iframes, each iframe, as well as the containing page, will have a unique window object. Each window on a page will have a unique VisualViewport representing the properties associated with that window.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/VisualViewport">MDN Reference</a>
+        /// </summary>
+        type VisualViewport = Fable.Core.TS.Dom.VisualViewport
+
+        /// <summary>
+        /// The <b><c>WEBGL_color_buffer_float</c></b> extension is part of the WebGL API and adds the ability to render to 32-bit floating-point color buffers.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WEBGL_color_buffer_float">MDN Reference</a>
+        /// </summary>
+        type WEBGL_color_buffer_float = Fable.Core.TS.Dom.WEBGL_color_buffer_float
+
+        /// <summary>
+        /// The <b><c>WEBGL_compressed_texture_astc</c></b> extension is part of the WebGL API and exposes Adaptive Scalable Texture Compression (ASTC) compressed texture formats to WebGL.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WEBGL_compressed_texture_astc">MDN Reference</a>
+        /// </summary>
+        type WEBGL_compressed_texture_astc = Fable.Core.TS.Dom.WEBGL_compressed_texture_astc
+
+        /// <summary>
+        /// The <b><c>WEBGL_compressed_texture_etc</c></b> extension is part of the WebGL API and exposes 10 ETC/EAC compressed texture formats.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WEBGL_compressed_texture_etc">MDN Reference</a>
+        /// </summary>
+        type WEBGL_compressed_texture_etc = Fable.Core.TS.Dom.WEBGL_compressed_texture_etc
+
+        /// <summary>
+        /// The <b><c>WEBGL_compressed_texture_etc1</c></b> extension is part of the WebGL API and exposes the ETC1 compressed texture format.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WEBGL_compressed_texture_etc1">MDN Reference</a>
+        /// </summary>
+        type WEBGL_compressed_texture_etc1 = Fable.Core.TS.Dom.WEBGL_compressed_texture_etc1
+
+        /// <summary>
+        /// The <b><c>WEBGL_compressed_texture_pvrtc</c></b> extension is part of the WebGL API and exposes four PVRTC compressed texture formats.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WEBGL_compressed_texture_pvrtc">MDN Reference</a>
+        /// </summary>
+        type WEBGL_compressed_texture_pvrtc = Fable.Core.TS.Dom.WEBGL_compressed_texture_pvrtc
+
+        /// <summary>
+        /// The <b><c>WEBGL_compressed_texture_s3tc</c></b> extension is part of the WebGL API and exposes four S3TC compressed texture formats.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WEBGL_compressed_texture_s3tc">MDN Reference</a>
+        /// </summary>
+        type WEBGL_compressed_texture_s3tc = Fable.Core.TS.Dom.WEBGL_compressed_texture_s3tc
+
+        /// <summary>
+        /// The <b><c>WEBGL_compressed_texture_s3tc_srgb</c></b> extension is part of the WebGL API and exposes four S3TC compressed texture formats for the sRGB colorspace.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WEBGL_compressed_texture_s3tc_srgb">MDN Reference</a>
+        /// </summary>
+        type WEBGL_compressed_texture_s3tc_srgb = Fable.Core.TS.Dom.WEBGL_compressed_texture_s3tc_srgb
+
+        /// <summary>
+        /// The <b><c>WEBGL_debug_renderer_info</c></b> extension is part of the WebGL API and exposes two constants with information about the graphics driver for debugging purposes.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WEBGL_debug_renderer_info">MDN Reference</a>
+        /// </summary>
+        type WEBGL_debug_renderer_info = Fable.Core.TS.Dom.WEBGL_debug_renderer_info
+
+        /// <summary>
+        /// The <b><c>WEBGL_debug_shaders</c></b> extension is part of the WebGL API and exposes a method to debug shaders from privileged contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WEBGL_debug_shaders">MDN Reference</a>
+        /// </summary>
+        type WEBGL_debug_shaders = Fable.Core.TS.Dom.WEBGL_debug_shaders
+
+        /// <summary>
+        /// The <b><c>WEBGL_depth_texture</c></b> extension is part of the WebGL API and defines 2D depth and depth-stencil textures.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WEBGL_depth_texture">MDN Reference</a>
+        /// </summary>
+        type WEBGL_depth_texture = Fable.Core.TS.Dom.WEBGL_depth_texture
+
+        /// <summary>
+        /// The <b><c>WEBGL_draw_buffers</c></b> extension is part of the WebGL API and enables a fragment shader to write to several textures, which is useful for deferred shading, for example.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WEBGL_draw_buffers">MDN Reference</a>
+        /// </summary>
+        type WEBGL_draw_buffers = Fable.Core.TS.Dom.WEBGL_draw_buffers
+
+        /// <summary>
+        /// The <b><c>WEBGL_lose_context</c></b> extension is part of the WebGL API and exposes functions to simulate losing and restoring a WebGLRenderingContext.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WEBGL_lose_context">MDN Reference</a>
+        /// </summary>
+        type WEBGL_lose_context = Fable.Core.TS.Dom.WEBGL_lose_context
+
+        /// <summary>
+        /// The <b><c>WEBGL_multi_draw</c></b> extension is part of the WebGL API and allows to render more than one primitive with a single function call. This can improve a WebGL application's performance as it reduces binding costs in the renderer and speeds up GPU thread time with uniform data.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WEBGL_multi_draw">MDN Reference</a>
+        /// </summary>
+        type WEBGL_multi_draw = Fable.Core.TS.Dom.WEBGL_multi_draw
+
+        /// <summary>
+        /// The <b><c>WGSLLanguageFeatures</c></b> interface of the WebGPU API is a setlike object that reports the WGSL language extensions supported by the WebGPU implementation.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WGSLLanguageFeatures">MDN Reference</a>
+        /// </summary>
+        type WGSLLanguageFeatures = Fable.Core.TS.Dom.WGSLLanguageFeatures
+
+        /// <summary>
+        /// The <b><c>WakeLock</c></b> interface of the Screen Wake Lock API can be used to request a lock that prevents device screens from dimming or locking when an application needs to keep running.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WakeLock">MDN Reference</a>
+        /// </summary>
+        type WakeLock = Fable.Core.TS.Dom.WakeLock
+
+        type WakeLockSentinelEventMap = Fable.Core.TS.Dom.WakeLockSentinelEventMap
+
+        /// <summary>
+        /// The <b><c>WakeLockSentinel</c></b> interface of the Screen Wake Lock API can be used to monitor the status of the platform screen wake lock, and manually release the lock when needed.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WakeLockSentinel">MDN Reference</a>
+        /// </summary>
+        type WakeLockSentinel = Fable.Core.TS.Dom.WakeLockSentinel
+
+        /// <summary>
+        /// The <b><c>WaveShaperNode</c></b> interface represents a non-linear distorter.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WaveShaperNode">MDN Reference</a>
+        /// </summary>
+        type WaveShaperNode = Fable.Core.TS.Dom.WaveShaperNode
+
+        /// <summary>
+        /// The <b><c>WebGL2RenderingContext</c></b> interface provides the OpenGL ES 3.0 rendering context for the drawing surface of an HTML &lt;canvas&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGL2RenderingContext">MDN Reference</a>
+        /// </summary>
+        type WebGL2RenderingContext = Fable.Core.TS.Dom.WebGL2RenderingContext
+
+        type WebGL2RenderingContextBase = Fable.Core.TS.Dom.WebGL2RenderingContextBase
+
+        type WebGL2RenderingContextOverloads = Fable.Core.TS.Dom.WebGL2RenderingContextOverloads
+
+        /// <summary>
+        /// The <b><c>WebGLActiveInfo</c></b> interface is part of the WebGL API and represents the information returned by calling the WebGLRenderingContext.getActiveAttrib() and WebGLRenderingContext.getActiveUniform() methods.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLActiveInfo">MDN Reference</a>
+        /// </summary>
+        type WebGLActiveInfo = Fable.Core.TS.Dom.WebGLActiveInfo
+
+        /// <summary>
+        /// The <b><c>WebGLBuffer</c></b> interface is part of the WebGL API and represents an opaque buffer object storing data such as vertices or colors.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLBuffer">MDN Reference</a>
+        /// </summary>
+        type WebGLBuffer = Fable.Core.TS.Dom.WebGLBuffer
+
+        /// <summary>
+        /// The <b><c>WebGLContextEvent</c></b> interface is part of the WebGL API and is an interface for an event that is generated in response to a status change to the WebGL rendering context.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLContextEvent">MDN Reference</a>
+        /// </summary>
+        type WebGLContextEvent = Fable.Core.TS.Dom.WebGLContextEvent
+
+        /// <summary>
+        /// The <b><c>WebGLFramebuffer</c></b> interface is part of the WebGL API and represents a collection of buffers that serve as a rendering destination.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLFramebuffer">MDN Reference</a>
+        /// </summary>
+        type WebGLFramebuffer = Fable.Core.TS.Dom.WebGLFramebuffer
+
+        /// <summary>
+        /// The <b><c>WebGLProgram</c></b> is part of the WebGL API and is a combination of two compiled WebGLShaders consisting of a vertex shader and a fragment shader (both written in GLSL).
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLProgram">MDN Reference</a>
+        /// </summary>
+        type WebGLProgram = Fable.Core.TS.Dom.WebGLProgram
+
+        /// <summary>
+        /// The <b><c>WebGLQuery</c></b> interface is part of the WebGL 2 API and provides ways to asynchronously query for information. By default, occlusion queries and primitive queries are available.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLQuery">MDN Reference</a>
+        /// </summary>
+        type WebGLQuery = Fable.Core.TS.Dom.WebGLQuery
+
+        /// <summary>
+        /// The <b><c>WebGLRenderbuffer</c></b> interface is part of the WebGL API and represents a buffer that can contain an image, or that can be a source or target of a rendering operation.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderbuffer">MDN Reference</a>
+        /// </summary>
+        type WebGLRenderbuffer = Fable.Core.TS.Dom.WebGLRenderbuffer
+
+        /// <summary>
+        /// The <b><c>WebGLRenderingContext</c></b> interface provides an interface to the OpenGL ES 2.0 graphics rendering context for the drawing surface of an HTML &lt;canvas&gt; element.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLRenderingContext">MDN Reference</a>
+        /// </summary>
+        type WebGLRenderingContext = Fable.Core.TS.Dom.WebGLRenderingContext
+
+        type WebGLRenderingContextBase = Fable.Core.TS.Dom.WebGLRenderingContextBase
+
+        type WebGLRenderingContextOverloads = Fable.Core.TS.Dom.WebGLRenderingContextOverloads
+
+        /// <summary>
+        /// The <b><c>WebGLSampler</c></b> interface is part of the WebGL 2 API and stores sampling parameters for WebGLTexture access inside of a shader.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLSampler">MDN Reference</a>
+        /// </summary>
+        type WebGLSampler = Fable.Core.TS.Dom.WebGLSampler
+
+        /// <summary>
+        /// The <b><c>WebGLShader</c></b> is part of the WebGL API and can either be a vertex or a fragment shader. A WebGLProgram requires both types of shaders.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLShader">MDN Reference</a>
+        /// </summary>
+        type WebGLShader = Fable.Core.TS.Dom.WebGLShader
+
+        /// <summary>
+        /// The <b><c>WebGLShaderPrecisionFormat</c></b> interface is part of the WebGL API and represents the information returned by calling the WebGLRenderingContext.getShaderPrecisionFormat() method.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLShaderPrecisionFormat">MDN Reference</a>
+        /// </summary>
+        type WebGLShaderPrecisionFormat = Fable.Core.TS.Dom.WebGLShaderPrecisionFormat
+
+        /// <summary>
+        /// The <b><c>WebGLSync</c></b> interface is part of the WebGL 2 API and is used to synchronize activities between the GPU and the application.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLSync">MDN Reference</a>
+        /// </summary>
+        type WebGLSync = Fable.Core.TS.Dom.WebGLSync
+
+        /// <summary>
+        /// The <b><c>WebGLTexture</c></b> interface is part of the WebGL API and represents an opaque texture object providing storage and state for texturing operations.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLTexture">MDN Reference</a>
+        /// </summary>
+        type WebGLTexture = Fable.Core.TS.Dom.WebGLTexture
+
+        /// <summary>
+        /// The <b><c>WebGLTransformFeedback</c></b> interface is part of the WebGL 2 API and enables transform feedback, which is the process of capturing primitives generated by vertex processing. It allows to preserve the post-transform rendering state of an object and resubmit this data multiple times.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLTransformFeedback">MDN Reference</a>
+        /// </summary>
+        type WebGLTransformFeedback = Fable.Core.TS.Dom.WebGLTransformFeedback
+
+        /// <summary>
+        /// The <b><c>WebGLUniformLocation</c></b> interface is part of the WebGL API and represents the location of a uniform variable in a shader program.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLUniformLocation">MDN Reference</a>
+        /// </summary>
+        type WebGLUniformLocation = Fable.Core.TS.Dom.WebGLUniformLocation
+
+        /// <summary>
+        /// The <b><c>WebGLVertexArrayObject</c></b> interface is part of the WebGL 2 API, represents vertex array objects (VAOs) pointing to vertex array data, and provides names for different sets of vertex data.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLVertexArrayObject">MDN Reference</a>
+        /// </summary>
+        type WebGLVertexArrayObject = Fable.Core.TS.Dom.WebGLVertexArrayObject
+
+        /// <summary>
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebGLVertexArrayObject">MDN Reference</a>
+        /// </summary>
+        type WebGLVertexArrayObjectOES = Fable.Core.TS.Dom.WebGLVertexArrayObjectOES
+
+        type WebSocketEventMap = Fable.Core.TS.Dom.WebSocketEventMap
+
+        /// <summary>
+        /// The <b><c>WebSocket</c></b> object provides the API for creating and managing a WebSocket connection to a server, as well as for sending and receiving data on the connection.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket">MDN Reference</a>
+        /// </summary>
+        type WebSocket = Fable.Core.TS.Dom.WebSocket
+
+        /// <summary>
+        /// The <b><c>WebTransport</c></b> interface of the WebTransport API provides functionality to enable a user agent to connect to an HTTP/3 server, initiate reliable and unreliable transport in either or both directions, and close the connection once it is no longer needed.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebTransport">MDN Reference</a>
+        /// </summary>
+        type WebTransport = Fable.Core.TS.Dom.WebTransport
+
+        /// <summary>
+        /// The <b><c>WebTransportBidirectionalStream</c></b> interface of the WebTransport API represents a bidirectional stream created by a server or a client that can be used for reliable transport. Provides access to a WebTransportReceiveStream for reading incoming data, and a WebTransportSendStream for writing outgoing data.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebTransportBidirectionalStream">MDN Reference</a>
+        /// </summary>
+        type WebTransportBidirectionalStream = Fable.Core.TS.Dom.WebTransportBidirectionalStream
+
+        /// <summary>
+        /// The <b><c>WebTransportDatagramDuplexStream</c></b> interface of the WebTransport API represents a duplex stream that can be used for unreliable transport of datagrams between client and server. Provides access to a ReadableStream for reading incoming datagrams, a WritableStream for writing outgoing datagrams, and various settings and statistics related to the stream.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebTransportDatagramDuplexStream">MDN Reference</a>
+        /// </summary>
+        type WebTransportDatagramDuplexStream = Fable.Core.TS.Dom.WebTransportDatagramDuplexStream
+
+        /// <summary>
+        /// The <b><c>WebTransportError</c></b> interface of the WebTransport API represents an error related to the API, which can arise from server errors, network connection problems, or client-initiated abort operations (for example, arising from a WritableStream.abort() call).
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebTransportError">MDN Reference</a>
+        /// </summary>
+        type WebTransportError = Fable.Core.TS.Dom.WebTransportError
+
+        /// <summary>
+        /// The <b><c>WebTransportReceiveStream</c></b> interface of the WebTransport API is a ReadableStream that can be used to read from an incoming unidirectional or bidirectional WebTransport stream.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebTransportReceiveStream">MDN Reference</a>
+        /// </summary>
+        type WebTransportReceiveStream = Fable.Core.TS.Dom.WebTransportReceiveStream
+
+        /// <summary>
+        /// The <b><c>WebTransportSendStream</c></b> interface of the WebTransport API is a specialized WritableStream that is used to send outbound data in both unidirectional or bidirectional WebTransport streams.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WebTransportSendStream">MDN Reference</a>
+        /// </summary>
+        type WebTransportSendStream = Fable.Core.TS.Dom.WebTransportSendStream
+
+        /// <summary>
+        /// The <b><c>WheelEvent</c></b> interface represents events that occur due to the user moving a mouse wheel or similar input device.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WheelEvent">MDN Reference</a>
+        /// </summary>
+        type WheelEvent = Fable.Core.TS.Dom.WheelEvent
+
+        type WindowEventMap = Fable.Core.TS.Dom.WindowEventMap
+
+        /// <summary>
+        /// The <b><c>Window</c></b> interface represents a window containing a DOM document; the document property points to the DOM document loaded in that window.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Window">MDN Reference</a>
+        /// </summary>
+        type Window = Fable.Core.TS.Dom.Window
+
+        type WindowEventHandlersEventMap = Fable.Core.TS.Dom.WindowEventHandlersEventMap
+
+        type WindowEventHandlers = Fable.Core.TS.Dom.WindowEventHandlers
+
+        type WindowLocalStorage = Fable.Core.TS.Dom.WindowLocalStorage
+
+        type WindowOrWorkerGlobalScope = Fable.Core.TS.Dom.WindowOrWorkerGlobalScope
+
+        type WindowSessionStorage = Fable.Core.TS.Dom.WindowSessionStorage
+
+        type WorkerEventMap = Fable.Core.TS.Dom.WorkerEventMap
+
+        /// <summary>
+        /// The <b><c>Worker</c></b> interface of the Web Workers API represents a background task that can be created via script, which can send messages back to its creator.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Worker">MDN Reference</a>
+        /// </summary>
+        type Worker = Fable.Core.TS.Dom.Worker
+
+        /// <summary>
+        /// The <b><c>Worklet</c></b> interface is a lightweight version of Web Workers and gives developers access to low-level parts of the rendering pipeline.
+        /// Available only in secure contexts.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/Worklet">MDN Reference</a>
+        /// </summary>
+        type Worklet = Fable.Core.TS.Dom.Worklet
+
+        /// <summary>
+        /// The <b><c>WritableStream</c></b> interface of the Streams API provides a standard abstraction for writing streaming data to a destination, known as a sink. This object comes with built-in backpressure and queuing.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStream">MDN Reference</a>
+        /// </summary>
+        type WritableStream<'W> = Fable.Core.TS.Dom.WritableStream<'W>
+
+        /// <summary>
+        /// The <b><c>WritableStreamDefaultController</c></b> interface of the Streams API represents a controller allowing control of a WritableStream's state. When constructing a WritableStream, the underlying sink is given a corresponding WritableStreamDefaultController instance to manipulate.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultController">MDN Reference</a>
+        /// </summary>
+        type WritableStreamDefaultController = Fable.Core.TS.Dom.WritableStreamDefaultController
+
+        /// <summary>
+        /// The <b><c>WritableStreamDefaultWriter</c></b> interface of the Streams API is the object returned by WritableStream.getWriter() and once created locks the writer to the WritableStream ensuring that no other streams can write to the underlying sink.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultWriter">MDN Reference</a>
+        /// </summary>
+        type WritableStreamDefaultWriter<'W> = Fable.Core.TS.Dom.WritableStreamDefaultWriter<'W>
+
+        /// <summary>
+        /// The <b><c>XMLDocument</c></b> interface represents an XML document. It inherits from the generic Document and does not add any specific methods or properties to it: nevertheless, several algorithms behave differently with the two types of documents.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/XMLDocument">MDN Reference</a>
+        /// </summary>
+        type XMLDocument = Fable.Core.TS.Dom.XMLDocument
+
+        type XMLHttpRequestEventMap = Fable.Core.TS.Dom.XMLHttpRequestEventMap
+
+        /// <summary>
+        /// <b><c>XMLHttpRequest</c></b> (XHR) objects are used to interact with servers. You can retrieve data from a URL without having to do a full page refresh. This enables a Web page to update just part of a page without disrupting what the user is doing.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/XMLHttpRequest">MDN Reference</a>
+        /// </summary>
+        type XMLHttpRequest = Fable.Core.TS.Dom.XMLHttpRequest
+
+        type XMLHttpRequestEventTargetEventMap = Fable.Core.TS.Dom.XMLHttpRequestEventTargetEventMap
+
+        /// <summary>
+        /// <b><c>XMLHttpRequestEventTarget</c></b> is the interface that describes the event handlers shared on XMLHttpRequest and XMLHttpRequestUpload.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/XMLHttpRequestEventTarget">MDN Reference</a>
+        /// </summary>
+        type XMLHttpRequestEventTarget = Fable.Core.TS.Dom.XMLHttpRequestEventTarget
+
+        /// <summary>
+        /// The <b><c>XMLHttpRequestUpload</c></b> interface represents the upload process for a specific XMLHttpRequest. It is an opaque object that represents the underlying, browser-dependent, upload process. It is an XMLHttpRequestEventTarget and can be obtained by calling XMLHttpRequest.upload.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/XMLHttpRequestUpload">MDN Reference</a>
+        /// </summary>
+        type XMLHttpRequestUpload = Fable.Core.TS.Dom.XMLHttpRequestUpload
+
+        /// <summary>
+        /// The <b><c>XMLSerializer</c></b> interface provides the serializeToString() method to construct an XML string representing a DOM tree.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/XMLSerializer">MDN Reference</a>
+        /// </summary>
+        type XMLSerializer = Fable.Core.TS.Dom.XMLSerializer
+
+        /// <summary>
+        /// The <b><c>XPathEvaluator</c></b> interface allows to compile and evaluate XPath expressions.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/XPathEvaluator">MDN Reference</a>
+        /// </summary>
+        type XPathEvaluator = Fable.Core.TS.Dom.XPathEvaluator
+
+        type XPathEvaluatorBase = Fable.Core.TS.Dom.XPathEvaluatorBase
+
+        /// <summary>
+        /// This interface is a compiled XPath expression that can be evaluated on a document or specific node to return information from its DOM tree.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/XPathExpression">MDN Reference</a>
+        /// </summary>
+        type XPathExpression = Fable.Core.TS.Dom.XPathExpression
+
+        /// <summary>
+        /// The <b><c>XPathResult</c></b> interface represents the results generated by evaluating an XPath expression within the context of a given node.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/XPathResult">MDN Reference</a>
+        /// </summary>
+        type XPathResult = Fable.Core.TS.Dom.XPathResult
+
+        /// <summary>
+        /// An <b><c>XSLTProcessor</c></b> applies an XSLT stylesheet transformation to an XML document to produce a new XML document as output. It has methods to load the XSLT stylesheet, to manipulate &lt;xsl:param&gt; parameter values, and to apply the transformation to documents.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/XSLTProcessor">MDN Reference</a>
+        /// </summary>
+        type XSLTProcessor = Fable.Core.TS.Dom.XSLTProcessor
+
+        /// <summary>
+        /// The <b><c>console</c></b> object provides access to the debugging console (e.g., the Web console in Firefox).
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/Web/API/console">MDN Reference</a>
+        /// </summary>
+        type Console = Fable.Core.TS.Dom.Console
+
+        type AudioDataOutputCallback = Fable.Core.TS.Dom.AudioDataOutputCallback
+
+        type BlobCallback = Fable.Core.TS.Dom.BlobCallback
+
+        type CustomElementConstructor = Fable.Core.TS.Dom.CustomElementConstructor
+
+        type DecodeErrorCallback = Fable.Core.TS.Dom.DecodeErrorCallback
+
+        type DecodeSuccessCallback = Fable.Core.TS.Dom.DecodeSuccessCallback
+
+        type EncodedAudioChunkOutputCallback = Fable.Core.TS.Dom.EncodedAudioChunkOutputCallback
+
+        type EncodedVideoChunkOutputCallback = Fable.Core.TS.Dom.EncodedVideoChunkOutputCallback
+
+        type ErrorCallback = Fable.Core.TS.Dom.ErrorCallback
+
+        type FileCallback = Fable.Core.TS.Dom.FileCallback
+
+        type FileSystemEntriesCallback = Fable.Core.TS.Dom.FileSystemEntriesCallback
+
+        type FileSystemEntryCallback = Fable.Core.TS.Dom.FileSystemEntryCallback
+
+        type FrameRequestCallback = Fable.Core.TS.Dom.FrameRequestCallback
+
+        type FunctionStringCallback = Fable.Core.TS.Dom.FunctionStringCallback
+
+        type IdleRequestCallback = Fable.Core.TS.Dom.IdleRequestCallback
+
+        type IntersectionObserverCallback = Fable.Core.TS.Dom.IntersectionObserverCallback
+
+        type LockGrantedCallback<'T> = Fable.Core.TS.Dom.LockGrantedCallback<'T>
+
+        type MediaSessionActionHandler = Fable.Core.TS.Dom.MediaSessionActionHandler
+
+        type MutationCallback = Fable.Core.TS.Dom.MutationCallback
+
+        type NavigationInterceptHandler = Fable.Core.TS.Dom.NavigationInterceptHandler
+
+        type NavigationPrecommitHandler = Fable.Core.TS.Dom.NavigationPrecommitHandler
+
+        type NotificationPermissionCallback = Fable.Core.TS.Dom.NotificationPermissionCallback
+
+        type OnBeforeUnloadEventHandlerNonNull = Fable.Core.TS.Dom.OnBeforeUnloadEventHandlerNonNull
+
+        type OnErrorEventHandlerNonNull = Fable.Core.TS.Dom.OnErrorEventHandlerNonNull
+
+        type PerformanceObserverCallback = Fable.Core.TS.Dom.PerformanceObserverCallback
+
+        type PositionCallback = Fable.Core.TS.Dom.PositionCallback
+
+        type PositionErrorCallback = Fable.Core.TS.Dom.PositionErrorCallback
+
+        type QueuingStrategySize<'T> = Fable.Core.TS.Dom.QueuingStrategySize<'T>
+
+        type RTCPeerConnectionErrorCallback = Fable.Core.TS.Dom.RTCPeerConnectionErrorCallback
+
+        type RTCSessionDescriptionCallback = Fable.Core.TS.Dom.RTCSessionDescriptionCallback
+
+        type RemotePlaybackAvailabilityCallback = Fable.Core.TS.Dom.RemotePlaybackAvailabilityCallback
+
+        type ReportingObserverCallback = Fable.Core.TS.Dom.ReportingObserverCallback
+
+        type ResizeObserverCallback = Fable.Core.TS.Dom.ResizeObserverCallback
+
+        type SchedulerPostTaskCallback = Fable.Core.TS.Dom.SchedulerPostTaskCallback
+
+        type TransformerFlushCallback<'O> = Fable.Core.TS.Dom.TransformerFlushCallback<'O>
+
+        type TransformerStartCallback<'O> = Fable.Core.TS.Dom.TransformerStartCallback<'O>
+
+        type TransformerTransformCallback<'I, 'O> = Fable.Core.TS.Dom.TransformerTransformCallback<'I, 'O>
+
+        type UnderlyingSinkAbortCallback = Fable.Core.TS.Dom.UnderlyingSinkAbortCallback
+
+        type UnderlyingSinkCloseCallback = Fable.Core.TS.Dom.UnderlyingSinkCloseCallback
+
+        type UnderlyingSinkStartCallback = Fable.Core.TS.Dom.UnderlyingSinkStartCallback
+
+        type UnderlyingSinkWriteCallback<'W> = Fable.Core.TS.Dom.UnderlyingSinkWriteCallback<'W>
+
+        type UnderlyingSourceCancelCallback = Fable.Core.TS.Dom.UnderlyingSourceCancelCallback
+
+        type UnderlyingSourcePullCallback<'R> = Fable.Core.TS.Dom.UnderlyingSourcePullCallback<'R>
+
+        type UnderlyingSourceStartCallback<'R> = Fable.Core.TS.Dom.UnderlyingSourceStartCallback<'R>
+
+        type VideoFrameOutputCallback = Fable.Core.TS.Dom.VideoFrameOutputCallback
+
+        type VideoFrameRequestCallback = Fable.Core.TS.Dom.VideoFrameRequestCallback
+
+        type ViewTransitionUpdateCallback = Fable.Core.TS.Dom.ViewTransitionUpdateCallback
+
+        type VoidFunction = Fable.Core.TS.Dom.VoidFunction
+
+        type WebCodecsErrorCallback = Fable.Core.TS.Dom.WebCodecsErrorCallback
+
+        type HTMLElementTagNameMap = Fable.Core.TS.Dom.HTMLElementTagNameMap
+
+        type HTMLElementDeprecatedTagNameMap = Fable.Core.TS.Dom.HTMLElementDeprecatedTagNameMap
+
+        type SVGElementTagNameMap = Fable.Core.TS.Dom.SVGElementTagNameMap
+
+        type MathMLElementTagNameMap = Fable.Core.TS.Dom.MathMLElementTagNameMap
+
+        /// <remarks>@deprecated Directly use HTMLElementTagNameMap or SVGElementTagNameMap as appropriate, instead.</remarks>
+        type ElementTagNameMap = Fable.Core.TS.Dom.ElementTagNameMap
+
+        type AlgorithmIdentifier = U2<string, Fable.Core.TS.Dom.Algorithm>
+
+        type AllowSharedBufferSource =
+            U3<
+                Fable.Core.TS.Es.ArrayBuffer,
+                Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBufferLike>,
+                Fable.Core.TS.Es.SharedArrayBuffer
+             >
+
+        type AutoFill = string
+
+        type AutoFillField = Fable.Core.TS.Dom.AutoFillField
+
+        type AutoFillSection = string
+
+        type Base64URLString = string
+
+        type BigInteger = Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>
+
+        type BlobPart =
+            U4<
+                string,
+                Fable.Core.TS.Es.ArrayBuffer,
+                Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBuffer>,
+                Fable.Core.TS.Dom.Blob
+             >
+
+        type BluetoothServiceUUID = U2<string, float>
+
+        type BodyInit =
+            U7<
+                string,
+                Fable.Core.TS.Es.ArrayBuffer,
+                Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBuffer>,
+                Fable.Core.TS.Dom.Blob,
+                Fable.Core.TS.Dom.FormData,
+                Fable.Core.TS.Dom.ReadableStream<obj>,
+                Fable.Core.TS.Dom.URLSearchParams
+             >
+
+        type BufferSource =
+            U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBuffer>>
+
+        type COSEAlgorithmIdentifier = float
+
+        type CSSKeywordish = U2<string, Fable.Core.TS.Dom.CSSKeywordValue>
+
+        type CSSNumberish = U2<float, Fable.Core.TS.Dom.CSSNumericValue>
+
+        type CSSPerspectiveValue = U3<string, Fable.Core.TS.Dom.CSSKeywordValue, Fable.Core.TS.Dom.CSSNumericValue>
+
+        type CSSUnparsedSegment = U2<string, Fable.Core.TS.Dom.CSSVariableReferenceValue>
+
+        type CanvasImageSource =
+            U7<
+                Fable.Core.TS.Dom.HTMLCanvasElement,
+                Fable.Core.TS.Dom.HTMLImageElement,
+                Fable.Core.TS.Dom.HTMLVideoElement,
+                Fable.Core.TS.Dom.ImageBitmap,
+                Fable.Core.TS.Dom.OffscreenCanvas,
+                Fable.Core.TS.Dom.SVGImageElement,
+                Fable.Core.TS.Dom.VideoFrame
+             >
+
+        type ClipboardItemData = JS.Promise<U2<string, Fable.Core.TS.Dom.Blob>>
+
+        type ClipboardItems = Fable.Core.TS.Dom.ClipboardItem[]
+
+        type ConstrainBoolean = U2<bool, Fable.Core.TS.Dom.ConstrainBooleanParameters>
+
+        type ConstrainBooleanOrDOMString = U3<string, bool, Fable.Core.TS.Dom.ConstrainBooleanOrDOMStringParameters>
+
+        type ConstrainDOMString = U3<string, string[], Fable.Core.TS.Dom.ConstrainDOMStringParameters>
+
+        type ConstrainDouble = U2<float, Fable.Core.TS.Dom.ConstrainDoubleRange>
+
+        type ConstrainULong = U2<float, Fable.Core.TS.Dom.ConstrainULongRange>
+
+        type CookieList = Fable.Core.TS.Dom.CookieListItem[]
+
+        type DOMHighResTimeStamp = float
+
+        type EpochTimeStamp = float
+
+        type EventListenerOrEventListenerObject =
+            U2<Fable.Core.TS.Dom.EventListener, Fable.Core.TS.Dom.EventListenerObject>
+
+        type FileSystemWriteChunkType =
+            U5<
+                string,
+                Fable.Core.TS.Es.ArrayBuffer,
+                Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBuffer>,
+                Fable.Core.TS.Dom.Blob,
+                Fable.Core.TS.Dom.WriteParams
+             >
+
+        type Float32List = U2<float[], Fable.Core.TS.Es.Float32Array<Fable.Core.TS.Es.ArrayBufferLike>>
+
+        type FormDataEntryValue = U2<string, Fable.Core.TS.Dom.File>
+
+        type GLbitfield = float
+
+        type GLboolean = bool
+
+        type GLclampf = float
+
+        type GLenum = float
+
+        type GLfloat = float
+
+        type GLint = float
+
+        type GLint64 = float
+
+        type GLintptr = float
+
+        type GLsizei = float
+
+        type GLsizeiptr = float
+
+        type GLuint = float
+
+        type GLuint64 = float
+
+        type GPUBindingResource =
+            U6<
+                Fable.Core.TS.Dom.GPUBuffer,
+                Fable.Core.TS.Dom.GPUBufferBinding,
+                Fable.Core.TS.Dom.GPUExternalTexture,
+                Fable.Core.TS.Dom.GPUSampler,
+                Fable.Core.TS.Dom.GPUTexture,
+                Fable.Core.TS.Dom.GPUTextureView
+             >
+
+        type GPUBufferDynamicOffset = float
+
+        type GPUBufferUsageFlags = float
+
+        type GPUColor = U2<float[], Fable.Core.TS.Dom.GPUColorDict>
+
+        type GPUColorWriteFlags = float
+
+        type GPUCopyExternalImageSource =
+            U7<
+                Fable.Core.TS.Dom.HTMLCanvasElement,
+                Fable.Core.TS.Dom.HTMLImageElement,
+                Fable.Core.TS.Dom.HTMLVideoElement,
+                Fable.Core.TS.Dom.ImageBitmap,
+                Fable.Core.TS.Dom.ImageData,
+                Fable.Core.TS.Dom.OffscreenCanvas,
+                Fable.Core.TS.Dom.VideoFrame
+             >
+
+        type GPUDepthBias = float
+
+        type GPUExtent3D = U2<float[], Fable.Core.TS.Dom.GPUExtent3DDict>
+
+        type GPUFlagsConstant = float
+
+        type GPUIndex32 = float
+
+        type GPUIntegerCoordinate = float
+
+        type GPUIntegerCoordinateOut = float
+
+        type GPUMapModeFlags = float
+
+        type GPUOrigin2D = U2<float[], Fable.Core.TS.Dom.GPUOrigin2DDict>
+
+        type GPUOrigin3D = U2<float[], Fable.Core.TS.Dom.GPUOrigin3DDict>
+
+        type GPUPipelineConstantValue = float
+
+        type GPUSampleMask = float
+
+        type GPUShaderStageFlags = float
+
+        type GPUSignedOffset32 = float
+
+        type GPUSize32 = float
+
+        type GPUSize32Out = float
+
+        type GPUSize64 = float
+
+        type GPUSize64Out = float
+
+        type GPUStencilValue = float
+
+        type GPUTextureUsageFlags = float
+
+        type HTMLOrSVGImageElement = U2<Fable.Core.TS.Dom.HTMLImageElement, Fable.Core.TS.Dom.SVGImageElement>
+
+        type HTMLOrSVGScriptElement = U2<Fable.Core.TS.Dom.HTMLScriptElement, Fable.Core.TS.Dom.SVGScriptElement>
+
+        type HashAlgorithmIdentifier = U2<string, Fable.Core.TS.Dom.Algorithm>
+
+        type HeadersInit = U3<(string * string)[], Fable.Core.TS.Dom.Headers, JS.Record<string, string>>
+
+        type IDBValidKey =
+            U6<
+                string,
+                float,
+                obj[],
+                Fable.Core.TS.Es.ArrayBuffer,
+                Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBuffer>,
+                Fable.Core.TS.Es.Date
+             >
+
+        type ImageBitmapSource =
+            U9<
+                Fable.Core.TS.Dom.Blob,
+                Fable.Core.TS.Dom.HTMLCanvasElement,
+                Fable.Core.TS.Dom.HTMLImageElement,
+                Fable.Core.TS.Dom.HTMLVideoElement,
+                Fable.Core.TS.Dom.ImageBitmap,
+                Fable.Core.TS.Dom.ImageData,
+                Fable.Core.TS.Dom.OffscreenCanvas,
+                Fable.Core.TS.Dom.SVGImageElement,
+                Fable.Core.TS.Dom.VideoFrame
+             >
+
+        type ImageBufferSource =
+            U4<
+                Fable.Core.TS.Es.ArrayBuffer,
+                Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBufferLike>,
+                Fable.Core.TS.Dom.ReadableStream<obj>,
+                Fable.Core.TS.Es.SharedArrayBuffer
+             >
+
+        type ImageDataArray = Fable.Core.TS.Es.Uint8ClampedArray<Fable.Core.TS.Es.ArrayBuffer>
+
+        type Int32List = U2<float[], Fable.Core.TS.Es.Int32Array<Fable.Core.TS.Es.ArrayBufferLike>>
+
+        type LineAndPositionSetting = U2<float, string>
+
+        type MediaProvider = U3<Fable.Core.TS.Dom.Blob, Fable.Core.TS.Dom.MediaSource, Fable.Core.TS.Dom.MediaStream>
+
+        type MessageEventSource =
+            U3<Fable.Core.TS.Dom.MessagePort, Fable.Core.TS.Dom.ServiceWorker, Fable.Core.TS.Dom.Window>
+
+        type MutationRecordType = Fable.Core.TS.Dom.MutationRecordType
+
+        type NamedCurve = string
+
+        type OffscreenRenderingContext =
+            U5<
+                Fable.Core.TS.Dom.GPUCanvasContext,
+                Fable.Core.TS.Dom.ImageBitmapRenderingContext,
+                Fable.Core.TS.Dom.OffscreenCanvasRenderingContext2D,
+                Fable.Core.TS.Dom.WebGL2RenderingContext,
+                Fable.Core.TS.Dom.WebGLRenderingContext
+             >
+
+        type OnBeforeUnloadEventHandler = Fable.Core.TS.Dom.OnBeforeUnloadEventHandlerNonNull option
+
+        type OnErrorEventHandler = Fable.Core.TS.Dom.OnErrorEventHandlerNonNull option
+
+        [<Erase>]
+        type OptionalPostfixToken<'T> = private OptionalPostfixToken__ of string
+
+        [<Erase>]
+        type OptionalPrefixToken<'T> = private OptionalPrefixToken__ of string
+
+        type PerformanceEntryList = Fable.Core.TS.Dom.PerformanceEntry[]
+
+        type PublicKeyCredentialClientCapabilities = JS.Record<string, bool>
+
+        type RTCRtpReceiverTransform = obj
+
+        type RTCRtpSenderTransform = obj
+
+        type ReadableStreamController<'T> =
+            U2<Fable.Core.TS.Dom.ReadableByteStreamController, Fable.Core.TS.Dom.ReadableStreamDefaultController<'T>>
+
+        type ReadableStreamReadResult<'T> =
+            U2<Fable.Core.TS.Dom.ReadableStreamReadDoneResult<'T>, Fable.Core.TS.Dom.ReadableStreamReadValueResult<'T>>
+
+        type ReadableStreamReader<'T> =
+            U2<Fable.Core.TS.Dom.ReadableStreamBYOBReader, Fable.Core.TS.Dom.ReadableStreamDefaultReader<'T>>
+
+        type RenderingContext =
+            U5<
+                Fable.Core.TS.Dom.CanvasRenderingContext2D,
+                Fable.Core.TS.Dom.GPUCanvasContext,
+                Fable.Core.TS.Dom.ImageBitmapRenderingContext,
+                Fable.Core.TS.Dom.WebGL2RenderingContext,
+                Fable.Core.TS.Dom.WebGLRenderingContext
+             >
+
+        type ReportList = Fable.Core.TS.Dom.Report[]
+
+        type RequestInfo = U2<string, Fable.Core.TS.Dom.Request>
+
+        type SanitizerAttribute = U2<string, Fable.Core.TS.Dom.SanitizerAttributeNamespace>
+
+        type SanitizerElement = U2<string, Fable.Core.TS.Dom.SanitizerElementNamespace>
+
+        type SanitizerElementWithAttributes = U2<string, Fable.Core.TS.Dom.SanitizerElementNamespaceWithAttributes>
+
+        type SanitizerPI = U2<string, Fable.Core.TS.Dom.SanitizerProcessingInstruction>
+
+        type SelectionDirection = Fable.Core.TS.Dom.SelectionDirection
+
+        type TexImageSource = Fable.Core.TS.Dom.GPUCopyExternalImageSource
+
+        type TimerHandler = U2<string, Fable.Core.TS.Es.Function>
+
+        type Transferable = obj
+
+        type URLPatternInput = U2<string, Fable.Core.TS.Dom.URLPatternInit>
+
+        type Uint32List = U2<float[], Fable.Core.TS.Es.Uint32Array<Fable.Core.TS.Es.ArrayBufferLike>>
+
+        type VibratePattern = U2<float, float[]>
+
+        type WindowProxy = Fable.Core.TS.Dom.Window
+
+        type XMLHttpRequestBodyInit =
+            U6<
+                string,
+                Fable.Core.TS.Es.ArrayBuffer,
+                Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBuffer>,
+                Fable.Core.TS.Dom.Blob,
+                Fable.Core.TS.Dom.FormData,
+                Fable.Core.TS.Dom.URLSearchParams
+             >
+
+        type AacBitstreamFormat = Fable.Core.TS.Dom.AacBitstreamFormat
+
+        type AlignSetting = Fable.Core.TS.Dom.AlignSetting
+
+        type AlphaOption = Fable.Core.TS.Dom.AlphaOption
+
+        type AnimationPlayState = Fable.Core.TS.Dom.AnimationPlayState
+
+        type AnimationReplaceState = Fable.Core.TS.Dom.AnimationReplaceState
+
+        type AppendMode = Fable.Core.TS.Dom.AppendMode
+
+        type AttestationConveyancePreference = Fable.Core.TS.Dom.AttestationConveyancePreference
+
+        type AudioContextLatencyCategory = Fable.Core.TS.Dom.AudioContextLatencyCategory
+
+        type AudioContextState = Fable.Core.TS.Dom.AudioContextState
+
+        type AudioSampleFormat = Fable.Core.TS.Dom.AudioSampleFormat
+
+        type AuthenticatorAttachment = Fable.Core.TS.Dom.AuthenticatorAttachment
+
+        type AuthenticatorTransport = Fable.Core.TS.Dom.AuthenticatorTransport
+
+        type AutoFillAddressKind = Fable.Core.TS.Dom.AutoFillAddressKind
+
+        type AutoFillBase = Fable.Core.TS.Dom.AutoFillBase
+
+        type AutoFillContactField = Fable.Core.TS.Dom.AutoFillContactField
+
+        type AutoFillContactKind = Fable.Core.TS.Dom.AutoFillContactKind
+
+        type AutoFillCredentialField = string
+
+        type AutoFillNormalField = Fable.Core.TS.Dom.AutoFillNormalField
+
+        type AutoKeyword = string
+
+        type AutomationRate = Fable.Core.TS.Dom.AutomationRate
+
+        type AvcBitstreamFormat = Fable.Core.TS.Dom.AvcBitstreamFormat
+
+        type BinaryType = Fable.Core.TS.Dom.BinaryType
+
+        type BiquadFilterType = Fable.Core.TS.Dom.BiquadFilterType
+
+        type BitrateMode = Fable.Core.TS.Dom.BitrateMode
+
+        type CSSMathOperator = Fable.Core.TS.Dom.CSSMathOperator
+
+        type CSSNumericBaseType = Fable.Core.TS.Dom.CSSNumericBaseType
+
+        type CanPlayTypeResult = Fable.Core.TS.Dom.CanPlayTypeResult
+
+        type CanvasDirection = Fable.Core.TS.Dom.CanvasDirection
+
+        type CanvasFillRule = Fable.Core.TS.Dom.CanvasFillRule
+
+        type CanvasFontKerning = Fable.Core.TS.Dom.CanvasFontKerning
+
+        type CanvasFontStretch = Fable.Core.TS.Dom.CanvasFontStretch
+
+        type CanvasFontVariantCaps = Fable.Core.TS.Dom.CanvasFontVariantCaps
+
+        type CanvasLineCap = Fable.Core.TS.Dom.CanvasLineCap
+
+        type CanvasLineJoin = Fable.Core.TS.Dom.CanvasLineJoin
+
+        type CanvasTextAlign = Fable.Core.TS.Dom.CanvasTextAlign
+
+        type CanvasTextBaseline = Fable.Core.TS.Dom.CanvasTextBaseline
+
+        type CanvasTextRendering = Fable.Core.TS.Dom.CanvasTextRendering
+
+        type ChannelCountMode = Fable.Core.TS.Dom.ChannelCountMode
+
+        type ChannelInterpretation = Fable.Core.TS.Dom.ChannelInterpretation
+
+        type ClientTypes = Fable.Core.TS.Dom.ClientTypes
+
+        type CodecState = Fable.Core.TS.Dom.CodecState
+
+        type ColorGamut = Fable.Core.TS.Dom.ColorGamut
+
+        type ColorSpaceConversion = Fable.Core.TS.Dom.ColorSpaceConversion
+
+        type CompositeOperation = Fable.Core.TS.Dom.CompositeOperation
+
+        type CompositeOperationOrAuto = Fable.Core.TS.Dom.CompositeOperationOrAuto
+
+        type CompressionFormat = Fable.Core.TS.Dom.CompressionFormat
+
+        type CookieSameSite = Fable.Core.TS.Dom.CookieSameSite
+
+        type CredentialMediationRequirement = Fable.Core.TS.Dom.CredentialMediationRequirement
+
+        type DOMParserSupportedType = Fable.Core.TS.Dom.DOMParserSupportedType
+
+        type DigitalCredentialPresentationProtocol = string
+
+        type DirectionSetting = Fable.Core.TS.Dom.DirectionSetting
+
+        type DisplayCaptureSurfaceType = Fable.Core.TS.Dom.DisplayCaptureSurfaceType
+
+        type DistanceModelType = Fable.Core.TS.Dom.DistanceModelType
+
+        type DocumentReadyState = Fable.Core.TS.Dom.DocumentReadyState
+
+        type DocumentVisibilityState = Fable.Core.TS.Dom.DocumentVisibilityState
+
+        type EncodedAudioChunkType = Fable.Core.TS.Dom.EncodedAudioChunkType
+
+        type EncodedVideoChunkType = Fable.Core.TS.Dom.EncodedVideoChunkType
+
+        type EndOfStreamError = Fable.Core.TS.Dom.EndOfStreamError
+
+        type EndingType = Fable.Core.TS.Dom.EndingType
+
+        type FileSystemHandleKind = Fable.Core.TS.Dom.FileSystemHandleKind
+
+        type FillLightMode = Fable.Core.TS.Dom.FillLightMode
+
+        type FillMode = Fable.Core.TS.Dom.FillMode
+
+        type FlowControlType = Fable.Core.TS.Dom.FlowControlType
+
+        type FontDisplay = Fable.Core.TS.Dom.FontDisplay
+
+        type FontFaceLoadStatus = Fable.Core.TS.Dom.FontFaceLoadStatus
+
+        type FontFaceSetLoadStatus = Fable.Core.TS.Dom.FontFaceSetLoadStatus
+
+        type FullscreenKeyboardLock = Fable.Core.TS.Dom.FullscreenKeyboardLock
+
+        type FullscreenNavigationUI = Fable.Core.TS.Dom.FullscreenNavigationUI
+
+        type GPUAddressMode = Fable.Core.TS.Dom.GPUAddressMode
+
+        type GPUAutoLayoutMode = string
+
+        type GPUBlendFactor = Fable.Core.TS.Dom.GPUBlendFactor
+
+        type GPUBlendOperation = Fable.Core.TS.Dom.GPUBlendOperation
+
+        type GPUBufferBindingType = Fable.Core.TS.Dom.GPUBufferBindingType
+
+        type GPUBufferMapState = Fable.Core.TS.Dom.GPUBufferMapState
+
+        type GPUCanvasAlphaMode = Fable.Core.TS.Dom.GPUCanvasAlphaMode
+
+        type GPUCanvasToneMappingMode = Fable.Core.TS.Dom.GPUCanvasToneMappingMode
+
+        type GPUCompareFunction = Fable.Core.TS.Dom.GPUCompareFunction
+
+        type GPUCompilationMessageType = Fable.Core.TS.Dom.GPUCompilationMessageType
+
+        type GPUCullMode = Fable.Core.TS.Dom.GPUCullMode
+
+        type GPUDeviceLostReason = Fable.Core.TS.Dom.GPUDeviceLostReason
+
+        type GPUErrorFilter = Fable.Core.TS.Dom.GPUErrorFilter
+
+        type GPUFeatureName = Fable.Core.TS.Dom.GPUFeatureName
+
+        type GPUFilterMode = Fable.Core.TS.Dom.GPUFilterMode
+
+        type GPUFrontFace = Fable.Core.TS.Dom.GPUFrontFace
+
+        type GPUIndexFormat = Fable.Core.TS.Dom.GPUIndexFormat
+
+        type GPULoadOp = Fable.Core.TS.Dom.GPULoadOp
+
+        type GPUMipmapFilterMode = Fable.Core.TS.Dom.GPUMipmapFilterMode
+
+        type GPUPipelineErrorReason = Fable.Core.TS.Dom.GPUPipelineErrorReason
+
+        type GPUPowerPreference = Fable.Core.TS.Dom.GPUPowerPreference
+
+        type GPUPrimitiveTopology = Fable.Core.TS.Dom.GPUPrimitiveTopology
+
+        type GPUQueryType = Fable.Core.TS.Dom.GPUQueryType
+
+        type GPUSamplerBindingType = Fable.Core.TS.Dom.GPUSamplerBindingType
+
+        type GPUStencilOperation = Fable.Core.TS.Dom.GPUStencilOperation
+
+        type GPUStorageTextureAccess = Fable.Core.TS.Dom.GPUStorageTextureAccess
+
+        type GPUStoreOp = Fable.Core.TS.Dom.GPUStoreOp
+
+        type GPUTextureAspect = Fable.Core.TS.Dom.GPUTextureAspect
+
+        type GPUTextureDimension = Fable.Core.TS.Dom.GPUTextureDimension
+
+        type GPUTextureFormat = Fable.Core.TS.Dom.GPUTextureFormat
+
+        type GPUTextureSampleType = Fable.Core.TS.Dom.GPUTextureSampleType
+
+        type GPUTextureViewDimension = Fable.Core.TS.Dom.GPUTextureViewDimension
+
+        type GPUVertexFormat = Fable.Core.TS.Dom.GPUVertexFormat
+
+        type GPUVertexStepMode = Fable.Core.TS.Dom.GPUVertexStepMode
+
+        type GamepadHapticEffectType = Fable.Core.TS.Dom.GamepadHapticEffectType
+
+        type GamepadHapticsResult = Fable.Core.TS.Dom.GamepadHapticsResult
+
+        type GamepadMappingType = Fable.Core.TS.Dom.GamepadMappingType
+
+        type GlobalCompositeOperation = Fable.Core.TS.Dom.GlobalCompositeOperation
+
+        type HardwareAcceleration = Fable.Core.TS.Dom.HardwareAcceleration
+
+        type HdrMetadataType = Fable.Core.TS.Dom.HdrMetadataType
+
+        type HighlightType = Fable.Core.TS.Dom.HighlightType
+
+        type IDBCursorDirection = Fable.Core.TS.Dom.IDBCursorDirection
+
+        type IDBRequestReadyState = Fable.Core.TS.Dom.IDBRequestReadyState
+
+        type IDBTransactionDurability = Fable.Core.TS.Dom.IDBTransactionDurability
+
+        type IDBTransactionMode = Fable.Core.TS.Dom.IDBTransactionMode
+
+        type ImageDataPixelFormat = Fable.Core.TS.Dom.ImageDataPixelFormat
+
+        type ImageOrientation = Fable.Core.TS.Dom.ImageOrientation
+
+        type ImageSmoothingQuality = Fable.Core.TS.Dom.ImageSmoothingQuality
+
+        type InsertPosition = Fable.Core.TS.Dom.InsertPosition
+
+        type IterationCompositeOperation = Fable.Core.TS.Dom.IterationCompositeOperation
+
+        type KeyFormat = Fable.Core.TS.Dom.KeyFormat
+
+        type KeyType = Fable.Core.TS.Dom.KeyType
+
+        type KeyUsage = Fable.Core.TS.Dom.KeyUsage
+
+        type LatencyMode = Fable.Core.TS.Dom.LatencyMode
+
+        type LineAlignSetting = Fable.Core.TS.Dom.LineAlignSetting
+
+        type LockMode = Fable.Core.TS.Dom.LockMode
+
+        type LoginStatus = Fable.Core.TS.Dom.LoginStatus
+
+        type MIDIPortConnectionState = Fable.Core.TS.Dom.MIDIPortConnectionState
+
+        type MIDIPortDeviceState = Fable.Core.TS.Dom.MIDIPortDeviceState
+
+        type MIDIPortType = Fable.Core.TS.Dom.MIDIPortType
+
+        type MediaDecodingType = Fable.Core.TS.Dom.MediaDecodingType
+
+        type MediaDeviceKind = Fable.Core.TS.Dom.MediaDeviceKind
+
+        type MediaEncodingType = Fable.Core.TS.Dom.MediaEncodingType
+
+        type MediaKeyMessageType = Fable.Core.TS.Dom.MediaKeyMessageType
+
+        type MediaKeySessionClosedReason = Fable.Core.TS.Dom.MediaKeySessionClosedReason
+
+        type MediaKeySessionType = Fable.Core.TS.Dom.MediaKeySessionType
+
+        type MediaKeyStatus = Fable.Core.TS.Dom.MediaKeyStatus
+
+        type MediaKeysRequirement = Fable.Core.TS.Dom.MediaKeysRequirement
+
+        type MediaSessionAction = Fable.Core.TS.Dom.MediaSessionAction
+
+        type MediaSessionPlaybackState = Fable.Core.TS.Dom.MediaSessionPlaybackState
+
+        type MediaStreamTrackState = Fable.Core.TS.Dom.MediaStreamTrackState
+
+        type NavigationFocusReset = Fable.Core.TS.Dom.NavigationFocusReset
+
+        type NavigationHistoryBehavior = Fable.Core.TS.Dom.NavigationHistoryBehavior
+
+        type NavigationScrollBehavior = Fable.Core.TS.Dom.NavigationScrollBehavior
+
+        type NavigationTimingType = Fable.Core.TS.Dom.NavigationTimingType
+
+        type NavigationType = Fable.Core.TS.Dom.NavigationType
+
+        type NotificationDirection = Fable.Core.TS.Dom.NotificationDirection
+
+        type NotificationPermission = Fable.Core.TS.Dom.NotificationPermission
+
+        type OffscreenRenderingContextId = Fable.Core.TS.Dom.OffscreenRenderingContextId
+
+        type OpusBitstreamFormat = Fable.Core.TS.Dom.OpusBitstreamFormat
+
+        type OrientationLockType = Fable.Core.TS.Dom.OrientationLockType
+
+        type OrientationType = Fable.Core.TS.Dom.OrientationType
+
+        type OscillatorType = Fable.Core.TS.Dom.OscillatorType
+
+        type OverSampleType = Fable.Core.TS.Dom.OverSampleType
+
+        type PanningModelType = Fable.Core.TS.Dom.PanningModelType
+
+        type ParityType = Fable.Core.TS.Dom.ParityType
+
+        type PaymentComplete = Fable.Core.TS.Dom.PaymentComplete
+
+        type PaymentShippingType = Fable.Core.TS.Dom.PaymentShippingType
+
+        type PermissionName = Fable.Core.TS.Dom.PermissionName
+
+        type PermissionState = Fable.Core.TS.Dom.PermissionState
+
+        type PlaybackDirection = Fable.Core.TS.Dom.PlaybackDirection
+
+        type PositionAlignSetting = Fable.Core.TS.Dom.PositionAlignSetting
+
+        type PredefinedColorSpace = Fable.Core.TS.Dom.PredefinedColorSpace
+
+        type PremultiplyAlpha = Fable.Core.TS.Dom.PremultiplyAlpha
+
+        type PresentationStyle = Fable.Core.TS.Dom.PresentationStyle
+
+        type PublicKeyCredentialType = string
+
+        type PushEncryptionKeyName = Fable.Core.TS.Dom.PushEncryptionKeyName
+
+        type RTCBundlePolicy = Fable.Core.TS.Dom.RTCBundlePolicy
+
+        type RTCDataChannelState = Fable.Core.TS.Dom.RTCDataChannelState
+
+        type RTCDegradationPreference = Fable.Core.TS.Dom.RTCDegradationPreference
+
+        type RTCDtlsRole = Fable.Core.TS.Dom.RTCDtlsRole
+
+        type RTCDtlsTransportState = Fable.Core.TS.Dom.RTCDtlsTransportState
+
+        type RTCErrorDetailType = Fable.Core.TS.Dom.RTCErrorDetailType
+
+        type RTCIceCandidateType = Fable.Core.TS.Dom.RTCIceCandidateType
+
+        type RTCIceComponent = Fable.Core.TS.Dom.RTCIceComponent
+
+        type RTCIceConnectionState = Fable.Core.TS.Dom.RTCIceConnectionState
+
+        type RTCIceGathererState = Fable.Core.TS.Dom.RTCIceGathererState
+
+        type RTCIceGatheringState = Fable.Core.TS.Dom.RTCIceGatheringState
+
+        type RTCIceProtocol = Fable.Core.TS.Dom.RTCIceProtocol
+
+        type RTCIceRole = Fable.Core.TS.Dom.RTCIceRole
+
+        type RTCIceTcpCandidateType = Fable.Core.TS.Dom.RTCIceTcpCandidateType
+
+        type RTCIceTransportPolicy = Fable.Core.TS.Dom.RTCIceTransportPolicy
+
+        type RTCIceTransportState = Fable.Core.TS.Dom.RTCIceTransportState
+
+        type RTCPeerConnectionState = Fable.Core.TS.Dom.RTCPeerConnectionState
+
+        type RTCPriorityType = Fable.Core.TS.Dom.RTCPriorityType
+
+        type RTCQualityLimitationReason = Fable.Core.TS.Dom.RTCQualityLimitationReason
+
+        type RTCRtcpMuxPolicy = string
+
+        type RTCRtpTransceiverDirection = Fable.Core.TS.Dom.RTCRtpTransceiverDirection
+
+        type RTCSctpTransportState = Fable.Core.TS.Dom.RTCSctpTransportState
+
+        type RTCSdpType = Fable.Core.TS.Dom.RTCSdpType
+
+        type RTCSignalingState = Fable.Core.TS.Dom.RTCSignalingState
+
+        type RTCStatsIceCandidatePairState = Fable.Core.TS.Dom.RTCStatsIceCandidatePairState
+
+        type RTCStatsType = Fable.Core.TS.Dom.RTCStatsType
+
+        type ReadableStreamReaderMode = string
+
+        type ReadableStreamType = string
+
+        type ReadyState = Fable.Core.TS.Dom.ReadyState
+
+        type RecordingState = Fable.Core.TS.Dom.RecordingState
+
+        type RedEyeReduction = Fable.Core.TS.Dom.RedEyeReduction
+
+        type ReferrerPolicy = Fable.Core.TS.Dom.ReferrerPolicy
+
+        type RemotePlaybackState = Fable.Core.TS.Dom.RemotePlaybackState
+
+        type RequestCache = Fable.Core.TS.Dom.RequestCache
+
+        type RequestCredentials = Fable.Core.TS.Dom.RequestCredentials
+
+        type RequestDestination = Fable.Core.TS.Dom.RequestDestination
+
+        type RequestMode = Fable.Core.TS.Dom.RequestMode
+
+        type RequestPriority = Fable.Core.TS.Dom.RequestPriority
+
+        type RequestRedirect = Fable.Core.TS.Dom.RequestRedirect
+
+        type ResidentKeyRequirement = Fable.Core.TS.Dom.ResidentKeyRequirement
+
+        type ResizeObserverBoxOptions = Fable.Core.TS.Dom.ResizeObserverBoxOptions
+
+        type ResizeQuality = Fable.Core.TS.Dom.ResizeQuality
+
+        type ResponseType = Fable.Core.TS.Dom.ResponseType
+
+        type SanitizerPresets = string
+
+        type ScrollAxis = Fable.Core.TS.Dom.ScrollAxis
+
+        type ScrollBehavior = Fable.Core.TS.Dom.ScrollBehavior
+
+        type ScrollLogicalPosition = Fable.Core.TS.Dom.ScrollLogicalPosition
+
+        type ScrollRestoration = Fable.Core.TS.Dom.ScrollRestoration
+
+        type ScrollSetting = Fable.Core.TS.Dom.ScrollSetting
+
+        type SecurityPolicyViolationEventDisposition = Fable.Core.TS.Dom.SecurityPolicyViolationEventDisposition
+
+        type SelectionMode = Fable.Core.TS.Dom.SelectionMode
+
+        type ServiceWorkerState = Fable.Core.TS.Dom.ServiceWorkerState
+
+        type ServiceWorkerUpdateViaCache = Fable.Core.TS.Dom.ServiceWorkerUpdateViaCache
+
+        type ShadowRootMode = Fable.Core.TS.Dom.ShadowRootMode
+
+        type SlotAssignmentMode = Fable.Core.TS.Dom.SlotAssignmentMode
+
+        type SpeechRecognitionErrorCode = Fable.Core.TS.Dom.SpeechRecognitionErrorCode
+
+        type SpeechSynthesisErrorCode = Fable.Core.TS.Dom.SpeechSynthesisErrorCode
+
+        type TaskPriority = Fable.Core.TS.Dom.TaskPriority
+
+        type TextTrackKind = Fable.Core.TS.Dom.TextTrackKind
+
+        type TextTrackMode = Fable.Core.TS.Dom.TextTrackMode
+
+        type TouchType = Fable.Core.TS.Dom.TouchType
+
+        type TransferFunction = Fable.Core.TS.Dom.TransferFunction
+
+        type UserVerificationRequirement = Fable.Core.TS.Dom.UserVerificationRequirement
+
+        type VideoColorPrimaries = Fable.Core.TS.Dom.VideoColorPrimaries
+
+        type VideoEncoderBitrateMode = Fable.Core.TS.Dom.VideoEncoderBitrateMode
+
+        type VideoFacingModeEnum = Fable.Core.TS.Dom.VideoFacingModeEnum
+
+        type VideoMatrixCoefficients = Fable.Core.TS.Dom.VideoMatrixCoefficients
+
+        type VideoPixelFormat = Fable.Core.TS.Dom.VideoPixelFormat
+
+        type VideoTransferCharacteristics = Fable.Core.TS.Dom.VideoTransferCharacteristics
+
+        type WakeLockType = string
+
+        type WebGLPowerPreference = Fable.Core.TS.Dom.WebGLPowerPreference
+
+        type WebTransportCongestionControl = Fable.Core.TS.Dom.WebTransportCongestionControl
+
+        type WebTransportErrorSource = Fable.Core.TS.Dom.WebTransportErrorSource
+
+        type WebTransportReliabilityMode = Fable.Core.TS.Dom.WebTransportReliabilityMode
+
+        type WorkerType = Fable.Core.TS.Dom.WorkerType
+
+        type WriteCommandType = Fable.Core.TS.Dom.WriteCommandType
+
+        type XMLHttpRequestResponseType = Fable.Core.TS.Dom.XMLHttpRequestResponseType
+
+        type FormDataIterator<'T> = Fable.Core.TS.Dom.FormDataIterator<'T>
+
+        type HeadersIterator<'T> = Fable.Core.TS.Dom.HeadersIterator<'T>
+
+        type MediaKeyStatusMapIterator<'T> = Fable.Core.TS.Dom.MediaKeyStatusMapIterator<'T>
+
+        type StylePropertyMapReadOnlyIterator<'T> = Fable.Core.TS.Dom.StylePropertyMapReadOnlyIterator<'T>
+
+        type URLSearchParamsIterator<'T> = Fable.Core.TS.Dom.URLSearchParamsIterator<'T>
+
+        type FileSystemDirectoryHandleAsyncIterator<'T> = Fable.Core.TS.Dom.FileSystemDirectoryHandleAsyncIterator<'T>
+
+        type ReadableStreamAsyncIterator<'T> = Fable.Core.TS.Dom.ReadableStreamAsyncIterator<'T>
+
     module HTMLButtonElement =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
         type Type =
@@ -97699,44 +106505,458 @@ module Dom =
             type Callbackfn = delegate of value: string * key: string * parent: WGSLLanguageFeatures -> unit
 
     module WebAssembly =
+        /// <summary>
+        /// The <b><c>WebAssembly.CompileError</c></b> object indicates an error during WebAssembly decoding or validation.
+        /// </summary>
+        [<Interface>]
+        type CompileError =
+            inherit Fable.Core.TS.Es.Error
+
+            [<ParamObject; Emit("$0")>]
+            static member Create(name: string, message: string, ?stack: string, ?cause: obj) : CompileError = jsNative
+
+        type CompileErrorConstructor =
+            [<EmitConstructor>]
+            abstract Create: ?message: string -> Fable.Core.TS.Dom.WebAssembly.CompileError
+
+            /// <summary>
+            /// The <b><c>WebAssembly.CompileError</c></b> object indicates an error during WebAssembly decoding or validation.
+            /// </summary>
+            [<Emit("$0($1...)")>]
+            abstract Invoke: ?message: string -> Fable.Core.TS.Dom.WebAssembly.CompileError
+
+        /// <summary>
+        /// The <b><c>WebAssembly.Exception</c></b> object represents a runtime exception thrown from WebAssembly to JavaScript, or thrown from JavaScript to a WebAssembly exception handler.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Exception">MDN Reference</a>
+        /// </summary>
+        [<Interface>]
+        type Exception =
+            /// <summary>
+            /// The read-only <b><c>stack</c></b> property of an object instance of type WebAssembly.Exception may contain a stack trace.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Exception/stack">MDN Reference</a>
+            /// </summary>
+            abstract stack: string option
+            /// <summary>
+            /// The <b><c>getArg()</c></b> prototype method of the Exception object can be used to get the value of a specified item in the exception's data arguments.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Exception/getArg">MDN Reference</a>
+            /// </summary>
+            abstract getArg: exceptionTag: Fable.Core.TS.Dom.WebAssembly.Tag * index: float -> obj
+            /// <summary>
+            /// The <b><c>is()</c></b> prototype method of the Exception object can be used to test if the Exception matches a given tag.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Exception/is">MDN Reference</a>
+            /// </summary>
+            abstract is: exceptionTag: Fable.Core.TS.Dom.WebAssembly.Tag -> bool
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    getArg: Func<Fable.Core.TS.Dom.WebAssembly.Tag, float, obj>,
+                    is: (Fable.Core.TS.Dom.WebAssembly.Tag -> bool),
+                    ?stack: string
+                ) : Exception =
+                jsNative
+
+        type ExceptionConstructor =
+            [<EmitConstructor>]
+            abstract Create:
+                exceptionTag: Fable.Core.TS.Dom.WebAssembly.Tag *
+                payload: obj[] *
+                ?options: Fable.Core.TS.Dom.WebAssembly.ExceptionOptions ->
+                    Fable.Core.TS.Dom.WebAssembly.Exception
+
+        /// <summary>
+        /// A <b><c>WebAssembly.Global</c></b> object represents a global variable instance, accessible from both JavaScript and importable/exportable across one or more WebAssembly.Module instances. This allows dynamic linking of multiple modules.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Global">MDN Reference</a>
+        /// </summary>
+        [<Interface>]
+        type Global<'T> =
+            /// <summary>
+            /// The <b><c>value</c></b> property of the WebAssembly.Global object prototype returns the value contained inside the global variable.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Global/value">MDN Reference</a>
+            /// </summary>
+            abstract value: obj with get, set
+            /// <summary>
+            /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Global/valueOf">MDN Reference</a>
+            /// </summary>
+            abstract valueOf: unit -> obj
+
+            [<ParamObject; Emit("$0")>]
+            static member Create(value: obj, valueOf: (unit -> obj)) : Global<'T> = jsNative
+
+        type GlobalConstructor =
+            [<EmitConstructor>]
+            abstract Create<'T> :
+                descriptor: Fable.Core.TS.Dom.WebAssembly.GlobalDescriptor<'T> * ?v: obj ->
+                    Fable.Core.TS.Dom.WebAssembly.Global<'T>
+
+        /// <summary>
+        /// A <b><c>WebAssembly.Instance</c></b> object is a stateful, executable instance of a WebAssembly.Module. Instance objects contain all the Exported WebAssembly functions that allow calling into WebAssembly code from JavaScript.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Instance">MDN Reference</a>
+        /// </summary>
+        [<Interface>]
+        type Instance =
+            /// <summary>
+            /// The <b><c>exports</c></b> read-only property of the WebAssembly.Instance object prototype returns an object containing as its members all the functions exported from the WebAssembly module instance, to allow them to be accessed and used by JavaScript.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Instance/exports">MDN Reference</a>
+            /// </summary>
+            abstract exports: Fable.Core.TS.Dom.WebAssembly.Exports
+
+            [<ParamObject; Emit("$0")>]
+            static member Create(exports: Fable.Core.TS.Dom.WebAssembly.Exports) : Instance = jsNative
+
+        type InstanceConstructor =
+            [<EmitConstructor>]
+            abstract Create:
+                ``module``: Fable.Core.TS.Dom.WebAssembly.Module * ?importObject: Fable.Core.TS.Dom.WebAssembly.Imports ->
+                    Fable.Core.TS.Dom.WebAssembly.Instance
+
+        /// <summary>
+        /// The <b><c>WebAssembly.LinkError</c></b> object indicates an error during module instantiation (besides traps from the start function).
+        /// </summary>
+        [<Interface>]
+        type LinkError =
+            inherit Fable.Core.TS.Es.Error
+
+            [<ParamObject; Emit("$0")>]
+            static member Create(name: string, message: string, ?stack: string, ?cause: obj) : LinkError = jsNative
+
+        type LinkErrorConstructor =
+            [<EmitConstructor>]
+            abstract Create: ?message: string -> Fable.Core.TS.Dom.WebAssembly.LinkError
+
+            /// <summary>
+            /// The <b><c>WebAssembly.LinkError</c></b> object indicates an error during module instantiation (besides traps from the start function).
+            /// </summary>
+            [<Emit("$0($1...)")>]
+            abstract Invoke: ?message: string -> Fable.Core.TS.Dom.WebAssembly.LinkError
+
+        /// <summary>
+        /// The <b><c>WebAssembly.Memory</c></b> object is a resizable ArrayBuffer or SharedArrayBuffer that holds raw bytes of memory accessed by a WebAssembly.Instance.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Memory">MDN Reference</a>
+        /// </summary>
+        [<Interface>]
+        type Memory =
+            /// <summary>
+            /// The read-only <b><c>buffer</c></b> prototype property of the WebAssembly.Memory object returns the buffer contained in the memory. Depending on whether or not the memory was constructed with shared: true, the buffer is either an ArrayBuffer or a SharedArrayBuffer.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Memory/buffer">MDN Reference</a>
+            /// </summary>
+            abstract buffer: Fable.Core.TS.Es.ArrayBuffer
+            /// <summary>
+            /// The <b><c>grow()</c></b> prototype method of the WebAssembly.Memory object increases the size of the memory instance by a specified number of WebAssembly pages.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Memory/grow">MDN Reference</a>
+            /// </summary>
+            abstract grow: delta: float -> float
+            abstract toFixedLengthBuffer: unit -> Fable.Core.TS.Es.ArrayBuffer
+            abstract toResizableBuffer: unit -> Fable.Core.TS.Es.ArrayBuffer
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    buffer: Fable.Core.TS.Es.ArrayBuffer,
+                    grow: (float -> float),
+                    toFixedLengthBuffer: (unit -> Fable.Core.TS.Es.ArrayBuffer),
+                    toResizableBuffer: (unit -> Fable.Core.TS.Es.ArrayBuffer)
+                ) : Memory =
+                jsNative
+
+        type MemoryConstructor =
+            [<EmitConstructor>]
+            abstract Create:
+                descriptor: Fable.Core.TS.Dom.WebAssembly.MemoryDescriptor -> Fable.Core.TS.Dom.WebAssembly.Memory
+
+        /// <summary>
+        /// A <b><c>WebAssembly.Module</c></b> object contains stateless WebAssembly code that has already been compiled by the browser — this can be efficiently shared with Workers, and instantiated multiple times.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Module">MDN Reference</a>
+        /// </summary>
+        type Module = obj
+
         type ModuleConstructor =
             /// <summary>
             /// The WebAssembly.<b><c>Module.customSections()</c></b> static method returns a copy of the contents of all custom sections in the given module with the given string name.
             /// <br /><br />
             /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Module/customSections_static">MDN Reference</a>
             /// </summary>
-            abstract customSections: moduleObject: obj * sectionName: string -> Fable.Core.TS.Es.ArrayBuffer[]
+            abstract customSections:
+                moduleObject: Fable.Core.TS.Dom.WebAssembly.Module * sectionName: string ->
+                    Fable.Core.TS.Es.ArrayBuffer[]
+
             /// <summary>
             /// The WebAssembly.<b><c>Module.exports()</c></b> static method returns an array containing descriptions of all the declared exports of the given Module.
             /// <br /><br />
             /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Module/exports_static">MDN Reference</a>
             /// </summary>
-            abstract exports: moduleObject: obj -> ModuleExportDescriptor[]
+            abstract exports:
+                moduleObject: Fable.Core.TS.Dom.WebAssembly.Module ->
+                    Fable.Core.TS.Dom.WebAssembly.ModuleExportDescriptor[]
+
             /// <summary>
             /// The WebAssembly.<b><c>Module.imports()</c></b> static method returns an array containing descriptions of all the declared imports of the given Module.
             /// <br /><br />
             /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Module/imports_static">MDN Reference</a>
             /// </summary>
-            abstract imports: moduleObject: obj -> ModuleImportDescriptor[]
+            abstract imports:
+                moduleObject: Fable.Core.TS.Dom.WebAssembly.Module ->
+                    Fable.Core.TS.Dom.WebAssembly.ModuleImportDescriptor[]
 
             [<EmitConstructor>]
-            abstract Create: bytes: AllowSharedBufferSource * ?options: WebAssemblyCompileOptions -> obj
+            abstract Create:
+                bytes: AllowSharedBufferSource * ?options: Fable.Core.TS.Dom.WebAssembly.WebAssemblyCompileOptions ->
+                    Fable.Core.TS.Dom.WebAssembly.Module
+
+        /// <summary>
+        /// The <b><c>WebAssembly.RuntimeError</c></b> object is the error type that is thrown whenever WebAssembly specifies a trap.
+        /// </summary>
+        [<Interface>]
+        type RuntimeError =
+            inherit Fable.Core.TS.Es.Error
+
+            [<ParamObject; Emit("$0")>]
+            static member Create(name: string, message: string, ?stack: string, ?cause: obj) : RuntimeError = jsNative
+
+        type RuntimeErrorConstructor =
+            [<EmitConstructor>]
+            abstract Create: ?message: string -> Fable.Core.TS.Dom.WebAssembly.RuntimeError
+
+            /// <summary>
+            /// The <b><c>WebAssembly.RuntimeError</c></b> object is the error type that is thrown whenever WebAssembly specifies a trap.
+            /// </summary>
+            [<Emit("$0($1...)")>]
+            abstract Invoke: ?message: string -> Fable.Core.TS.Dom.WebAssembly.RuntimeError
+
+        /// <summary>
+        /// The <b><c>WebAssembly.Table</c></b> object is a JavaScript wrapper object — an array-like structure representing a WebAssembly table, which stores homogeneous references. A table created by JavaScript or in WebAssembly code will be accessible and mutable from both JavaScript and WebAssembly.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Table">MDN Reference</a>
+        /// </summary>
+        [<Interface>]
+        type Table =
+            /// <summary>
+            /// The read-only <b><c>length</c></b> prototype property of the WebAssembly.Table object returns the length of the table, i.e., the number of elements in the table.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Table/length">MDN Reference</a>
+            /// </summary>
+            abstract length: float
+            /// <summary>
+            /// The <b><c>get()</c></b> prototype method of the WebAssembly.Table() object retrieves the element stored at a given index.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Table/get">MDN Reference</a>
+            /// </summary>
+            abstract get: index: float -> obj
+            /// <summary>
+            /// The <b><c>grow()</c></b> prototype method of the WebAssembly.Table object increases the size of the Table instance by a specified number of elements, filled with the provided value.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Table/grow">MDN Reference</a>
+            /// </summary>
+            abstract grow: delta: float * ?value: obj -> float
+            /// <summary>
+            /// The <b><c>set()</c></b> prototype method of the WebAssembly.Table object mutates a reference stored at a given index to a different value.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Table/set">MDN Reference</a>
+            /// </summary>
+            abstract set: index: float * ?value: obj -> unit
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    length: float,
+                    get: (float -> obj),
+                    grow: Func<float, obj option, float>,
+                    set: Action<float, obj option>
+                ) : Table =
+                jsNative
+
+        type TableConstructor =
+            [<EmitConstructor>]
+            abstract Create:
+                descriptor: Fable.Core.TS.Dom.WebAssembly.TableDescriptor * ?value: obj ->
+                    Fable.Core.TS.Dom.WebAssembly.Table
+
+        /// <summary>
+        /// The <b><c>WebAssembly.Tag</c></b> object defines a type of a WebAssembly exception that can be thrown to/from WebAssembly code.
+        /// <br /><br />
+        /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Tag">MDN Reference</a>
+        /// </summary>
+        type Tag = obj
 
         type TagConstructor =
             [<EmitConstructor>]
-            abstract Create: ``type``: TagType -> obj
+            abstract Create: ``type``: Fable.Core.TS.Dom.WebAssembly.TagType -> Fable.Core.TS.Dom.WebAssembly.Tag
 
-        module Global =
-            module Prototype =
-                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                type Item =
-                    | [<CompiledName("anyfunc")>] Anyfunc
-                    | [<CompiledName("externref")>] Externref
-                    | [<CompiledName("f32")>] F32
-                    | [<CompiledName("f64")>] F64
-                    | [<CompiledName("i32")>] I32
-                    | [<CompiledName("i64")>] I64
-                    | [<CompiledName("v128")>] V128
+        [<Interface>]
+        type ExceptionOptions =
+            abstract traceStack: bool option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create(?traceStack: bool) : ExceptionOptions = jsNative
+
+        [<Interface>]
+        type GlobalDescriptor<'T> =
+            abstract ``mutable``: bool option with get, set
+            abstract value: 'T with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create(value: 'T, ?``mutable``: bool) : GlobalDescriptor<'T> = jsNative
+
+        [<Interface>]
+        type MemoryDescriptor =
+            abstract address: Fable.Core.TS.Dom.WebAssembly.AddressType option with get, set
+            abstract initial: float with get, set
+            abstract maximum: float option with get, set
+            abstract shared: bool option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (initial: float, ?address: Fable.Core.TS.Dom.WebAssembly.AddressType, ?maximum: float, ?shared: bool)
+                : MemoryDescriptor =
+                jsNative
+
+        [<Interface>]
+        type ModuleExportDescriptor =
+            abstract kind: Fable.Core.TS.Dom.WebAssembly.ImportExportKind with get, set
+            abstract name: string with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (kind: Fable.Core.TS.Dom.WebAssembly.ImportExportKind, name: string)
+                : ModuleExportDescriptor =
+                jsNative
+
+        [<Interface>]
+        type ModuleImportDescriptor =
+            abstract kind: Fable.Core.TS.Dom.WebAssembly.ImportExportKind with get, set
+            abstract ``module``: string with get, set
+            abstract name: string with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (kind: Fable.Core.TS.Dom.WebAssembly.ImportExportKind, ``module``: string, name: string)
+                : ModuleImportDescriptor =
+                jsNative
+
+        [<Interface>]
+        type TableDescriptor =
+            abstract address: Fable.Core.TS.Dom.WebAssembly.AddressType option with get, set
+            abstract element: Fable.Core.TS.Dom.WebAssembly.TableKind with get, set
+            abstract initial: float with get, set
+            abstract maximum: float option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (
+                    element: Fable.Core.TS.Dom.WebAssembly.TableKind,
+                    initial: float,
+                    ?address: Fable.Core.TS.Dom.WebAssembly.AddressType,
+                    ?maximum: float
+                ) : TableDescriptor =
+                jsNative
+
+        [<Interface>]
+        type TagType =
+            abstract parameters: Fable.Core.TS.Dom.WebAssembly.ValueType[] with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create(parameters: Fable.Core.TS.Dom.WebAssembly.ValueType[]) : TagType = jsNative
+
+        [<Interface>]
+        type ValueTypeMap =
+            abstract anyfunc: Fable.Core.TS.Es.Function with get, set
+            abstract externref: obj with get, set
+            abstract f32: float with get, set
+            abstract f64: float with get, set
+            abstract i32: float with get, set
+            abstract i64: bigint with get, set
+            abstract v128: unit
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (anyfunc: Fable.Core.TS.Es.Function, externref: obj, f32: float, f64: float, i32: float, i64: bigint)
+                : ValueTypeMap =
+                jsNative
+
+        [<Interface>]
+        type WebAssemblyCompileOptions =
+            abstract builtins: string[] option with get, set
+            abstract importedStringConstants: string option with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create(?builtins: string[], ?importedStringConstants: string) : WebAssemblyCompileOptions =
+                jsNative
+
+        [<Interface>]
+        type WebAssemblyInstantiatedSource =
+            abstract instance: Fable.Core.TS.Dom.WebAssembly.Instance with get, set
+            abstract ``module``: Fable.Core.TS.Dom.WebAssembly.Module with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create
+                (instance: Fable.Core.TS.Dom.WebAssembly.Instance, ``module``: Fable.Core.TS.Dom.WebAssembly.Module)
+                : WebAssemblyInstantiatedSource =
+                jsNative
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type AddressType =
+            | [<CompiledName("i32")>] I32
+            | [<CompiledName("i64")>] I64
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type ImportExportKind =
+            | [<CompiledName("function")>] Function
+            | [<CompiledName("global")>] Global
+            | [<CompiledName("memory")>] Memory
+            | [<CompiledName("table")>] Table
+            | [<CompiledName("tag")>] Tag
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type TableKind =
+            | [<CompiledName("anyfunc")>] Anyfunc
+            | [<CompiledName("externref")>] Externref
+
+        type AddressValue = float
+
+        type ExportValue =
+            U4<
+                Fable.Core.TS.Es.Function,
+                Fable.Core.TS.Dom.WebAssembly.Global<Fable.Core.TS.Dom.WebAssembly.ValueType>,
+                Fable.Core.TS.Dom.WebAssembly.Memory,
+                Fable.Core.TS.Dom.WebAssembly.Table
+             >
+
+        type Exports = JS.Record<string, Fable.Core.TS.Dom.WebAssembly.ExportValue>
+
+        type ImportValue =
+            U5<
+                float,
+                Fable.Core.TS.Es.Function,
+                Fable.Core.TS.Dom.WebAssembly.Global<Fable.Core.TS.Dom.WebAssembly.ValueType>,
+                Fable.Core.TS.Dom.WebAssembly.Memory,
+                Fable.Core.TS.Dom.WebAssembly.Table
+             >
+
+        type Imports = JS.Record<string, Fable.Core.TS.Dom.WebAssembly.ModuleImports>
+
+        type ModuleImports = JS.Record<string, Fable.Core.TS.Dom.WebAssembly.ImportValue>
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type ValueType =
+            | [<CompiledName("anyfunc")>] Anyfunc
+            | [<CompiledName("externref")>] Externref
+            | [<CompiledName("f32")>] F32
+            | [<CompiledName("f64")>] F64
+            | [<CompiledName("i32")>] I32
+            | [<CompiledName("i64")>] I64
+            | [<CompiledName("v128")>] V128
 
     module Window =
         type Self =

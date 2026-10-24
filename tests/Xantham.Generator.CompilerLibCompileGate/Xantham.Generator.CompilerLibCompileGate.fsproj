@@ -11,6 +11,7 @@
     <ItemGroup>
         <Compile Include="..\Xantham.Generator.Tests\golden\compiler-lib-ownership-lab\groups\TypeScript.Lib.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\compiler-lib-ownership-lab\CompilerLibOwnershipLab.fs" />
+        <Compile Include="NamespaceAliases.fs" />
     </ItemGroup>
 
     <ItemGroup>

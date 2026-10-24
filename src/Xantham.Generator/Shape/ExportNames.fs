@@ -43,6 +43,9 @@ let declarationExports (ctx: Context) (model: ShapeModel) =
 
                     ExportLayout.depthOf model.RuntimePackage hasEntryOwner owner,
                     ExportLayout.ownerSpecifier owner,
+                    export.ExportName <> export.Symbol.Name,
+                    exportNamespacePath model.Harvest.Namespaces export
+                    <> namespacePath model.Harvest.Namespaces export.DeclaringNamespace,
                     index)
                 |> snd
             )
@@ -55,12 +58,8 @@ let declarationExports (ctx: Context) (model: ShapeModel) =
 /// otherwise under the shallowest owner path (ordinal owner specifier, then harvest order,
 /// breaking ties), and `shape-aliases` abbreviates the rest.
 ///
-/// Two exports of two *different* types under one name are two declarations, and F# admits one
-/// name per declaration. Where TypeScript separates them by the namespace one of them is
-/// written in, so does F#: `@cloudflare/workers-types` declares `WorkflowSleepDuration` twice,
-/// once in global scope and once in `CloudflareWorkersModule`, and the second reads
-/// `CloudflareWorkersModule.WorkflowSleepDuration` inside a module of that name. A pair with no
-/// namespace between them keeps the numeric suffix `shape-anonymous` uses for the same clash.
+/// Source namespace members always retain their namespace module path. Two declarations
+/// competing for the same full path keep distinct names through a numeric suffix.
 let nameExports: Pass<ShapeModel> =
     {
         Name = "name-exports"
@@ -80,10 +79,7 @@ let nameExports: Pass<ShapeModel> =
                     /// The module name an export nests under, where its symbol is written inside
                     /// a namespace this run names.
                     let namespaceOf (export: HarvestedExport) =
-                        export.Symbol.ParentSymbolId
-                        |> ValueOption.toOption
-                        |> Option.bind (fun parent -> Map.tryFind parent model.Harvest.Namespaces)
-                        |> Option.map (fun value -> Naming.pascalSegment (value / uom<symbolName>))
+                        exportNamespacePath model.Harvest.Namespaces export
 
                     /// Where a declaration was harvested from, in the words a manifest reads.
                     let originOf (export: HarvestedExport) =
@@ -111,20 +107,9 @@ let nameExports: Pass<ShapeModel> =
 
                     let declared = model.DeclNames |> Map.toList |> List.map snd |> Set.ofList
 
-                    let contested =
-                        claimants
-                        |> List.countBy (fun (_, _, preferred, _, _, _) -> preferred)
-                        |> List.filter (fun (preferred, count) -> count > 1 || Set.contains preferred declared)
-                        |> List.map fst
-                        |> Set.ofList
-
-                    /// The full spelling preferred by a claimant, and whether it nests under
-                    /// its namespace to take it.
+                    /// Public-owner path followed by the source namespace and declaration name.
                     let wantedOf preferred owner path =
-                        match path, owner with
-                        | (_ :: _ as path), _ -> (path @ [ preferred ]) |> String.concat ".", false
-                        | [], Some ns when Set.contains preferred contested -> nestUnder ns preferred, true
-                        | [], _ -> preferred, false
+                        path @ [ underNamespace owner preferred ] |> String.concat "."
 
                     let sourceOf typeId preferred =
                         Map.tryFind typeId exportsById
@@ -137,14 +122,14 @@ let nameExports: Pass<ShapeModel> =
                     let verbatim =
                         claimants
                         |> List.filter (fun (typeId, _, preferred, _, _, _) -> sourceOf typeId preferred = preferred)
-                        |> List.map (fun (_, _, preferred, owner, _, path) -> wantedOf preferred owner path |> fst)
+                        |> List.map (fun (_, _, preferred, owner, _, path) -> wantedOf preferred owner path)
                         |> Set.ofList
 
                     let names, orders, _, findings =
                         claimants
                         |> List.fold
                             (fun (names, orders, taken, findings) (typeId, order, preferred, owner, origin, path) ->
-                                let wanted, nestedUnderNamespace = wantedOf preferred owner path
+                                let wanted = wantedOf preferred owner path
                                 let source = sourceOf typeId preferred
                                 let sanitised = source <> preferred
 
@@ -162,13 +147,6 @@ let nameExports: Pass<ShapeModel> =
                                                 name
                                                 (SynthesizeAnonymous.NameSanitisedForIdentifier(source, name))
                                         ]
-                                    else
-                                        findings
-
-                                let findings =
-                                    if nestedUnderNamespace && name.Contains "." then
-                                        findings
-                                        @ [ Finding.make name (SynthesizeAnonymous.NameNestedUnderOwner name) ]
                                     else
                                         findings
 

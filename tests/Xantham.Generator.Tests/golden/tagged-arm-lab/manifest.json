@@ -11,8 +11,8 @@
   "passes": [
     {
       "pass": "SY - synthesize-anonymous",
-      "total": 34,
-      "exact": 34
+      "total": 32,
+      "exact": 32
     },
     {
       "pass": "DT - detect-tagged-unions",

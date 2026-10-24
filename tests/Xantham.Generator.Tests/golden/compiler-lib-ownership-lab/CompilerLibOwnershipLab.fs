@@ -451,6 +451,19 @@ type Exports =
     [<Global("globalThis")>]
     static member globalThis: GlobalThis = jsNative
 
+module GlobalThis =
+    type Item = CompilerLibOwnershipLab.Item
+
+    type Items = CompilerLibOwnershipLab.Items
+
+    type Brief = CompilerLibOwnershipLab.Brief
+
+    type LocalDate = TypeScript.Lib.Es.Date
+
+    type Store = CompilerLibOwnershipLab.Store
+
+    type WindowLike = CompilerLibOwnershipLab.WindowLike
+
 module Store =
     module Update =
         [<Interface>]

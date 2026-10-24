@@ -3,9 +3,9 @@
   "package": "@cloudflare/workers-types",
   "module": "Cloudflare.WorkersTypes",
   "counts": {
-    "exact": 424,
-    "ergonomic": 1251,
-    "widened": 285,
+    "exact": 429,
+    "ergonomic": 1268,
+    "widened": 292,
     "escape": 1
   },
   "passes": [
@@ -17,8 +17,8 @@
     },
     {
       "pass": "SY - synthesize-anonymous",
-      "total": 548,
-      "exact": 548
+      "total": 539,
+      "exact": 539
     },
     {
       "pass": "LU - classify-literal-unions",
@@ -34,22 +34,23 @@
     },
     {
       "pass": "shape-callbacks",
-      "total": 57,
-      "ergonomic": 51,
+      "total": 59,
+      "ergonomic": 53,
       "widened": 6
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 8048,
-      "exact": 84,
-      "ergonomic": 7634,
-      "widened": 330
+      "total": 8024,
+      "exact": 85,
+      "ergonomic": 7630,
+      "widened": 309
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 54,
-      "ergonomic": 22,
-      "widened": 32
+      "total": 107,
+      "exact": 1,
+      "ergonomic": 42,
+      "widened": 64
     },
     {
       "pass": "SC - shape-classes",
@@ -60,15 +61,15 @@
     },
     {
       "pass": "SE - shape-exports",
-      "total": 62,
+      "total": 60,
       "ergonomic": 35,
-      "widened": 27
+      "widened": 25
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 2154,
+      "total": 2155,
       "exact": 121,
-      "ergonomic": 1999,
+      "ergonomic": 2000,
       "widened": 34
     },
     {
@@ -89,13 +90,13 @@
     },
     {
       "pass": "normalize-obj-unions",
-      "total": 1,
-      "widened": 1
+      "total": 3,
+      "widened": 3
     },
     {
       "pass": "DD - drop-orphan-delegates",
-      "total": 5,
-      "exact": 5
+      "total": 4,
+      "exact": 4
     }
   ]
 }

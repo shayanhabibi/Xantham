@@ -19,15 +19,9 @@ type Payload =
     /// The payload's label.
     /// </summary>
     abstract label: string with get, set
-    abstract at: Point with get, set
+    abstract at: Shapes.Point with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (label: string, at: Point) : Payload = jsNative
-
-[<Interface>]
-type Point =
-    abstract x: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (x: float) : Point = jsNative
+    static member Create (label: string, at: Shapes.Point) : Payload = jsNative
 
 [<Interface>]
 type Telemetry =
@@ -245,3 +239,13 @@ module AmbientLab =
             /// </summary>
             [<Import("Vise", "ambient-lab:tools"); EmitConstructor>]
             static member Vise (weight: float, jaw: float) : Vise = jsNative
+
+module Shapes =
+    /// <summary>
+    /// A type reached only through a reference to it.
+    /// </summary>
+    [<Interface>]
+    type Point =
+        abstract x: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (x: float) : Point = jsNative
