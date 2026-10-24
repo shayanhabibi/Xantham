@@ -3,10 +3,10 @@
   "package": "compiler-lib-ownership-lab",
   "module": "CompilerLibOwnershipLab",
   "counts": {
-    "exact": 68,
+    "exact": 187,
     "ergonomic": 219,
     "widened": 63,
-    "escape": 5
+    "escape": 10
   },
   "passes": [
     {
@@ -36,10 +36,10 @@
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 54,
-      "ergonomic": 14,
+      "total": 66,
+      "ergonomic": 17,
       "widened": 31,
-      "escape": 9
+      "escape": 18
     },
     {
       "pass": "SE - shape-exports",
@@ -60,9 +60,9 @@
     },
     {
       "pass": "RA - repair-arity",
-      "total": 13,
+      "total": 17,
       "ergonomic": 7,
-      "widened": 6
+      "widened": 10
     },
     {
       "pass": "render-source",

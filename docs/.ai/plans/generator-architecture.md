@@ -3333,3 +3333,11 @@ retains the first and reports the existing DO001 finding for the dropped contrac
 Harvest deduplication includes the declaring namespace, preserving a same-named re-export
 beside its root export. Distinct source type-alias symbols retain their declarations across
 module owners even when the checker shares their type ID, including primitive aliases.
+
+Shape computes canonical abbreviations and phantoms before materializing their re-exports.
+The re-export parameter lookup includes declarations produced in that same pass. Re-exporting
+the same source symbol applies its canonical type and forwards its binders; only a distinct
+source alias reinterprets its own alias parameters. This keeps `GlobalThis.Array<'T>` typed
+and makes `GlobalThis.Partial<'T>` the same F# type as the canonical `Partial<'T>`, rather
+than a second erased wrapper. The compiler-library consumer gate pins both assignability
+and generic arity.

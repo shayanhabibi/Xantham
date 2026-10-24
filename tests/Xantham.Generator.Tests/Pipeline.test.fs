@@ -2124,7 +2124,24 @@ let pipelineTests =
                 (handFixture "compiler-lib-ownership-lab")
                 (handConfig (handFixture "compiler-lib-ownership-lab"))
                 (fun package ->
-                    [ testCase "compiler-lib ownership keeps the shared core independent of its consumer"
+                    [ testCase "compiler-lib namespace reexports preserve generic array parameters" <| fun _ ->
+                          let rendered =
+                              Async.RunSynchronously(
+                                  Pipeline.generate (handConfig (handFixture "compiler-lib-ownership-lab")) package)
+                          let core = rendered.Files |> List.find (fun (path, _) -> path = "groups/TypeScript.Lib.fs") |> snd
+                          let aliases = moduleBodyOf (moduleBodyOf core "Es") "GlobalThis"
+                          Expect.stringContains aliases "type Array<'T> = TypeScript.Lib.Es.Array<'T>" "the reexport forwards its element type"
+                          Expect.stringContains aliases "type ReadonlyArray<'T> = TypeScript.Lib.Es.ReadonlyArray<'T>" "readonly arrays retain their element type too"
+
+                      testCase "compiler-lib namespace reexports reuse canonical phantom types" <| fun _ ->
+                          let rendered =
+                              Async.RunSynchronously(
+                                  Pipeline.generate (handConfig (handFixture "compiler-lib-ownership-lab")) package)
+                          let core = rendered.Files |> List.find (fun (path, _) -> path = "groups/TypeScript.Lib.fs") |> snd
+                          let aliases = moduleBodyOf (moduleBodyOf core "Es") "GlobalThis"
+                          Expect.stringContains aliases "type Partial<'T> = TypeScript.Lib.Es.Partial<'T>" "reexporting a source symbol does not introduce a new nominal wrapper"
+
+                      testCase "compiler-lib ownership keeps the shared core independent of its consumer"
                       <| fun _ ->
                           let rendered =
                               Async.RunSynchronously(

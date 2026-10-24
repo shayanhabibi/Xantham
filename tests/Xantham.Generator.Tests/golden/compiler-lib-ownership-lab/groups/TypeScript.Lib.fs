@@ -5770,6 +5770,469 @@ module Es =
         module From =
             type Mapfn<'T> = delegate of v: 'T * k: float -> float
 
+    module GlobalThis =
+        /// <summary>
+        /// The decorator context types provided to class element decorators.
+        /// </summary>
+        type ClassMemberDecoratorContext = TypeScript.Lib.Es.ClassMemberDecoratorContext
+
+        /// <summary>
+        /// The decorator context types provided to any decorator.
+        /// </summary>
+        type DecoratorContext = TypeScript.Lib.Es.DecoratorContext
+
+        type DecoratorMetadataObject = TypeScript.Lib.Es.DecoratorMetadataObject
+
+        type DecoratorMetadata = TypeScript.Lib.Es.DecoratorMetadata
+
+        /// <summary>
+        /// Context provided to a class decorator.
+        /// </summary>
+        /// <remarks>@template Class The type of the decorated class associated with this context.</remarks>
+        type ClassDecoratorContext<'Class> = TypeScript.Lib.Es.ClassDecoratorContext<'Class>
+
+        /// <summary>
+        /// Context provided to a class method decorator.
+        /// </summary>
+        /// <remarks>
+        /// @template
+        /// This The type on which the class element will be defined. For a static class element, this will be
+        /// the type of the constructor. For a non-static class element, this will be the type of the instance.
+        /// </remarks>
+        /// <remarks>@template Value The type of the decorated class method.</remarks>
+        type ClassMethodDecoratorContext<'This, 'Value> = TypeScript.Lib.Es.ClassMethodDecoratorContext<'This, 'Value>
+
+        /// <summary>
+        /// Context provided to a class getter decorator.
+        /// </summary>
+        /// <remarks>
+        /// @template
+        /// This The type on which the class element will be defined. For a static class element, this will be
+        /// the type of the constructor. For a non-static class element, this will be the type of the instance.
+        /// </remarks>
+        /// <remarks>@template Value The property type of the decorated class getter.</remarks>
+        type ClassGetterDecoratorContext<'This, 'Value> = TypeScript.Lib.Es.ClassGetterDecoratorContext<'This, 'Value>
+
+        /// <summary>
+        /// Context provided to a class setter decorator.
+        /// </summary>
+        /// <remarks>
+        /// @template
+        /// This The type on which the class element will be defined. For a static class element, this will be
+        /// the type of the constructor. For a non-static class element, this will be the type of the instance.
+        /// </remarks>
+        /// <remarks>@template Value The type of the decorated class setter.</remarks>
+        type ClassSetterDecoratorContext<'This, 'Value> = TypeScript.Lib.Es.ClassSetterDecoratorContext<'This, 'Value>
+
+        /// <summary>
+        /// Context provided to a class <c>accessor</c> field decorator.
+        /// </summary>
+        /// <remarks>
+        /// @template
+        /// This The type on which the class element will be defined. For a static class element, this will be
+        /// the type of the constructor. For a non-static class element, this will be the type of the instance.
+        /// </remarks>
+        /// <remarks>@template Value The type of decorated class field.</remarks>
+        type ClassAccessorDecoratorContext<'This, 'Value> = TypeScript.Lib.Es.ClassAccessorDecoratorContext<'This, 'Value>
+
+        /// <summary>
+        /// Describes the target provided to class <c>accessor</c> field decorators.
+        /// </summary>
+        /// <remarks>@template This The <c>this</c> type to which the target applies.</remarks>
+        /// <remarks>@template Value The property type for the class <c>accessor</c> field.</remarks>
+        type ClassAccessorDecoratorTarget<'This, 'Value> = TypeScript.Lib.Es.ClassAccessorDecoratorTarget<'This, 'Value>
+
+        /// <summary>
+        /// Describes the allowed return value from a class <c>accessor</c> field decorator.
+        /// </summary>
+        /// <remarks>@template This The <c>this</c> type to which the target applies.</remarks>
+        /// <remarks>@template Value The property type for the class <c>accessor</c> field.</remarks>
+        type ClassAccessorDecoratorResult<'This, 'Value> = TypeScript.Lib.Es.ClassAccessorDecoratorResult<'This, 'Value>
+
+        /// <summary>
+        /// Context provided to a class field decorator.
+        /// </summary>
+        /// <remarks>
+        /// @template
+        /// This The type on which the class element will be defined. For a static class element, this will be
+        /// the type of the constructor. For a non-static class element, this will be the type of the instance.
+        /// </remarks>
+        /// <remarks>@template Value The type of the decorated class field.</remarks>
+        type ClassFieldDecoratorContext<'This, 'Value> = TypeScript.Lib.Es.ClassFieldDecoratorContext<'This, 'Value>
+
+        type ClassDecorator = TypeScript.Lib.Es.ClassDecorator
+
+        type PropertyDecorator = TypeScript.Lib.Es.PropertyDecorator
+
+        type MethodDecorator = TypeScript.Lib.Es.MethodDecorator
+
+        type ParameterDecorator = TypeScript.Lib.Es.ParameterDecorator
+
+        type Symbol = TypeScript.Lib.Es.Symbol
+
+        type PropertyKey = TypeScript.Lib.Es.PropertyKey
+
+        type PropertyDescriptor = TypeScript.Lib.Es.PropertyDescriptor
+
+        type PropertyDescriptorMap = TypeScript.Lib.Es.PropertyDescriptorMap
+
+        /// <summary>
+        /// Provides functionality common to all JavaScript objects.
+        /// </summary>
+        type Object = TypeScript.Lib.Es.Object
+
+        type ObjectConstructor = TypeScript.Lib.Es.ObjectConstructor
+
+        /// <summary>
+        /// Creates a new function.
+        /// </summary>
+        type Function = TypeScript.Lib.Es.Function
+
+        type FunctionConstructor = TypeScript.Lib.Es.FunctionConstructor
+
+        /// <summary>
+        /// Extracts the type of the 'this' parameter of a function type, or 'unknown' if the function type has no 'this' parameter.
+        /// </summary>
+        type ThisParameterType<'T> = TypeScript.Lib.Es.ThisParameterType<'T>
+
+        /// <summary>
+        /// Removes the 'this' parameter from a function type.
+        /// </summary>
+        type OmitThisParameter<'T> = TypeScript.Lib.Es.OmitThisParameter<'T>
+
+        type CallableFunction = TypeScript.Lib.Es.CallableFunction
+
+        type NewableFunction = TypeScript.Lib.Es.NewableFunction
+
+        type IArguments = TypeScript.Lib.Es.IArguments
+
+        /// <summary>
+        /// Allows manipulation and formatting of text strings and determination and location of substrings within strings.
+        /// </summary>
+        type String = TypeScript.Lib.Es.String
+
+        type StringConstructor = TypeScript.Lib.Es.StringConstructor
+
+        type Boolean = TypeScript.Lib.Es.Boolean
+
+        type BooleanConstructor = TypeScript.Lib.Es.BooleanConstructor
+
+        /// <summary>
+        /// An object that represents a number of any kind. All JavaScript numbers are 64-bit floating-point numbers.
+        /// </summary>
+        type Number = TypeScript.Lib.Es.Number
+
+        type NumberConstructor = TypeScript.Lib.Es.NumberConstructor
+
+        type TemplateStringsArray = TypeScript.Lib.Es.TemplateStringsArray
+
+        /// <summary>
+        /// The type of <c>import.meta</c>.
+        /// <br /><br />
+        /// If you need to declare that a given property exists on <c>import.meta</c>,
+        /// this type may be augmented via interface merging.
+        /// </summary>
+        type ImportMeta = TypeScript.Lib.Es.ImportMeta
+
+        /// <summary>
+        /// The type for the optional second argument to <c>import()</c>.
+        /// <br /><br />
+        /// If your host environment supports additional options, this type may be
+        /// augmented via interface merging.
+        /// </summary>
+        type ImportCallOptions = TypeScript.Lib.Es.ImportCallOptions
+
+        /// <summary>
+        /// The type for the <c>assert</c> property of the optional second argument to <c>import()</c>.
+        /// </summary>
+        /// <remarks>@deprecated</remarks>
+        type ImportAssertions = TypeScript.Lib.Es.ImportAssertions
+
+        /// <summary>
+        /// The type for the <c>with</c> property of the optional second argument to <c>import()</c>.
+        /// </summary>
+        type ImportAttributes = TypeScript.Lib.Es.ImportAttributes
+
+        /// <summary>
+        /// An intrinsic object that provides basic mathematics functionality and constants.
+        /// </summary>
+        type Math = TypeScript.Lib.Es.Math
+
+        /// <summary>
+        /// Enables basic storage and retrieval of dates and times.
+        /// </summary>
+        type Date = TypeScript.Lib.Es.Date
+
+        type DateConstructor = TypeScript.Lib.Es.DateConstructor
+
+        type RegExpMatchArray = TypeScript.Lib.Es.RegExpMatchArray
+
+        type RegExpExecArray = TypeScript.Lib.Es.RegExpExecArray
+
+        type RegExp = TypeScript.Lib.Es.RegExp
+
+        type RegExpConstructor = TypeScript.Lib.Es.RegExpConstructor
+
+        type Error = TypeScript.Lib.Es.Error
+
+        type ErrorConstructor = TypeScript.Lib.Es.ErrorConstructor
+
+        type EvalError = TypeScript.Lib.Es.EvalError
+
+        type EvalErrorConstructor = TypeScript.Lib.Es.EvalErrorConstructor
+
+        type RangeError = TypeScript.Lib.Es.RangeError
+
+        type RangeErrorConstructor = TypeScript.Lib.Es.RangeErrorConstructor
+
+        type ReferenceError = TypeScript.Lib.Es.ReferenceError
+
+        type ReferenceErrorConstructor = TypeScript.Lib.Es.ReferenceErrorConstructor
+
+        type SyntaxError = TypeScript.Lib.Es.SyntaxError
+
+        type SyntaxErrorConstructor = TypeScript.Lib.Es.SyntaxErrorConstructor
+
+        type TypeError = TypeScript.Lib.Es.TypeError
+
+        type TypeErrorConstructor = TypeScript.Lib.Es.TypeErrorConstructor
+
+        type URIError = TypeScript.Lib.Es.URIError
+
+        type URIErrorConstructor = TypeScript.Lib.Es.URIErrorConstructor
+
+        /// <summary>
+        /// An intrinsic object that provides functions to convert JavaScript values to and from the JavaScript Object Notation (JSON) format.
+        /// </summary>
+        type JSON = TypeScript.Lib.Es.JSON
+
+        type ReadonlyArray<'T> = TypeScript.Lib.Es.ReadonlyArray<'T>
+
+        type ConcatArray<'T> = TypeScript.Lib.Es.ConcatArray<'T>
+
+        type Array<'T> = TypeScript.Lib.Es.Array<'T>
+
+        type ArrayConstructor = TypeScript.Lib.Es.ArrayConstructor
+
+        type TypedPropertyDescriptor<'T> = TypeScript.Lib.Es.TypedPropertyDescriptor<'T>
+
+        type PromiseConstructorLike = TypeScript.Lib.Es.PromiseConstructorLike
+
+        type PromiseLike<'T> = TypeScript.Lib.Es.PromiseLike<'T>
+
+        /// <summary>
+        /// Represents the completion of an asynchronous operation
+        /// </summary>
+        type Promise<'T> = TypeScript.Lib.Es.Promise<'T>
+
+        /// <summary>
+        /// Recursively unwraps the "awaited type" of a type. Non-promise "thenables" should resolve to <c>never</c>. This emulates the behavior of <c>await</c>.
+        /// </summary>
+        type Awaited<'T> = TypeScript.Lib.Es.Awaited<'T>
+
+        type ArrayLike<'T> = TypeScript.Lib.Es.ArrayLike<'T>
+
+        /// <summary>
+        /// Make all properties in T optional
+        /// </summary>
+        type Partial<'T> = TypeScript.Lib.Es.Partial<'T>
+
+        /// <summary>
+        /// Make all properties in T required
+        /// </summary>
+        type Required<'T> = TypeScript.Lib.Es.Required<'T>
+
+        /// <summary>
+        /// Make all properties in T readonly
+        /// </summary>
+        type Readonly<'T> = TypeScript.Lib.Es.Readonly<'T>
+
+        /// <summary>
+        /// From T, pick a set of properties whose keys are in the union K
+        /// </summary>
+        type Pick<'T, 'K> = TypeScript.Lib.Es.Pick<'T, 'K>
+
+        /// <summary>
+        /// Construct a type with a set of properties K of type T
+        /// </summary>
+        type Record<'K, 'T> = TypeScript.Lib.Es.Record<'K, 'T>
+
+        /// <summary>
+        /// Exclude from T those types that are assignable to U
+        /// </summary>
+        type Exclude<'T, 'U> = TypeScript.Lib.Es.Exclude<'T, 'U>
+
+        /// <summary>
+        /// Extract from T those types that are assignable to U
+        /// </summary>
+        type Extract<'T, 'U> = TypeScript.Lib.Es.Extract<'T, 'U>
+
+        /// <summary>
+        /// Construct a type with the properties of T except for those in type K.
+        /// </summary>
+        type Omit<'T, 'K> = TypeScript.Lib.Es.Omit<'T, 'K>
+
+        /// <summary>
+        /// Exclude null and undefined from T
+        /// </summary>
+        type NonNullable<'T> = TypeScript.Lib.Es.NonNullable<'T>
+
+        /// <summary>
+        /// Obtain the parameters of a function type in a tuple
+        /// </summary>
+        type Parameters<'T> = TypeScript.Lib.Es.Parameters<'T>
+
+        /// <summary>
+        /// Obtain the parameters of a constructor function type in a tuple
+        /// </summary>
+        type ConstructorParameters<'T> = TypeScript.Lib.Es.ConstructorParameters<'T>
+
+        /// <summary>
+        /// Obtain the return type of a function type
+        /// </summary>
+        type ReturnType<'T> = TypeScript.Lib.Es.ReturnType<'T>
+
+        /// <summary>
+        /// Obtain the return type of a constructor function type
+        /// </summary>
+        type InstanceType<'T> = TypeScript.Lib.Es.InstanceType<'T>
+
+        /// <summary>
+        /// Convert string literal type to uppercase
+        /// </summary>
+        type Uppercase<'S> = TypeScript.Lib.Es.Uppercase<'S>
+
+        /// <summary>
+        /// Convert string literal type to lowercase
+        /// </summary>
+        [<Erase>]
+        type Lowercase<'S> = private Lowercase__ of obj
+
+        /// <summary>
+        /// Convert first character of string literal type to uppercase
+        /// </summary>
+        [<Erase>]
+        type Capitalize<'S> = private Capitalize__ of obj
+
+        /// <summary>
+        /// Convert first character of string literal type to lowercase
+        /// </summary>
+        [<Erase>]
+        type Uncapitalize<'S> = private Uncapitalize__ of obj
+
+        /// <summary>
+        /// Marker for non-inference type position
+        /// </summary>
+        [<Erase>]
+        type NoInfer<'T> = private NoInfer__ of obj
+
+        /// <summary>
+        /// Marker for contextual 'this' type
+        /// </summary>
+        type ThisType<'T> = TypeScript.Lib.Es.ThisType<'T>
+
+        /// <summary>
+        /// Stores types to be used with WeakSet, WeakMap, WeakRef, and FinalizationRegistry
+        /// </summary>
+        type WeakKeyTypes = TypeScript.Lib.Es.WeakKeyTypes
+
+        type WeakKey = TypeScript.Lib.Es.WeakKey
+
+        /// <summary>
+        /// Represents a raw buffer of binary data, which is used to store data for the
+        /// different typed arrays. ArrayBuffers cannot be read from or written to directly,
+        /// but can be passed to a typed array or DataView Object to interpret the raw
+        /// buffer as needed.
+        /// </summary>
+        type ArrayBuffer = TypeScript.Lib.Es.ArrayBuffer
+
+        /// <summary>
+        /// Allowed ArrayBuffer types for the buffer of an ArrayBufferView and related Typed Arrays.
+        /// </summary>
+        type ArrayBufferTypes = TypeScript.Lib.Es.ArrayBufferTypes
+
+        type ArrayBufferLike = TypeScript.Lib.Es.ArrayBuffer
+
+        type ArrayBufferConstructor = TypeScript.Lib.Es.ArrayBufferConstructor
+
+        type ArrayBufferView<'TArrayBuffer when 'TArrayBuffer :> TypeScript.Lib.Es.ArrayBuffer> = TypeScript.Lib.Es.ArrayBufferView<'TArrayBuffer>
+
+        type DataView<'TArrayBuffer when 'TArrayBuffer :> TypeScript.Lib.Es.ArrayBuffer> = TypeScript.Lib.Es.DataView<'TArrayBuffer>
+
+        type DataViewConstructor = TypeScript.Lib.Es.DataViewConstructor
+
+        /// <summary>
+        /// A typed array of 8-bit integer values. The contents are initialized to 0. If the requested
+        /// number of bytes could not be allocated an exception is raised.
+        /// </summary>
+        type Int8Array<'TArrayBuffer when 'TArrayBuffer :> TypeScript.Lib.Es.ArrayBuffer> = TypeScript.Lib.Es.Int8Array<'TArrayBuffer>
+
+        type Int8ArrayConstructor = TypeScript.Lib.Es.Int8ArrayConstructor
+
+        /// <summary>
+        /// A typed array of 8-bit unsigned integer values. The contents are initialized to 0. If the
+        /// requested number of bytes could not be allocated an exception is raised.
+        /// </summary>
+        type Uint8Array<'TArrayBuffer when 'TArrayBuffer :> TypeScript.Lib.Es.ArrayBuffer> = TypeScript.Lib.Es.Uint8Array<'TArrayBuffer>
+
+        type Uint8ArrayConstructor = TypeScript.Lib.Es.Uint8ArrayConstructor
+
+        /// <summary>
+        /// A typed array of 8-bit unsigned integer (clamped) values. The contents are initialized to 0.
+        /// If the requested number of bytes could not be allocated an exception is raised.
+        /// </summary>
+        type Uint8ClampedArray<'TArrayBuffer when 'TArrayBuffer :> TypeScript.Lib.Es.ArrayBuffer> = TypeScript.Lib.Es.Uint8ClampedArray<'TArrayBuffer>
+
+        type Uint8ClampedArrayConstructor = TypeScript.Lib.Es.Uint8ClampedArrayConstructor
+
+        /// <summary>
+        /// A typed array of 16-bit signed integer values. The contents are initialized to 0. If the
+        /// requested number of bytes could not be allocated an exception is raised.
+        /// </summary>
+        type Int16Array<'TArrayBuffer when 'TArrayBuffer :> TypeScript.Lib.Es.ArrayBuffer> = TypeScript.Lib.Es.Int16Array<'TArrayBuffer>
+
+        type Int16ArrayConstructor = TypeScript.Lib.Es.Int16ArrayConstructor
+
+        /// <summary>
+        /// A typed array of 16-bit unsigned integer values. The contents are initialized to 0. If the
+        /// requested number of bytes could not be allocated an exception is raised.
+        /// </summary>
+        type Uint16Array<'TArrayBuffer when 'TArrayBuffer :> TypeScript.Lib.Es.ArrayBuffer> = TypeScript.Lib.Es.Uint16Array<'TArrayBuffer>
+
+        type Uint16ArrayConstructor = TypeScript.Lib.Es.Uint16ArrayConstructor
+
+        /// <summary>
+        /// A typed array of 32-bit signed integer values. The contents are initialized to 0. If the
+        /// requested number of bytes could not be allocated an exception is raised.
+        /// </summary>
+        type Int32Array<'TArrayBuffer when 'TArrayBuffer :> TypeScript.Lib.Es.ArrayBuffer> = TypeScript.Lib.Es.Int32Array<'TArrayBuffer>
+
+        type Int32ArrayConstructor = TypeScript.Lib.Es.Int32ArrayConstructor
+
+        /// <summary>
+        /// A typed array of 32-bit unsigned integer values. The contents are initialized to 0. If the
+        /// requested number of bytes could not be allocated an exception is raised.
+        /// </summary>
+        type Uint32Array<'TArrayBuffer when 'TArrayBuffer :> TypeScript.Lib.Es.ArrayBuffer> = TypeScript.Lib.Es.Uint32Array<'TArrayBuffer>
+
+        type Uint32ArrayConstructor = TypeScript.Lib.Es.Uint32ArrayConstructor
+
+        /// <summary>
+        /// A typed array of 32-bit float values. The contents are initialized to 0. If the requested number
+        /// of bytes could not be allocated an exception is raised.
+        /// </summary>
+        type Float32Array<'TArrayBuffer when 'TArrayBuffer :> TypeScript.Lib.Es.ArrayBuffer> = TypeScript.Lib.Es.Float32Array<'TArrayBuffer>
+
+        type Float32ArrayConstructor = TypeScript.Lib.Es.Float32ArrayConstructor
+
+        /// <summary>
+        /// A typed array of 64-bit float values. The contents are initialized to 0. If the requested
+        /// number of bytes could not be allocated an exception is raised.
+        /// </summary>
+        type Float64Array<'TArrayBuffer when 'TArrayBuffer :> TypeScript.Lib.Es.ArrayBuffer> = TypeScript.Lib.Es.Float64Array<'TArrayBuffer>
+
+        type Float64ArrayConstructor = TypeScript.Lib.Es.Float64ArrayConstructor
+
     module Int16Array =
         module Every =
             type Predicate<'TArrayBuffer when 'TArrayBuffer :> ArrayBuffer> = delegate of value: float * index: float * array: Int16Array<'TArrayBuffer> -> obj
