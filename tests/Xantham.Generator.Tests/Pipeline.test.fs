@@ -733,8 +733,8 @@ let pipelineTests =
                   testCase "a merged class namespace re-export qualifies its outer class" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                     let source = rendered.Files |> List.head |> snd
-                    let inner = moduleBodyOf (moduleBodyOf source "Mirror") "Mirror"
-                    Expect.stringContains inner "type Mirror = AmbientModuleLab.Mirror.Mirror" "the RHS cannot resolve through its own abbreviation"
+                    let inner = moduleBodyOf (moduleBodyOf (moduleBodyOf source "AmbientLab") "Mirror") "Mirror"
+                    Expect.stringContains inner "type Mirror = AmbientModuleLab.AmbientLab.Mirror.Mirror" "the RHS cannot resolve through its own abbreviation"
 
                   testCase "an ambient module's exports bind to its specifier" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)

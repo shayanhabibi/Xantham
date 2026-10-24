@@ -1827,8 +1827,8 @@ let private renderBody
         let absolute = $"{group.Module}.{name}"
         let relative = relativeQualification (group.Module :: scope) absolute
 
-        if relative.Contains '.' && Set.contains (relative.Split '.')[0] shadowed then
-            if Set.contains (absolute.Split '.')[0] shadowed then
+        if relative.Contains '.' && Set.contains ((relative.Split '.')[0]) shadowed then
+            if Set.contains ((absolute.Split '.')[0]) shadowed then
                 $"global.{absolute}"
             else
                 absolute
