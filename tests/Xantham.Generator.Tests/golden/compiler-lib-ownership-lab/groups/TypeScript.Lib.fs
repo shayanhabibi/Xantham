@@ -1839,8 +1839,7 @@ module Es =
     /// <summary>
     /// Exclude null and undefined from T
     /// </summary>
-    [<Erase>]
-    type NonNullable<'T> = private NonNullable__ of obj
+    type NonNullable<'T> = 'T
 
     /// <summary>
     /// Obtain the parameters of a function type in a tuple

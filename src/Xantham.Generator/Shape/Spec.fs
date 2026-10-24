@@ -1551,6 +1551,56 @@ let internal uninhabitedOperand (model: ShapeModel) (facts: TypeFacts) =
                 | _ :: _, [ (_, survivor) ] -> Some(survivor, name)
                 | _ -> None)
 
+/// Whether an anonymous object operand adds nothing over the type-parameter operands beside it:
+/// each of its properties is declared by one parameter's bound under the same type, and is
+/// optional wherever the bound's is (§4.6). `R & { req: Base }` over `R extends { req: Base }` is
+/// `R`, and so is `T & {}`.
+let internal restatesBound (model: ShapeModel) (parameters: TypeFacts list) (operand: TypeFacts) =
+    let declaredByBound (m: ResolvedMember) =
+        parameters
+        |> List.exists (fun parameter ->
+            parameter.Constraint
+            |> Option.bind (fun id -> Map.tryFind id model.Types)
+            |> Option.exists (fun bound ->
+                bound.Members
+                |> List.exists (fun declared ->
+                    declared.Symbol.Name = m.Symbol.Name
+                    && declared.TypeId = m.TypeId
+                    && (m.Optional || not declared.Optional))))
+
+    // A mapped or otherwise generic operand fills its members in at each instantiation, so an
+    // empty member list at the declaration states nothing.
+    let mapped =
+        operand.Response.ObjectFlags
+        |> ValueOption.exists (fun flags -> flags.HasFlag ObjectFlags.Mapped)
+
+    flag TypeFlags.Object operand
+    && not mapped
+    && not (standsOverTypeParameter model operand)
+    && (operand.SymbolName |> Option.forall isSyntheticName)
+    && operand.IndexInfos.IsEmpty
+    && operand.CallSignatures.IsEmpty
+    && operand.ConstructSignatures.IsEmpty
+    && operand.BaseTypes.IsEmpty
+    && operand.Members |> List.forall declaredByBound
+
+/// The operands an intersection over at least one type parameter is written as (§4.6): every
+/// operand except an object operand that restates the parameters' bounds. `None` without a
+/// type-parameter operand: `string & { count: number }` keeps no parameter to carry, while
+/// `string & U` keeps `U`.
+let internal openOperands (model: ShapeModel) (facts: TypeFacts) =
+    let operands = operandsOf model facts
+    let parameters = operands |> List.filter (flag TypeFlags.TypeParameter)
+
+    if parameters.IsEmpty then
+        None
+    else
+        operands
+        |> List.filter (fun operand ->
+            flag TypeFlags.TypeParameter operand
+            || not (restatesBound model parameters operand))
+        |> Some
+
 /// Whether an argument *is* the bound, or reaches it through the bases and intersection
 /// operands `shape-interfaces` emits as `inherit`. An instantiation is asked of its target,
 /// the declaration carrying the heritage. This is F# subtyping, not TypeScript's: it is the
@@ -2571,13 +2621,55 @@ and internal intersectionRef
                             ]
                         else
 
-                            let reason =
-                                if facts.Members.IsEmpty && facts.IndexInfos.IsEmpty then
-                                    TypeReference.IntersectionOverNonObject
-                                else
-                                    TypeReference.IntersectionNotDeclared
+                            match openIntersectionRef ctx model self owner facts with
+                            | Some carried -> carried
+                            | None ->
 
-                            FsObj, [ Finding.make owner reason ]
+                                let reason =
+                                    if facts.Members.IsEmpty && facts.IndexInfos.IsEmpty then
+                                        TypeReference.IntersectionOverNonObject
+                                    else
+                                        TypeReference.IntersectionNotDeclared
+
+                                FsObj, [ Finding.make owner reason ]
+
+/// An intersection over a type parameter (§4.6). Operands that restate a parameter's bound
+/// reduce away, and a single remaining parameter is the type. Otherwise the operands nest to the
+/// right in the support package's `JS.Intersect`, the parameter staying a parameter and an
+/// anonymous operand its own declaration. `None` where an operand has no reference of its own,
+/// which leaves the intersection to widen.
+and internal openIntersectionRef
+    (ctx: Context)
+    (model: ShapeModel)
+    (self: string option)
+    (owner: string)
+    (facts: TypeFacts)
+    : (FsTypeRef * Finding list) option =
+    match openOperands model facts with
+    | None -> None
+    | Some kept ->
+        let rendered =
+            kept
+            |> List.map (fun operand -> typeRef ctx model self owner operand.Response.TypeId)
+
+        if rendered |> List.exists (fun (reference, _) -> reference = FsObj) then
+            None
+        else
+            let findings = rendered |> List.collect snd
+
+            match rendered |> List.map fst with
+            | [ single ] ->
+                Some(single, findings @ [ Finding.make owner TypeReference.EmptyIntersectionOperandReduced ])
+            | references ->
+                let carried =
+                    references
+                    |> List.reduceBack (fun left right -> FsApp("JS.Intersect", [ left; right ]))
+
+                Some(
+                    carried,
+                    findings
+                    @ [ Finding.make owner (TypeReference.OpenIntersectionCarried references.Length) ]
+                )
 
 /// `T[K]`. Where `K` is a key variable this signature bound as `typekeyof<Operand,'R>`, the
 /// access is exactly the `'R` that idiom introduced. Where the operand's own keys confine `K`,

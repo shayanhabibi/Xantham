@@ -415,11 +415,11 @@ type NamedTimed =
     static member Create (name: string, at: float, ?stamp: string) : NamedTimed = jsNative
 ```
 
-What still widens, each saying which case it is: an intersection with a type-parameter or
-primitive operand (`T & { id: number }`, `string & { count: number }`) has no members to read,
-and a member-level generic intersection alias instantiates by re-expansion under a suffixed name
-like any generic alias (§4.9's deferred item). `tests/fixtures/intersection-lab` pins the
-positives and the negative.
+What still widens, each saying which case it is: an intersection with a primitive operand
+(`string & { count: number }`) has no members to read, and a member-level generic intersection
+alias instantiates by re-expansion under a suffixed name like any generic alias (§4.9's deferred
+item). A type-parameter operand no longer widens (below). `tests/fixtures/intersection-lab` pins
+the positives and the negative.
 
 *Landed (2026-09-02, phase D) — the branding half.* The declaration becomes the measure and the
 *uses* carry the brand:
@@ -455,8 +455,7 @@ included, and its golden compiles against the support package in the gate.
 
 *Landed (wave four, lane P) — three of the four intersections that used to widen.*
 A reconnaissance (since retired) attributed every `TR018` site to one of four causes; three
-of them now have an answer, and the fourth (a type-parameter operand) is left as the contract it
-always was.
+of them now have an answer; the fourth (a type-parameter operand) is answered below.
 
 - **An operand that declares nothing reduces away** (`TR049`, Exact). `"in" | "out" | (string &
   {})` is TypeScript's autocomplete idiom, and `string` is the type it means — so `type Ease =
@@ -476,6 +475,37 @@ always was.
   widen. One equality test over the operands' declarations answers it: `U`, required, no
   distribution. Optionality is the only difference the test tolerates, and the required
   declaration is the answer.
+
+*Landed (fidelity W5) — the type-parameter operand.* An intersection with at least one
+type-parameter operand keeps the parameters. Two readings, decided per operand:
+
+- **An object operand restating a parameter's bound reduces away** (`TR049`, Exact). An
+  anonymous operand whose every property the bound of a type-parameter operand declares under
+  the same type id, and optional wherever the bound's is, adds nothing: `R & { req: Base }` over
+  `R extends Wide` is `'R`, and `T & {}` (`NonNullable<T>`) is `'T`.
+- **Every other operand is carried** (`TR072`, Ergonomic) in the support package's erased
+  `JS.Intersect<'A, 'B>`, nested to the right for three or more. An anonymous operand is declared
+  as an interface of its own over the parameters it reads, under the intersection's path, or
+  under `<Alias>.Members` where the intersection is an alias's body:
+
+```fsharp
+type Handler<'E, 'T> = (JS.Intersect<'E, Handler.E<'T>> -> unit)
+type WithChildren<'P> = JS.Intersect<'P, WithChildren.Members>
+static member assign<'T, 'U> (target: 'T, source: 'U) : JS.Intersect<'T, 'U> = jsNative
+```
+
+A primitive operand beside a parameter is carried the same way (`T & U` at `Set<string>` is
+`JS.Intersect<string, 'U>`), so an instantiated base agrees with its generic declaration rather
+than redeclaring the member as `obj`.
+
+`Left`/`Right` read either side and erase to the value itself; `Intersect.unsafeCast` reads a
+value as the intersection, and `Intersect.assign` is `Object.assign` onto the first operand, so a
+constructed argument keeps its identity and prototype. The mapping is Ergonomic rather than Exact
+because the intersection does not upcast to its operands: a side is reached through `Left`/`Right`,
+not by inheritance. An intersection without a type-parameter operand (`string & { count: number
+}`, or a conditional such as `InstanceType<Response> & { req: … }`), and one with an operand that
+has no reference of its own (a generic mapped alias's body), still widen under `TR018`.
+`tests/fixtures/open-intersection-lab` pins both readings and the primitive negative.
 
 ### 4.7 Enums
 

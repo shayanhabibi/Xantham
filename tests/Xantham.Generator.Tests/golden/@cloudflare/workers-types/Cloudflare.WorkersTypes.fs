@@ -16984,11 +16984,11 @@ type EventContext<'Env, 'P, 'Data> =
     abstract waitUntil: (JS.Promise<obj> -> unit) with get, set
     abstract passThroughOnException: (unit -> unit) with get, set
     abstract next: EventContext.Next with get, set
-    abstract env: obj with get, set
+    abstract env: JS.Intersect<'Env, EventContext.Env> with get, set
     abstract ``params``: obj with get, set
     abstract data: 'Data with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: EventContext.Next, env: obj, ``params``: obj, data: 'Data) : EventContext<'Env, 'P, 'Data> = jsNative
+    static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: EventContext.Next, env: JS.Intersect<'Env, EventContext.Env>, ``params``: obj, data: 'Data) : EventContext<'Env, 'P, 'Data> = jsNative
 
 type PagesFunction<'Env, 'Params, 'Data> = (PagesFunction.Context<'Env, 'Params, 'Data> -> U2<JS.Promise<Response>, Response>)
 
@@ -16999,12 +16999,12 @@ type EventPluginContext<'Env, 'P, 'Data, 'PluginArgs> =
     abstract waitUntil: (JS.Promise<obj> -> unit) with get, set
     abstract passThroughOnException: (unit -> unit) with get, set
     abstract next: EventPluginContext.Next with get, set
-    abstract env: obj with get, set
+    abstract env: JS.Intersect<'Env, EventPluginContext.Env> with get, set
     abstract ``params``: obj with get, set
     abstract data: 'Data with get, set
     abstract pluginArgs: 'PluginArgs with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: EventPluginContext.Next, env: obj, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : EventPluginContext<'Env, 'P, 'Data, 'PluginArgs> = jsNative
+    static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: EventPluginContext.Next, env: JS.Intersect<'Env, EventPluginContext.Env>, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : EventPluginContext<'Env, 'P, 'Data, 'PluginArgs> = jsNative
 
 type PagesPluginFunction<'Env, 'Params, 'Data, 'PluginArgs> = (PagesPluginFunction.Context<'Env, 'Params, 'Data, 'PluginArgs> -> U2<JS.Promise<Response>, Response>)
 
@@ -25109,14 +25109,40 @@ module EasyInputMessage =
         | [<CompiledName("user")>] User
 
 module EventContext =
+    [<Interface>]
+    type Env =
+        abstract ASSETS: EventContext.Env.ASSETS with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (ASSETS: EventContext.Env.ASSETS) : Env = jsNative
+
     type Next = delegate of input: U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option * init: RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option -> JS.Promise<Response>
+
+    module Env =
+        [<Interface>]
+        type ASSETS =
+            abstract fetch: Func<U3<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, URL>, RequestInit<RequestInitCfProperties> option, JS.Promise<Response>> with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (fetch: Func<U3<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, URL>, RequestInit<RequestInitCfProperties> option, JS.Promise<Response>>) : ASSETS = jsNative
 
 module EventCounts =
     module ForEach =
         type Param1 = delegate of param0: float * param1: string * param2: EventCounts -> unit
 
 module EventPluginContext =
+    [<Interface>]
+    type Env =
+        abstract ASSETS: EventPluginContext.Env.ASSETS with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (ASSETS: EventPluginContext.Env.ASSETS) : Env = jsNative
+
     type Next = delegate of input: U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option * init: RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option -> JS.Promise<Response>
+
+    module Env =
+        [<Interface>]
+        type ASSETS =
+            abstract fetch: Func<U3<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, URL>, RequestInit<RequestInitCfProperties> option, JS.Promise<Response>> with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (fetch: Func<U3<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, URL>, RequestInit<RequestInitCfProperties> option, JS.Promise<Response>>) : ASSETS = jsNative
 
 module FormData =
     module ForEach =
@@ -25567,11 +25593,11 @@ module PagesFunction =
         abstract waitUntil: (JS.Promise<obj> -> unit) with get, set
         abstract passThroughOnException: (unit -> unit) with get, set
         abstract next: EventContext.Next with get, set
-        abstract env: obj with get, set
+        abstract env: JS.Intersect<'Env, EventContext.Env> with get, set
         abstract ``params``: obj with get, set
         abstract data: 'Data with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: EventContext.Next, env: obj, ``params``: obj, data: 'Data) : Context<'Env, 'Params, 'Data> = jsNative
+        static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: EventContext.Next, env: JS.Intersect<'Env, EventContext.Env>, ``params``: obj, data: 'Data) : Context<'Env, 'Params, 'Data> = jsNative
 
 module PagesPluginFunction =
     [<Interface>]
@@ -25581,12 +25607,12 @@ module PagesPluginFunction =
         abstract waitUntil: (JS.Promise<obj> -> unit) with get, set
         abstract passThroughOnException: (unit -> unit) with get, set
         abstract next: EventPluginContext.Next with get, set
-        abstract env: obj with get, set
+        abstract env: JS.Intersect<'Env, EventPluginContext.Env> with get, set
         abstract ``params``: obj with get, set
         abstract data: 'Data with get, set
         abstract pluginArgs: 'PluginArgs with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: EventPluginContext.Next, env: obj, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : Context<'Env, 'Params, 'Data, 'PluginArgs> = jsNative
+        static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: EventPluginContext.Next, env: JS.Intersect<'Env, EventPluginContext.Env>, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : Context<'Env, 'Params, 'Data, 'PluginArgs> = jsNative
 
 module R2Bucket =
     module Get =

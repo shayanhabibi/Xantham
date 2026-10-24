@@ -19,5 +19,13 @@ export declare function assign<T, U>(target: T, source: U): T & U;
 export type Counted<P, Q> = P & Q & { count: number };
 /** An empty literal restates nothing: the intersection is `T`. */
 export type Defined<T> = T & {};
+/** Negative: a mapped operand fills its members in at each use, so it is never read as restating the bound. */
+export type Without<T, U> = { [K in Exclude<keyof T, keyof U>]?: never };
+export type Exclusive<T, U> = Without<T, U> & U;
+/** A primitive beside a type parameter keeps the parameter. */
+export interface Pool<T> {
+    narrow<U>(other: U): Pool<T & U>;
+}
+export interface Names extends Pool<string> {}
 /** Negative: a primitive operand has no type parameter to keep, and widens as before. */
 export type Tally = string & { count: number };

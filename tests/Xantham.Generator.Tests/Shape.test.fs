@@ -2747,6 +2747,47 @@ let shapePassTests =
                 [ "TR018" ]
                 "under the case that describes it"
 
+        testCase "an operand restating a type parameter's bound reduces to the parameter (§4.6)" <| fun _ ->
+            // `R & { label: string }` over `R extends { label: string }` is `R`.
+            let label = Build.resolvedMember (Build.symbol 840 "label" SymbolFlags.Property) 1
+            let bound = { Build.facts (Build.typeResponse 84 TypeFlags.Object) with Members = [ label ] }
+            let parameter = { typeParam 20 "R" with Constraint = Some 84<typeId> }
+            let literal = { Build.facts (Build.typeResponse 85 TypeFlags.Object) with Members = [ label ] }
+
+            let intersection =
+                { Build.facts (Build.typeResponse 86 TypeFlags.Intersection) with IntersectionMembers = [ 20<typeId>; 85<typeId> ] }
+
+            let model =
+                { Build.shapeModel (bound :: parameter :: literal :: intersection :: Build.primitives) with
+                    TypeVars = Map.ofList [ 20<typeId>, "R" ] }
+
+            let reference, findings = Spec.typeRef Build.context model None "res" 86<typeId>
+            Expect.equal reference (FsTypeVar "R") "the parameter is the whole intersection"
+            Expect.equal (findings |> List.map _.Key) [ "TR049" ] "an exact reduction"
+
+        testCase "an operand adding members over a type parameter is carried beside it (§4.6)" <| fun _ ->
+            // `P & { count: number }`: `JS.Intersect` keeps the parameter and the declared operand.
+            let counted =
+                { Build.facts (Build.typeResponse 87 TypeFlags.Object) with
+                    Members = [ Build.resolvedMember (Build.symbol 870 "count" SymbolFlags.Property) 2 ] }
+
+            let intersection =
+                { Build.facts (Build.typeResponse 88 TypeFlags.Intersection) with IntersectionMembers = [ 20<typeId>; 87<typeId> ] }
+
+            let model =
+                { Build.shapeModel (typeParam 20 "P" :: counted :: intersection :: Build.primitives) with
+                    TypeVars = Map.ofList [ 20<typeId>, "P" ]
+                    DeclNames = Map.ofList [ 87<typeId>, "Counted.Members" ] }
+
+            let reference, findings = Spec.typeRef Build.context model None "Counted" 88<typeId>
+
+            Expect.equal
+                reference
+                (FsApp("JS.Intersect", [ FsTypeVar "P"; FsNamed "Counted.Members" ]))
+                "both operands stay typed"
+
+            Expect.equal (findings |> List.map _.Key) [ "TR072" ] "an ergonomic carrier"
+
         testCase "an intersection of callable operands renders from its call signatures" <| fun _ ->
             // `typeof round & Chained`: both operands carry signatures and no properties, so
             // the checker hands the intersection both, and D5 writes the first as a delegate.

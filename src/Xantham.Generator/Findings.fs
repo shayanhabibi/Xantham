@@ -150,6 +150,7 @@ module FindingCodes =
             "TR.MappedAsPropertyRecord", "TR067"
             "TR.ConditionalResolvedToConstraint", "TR068"
             "TR.SymbolAsLibInterface", "TR069"
+            "TR.OpenIntersectionCarried", "TR072"
             "TP.UnnamedTypeParameter", "TP001"
             "TP.ConstraintDropped", "TP002"
             "TP.GenericFunctionHoisted", "TP003"
@@ -552,6 +553,10 @@ type TypeReference =
     /// owner gives it (`Fable.Core.TS.Es.Symbol`). The interface also admits a boxed `Symbol`
     /// object, which `symbol` excludes.
     | [<Ergonomic>] SymbolAsLibInterface of name: string
+    /// An intersection over a type parameter, with members the parameter's bound does not
+    /// already declare, written as the support package's `JS.Intersect` over its operands. Each
+    /// operand stays typed and is read through `Left`/`Right` rather than by inheritance.
+    | [<Ergonomic>] OpenIntersectionCarried of operands: int
 
     interface IFindingKind with
         member this.Message =
@@ -681,6 +686,8 @@ type TypeReference =
                 $"{conditional} written as its value at the check type's bound; the parameter it is applied to is not carried (§4.11)"
             | SymbolAsLibInterface name ->
                 $"symbol written as the compiler lib's Symbol interface {name}, which also admits a boxed Symbol object"
+            | OpenIntersectionCarried operands ->
+                $"intersection over a type parameter written as JS.Intersect over its {operands} operands; each is read through Left/Right, not by inheritance (§4.6)"
 
 /// Type parameter binding: `Shape.typeParamsOf`, `aliasTypeParams`, key variables and erasure.
 [<Prefix "TP">]

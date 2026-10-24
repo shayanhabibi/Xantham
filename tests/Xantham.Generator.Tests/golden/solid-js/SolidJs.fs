@@ -351,22 +351,18 @@ type Component<'P> = ('P -> JSXElement)
 /// Use this to prevent accidentally passing <c>children</c> to components that
 /// would silently throw them away.
 /// </summary>
-[<Erase>]
-type VoidProps<'P> = private VoidProps__ of obj
+type VoidProps<'P> = JS.Intersect<'P, VoidProps.Members>
 
-[<Erase>]
-type VoidComponent<'P> = private VoidComponent__ of (obj -> JSXElement)
+type VoidComponent<'P> = (JS.Intersect<'P, VoidProps.Members> -> JSXElement)
 
 /// <summary>
 /// Extend props to allow an optional <c>children</c> prop with the usual
 /// type in JSX, <c>JSX.Element</c> (which allows elements, arrays, strings, etc.).
 /// Use this for components that you want to accept children.
 /// </summary>
-[<Erase>]
-type ParentProps<'P> = private ParentProps__ of obj
+type ParentProps<'P> = JS.Intersect<'P, ParentProps.Members>
 
-[<Erase>]
-type ParentComponent<'P> = private ParentComponent__ of (obj -> JSXElement)
+type ParentComponent<'P> = (JS.Intersect<'P, ParentProps.Members> -> JSXElement)
 
 /// <summary>
 /// Extend props to require a <c>children</c> prop with the specified type.
@@ -374,15 +370,12 @@ type ParentComponent<'P> = private ParentComponent__ of (obj -> JSXElement)
 /// typically a function that receives specific argument types.
 /// Note that all JSX &lt;Elements&gt; are of the type <c>JSX.Element</c>.
 /// </summary>
-[<Erase>]
-type FlowProps<'P, 'C> = private FlowProps__ of obj
+type FlowProps<'P, 'C> = JS.Intersect<'P, FlowProps.Members<'C>>
 
-[<Erase>]
-type FlowComponent<'P, 'C> = private FlowComponent__ of (obj -> JSXElement)
+type FlowComponent<'P, 'C> = (JS.Intersect<'P, FlowComponent.Props.Members<'C>> -> JSXElement)
 
 /// <remarks>@deprecated : use <c>ParentProps</c> instead</remarks>
-[<Erase>]
-type PropsWithChildren<'P> = private PropsWithChildren__ of obj
+type PropsWithChildren<'P> = JS.Intersect<'P, ParentProps.Members>
 
 type ValidComponent = U2<string, (obj -> JSXElement)>
 
@@ -414,9 +407,9 @@ type SplitProps<'T, 'K> = private SplitProps__ of obj[]
 type MatchProps<'T> =
     abstract ``when``: U2<bool, 'T> option with get, set
     abstract keyed: bool option with get, set
-    abstract children: U6<float, bool, JSXElement[], Fable.Core.TS.Dom.Node, (obj -> JSXElement), string> option with get, set
+    abstract children: U6<float, bool, JSXElement[], Fable.Core.TS.Dom.Node, (U2<(unit -> 'T), 'T> -> JSXElement), string> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?``when``: U2<bool, 'T>, ?keyed: bool, ?children: U6<float, bool, JSXElement[], Fable.Core.TS.Dom.Node, (obj -> JSXElement), string>) : MatchProps<'T> = jsNative
+    static member Create (?``when``: U2<bool, 'T>, ?keyed: bool, ?children: U6<float, bool, JSXElement[], Fable.Core.TS.Dom.Node, (U2<(unit -> 'T), 'T> -> JSXElement), string>) : MatchProps<'T> = jsNative
 
 [<Interface>]
 type SharedConfig =
@@ -1058,7 +1051,7 @@ type Exports =
     [<Import("splitProps", "solid-js")>]
     static member splitProps<'T, 'K> (props: 'T, [<ParamArray>] keys: 'K) : obj[] = jsNative
     [<Import("lazy", "solid-js")>]
-    static member ``lazy``<'T> (fn: (unit -> JS.Promise<Lazy.Fn.Result.Item<'T>>)) : obj = jsNative
+    static member ``lazy``<'T> (fn: (unit -> JS.Promise<Lazy.Fn.Result.Item<'T>>)) : JS.Intersect<'T, Lazy.Result<'T>> = jsNative
     [<Import("createUniqueId", "solid-js")>]
     static member createUniqueId () : string = jsNative
     /// <summary>
@@ -1227,14 +1220,14 @@ module CreateResource =
 
     [<Interface>]
     type Options<'I, 'T> =
-        abstract initialValue: obj with get, set
+        abstract initialValue: U3<'I, JS.Intersect<unit, 'I>, JS.Intersect<'T, 'I>> with get, set
         abstract name: string option with get, set
         abstract deferStream: bool option with get, set
         abstract ssrLoadFrom: ResourceOptions.SsrLoadFrom option with get, set
         abstract storage: (U2<'I, 'T> option -> ((unit -> U2<'I, 'T> option) * (obj[] -> unit))) option with get, set
         abstract onHydrated: CreateResource.Options.OnHydrated<'I, 'T> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (initialValue: obj, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptions.SsrLoadFrom, ?storage: (U2<'I, 'T> option -> ((unit -> U2<'I, 'T> option) * (obj[] -> unit))), ?onHydrated: CreateResource.Options.OnHydrated<'I, 'T>) : Options<'I, 'T> = jsNative
+        static member Create (initialValue: U3<'I, JS.Intersect<unit, 'I>, JS.Intersect<'T, 'I>>, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptions.SsrLoadFrom, ?storage: (U2<'I, 'T> option -> ((unit -> U2<'I, 'T> option) * (obj[] -> unit))), ?onHydrated: CreateResource.Options.OnHydrated<'I, 'T>) : Options<'I, 'T> = jsNative
 
     [<Interface>]
     type Options2<'T> =
@@ -1249,14 +1242,14 @@ module CreateResource =
 
     [<Interface>]
     type Options3<'I, 'T, 'S> =
-        abstract initialValue: obj with get, set
+        abstract initialValue: U3<'I, JS.Intersect<unit, 'I>, JS.Intersect<'T, 'I>> with get, set
         abstract name: string option with get, set
         abstract deferStream: bool option with get, set
         abstract ssrLoadFrom: ResourceOptions.SsrLoadFrom option with get, set
         abstract storage: (U2<'I, 'T> option -> ((unit -> U2<'I, 'T> option) * (obj[] -> unit))) option with get, set
         abstract onHydrated: CreateResource.Options3.OnHydrated<'S, 'I, 'T> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (initialValue: obj, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptions.SsrLoadFrom, ?storage: (U2<'I, 'T> option -> ((unit -> U2<'I, 'T> option) * (obj[] -> unit))), ?onHydrated: CreateResource.Options3.OnHydrated<'S, 'I, 'T>) : Options3<'I, 'T, 'S> = jsNative
+        static member Create (initialValue: U3<'I, JS.Intersect<unit, 'I>, JS.Intersect<'T, 'I>>, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptions.SsrLoadFrom, ?storage: (U2<'I, 'T> option -> ((unit -> U2<'I, 'T> option) * (obj[] -> unit))), ?onHydrated: CreateResource.Options3.OnHydrated<'S, 'I, 'T>) : Options3<'I, 'T, 'S> = jsNative
 
     [<Interface>]
     type Options4<'S, 'T> =
@@ -1402,6 +1395,21 @@ module ErrorBoundary =
 
     module Props =
         type Fallback = delegate of err: obj * reset: (unit -> unit) -> JSXElement
+
+module FlowComponent =
+    module Props =
+        [<Interface>]
+        type Members<'C> =
+            abstract children: 'C with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (children: 'C) : Members<'C> = jsNative
+
+module FlowProps =
+    [<Interface>]
+    type Members<'C> =
+        abstract children: 'C with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (children: 'C) : Members<'C> = jsNative
 
 module For =
     [<Interface>]
@@ -1873,8 +1881,7 @@ module H =
                 [<ParamObject; Emit("$0")>]
                 static member Create (children: obj) : ElementChildrenAttribute = jsNative
 
-            [<Erase>]
-            type EventHandler<'T, 'E when 'E :> Fable.Core.TS.Dom.Event> = private EventHandler__ of (obj -> unit)
+            type EventHandler<'T, 'E when 'E :> Fable.Core.TS.Dom.Event> = (JS.Intersect<'E, H.JsxDevRuntime.JSX.EventHandler.E<'T>> -> unit)
 
             [<Interface>]
             type BoundEventHandler<'T, 'E, 'EHandler when 'E :> Fable.Core.TS.Dom.Event> =
@@ -1899,18 +1906,15 @@ module H =
 
             type EventHandlerWithOptionsUnion<'T, 'E, 'EHandler when 'E :> Fable.Core.TS.Dom.Event> = U2<'EHandler, EventHandlerWithOptions<'T, 'E, 'EHandler>>
 
-            [<Erase>]
-            type InputEventHandler<'T, 'E when 'E :> Fable.Core.TS.Dom.InputEvent> = private InputEventHandler__ of (obj -> unit)
+            type InputEventHandler<'T, 'E when 'E :> Fable.Core.TS.Dom.InputEvent> = (JS.Intersect<'E, H.JsxDevRuntime.JSX.InputEventHandler.E<'T>> -> unit)
 
             type InputEventHandlerUnion<'T, 'E when 'E :> Fable.Core.TS.Dom.InputEvent> = U2<BoundEventHandler<'T, 'E, InputEventHandler<'T, 'E>>, InputEventHandler<'T, 'E>>
 
-            [<Erase>]
-            type ChangeEventHandler<'T, 'E when 'E :> Fable.Core.TS.Dom.Event> = private ChangeEventHandler__ of (obj -> unit)
+            type ChangeEventHandler<'T, 'E when 'E :> Fable.Core.TS.Dom.Event> = (JS.Intersect<'E, H.JsxDevRuntime.JSX.ChangeEventHandler.E<'T>> -> unit)
 
             type ChangeEventHandlerUnion<'T, 'E when 'E :> Fable.Core.TS.Dom.Event> = U2<BoundEventHandler<'T, 'E, ChangeEventHandler<'T, 'E>>, ChangeEventHandler<'T, 'E>>
 
-            [<Erase>]
-            type FocusEventHandler<'T, 'E when 'E :> Fable.Core.TS.Dom.FocusEvent> = private FocusEventHandler__ of (obj -> unit)
+            type FocusEventHandler<'T, 'E when 'E :> Fable.Core.TS.Dom.FocusEvent> = (JS.Intersect<'E, H.JsxDevRuntime.JSX.FocusEventHandler.E<'T>> -> unit)
 
             type FocusEventHandlerUnion<'T, 'E when 'E :> Fable.Core.TS.Dom.FocusEvent> = U2<BoundEventHandler<'T, 'E, FocusEventHandler<'T, 'E>>, FocusEventHandler<'T, 'E>>
 
@@ -16287,6 +16291,14 @@ module H =
                         | [<CompiledName("left")>] Left
                         | [<CompiledName("right")>] Right
 
+            module ChangeEventHandler =
+                [<Interface>]
+                type E<'T> =
+                    abstract currentTarget: 'T with get, set
+                    abstract target: obj with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (currentTarget: 'T, target: obj) : E<'T> = jsNative
+
             module CircleSVGAttributes =
                 [<Interface>]
                 type Base =
@@ -16527,6 +16539,14 @@ module H =
                         | [<CompiledName("left")>] Left
                         | [<CompiledName("right")>] Right
 
+            module EventHandler =
+                [<Interface>]
+                type E<'T> =
+                    abstract currentTarget: 'T with get, set
+                    abstract target: JsxDevRuntime.DOMElement with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (currentTarget: 'T, target: JsxDevRuntime.DOMElement) : E<'T> = jsNative
+
             module ExternalResourceSVGAttributes =
                 module ExternalResourcesRequired =
                     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -16634,6 +16654,14 @@ module H =
                     abstract ``color-interpolation-filters``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.ColorInterpolation.Result option> option with get, set
                     [<ParamObject; Emit("$0")>]
                     static member Create (?``color-interpolation-filters``: SolidJs.H.JsxDevRuntime.JSX.FunctionMaybe<H.JsxDevRuntime.JSX.PresentationSVGAttributes.ColorInterpolation.Result option>) : Base = jsNative
+
+            module FocusEventHandler =
+                [<Interface>]
+                type E<'T> =
+                    abstract currentTarget: 'T with get, set
+                    abstract target: obj with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (currentTarget: 'T, target: obj) : E<'T> = jsNative
 
             module ForeignObjectSVGAttributes =
                 [<Interface>]
@@ -16792,6 +16820,14 @@ module H =
                         | [<CompiledName("auto")>] Auto
                         | [<CompiledName("high")>] High
                         | [<CompiledName("low")>] Low
+
+            module InputEventHandler =
+                [<Interface>]
+                type E<'T> =
+                    abstract currentTarget: 'T with get, set
+                    abstract target: obj with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (currentTarget: 'T, target: obj) : E<'T> = jsNative
 
             module InputHTMLAttributes =
                 module Capture =
@@ -18703,8 +18739,7 @@ module JSX =
         [<ParamObject; Emit("$0")>]
         static member Create (children: obj) : ElementChildrenAttribute = jsNative
 
-    [<Erase>]
-    type EventHandler<'T, 'E when 'E :> Fable.Core.TS.Dom.Event> = private EventHandler__ of (obj -> unit)
+    type EventHandler<'T, 'E when 'E :> Fable.Core.TS.Dom.Event> = (JS.Intersect<'E, JSX.EventHandler.E<'T>> -> unit)
 
     [<Interface>]
     type BoundEventHandler<'T, 'E, 'EHandler when 'E :> Fable.Core.TS.Dom.Event> =
@@ -18729,18 +18764,15 @@ module JSX =
 
     type EventHandlerWithOptionsUnion<'T, 'E, 'EHandler when 'E :> Fable.Core.TS.Dom.Event> = U2<'EHandler, EventHandlerWithOptions<'T, 'E, 'EHandler>>
 
-    [<Erase>]
-    type InputEventHandler<'T, 'E when 'E :> Fable.Core.TS.Dom.InputEvent> = private InputEventHandler__ of (obj -> unit)
+    type InputEventHandler<'T, 'E when 'E :> Fable.Core.TS.Dom.InputEvent> = (JS.Intersect<'E, JSX.InputEventHandler.E<'T>> -> unit)
 
     type InputEventHandlerUnion<'T, 'E when 'E :> Fable.Core.TS.Dom.InputEvent> = U2<BoundEventHandler<'T, 'E, InputEventHandler<'T, 'E>>, InputEventHandler<'T, 'E>>
 
-    [<Erase>]
-    type ChangeEventHandler<'T, 'E when 'E :> Fable.Core.TS.Dom.Event> = private ChangeEventHandler__ of (obj -> unit)
+    type ChangeEventHandler<'T, 'E when 'E :> Fable.Core.TS.Dom.Event> = (JS.Intersect<'E, JSX.ChangeEventHandler.E<'T>> -> unit)
 
     type ChangeEventHandlerUnion<'T, 'E when 'E :> Fable.Core.TS.Dom.Event> = U2<BoundEventHandler<'T, 'E, ChangeEventHandler<'T, 'E>>, ChangeEventHandler<'T, 'E>>
 
-    [<Erase>]
-    type FocusEventHandler<'T, 'E when 'E :> Fable.Core.TS.Dom.FocusEvent> = private FocusEventHandler__ of (obj -> unit)
+    type FocusEventHandler<'T, 'E when 'E :> Fable.Core.TS.Dom.FocusEvent> = (JS.Intersect<'E, JSX.FocusEventHandler.E<'T>> -> unit)
 
     type FocusEventHandlerUnion<'T, 'E when 'E :> Fable.Core.TS.Dom.FocusEvent> = U2<BoundEventHandler<'T, 'E, FocusEventHandler<'T, 'E>>, FocusEventHandler<'T, 'E>>
 
@@ -31220,6 +31252,14 @@ module JSX =
             [<ParamObject; Emit("$0")>]
             static member Create (?``color-interpolation``: H.JsxDevRuntime.JSX.PresentationSVGAttributes.ColorInterpolation.Result, ?``color-rendering``: H.JsxDevRuntime.JSX.PresentationSVGAttributes.ColorRendering.Result) : Base = jsNative
 
+    module ChangeEventHandler =
+        [<Interface>]
+        type E<'T> =
+            abstract currentTarget: 'T with get, set
+            abstract target: obj with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (currentTarget: 'T, target: obj) : E<'T> = jsNative
+
     module CircleSVGAttributes =
         [<Interface>]
         type Base =
@@ -31244,6 +31284,14 @@ module JSX =
     module DirectiveFunctions =
         type Item = delegate of el: JsxDevRuntime.DOMElement * accessor: obj -> unit
 
+    module EventHandler =
+        [<Interface>]
+        type E<'T> =
+            abstract currentTarget: 'T with get, set
+            abstract target: JsxDevRuntime.DOMElement with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (currentTarget: 'T, target: JsxDevRuntime.DOMElement) : E<'T> = jsNative
+
     module FeDiffuseLightingSVGAttributes =
         [<Interface>]
         type Base =
@@ -31267,6 +31315,14 @@ module JSX =
             abstract ``color-interpolation-filters``: H.JsxDevRuntime.JSX.PresentationSVGAttributes.ColorInterpolation.Result option with get, set
             [<ParamObject; Emit("$0")>]
             static member Create (?``color-interpolation-filters``: H.JsxDevRuntime.JSX.PresentationSVGAttributes.ColorInterpolation.Result) : Base = jsNative
+
+    module FocusEventHandler =
+        [<Interface>]
+        type E<'T> =
+            abstract currentTarget: 'T with get, set
+            abstract target: obj with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (currentTarget: 'T, target: obj) : E<'T> = jsNative
 
     module ForeignObjectSVGAttributes =
         [<Interface>]
@@ -31309,6 +31365,14 @@ module JSX =
             abstract ``image-rendering``: H.JsxDevRuntime.JSX.PresentationSVGAttributes.ColorRendering.Result option with get, set
             [<ParamObject; Emit("$0")>]
             static member Create (?``clip-path``: string, ?``color-profile``: string, ?``image-rendering``: H.JsxDevRuntime.JSX.PresentationSVGAttributes.ColorRendering.Result) : Base = jsNative
+
+    module InputEventHandler =
+        [<Interface>]
+        type E<'T> =
+            abstract currentTarget: 'T with get, set
+            abstract target: obj with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (currentTarget: 'T, target: obj) : E<'T> = jsNative
 
     module LineSVGAttributes =
         [<Interface>]
@@ -32116,6 +32180,12 @@ module JsxRuntime =
         type Element = U5<float, bool, obj[], Fable.Core.TS.Dom.Node, string> option
 
 module Lazy =
+    [<Interface>]
+    type Result<'T> =
+        abstract preload: (unit -> JS.Promise<Lazy.Result.Preload.Result.Item<'T>>) with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (preload: (unit -> JS.Promise<Lazy.Result.Preload.Result.Item<'T>>)) : Result<'T> = jsNative
+
     module Fn =
         module Result =
             [<Interface>]
@@ -32123,6 +32193,15 @@ module Lazy =
                 abstract ``default``: 'T with get, set
                 [<ParamObject; Emit("$0")>]
                 static member Create (``default``: 'T) : Item<'T> = jsNative
+
+    module Result =
+        module Preload =
+            module Result =
+                [<Interface>]
+                type Item<'T> =
+                    abstract ``default``: 'T with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (``default``: 'T) : Item<'T> = jsNative
 
 module MapArray =
     type MapFn<'T, 'U> = delegate of v: 'T * i: (unit -> float) -> 'U
@@ -32184,6 +32263,13 @@ module On =
         abstract defer: bool with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (defer: bool) : Options2 = jsNative
+
+module ParentProps =
+    [<Interface>]
+    type Members =
+        abstract children: JSXElement option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?children: JSXElement) : Members = jsNative
 
 module RequestCallback =
     [<Interface>]
@@ -32477,6 +32563,13 @@ module Universal =
     module Renderer =
         module Use =
             type Fn<'NodeType, 'A, 'T> = delegate of element: 'NodeType * arg: 'A -> 'T
+
+module VoidProps =
+    [<Interface>]
+    type Members =
+        abstract children: unit option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?children: unit) : Members = jsNative
 
 /// <summary>solid-js/web</summary>
 module Web =

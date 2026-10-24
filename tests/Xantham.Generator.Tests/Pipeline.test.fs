@@ -1089,16 +1089,19 @@ let pipelineTests =
                     Expect.stringContains source "type Cancelable =" "a callable operand keeps its properties"
                     Expect.stringContains source "abstract cancel: unit -> unit" "and loses its call signature loudly"
 
-                  testCase "an intersection over a type-parameter operand still widens, and says so" <| fun _ ->
+                  testCase "an intersection over a type-parameter operand keeps the parameter (§4.6)" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                     let source = rendered.Files |> List.head |> snd
 
-                    Expect.stringContains source "static member merge<'T> (``base``: obj) : 'T" "T & { id: number } has no members to flatten"
+                    Expect.stringContains
+                        source
+                        "static member merge<'T> (``base``: JS.Intersect<'T, Merge.Base>) : 'T"
+                        "T & { id: number } carries T beside the literal"
 
                     Expect.contains
-                        (rendered.Findings |> List.map (fun finding -> finding.Tier, finding.Message))
-                        (Widened, "intersection over a non-object operand has no members to flatten; widened to obj (§4.6)")
-                        "the widening is owned"
+                        (rendered.Findings |> List.map _.Key)
+                        "TR072"
+                        "the carrier is owned"
 
                     Expect.isEmpty
                         (rendered.Findings
@@ -7553,6 +7556,20 @@ let openIntersectionFixtureTests =
             testCase "an intersection over a type parameter keeps the parameter (§4.6)" <| fun _ ->
                 let rendered = Pipeline.generate GeneratorConfig.Default package |> Async.RunSynchronously
                 let source = rendered.Files |> List.head |> snd
-                Expect.stringContains source "type Tally" "the primitive negative is still declared"
+                Expect.stringContains source "type Listener<'R when 'R :> Wide> = ('R -> unit)" "a literal restating the bound is the parameter"
+                Expect.stringContains source "type Defined<'T> = 'T" "an empty literal restates nothing"
+                Expect.stringContains source "type Handler<'E, 'T> = (JS.Intersect<'E, Handler.E<'T>> -> unit)" "the literal is declared over the parameter it reads"
+                Expect.stringContains source "type WithChildren<'P> = JS.Intersect<'P, WithChildren.Members>" "an alias body's literal nests under Members"
+                Expect.stringContains source "type Counted<'P, 'Q> = JS.Intersect<'P, JS.Intersect<'Q, Counted.Members>>" "three operands nest to the right"
+                Expect.stringContains source "static member assign<'T, 'U> (target: 'T, source: 'U) : JS.Intersect<'T, 'U>" "two parameters are both kept"
+                Expect.stringContains source "type Tally = obj" "a primitive operand still widens"
+                Expect.stringContains source "abstract narrow<'U>: other: 'U -> Pool<JS.Intersect<'T, 'U>>" "a primitive beside a parameter keeps the parameter"
+                Expect.isFalse (source.Contains "Pool<obj>") "an instantiated base agrees with its declaration and redeclares nothing"
+                Expect.isFalse (source.Contains "module Listener") "a restating literal is not declared"
+
+                let keyed key = rendered.Findings |> List.filter (fun finding -> finding.Key = key) |> List.map _.Symbol
+                Expect.stringContains source "type Exclusive<'T, 'U> = private Exclusive__ of obj" "a mapped operand is not read as restating the bound"
+                Expect.equal (keyed "TR018") [ "Exclusive"; "Tally" ] "an operand with no reference of its own, and a primitive operand, widen"
+                Expect.equal (keyed "TR049") [ "Listener(res)"; "Defined" ] "the reductions are exact"
         ])
     ]

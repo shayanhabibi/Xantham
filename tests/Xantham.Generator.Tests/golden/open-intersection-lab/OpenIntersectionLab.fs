@@ -23,29 +23,48 @@ type Wide =
     [<ParamObject; Emit("$0")>]
     static member Create (req: Base, label: string) : Wide = jsNative
 
-[<Erase>]
-type Listener<'R when 'R :> Wide> = private Listener__ of (obj -> unit)
+type Listener<'R when 'R :> Wide> = ('R -> unit)
 
-[<Erase>]
-type Handler<'E, 'T> = private Handler__ of (obj -> unit)
+type Handler<'E, 'T> = (JS.Intersect<'E, Handler.E<'T>> -> unit)
 
 /// <summary>
 /// A generic alias over an open operand and a literal.
 /// </summary>
-[<Erase>]
-type WithChildren<'P> = private WithChildren__ of obj
+type WithChildren<'P> = JS.Intersect<'P, WithChildren.Members>
 
 /// <summary>
 /// Three operands nest.
 /// </summary>
-[<Erase>]
-type Counted<'P, 'Q> = private Counted__ of obj
+type Counted<'P, 'Q> = JS.Intersect<'P, JS.Intersect<'Q, Counted.Members>>
 
 /// <summary>
 /// An empty literal restates nothing: the intersection is <c>T</c>.
 /// </summary>
+type Defined<'T> = 'T
+
+/// <summary>
+/// Negative: a mapped operand fills its members in at each use, so it is never read as restating the bound.
+/// </summary>
 [<Erase>]
-type Defined<'T> = private Defined__ of obj
+type Without<'T, 'U> = private Without__ of obj
+
+[<Erase>]
+type Exclusive<'T, 'U> = private Exclusive__ of obj
+
+/// <summary>
+/// A primitive beside a type parameter keeps the parameter.
+/// </summary>
+[<Interface>]
+type Pool<'T> =
+    abstract narrow<'U>: other: 'U -> Pool<JS.Intersect<'T, 'U>>
+    [<ParamObject; Emit("$0")>]
+    static member Create (narrow: ('U -> Pool<JS.Intersect<'T, 'U>>)) : Pool<'T> = jsNative
+
+[<Interface>]
+type Names =
+    inherit Pool<string>
+    [<ParamObject; Emit("$0")>]
+    static member Create (narrow: ('U -> Pool<JS.Intersect<string, 'U>>)) : Names = jsNative
 
 /// <summary>
 /// Negative: a primitive operand has no type parameter to keep, and widens as before.
@@ -56,14 +75,29 @@ type Tally = obj
 [<Erase>]
 type Exports =
     [<Import("wrap", "open-intersection-lab")>]
-    static member wrap<'P> (props: obj) : 'P = jsNative
+    static member wrap<'P> (props: JS.Intersect<'P, WithChildren.Members>) : 'P = jsNative
     [<Import("listen", "open-intersection-lab")>]
     static member listen (handler: (Listen.Handler.E -> unit)) : unit = jsNative
     /// <summary>
     /// Two open operands.
     /// </summary>
     [<Import("assign", "open-intersection-lab")>]
-    static member assign<'T, 'U> (target: 'T, source: 'U) : obj = jsNative
+    static member assign<'T, 'U> (target: 'T, source: 'U) : JS.Intersect<'T, 'U> = jsNative
+
+module Counted =
+    [<Interface>]
+    type Members =
+        abstract count: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (count: float) : Members = jsNative
+
+module Handler =
+    [<Interface>]
+    type E<'T> =
+        abstract currentTarget: 'T with get, set
+        abstract target: Base with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (currentTarget: 'T, target: Base) : E<'T> = jsNative
 
 module Listen =
     module Handler =
@@ -74,3 +108,10 @@ module Listen =
             abstract target: Base with get, set
             [<ParamObject; Emit("$0")>]
             static member Create (id: float, currentTarget: Wide, target: Base) : E = jsNative
+
+module WithChildren =
+    [<Interface>]
+    type Members =
+        abstract children: string option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?children: string) : Members = jsNative
