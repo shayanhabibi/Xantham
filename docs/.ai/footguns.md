@@ -230,6 +230,18 @@ descends its roots in source order, then by name. Order every root list that dec
 `DeclOrders` and name; prove a change deterministic by regenerating compiler-lib three times and
 comparing the `symbols.jsonl` hashes.
 
+**A frontier generation must never read what the same generation writes.** `resolve-type-table`
+derives a generation under `Async.Parallel`, and derivation both writes and reads the walk's
+registers: a union registers its operands as structural, a signature registers its type
+parameters, and an instantiation decides identity-versus-full derivation by reading both. With
+live `ConcurrentDictionary` reads, an operand derived in the same generation as its union came
+out identity or full depending on which answer arrived first, and solid-js's first
+`FrontierTooWide` count drifted between identical runs (280392, 281116, 281110, 280874). Each
+`Register` in `Resolve.fs` therefore answers from its state at the last `Commit`, and the walk
+commits only between generations (and after `boundedFrontier`, which writes but does not derive).
+A new register, or a new read of one, goes through `Register`; `XANTHAM_RESOLVE_COUNTERS=1`
+prints `staged-reads`, the reads per generation that a live read would have answered by timing.
+
 **`__@<name>@<id>` does not identify a well-known symbol.** A package's own `declare const
 iterator: unique symbol` escapes to the same `__@iterator@<id>` as `[Symbol.iterator]`. Resolve
 reads the declaration's computed name `Symbol.<name>` into `ResolvedMember.WellKnownSymbol`; a

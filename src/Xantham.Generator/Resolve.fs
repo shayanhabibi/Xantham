@@ -133,36 +133,76 @@ let private leafTypeFlags =
     ||| TypeFlags.Null
     ||| TypeFlags.Never
 
-/// One walk's registers, filled as derivation meets the ids and read before the next generation
-/// derives them: a generation is derived whole before the types it discovered reach the
-/// frontier, so every id below is registered before the walk derives anything over it.
+/// Type ids written during a frontier generation and visible to readers from the next
+/// generation on: `Contains` answers from the state as of the last `Commit`, whatever the
+/// generation has written since.
+type private Register() =
+    let committed = System.Collections.Generic.HashSet<int<typeId>>()
+    let staged = ConcurrentDictionary<int<typeId>, bool>()
+    let mutable stagedReads = 0
+
+    member _.Contains id =
+        if
+            resolveCountersEnabled.Value
+            && staged.ContainsKey id
+            && not (committed.Contains id)
+        then
+            System.Threading.Interlocked.Increment &stagedReads |> ignore
+
+        committed.Contains id
+
+    member _.Add id = staged.TryAdd(id, true) |> ignore
+
+    /// Removes the id from the committed state. Call only between generations.
+    member _.Remove(id: int<typeId>) =
+        committed.Remove id |> ignore
+        staged.TryRemove id |> ignore
+
+    /// Publishes the staged writes and returns how many reads since the last commit missed an id
+    /// staged at the time. Call only between generations.
+    member _.Commit() =
+        for id in staged.Keys do
+            committed.Add id |> ignore
+
+        staged.Clear()
+        let reads = stagedReads
+        stagedReads <- 0
+        reads
+
+/// One walk's registers, filled as derivation meets the ids and read by the next generation.
 type private Registers =
     {
         /// Type parameters a signature declared. A signature's parameter is cloned afresh every
         /// time the checker instantiates the signature, so an instantiation written over one is
         /// never the same type twice.
-        SignatureParameters: ConcurrentDictionary<int<typeId>, bool>
+        SignatureParameters: Register
         /// Types the shape tier reads for their structure: the seeds, and every operand of a
         /// union or an intersection.
-        Structural: ConcurrentDictionary<int<typeId>, bool>
+        Structural: Register
         /// Instantiations derived as identity alone. One a later generation reads as an
         /// operand is re-derived in full.
-        IdentityOnly: ConcurrentDictionary<int<typeId>, bool>
+        IdentityOnly: Register
     }
 
 module private Registers =
     let start () =
         {
-            SignatureParameters = ConcurrentDictionary()
-            Structural = ConcurrentDictionary()
-            IdentityOnly = ConcurrentDictionary()
+            SignatureParameters = Register()
+            Structural = Register()
+            IdentityOnly = Register()
         }
 
     let structural (registers: Registers) (types: TypeResponse list) =
         for ty in types do
-            registers.Structural.TryAdd(ty.TypeId, true) |> ignore
+            registers.Structural.Add ty.TypeId
 
         types
+
+    /// Publishes every register's staged writes; returns the reads that missed a staged id.
+    let commit (registers: Registers) =
+        registers.SignatureParameters.Commit()
+        + registers.Structural.Commit()
+        + registers.IdentityOnly.Commit()
 
 let private hasAny (mask: SymbolFlags) (flags: SymbolFlags) = uint32 (flags &&& mask) <> 0u
 
@@ -1152,7 +1192,7 @@ let private resolveSignatures (ctx: Context) (trace: Trace option) (registers: R
                     let typeParameters = typeParameters |> ValueOption.defaultValue [||]
 
                     for parameter in typeParameters do
-                        registers.SignatureParameters.TryAdd(parameter.TypeId, true) |> ignore
+                        registers.SignatureParameters.Add parameter.TypeId
 
                     // The spelling documents a literal overload's method of its own (W5).
                     let! source =
@@ -1270,7 +1310,7 @@ let rec private appliesSignatureParameter
             }
 
         if has TypeFlags.TypeParameter then
-            return registers.SignatureParameters.ContainsKey argument.TypeId
+            return registers.SignatureParameters.Contains argument.TypeId
         elif depth = 0 then
             return false
         elif has TypeFlags.Union || has TypeFlags.Intersection then
@@ -1768,12 +1808,12 @@ let private deriveFacts
                 let asIdentity =
                     isInstantiation
                     && (isOpenOverSignature
-                        || registers.IdentityOnly.ContainsKey ty.TypeId
-                        || not (registers.Structural.ContainsKey ty.TypeId))
+                        || registers.IdentityOnly.Contains ty.TypeId
+                        || not (registers.Structural.Contains ty.TypeId))
 
                 if asIdentity then
                     if not isOpenOverSignature then
-                        registers.IdentityOnly.TryAdd(ty.TypeId, true) |> ignore
+                        registers.IdentityOnly.Add ty.TypeId
 
                     return
                         { TypeFacts.shallow ty with
@@ -2492,11 +2532,11 @@ let internal resolveTypeTableObserved followWidth (observe: int -> int -> unit) 
                                                    |> ValueOption.exists (fun flags ->
                                                        flags.HasFlag ObjectFlags.Reference)
                                                 && ty.IsTupleType <> ValueSome true
-                                                && not (registers.Structural.ContainsKey ty.TypeId)
+                                                && not (registers.Structural.Contains ty.TypeId)
                                                 && not (sourceContracts.Contains ty.TypeId)
 
                                             if identityReference then
-                                                registers.IdentityOnly.TryAdd(ty.TypeId, true) |> ignore
+                                                registers.IdentityOnly.Add ty.TypeId
 
                                             let! canonical =
                                                 if
@@ -2544,17 +2584,22 @@ let internal resolveTypeTableObserved followWidth (observe: int -> int -> unit) 
 
                             let frontier = frontier @ resumed
 
+                            let stagedReads = Registers.commit registers
+
+                            if resolveCountersEnabled.Value then
+                                eprintfn "[resolve-counters] generation=%d staged-reads=%d" (depth - 1) stagedReads
+
                             // An instantiation derived as identity that a union or an
                             // intersection has since read as an operand is derived again, in
                             // full; its table entry is replaced.
                             let promoted =
                                 frontier
                                 |> List.filter (fun (ty: TypeResponse) ->
-                                    registers.IdentityOnly.ContainsKey ty.TypeId
-                                    && registers.Structural.ContainsKey ty.TypeId)
+                                    registers.IdentityOnly.Contains ty.TypeId
+                                    && registers.Structural.Contains ty.TypeId)
 
                             for ty in promoted do
-                                registers.IdentityOnly.TryRemove ty.TypeId |> ignore
+                                registers.IdentityOnly.Remove ty.TypeId
 
                             let derived = promoted |> List.fold (fun set ty -> Set.remove ty.TypeId set) derived
 
@@ -2580,6 +2625,7 @@ let internal resolveTypeTableObserved followWidth (observe: int -> int -> unit) 
                                     async {
                                         let! sourceContracts = contracts ()
                                         let! admitted, deferred = boundedFrontier sourceContracts fresh
+                                        Registers.commit registers |> ignore
                                         return List.map fst admitted, List.map fst deferred
                                     }
                                 else
