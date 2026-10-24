@@ -32630,6 +32630,7 @@ module Assert =
             /// </summary>
             /// <remarks>@since v0.1.21</remarks>
             abstract throws: block: (unit -> obj) * ?message: U2<string, exn> -> unit
+
             /// <summary>
             /// Expects the function <c>fn</c> to throw an error.
             /// <br /><br />
@@ -32810,7 +32811,9 @@ module Assert =
             /// argument.
             /// </summary>
             /// <remarks>@since v0.1.21</remarks>
-            abstract throws: block: (unit -> obj) * error: Assert.AssertPredicate * ?message: U2<string, exn> -> unit
+            abstract throws:
+                block: (unit -> obj) * error: Node.Assert.AssertPredicate * ?message: U2<string, exn> -> unit
+
             /// <summary>
             /// Asserts that the function <c>fn</c> does not throw an error.
             /// <br /><br />
@@ -32932,7 +32935,7 @@ module Assert =
             /// </summary>
             /// <remarks>@since v0.1.21</remarks>
             abstract doesNotThrow:
-                block: (unit -> obj) * error: Assert.AssertPredicate * ?message: U2<string, exn> -> unit
+                block: (unit -> obj) * error: Node.Assert.AssertPredicate * ?message: U2<string, exn> -> unit
 
             /// <summary>
             /// Throws <c>value</c> if <c>value</c> is not <c>undefined</c> or <c>null</c>. This is useful when
@@ -33092,7 +33095,7 @@ module Assert =
             /// <remarks>@since v10.0.0</remarks>
             abstract rejects:
                 block: U2<JS.Promise<obj>, (unit -> JS.Promise<obj>)> *
-                error: Assert.AssertPredicate *
+                error: Node.Assert.AssertPredicate *
                 ?message: U2<string, exn> ->
                     JS.Promise<unit>
 
@@ -33181,7 +33184,7 @@ module Assert =
             /// <remarks>@since v10.0.0</remarks>
             abstract doesNotReject:
                 block: U2<JS.Promise<obj>, (unit -> JS.Promise<obj>)> *
-                error: Assert.AssertPredicate *
+                error: Node.Assert.AssertPredicate *
                 ?message: U2<string, exn> ->
                     JS.Promise<unit>
 
@@ -33244,7 +33247,7 @@ module Assert =
 
         [<Interface>]
         type Options =
-            inherit Assert.AssertOptions
+            inherit Node.Assert.AssertOptions
 
             [<ParamObject; Emit("$0")>]
             static member Create(?diff: Assert.AssertOptions.Diff, ?strict: bool) : Options = jsNative
@@ -33266,14 +33269,14 @@ module Assert =
 
             abstract doesNotReject:
                 block: U2<JS.Promise<obj>, (unit -> JS.Promise<obj>)> *
-                error: Assert.AssertPredicate *
+                error: Node.Assert.AssertPredicate *
                 ?message: U2<string, exn> ->
                     JS.Promise<unit>
 
             abstract doesNotThrow: block: (unit -> obj) * ?message: U2<string, exn> -> unit
 
             abstract doesNotThrow:
-                block: (unit -> obj) * error: Assert.AssertPredicate * ?message: U2<string, exn> -> unit
+                block: (unit -> obj) * error: Node.Assert.AssertPredicate * ?message: U2<string, exn> -> unit
 
             abstract fail: ?message: U2<string, exn> -> unit
 
@@ -33299,33 +33302,35 @@ module Assert =
 
             abstract rejects:
                 block: U2<JS.Promise<obj>, (unit -> JS.Promise<obj>)> *
-                error: Assert.AssertPredicate *
+                error: Node.Assert.AssertPredicate *
                 ?message: U2<string, exn> ->
                     JS.Promise<unit>
 
             abstract strictEqual: Action<obj, obj, U2<string, exn> option> with get, set
             abstract equal: Action<obj, obj, U2<string, exn> option> with get, set
             abstract throws: block: (unit -> obj) * ?message: U2<string, exn> -> unit
-            abstract throws: block: (unit -> obj) * error: Assert.AssertPredicate * ?message: U2<string, exn> -> unit
+
+            abstract throws:
+                block: (unit -> obj) * error: Node.Assert.AssertPredicate * ?message: U2<string, exn> -> unit
 
     /// <summary>node:assert/strict</summary>
     module Strict =
-        type AssertOptions = Assert.AssertOptions
+        type AssertOptions = Node.Assert.AssertOptions
 
         /// <summary>
         /// The <c>Assert</c> class allows creating independent assertion instances with custom options.
         /// </summary>
         /// <remarks>@since v22.19.0</remarks>
-        type Assert = Assert.Assert
+        type Assert = Node.Assert.Assert
 
-        type AssertStrict = Assert.AssertStrict
+        type AssertStrict = Node.Assert.AssertStrict
 
-        type AssertionErrorOptions = Assert.AssertionErrorOptions
+        type AssertionErrorOptions = Node.Assert.AssertionErrorOptions
 
         /// <summary>
         /// Indicates the failure of an assertion. All errors thrown by the <c>node:assert</c> module will be instances of the <c>AssertionError</c> class.
         /// </summary>
-        type AssertionError = Assert.AssertionError
+        type AssertionError = Node.Assert.AssertionError
 
         /// <summary>
         /// This feature is deprecated and will be removed in a future version.
@@ -33333,11 +33338,11 @@ module Assert =
         /// </summary>
         /// <remarks>@since v14.2.0, v12.19.0</remarks>
         /// <remarks>@deprecated Deprecated</remarks>
-        type CallTracker = Assert.CallTracker
+        type CallTracker = Node.Assert.CallTracker
 
-        type CallTrackerCall = Assert.CallTrackerCall
+        type CallTrackerCall = Node.Assert.CallTrackerCall
 
-        type CallTrackerReportInformation = Assert.CallTrackerReportInformation
+        type CallTrackerReportInformation = Node.Assert.CallTrackerReportInformation
 
         type AssertPredicate = obj
 
@@ -33355,7 +33360,8 @@ module Assert =
             /// Indicates the failure of an assertion. All errors thrown by the <c>node:assert</c> module will be instances of the <c>AssertionError</c> class.
             /// </summary>
             [<Import("AssertionError", "node:assert/strict"); EmitConstructor>]
-            static member AssertionError(options: Assert.AssertionErrorOptions) : Assert.AssertionError = jsNative
+            static member AssertionError(options: Node.Assert.AssertionErrorOptions) : Node.Assert.AssertionError =
+                jsNative
 
             /// <summary>
             /// This feature is deprecated and will be removed in a future version.
@@ -33364,7 +33370,7 @@ module Assert =
             /// <remarks>@since v14.2.0, v12.19.0</remarks>
             /// <remarks>@deprecated Deprecated</remarks>
             [<Import("CallTracker", "node:assert/strict"); EmitConstructor>]
-            static member CallTracker() : Assert.CallTracker = jsNative
+            static member CallTracker() : Node.Assert.CallTracker = jsNative
 
             /// <summary>
             /// Throws an <c>AssertionError</c> with the provided error message or a default
@@ -34030,7 +34036,7 @@ module Assert =
             /// <remarks>@since v0.1.21</remarks>
             [<Import("throws", "node:assert/strict")>]
             static member throws
-                (block: (unit -> obj), error: Assert.AssertPredicate, ?message: U2<string, exn>)
+                (block: (unit -> obj), error: Node.Assert.AssertPredicate, ?message: U2<string, exn>)
                 : unit =
                 jsNative
 
@@ -34157,7 +34163,7 @@ module Assert =
             /// <remarks>@since v0.1.21</remarks>
             [<Import("doesNotThrow", "node:assert/strict")>]
             static member doesNotThrow
-                (block: (unit -> obj), error: Assert.AssertPredicate, ?message: U2<string, exn>)
+                (block: (unit -> obj), error: Node.Assert.AssertPredicate, ?message: U2<string, exn>)
                 : unit =
                 jsNative
 
@@ -34325,7 +34331,7 @@ module Assert =
             static member rejects
                 (
                     block: U2<JS.Promise<obj>, (unit -> JS.Promise<obj>)>,
-                    error: Assert.AssertPredicate,
+                    error: Node.Assert.AssertPredicate,
                     ?message: U2<string, exn>
                 ) : JS.Promise<unit> =
                 jsNative
@@ -34420,7 +34426,7 @@ module Assert =
             static member doesNotReject
                 (
                     block: U2<JS.Promise<obj>, (unit -> JS.Promise<obj>)>,
-                    error: Assert.AssertPredicate,
+                    error: Node.Assert.AssertPredicate,
                     ?message: U2<string, exn>
                 ) : JS.Promise<unit> =
                 jsNative
@@ -42883,7 +42889,7 @@ module ChildProcess =
             type Listener2 = delegate of code: float option * signal: NodeJS.Signals option -> unit
 
             type Listener3 =
-                delegate of message: ChildProcess.Serializable * sendHandle: ChildProcess.SendHandle -> unit
+                delegate of message: Node.ChildProcess.Serializable * sendHandle: Node.ChildProcess.SendHandle -> unit
 
         module On =
             type Listener = delegate of code: float option * signal: NodeJS.Signals option -> unit
@@ -42891,7 +42897,7 @@ module ChildProcess =
             type Listener2 = delegate of code: float option * signal: NodeJS.Signals option -> unit
 
             type Listener3 =
-                delegate of message: ChildProcess.Serializable * sendHandle: ChildProcess.SendHandle -> unit
+                delegate of message: Node.ChildProcess.Serializable * sendHandle: Node.ChildProcess.SendHandle -> unit
 
         module Once =
             type Listener = delegate of code: float option * signal: NodeJS.Signals option -> unit
@@ -42899,7 +42905,7 @@ module ChildProcess =
             type Listener2 = delegate of code: float option * signal: NodeJS.Signals option -> unit
 
             type Listener3 =
-                delegate of message: ChildProcess.Serializable * sendHandle: ChildProcess.SendHandle -> unit
+                delegate of message: Node.ChildProcess.Serializable * sendHandle: Node.ChildProcess.SendHandle -> unit
 
         module PrependListener =
             type Listener = delegate of code: float option * signal: NodeJS.Signals option -> unit
@@ -42907,7 +42913,7 @@ module ChildProcess =
             type Listener2 = delegate of code: float option * signal: NodeJS.Signals option -> unit
 
             type Listener3 =
-                delegate of message: ChildProcess.Serializable * sendHandle: ChildProcess.SendHandle -> unit
+                delegate of message: Node.ChildProcess.Serializable * sendHandle: Node.ChildProcess.SendHandle -> unit
 
         module PrependOnceListener =
             type Listener = delegate of code: float option * signal: NodeJS.Signals option -> unit
@@ -42915,7 +42921,7 @@ module ChildProcess =
             type Listener2 = delegate of code: float option * signal: NodeJS.Signals option -> unit
 
             type Listener3 =
-                delegate of message: ChildProcess.Serializable * sendHandle: ChildProcess.SendHandle -> unit
+                delegate of message: Node.ChildProcess.Serializable * sendHandle: Node.ChildProcess.SendHandle -> unit
 
     module SpawnSyncOptions =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -45210,44 +45216,44 @@ module Cluster =
 
     module Cluster =
         module AddListener =
-            type Listener = delegate of worker: Cluster.Worker * code: float * signal: string -> unit
+            type Listener = delegate of worker: Node.Cluster.Worker * code: float * signal: string -> unit
 
-            type Listener2 = delegate of worker: Cluster.Worker * address: Cluster.Address -> unit
+            type Listener2 = delegate of worker: Node.Cluster.Worker * address: Node.Cluster.Address -> unit
 
             type Listener3 =
-                delegate of worker: Cluster.Worker * message: obj * handle: U2<Net.Server, Net.Socket> -> unit
+                delegate of worker: Node.Cluster.Worker * message: obj * handle: U2<Net.Server, Net.Socket> -> unit
 
         module On =
-            type Listener = delegate of worker: Cluster.Worker * code: float * signal: string -> unit
+            type Listener = delegate of worker: Node.Cluster.Worker * code: float * signal: string -> unit
 
-            type Listener2 = delegate of worker: Cluster.Worker * address: Cluster.Address -> unit
+            type Listener2 = delegate of worker: Node.Cluster.Worker * address: Node.Cluster.Address -> unit
 
             type Listener3 =
-                delegate of worker: Cluster.Worker * message: obj * handle: U2<Net.Server, Net.Socket> -> unit
+                delegate of worker: Node.Cluster.Worker * message: obj * handle: U2<Net.Server, Net.Socket> -> unit
 
         module Once =
-            type Listener = delegate of worker: Cluster.Worker * code: float * signal: string -> unit
+            type Listener = delegate of worker: Node.Cluster.Worker * code: float * signal: string -> unit
 
-            type Listener2 = delegate of worker: Cluster.Worker * address: Cluster.Address -> unit
+            type Listener2 = delegate of worker: Node.Cluster.Worker * address: Node.Cluster.Address -> unit
 
             type Listener3 =
-                delegate of worker: Cluster.Worker * message: obj * handle: U2<Net.Server, Net.Socket> -> unit
+                delegate of worker: Node.Cluster.Worker * message: obj * handle: U2<Net.Server, Net.Socket> -> unit
 
         module PrependListener =
-            type Listener = delegate of worker: Cluster.Worker * code: float * signal: string -> unit
+            type Listener = delegate of worker: Node.Cluster.Worker * code: float * signal: string -> unit
 
-            type Listener2 = delegate of worker: Cluster.Worker * address: Cluster.Address -> unit
+            type Listener2 = delegate of worker: Node.Cluster.Worker * address: Node.Cluster.Address -> unit
 
             type Listener3 =
-                delegate of worker: Cluster.Worker * message: obj * handle: U2<Net.Server, Net.Socket> -> unit
+                delegate of worker: Node.Cluster.Worker * message: obj * handle: U2<Net.Server, Net.Socket> -> unit
 
         module PrependOnceListener =
-            type Listener = delegate of worker: Cluster.Worker * code: float * signal: string -> unit
+            type Listener = delegate of worker: Node.Cluster.Worker * code: float * signal: string -> unit
 
-            type Listener2 = delegate of worker: Cluster.Worker * address: Cluster.Address -> unit
+            type Listener2 = delegate of worker: Node.Cluster.Worker * address: Node.Cluster.Address -> unit
 
             type Listener3 =
-                delegate of worker: Cluster.Worker * message: obj * handle: U2<Net.Server, Net.Socket> -> unit
+                delegate of worker: Node.Cluster.Worker * message: obj * handle: U2<Net.Server, Net.Socket> -> unit
 
     module Worker =
         module AddListener =
@@ -89810,7 +89816,7 @@ module Fs =
         /// <remarks>@since v15.9.0, v14.18.0</remarks>
         /// <returns>of objects with the properties:</returns>
         abstract watch:
-            filename: PathLike * ?options: U2<string, Promises.WatchOptionsWithStringEncoding> ->
+            filename: PathLike * ?options: U2<string, Node.Fs.Promises.WatchOptionsWithStringEncoding> ->
                 NodeJS.AsyncIterator<Fs.Promises.FileChangeInfo<string>, obj, obj>
 
         /// <summary>
@@ -89843,7 +89849,7 @@ module Fs =
         /// <remarks>@since v15.9.0, v14.18.0</remarks>
         /// <returns>of objects with the properties:</returns>
         abstract watch:
-            filename: PathLike * options: U2<string, Promises.WatchOptionsWithBufferEncoding> ->
+            filename: PathLike * options: U2<string, Node.Fs.Promises.WatchOptionsWithBufferEncoding> ->
                 NodeJS.AsyncIterator<Fs.Promises.FileChangeInfo<NonSharedBuffer>, obj, obj>
 
         /// <summary>
@@ -89876,7 +89882,7 @@ module Fs =
         /// <remarks>@since v15.9.0, v14.18.0</remarks>
         /// <returns>of objects with the properties:</returns>
         abstract watch:
-            filename: PathLike * options: U2<string, Promises.WatchOptions> ->
+            filename: PathLike * options: U2<string, Node.Fs.Promises.WatchOptions> ->
                 NodeJS.AsyncIterator<Fs.Promises.FileChangeInfo<U2<string, NonSharedBuffer>>, obj, obj>
 
         /// <summary>
@@ -95025,7 +95031,7 @@ module Fs =
             [<Interface>]
             type Options =
                 inherit Fs.ObjectEncodingOptions
-                inherit Promises.FlagAndOpenMode
+                inherit Node.Fs.Promises.FlagAndOpenMode
                 abstract flush: bool option with get, set
 
                 [<ParamObject; Emit("$0")>]
@@ -137736,11 +137742,11 @@ module Module =
         type NextLoad =
             delegate of
                 url: string * context: Module.LoadHookSync.NextLoad.Context option ->
-                    U2<Module.LoadFnOutput, JS.Promise<Module.LoadFnOutput>>
+                    U2<Node.Module.LoadFnOutput, JS.Promise<Node.Module.LoadFnOutput>>
 
     module LoadHookSync =
         type NextLoad =
-            delegate of url: string * context: Module.LoadHookSync.NextLoad.Context option -> Module.LoadFnOutput
+            delegate of url: string * context: Module.LoadHookSync.NextLoad.Context option -> Node.Module.LoadFnOutput
 
         module NextLoad =
             [<Interface>]
@@ -137756,30 +137762,30 @@ module Module =
                 /// <summary>
                 /// An object whose key-value pairs represent the assertions for the module to import
                 /// </summary>
-                abstract importAttributes: Module.ImportAttributes option with get, set
+                abstract importAttributes: Node.Module.ImportAttributes option with get, set
 
                 [<ParamObject; Emit("$0")>]
                 static member Create
-                    (?conditions: string[], ?format: string, ?importAttributes: Module.ImportAttributes)
+                    (?conditions: string[], ?format: string, ?importAttributes: Node.Module.ImportAttributes)
                     : Context =
                     jsNative
 
     module Module =
-        type Module = Module.Module
+        type Module = Node.Module.Module
 
-        type EnableCompileCacheResult = Module.EnableCompileCacheResult
+        type EnableCompileCacheResult = Node.Module.EnableCompileCacheResult
 
-        type RegisterOptions<'Data> = Module.RegisterOptions<'Data>
+        type RegisterOptions<'Data> = Node.Module.RegisterOptions<'Data>
 
-        type RegisterHooksOptions = Module.RegisterHooksOptions
+        type RegisterHooksOptions = Node.Module.RegisterHooksOptions
 
-        type ModuleHooks = Module.ModuleHooks
+        type ModuleHooks = Node.Module.ModuleHooks
 
-        type StripTypeScriptTypesOptions = Module.StripTypeScriptTypesOptions
+        type StripTypeScriptTypesOptions = Node.Module.StripTypeScriptTypesOptions
 
-        type ImportAttributes = Module.ImportAttributes
+        type ImportAttributes = Node.Module.ImportAttributes
 
-        type ModuleFormat = Module.ModuleFormat
+        type ModuleFormat = Node.Module.ModuleFormat
 
         type ModuleSource =
             U13<
@@ -137808,11 +137814,11 @@ module Module =
         /// <c>Promise</c>, in which case it will be awaited before the main application thread
         /// execution resumes.
         /// </summary>
-        type InitializeHook<'Data> = Module.InitializeHook<'Data>
+        type InitializeHook<'Data> = Node.Module.InitializeHook<'Data>
 
-        type ResolveHookContext = Module.ResolveHookContext
+        type ResolveHookContext = Node.Module.ResolveHookContext
 
-        type ResolveFnOutput = Module.ResolveFnOutput
+        type ResolveFnOutput = Node.Module.ResolveFnOutput
 
         /// <summary>
         /// The <c>resolve</c> hook chain is responsible for telling Node.js where to find and
@@ -137823,48 +137829,49 @@ module Module =
         /// <c>resolve</c>); if <c>resolve</c> provides a <c>format</c>, a custom <c>load</c> hook is required
         /// even if only to pass the value to the Node.js default <c>load</c> hook.
         /// </summary>
-        type ResolveHook = Module.ResolveHook
+        type ResolveHook = Node.Module.ResolveHook
 
-        type ResolveHookSync = Module.ResolveHookSync
+        type ResolveHookSync = Node.Module.ResolveHookSync
 
-        type LoadHookContext = Module.LoadHookContext
+        type LoadHookContext = Node.Module.LoadHookContext
 
-        type LoadFnOutput = Module.LoadFnOutput
+        type LoadFnOutput = Node.Module.LoadFnOutput
 
         /// <summary>
         /// The <c>load</c> hook provides a way to define a custom method of determining how a
         /// URL should be interpreted, retrieved, and parsed. It is also in charge of
         /// validating the import attributes.
         /// </summary>
-        type LoadHook = Module.LoadHook
+        type LoadHook = Node.Module.LoadHook
 
-        type LoadHookSync = Module.LoadHookSync
+        type LoadHookSync = Node.Module.LoadHookSync
 
-        type SourceMapsSupport = Module.SourceMapsSupport
+        type SourceMapsSupport = Node.Module.SourceMapsSupport
 
-        type SetSourceMapsSupportOptions = Module.SetSourceMapsSupportOptions
+        type SetSourceMapsSupportOptions = Node.Module.SetSourceMapsSupportOptions
 
-        type SourceMapConstructorOptions = Module.SourceMapConstructorOptions
+        type SourceMapConstructorOptions = Node.Module.SourceMapConstructorOptions
 
-        type SourceMapPayload = Module.SourceMapPayload
+        type SourceMapPayload = Node.Module.SourceMapPayload
 
-        type SourceMapping = Module.SourceMapping
+        type SourceMapping = Node.Module.SourceMapping
 
-        type SourceOrigin = Module.SourceOrigin
+        type SourceOrigin = Node.Module.SourceOrigin
 
         /// <remarks>@since v13.7.0, v12.17.0</remarks>
-        type SourceMap = Module.SourceMap
+        type SourceMap = Node.Module.SourceMap
 
     module ResolveHook =
         type NextResolve =
             delegate of
                 specifier: string * context: Module.ResolveHookSync.NextResolve.Context option ->
-                    U2<JS.Promise<Module.ResolveFnOutput>, Module.ResolveFnOutput>
+                    U2<JS.Promise<Node.Module.ResolveFnOutput>, Node.Module.ResolveFnOutput>
 
     module ResolveHookSync =
         type NextResolve =
             delegate of
-                specifier: string * context: Module.ResolveHookSync.NextResolve.Context option -> Module.ResolveFnOutput
+                specifier: string * context: Module.ResolveHookSync.NextResolve.Context option ->
+                    Node.Module.ResolveFnOutput
 
         module NextResolve =
             [<Interface>]
@@ -137876,7 +137883,7 @@ module Module =
                 /// <summary>
                 /// An object whose key-value pairs represent the assertions for the module to import
                 /// </summary>
-                abstract importAttributes: Module.ImportAttributes option with get, set
+                abstract importAttributes: Node.Module.ImportAttributes option with get, set
                 /// <summary>
                 /// The module importing this one, or undefined if this is the Node.js entry point
                 /// </summary>
@@ -137884,7 +137891,7 @@ module Module =
 
                 [<ParamObject; Emit("$0")>]
                 static member Create
-                    (?conditions: string[], ?importAttributes: Module.ImportAttributes, ?parentURL: string)
+                    (?conditions: string[], ?importAttributes: Node.Module.ImportAttributes, ?parentURL: string)
                     : Context =
                     jsNative
 
@@ -156385,9 +156392,9 @@ module Readline =
         abstract createInterface:
             input: NodeJS.ReadableStream *
             ?output: NodeJS.WritableStream *
-            ?completer: Promises.Completer *
+            ?completer: Node.Readline.Promises.Completer *
             ?terminal: bool ->
-                Promises.Interface
+                Node.Readline.Promises.Interface
 
         /// <summary>
         /// The <c>readlinePromises.createInterface()</c> method creates a new <c>readlinePromises.Interface</c> instance.
@@ -156413,7 +156420,7 @@ module Readline =
         /// (<c>process.stdout</c> does this automatically when it is a TTY).
         /// </summary>
         /// <remarks>@since v17.0.0</remarks>
-        abstract createInterface: options: Promises.ReadLineOptions -> Promises.Interface
+        abstract createInterface: options: Node.Readline.Promises.ReadLineOptions -> Node.Readline.Promises.Interface
 
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
@@ -156696,7 +156703,7 @@ module Readline =
         [<Interface>]
         [<Import("Interface", "node:readline/promises")>]
         type Interface =
-            inherit Readline.Interface
+            inherit Node.Readline.Interface
             /// <summary>
             /// The <c>rl.question()</c> method displays the <c>query</c> by writing it to the <c>output</c>,
             /// waits for user input to be provided on <c>input</c>, then invokes the <c>callback</c> function passing the provided input as the first argument.
@@ -157893,7 +157900,7 @@ module Readline =
             /// </summary>
             /// <remarks>@since v17.0.0</remarks>
             /// <returns>this</returns>
-            abstract clearLine: dir: Readline.Direction -> Readline
+            abstract clearLine: dir: Node.Readline.Direction -> Readline
             /// <summary>
             /// The <c>rl.clearScreenDown()</c> method adds to the internal list of pending action an
             /// action that clears the associated stream from the current position of the
@@ -157936,7 +157943,7 @@ module Readline =
             [<ParamObject; Emit("$0")>]
             static member Create
                 (
-                    clearLine: (Readline.Direction -> Readline),
+                    clearLine: (Node.Readline.Direction -> Readline),
                     clearScreenDown: (unit -> Readline),
                     commit: (unit -> JS.Promise<unit>),
                     cursorTo: Func<float, float option, Readline>,
@@ -157945,7 +157952,7 @@ module Readline =
                 ) : Readline =
                 jsNative
 
-        type Completer = (string -> U2<Readline.CompleterResult, JS.Promise<Readline.CompleterResult>>)
+        type Completer = (string -> U2<Node.Readline.CompleterResult, JS.Promise<Node.Readline.CompleterResult>>)
 
         [<Interface>]
         type ReadLineOptions =
@@ -157988,7 +157995,7 @@ module Readline =
                 (
                     input: NodeJS.ReadableStream,
                     ?output: NodeJS.WritableStream,
-                    ?completer: U2<Readline.AsyncCompleter, Readline.Completer>,
+                    ?completer: U2<Node.Readline.AsyncCompleter, Node.Readline.Completer>,
                     ?terminal: bool
                 ) : Interface =
                 jsNative
@@ -158001,7 +158008,7 @@ module Readline =
             /// </summary>
             /// <remarks>@since v17.0.0</remarks>
             [<Import("Interface", "node:readline/promises"); EmitConstructor>]
-            static member Interface(options: Readline.ReadLineOptions) : Interface = jsNative
+            static member Interface(options: Node.Readline.ReadLineOptions) : Interface = jsNative
 
             /// <remarks>@since v17.0.0</remarks>
             [<Import("Readline", "node:readline/promises"); EmitConstructor>]
@@ -173299,7 +173306,7 @@ module Stream =
     [<Interface>]
     type TransformOptions<'T when 'T :> Transform> =
         inherit DuplexOptions<'T>
-        abstract transform: TransformOptions.Transform option with get, set
+        abstract transform: Node.Stream.TransformOptions.Transform option with get, set
         abstract flush: (TransformCallback -> unit) option with get, set
         abstract destroy: Stream.TransformOptions.Destroy option with get, set
         abstract write: Stream.TransformOptions.Write option with get, set
@@ -173308,7 +173315,7 @@ module Stream =
         [<ParamObject; Emit("$0")>]
         static member Create
             (
-                ?transform: TransformOptions.Transform,
+                ?transform: Node.Stream.TransformOptions.Transform,
                 ?flush: (TransformCallback -> unit),
                 ?signal: AbortSignal,
                 ?emitClose: bool,
@@ -177768,7 +177775,7 @@ module Stream =
     module Promises =
         [<Interface>]
         type FinishedOptions =
-            inherit Stream.FinishedOptions
+            inherit Node.Stream.FinishedOptions
             /// <summary>
             /// If true, removes the listeners registered by this function before the promise is fulfilled.
             /// </summary>
@@ -177793,18 +177800,18 @@ module Stream =
                 jsNative
 
             [<Import("pipeline", "node:stream/promises")>]
-            static member pipeline<'A, 'B>(source: 'A, destination: 'B, ?options: Stream.PipelineOptions) : obj =
+            static member pipeline<'A, 'B>(source: 'A, destination: 'B, ?options: Node.Stream.PipelineOptions) : obj =
                 jsNative
 
             [<Import("pipeline", "node:stream/promises")>]
             static member pipeline<'A, 'T1, 'B>
-                (source: 'A, transform1: 'T1, destination: 'B, ?options: Stream.PipelineOptions)
+                (source: 'A, transform1: 'T1, destination: 'B, ?options: Node.Stream.PipelineOptions)
                 : obj =
                 jsNative
 
             [<Import("pipeline", "node:stream/promises")>]
             static member pipeline<'A, 'T1, 'T2, 'B>
-                (source: 'A, transform1: 'T1, transform2: 'T2, destination: 'B, ?options: Stream.PipelineOptions)
+                (source: 'A, transform1: 'T1, transform2: 'T2, destination: 'B, ?options: Node.Stream.PipelineOptions)
                 : obj =
                 jsNative
 
@@ -177816,7 +177823,7 @@ module Stream =
                     transform2: 'T2,
                     transform3: 'T3,
                     destination: 'B,
-                    ?options: Stream.PipelineOptions
+                    ?options: Node.Stream.PipelineOptions
                 ) : obj =
                 jsNative
 
@@ -177829,7 +177836,7 @@ module Stream =
                     transform3: 'T3,
                     transform4: 'T4,
                     destination: 'B,
-                    ?options: Stream.PipelineOptions
+                    ?options: Node.Stream.PipelineOptions
                 ) : obj =
                 jsNative
 
@@ -177837,7 +177844,7 @@ module Stream =
             static member pipeline
                 (
                     streams: U3<NodeJS.ReadWriteStream, NodeJS.ReadableStream, NodeJS.WritableStream>[],
-                    ?options: Stream.PipelineOptions
+                    ?options: Node.Stream.PipelineOptions
                 ) : JS.Promise<unit> =
                 jsNative
 
@@ -177846,7 +177853,8 @@ module Stream =
                 (
                     stream1: NodeJS.ReadableStream,
                     stream2: U2<NodeJS.ReadWriteStream, NodeJS.WritableStream>,
-                    [<ParamArray>] streams: U3<Stream.PipelineOptions, NodeJS.ReadWriteStream, NodeJS.WritableStream>[]
+                    [<ParamArray>] streams:
+                        U3<Node.Stream.PipelineOptions, NodeJS.ReadWriteStream, NodeJS.WritableStream>[]
                 ) : JS.Promise<unit> =
                 jsNative
 
@@ -177896,23 +177904,23 @@ module Stream =
         type Destroy = delegate of error: exn option * callback: (exn option -> unit) -> unit
 
     module Stream =
-        type Stream = Stream.Stream
+        type Stream = Node.Stream.Stream
 
-        type StreamOptions<'T when 'T :> Stream.Stream> = Stream.StreamOptions<'T>
+        type StreamOptions<'T when 'T :> Node.Stream.Stream> = Node.Stream.StreamOptions<'T>
 
-        type ReadableOptions<'T when 'T :> Stream.Readable> = Stream.ReadableOptions<'T>
+        type ReadableOptions<'T when 'T :> Node.Stream.Readable> = Node.Stream.ReadableOptions<'T>
 
-        type ArrayOptions = Stream.ArrayOptions
-
-        /// <remarks>@since v0.9.4</remarks>
-        type Readable = Stream.Readable
-
-        type WritableOptions<'T when 'T :> Stream.Writable> = Stream.WritableOptions<'T>
+        type ArrayOptions = Node.Stream.ArrayOptions
 
         /// <remarks>@since v0.9.4</remarks>
-        type Writable = Stream.Writable
+        type Readable = Node.Stream.Readable
 
-        type DuplexOptions<'T when 'T :> Stream.Duplex> = Stream.DuplexOptions<'T>
+        type WritableOptions<'T when 'T :> Node.Stream.Writable> = Node.Stream.WritableOptions<'T>
+
+        /// <remarks>@since v0.9.4</remarks>
+        type Writable = Node.Stream.Writable
+
+        type DuplexOptions<'T when 'T :> Node.Stream.Duplex> = Node.Stream.DuplexOptions<'T>
 
         /// <summary>
         /// Duplex streams are streams that implement both the <c>Readable</c> and <c>Writable</c> interfaces.
@@ -177924,11 +177932,11 @@ module Stream =
         /// * <c>crypto streams</c>
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
-        type Duplex = Stream.Duplex
+        type Duplex = Node.Stream.Duplex
 
-        type TransformCallback = Stream.TransformCallback
+        type TransformCallback = Node.Stream.TransformCallback
 
-        type TransformOptions<'T when 'T :> Stream.Transform> = Stream.TransformOptions<'T>
+        type TransformOptions<'T when 'T :> Node.Stream.Transform> = Node.Stream.TransformOptions<'T>
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -177941,17 +177949,17 @@ module Stream =
         /// * <c>crypto streams</c>
         /// </summary>
         /// <remarks>@since v0.9.4</remarks>
-        type Transform = Stream.Transform
+        type Transform = Node.Stream.Transform
 
         /// <summary>
         /// The <c>stream.PassThrough</c> class is a trivial implementation of a <c>Transform</c> stream that simply passes the input bytes across to the output. Its purpose is
         /// primarily for examples and testing, but there are some use cases where <c>stream.PassThrough</c> is useful as a building block for novel sorts of streams.
         /// </summary>
-        type PassThrough = Stream.PassThrough
+        type PassThrough = Node.Stream.PassThrough
 
-        type FinishedOptions = Stream.FinishedOptions
+        type FinishedOptions = Node.Stream.FinishedOptions
 
-        type PipelineSourceFunction<'T> = Stream.PipelineSourceFunction<'T>
+        type PipelineSourceFunction<'T> = Node.Stream.PipelineSourceFunction<'T>
 
         type PipelineSource<'T> =
             U4<
@@ -177976,9 +177984,9 @@ module Stream =
                 (obj -> Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>)
              >
 
-        type PipelineDestinationIterableFunction<'T> = Stream.PipelineDestinationIterableFunction<'T>
+        type PipelineDestinationIterableFunction<'T> = Node.Stream.PipelineDestinationIterableFunction<'T>
 
-        type PipelineDestinationPromiseFunction<'T, 'P> = Stream.PipelineDestinationPromiseFunction<'T, 'P>
+        type PipelineDestinationPromiseFunction<'T, 'P> = Node.Stream.PipelineDestinationPromiseFunction<'T, 'P>
 
         [<Erase>]
         type PipelineDestination<'S, 'P> =
@@ -177995,9 +178003,9 @@ module Stream =
         [<Erase>]
         type PipelinePromise<'S> = private PipelinePromise__ of obj
 
-        type PipelineOptions = Stream.PipelineOptions
+        type PipelineOptions = Node.Stream.PipelineOptions
 
-        type Pipe = Stream.Pipe
+        type Pipe = Node.Stream.Pipe
 
         module Compose =
             [<Interface>]
@@ -178038,7 +178046,8 @@ module Stream =
     module TransformOptions =
         type Destroy = delegate of error: exn option * callback: (exn option -> unit) -> unit
 
-        type Transform = delegate of chunk: obj * encoding: BufferEncoding * callback: Stream.TransformCallback -> unit
+        type Transform =
+            delegate of chunk: obj * encoding: BufferEncoding * callback: Node.Stream.TransformCallback -> unit
 
         type Write = delegate of chunk: obj * encoding: BufferEncoding * callback: (exn option -> unit) -> unit
 
@@ -182137,7 +182146,7 @@ module Test =
                 /// <summary>
                 /// An error wrapping the error thrown by the test if it did not pass.
                 /// </summary>
-                abstract error: EventData.Error option with get, set
+                abstract error: Node.Test.EventData.Error option with get, set
                 /// <summary>
                 /// The type of the test, used to denote whether this is a suite.
                 /// </summary>
@@ -182145,7 +182154,7 @@ module Test =
 
                 [<ParamObject; Emit("$0")>]
                 static member Create
-                    (passed: bool, duration_ms: float, ?error: EventData.Error, ?``type``: string)
+                    (passed: bool, duration_ms: float, ?error: Node.Test.EventData.Error, ?``type``: string)
                     : Details =
                     jsNative
 
@@ -182302,15 +182311,15 @@ module Test =
                         /// <summary>
                         /// An array of functions representing function coverage.
                         /// </summary>
-                        abstract functions: Item.Functions.Item[] with get, set
+                        abstract functions: Node.Test.EventData.TestCoverage.Summary.Files.Item.Functions.Item[] with get, set
                         /// <summary>
                         /// An array of branches representing branch coverage.
                         /// </summary>
-                        abstract branches: Item.Branches.Item[] with get, set
+                        abstract branches: Node.Test.EventData.TestCoverage.Summary.Files.Item.Branches.Item[] with get, set
                         /// <summary>
                         /// An array of lines representing line numbers and the number of times they were covered.
                         /// </summary>
-                        abstract lines: Item.Lines.Item[] with get, set
+                        abstract lines: Node.Test.EventData.TestCoverage.Summary.Files.Item.Lines.Item[] with get, set
 
                         [<ParamObject; Emit("$0")>]
                         static member Create
@@ -182325,9 +182334,9 @@ module Test =
                                 coveredLinePercent: float,
                                 coveredBranchPercent: float,
                                 coveredFunctionPercent: float,
-                                functions: Item.Functions.Item[],
-                                branches: Item.Branches.Item[],
-                                lines: Item.Lines.Item[]
+                                functions: Node.Test.EventData.TestCoverage.Summary.Files.Item.Functions.Item[],
+                                branches: Node.Test.EventData.TestCoverage.Summary.Files.Item.Branches.Item[],
+                                lines: Node.Test.EventData.TestCoverage.Summary.Files.Item.Lines.Item[]
                             ) : Item =
                             jsNative
 
@@ -182404,7 +182413,7 @@ module Test =
                 /// <summary>
                 /// An error wrapping the error thrown by the test.
                 /// </summary>
-                abstract error: EventData.Error with get, set
+                abstract error: Node.Test.EventData.Error with get, set
                 /// <summary>
                 /// The type of the test, used to denote whether this is a suite.
                 /// </summary>
@@ -182412,7 +182421,10 @@ module Test =
                 abstract ``type``: string option with get, set
 
                 [<ParamObject; Emit("$0")>]
-                static member Create(duration_ms: float, error: EventData.Error, ?``type``: string) : Details = jsNative
+                static member Create
+                    (duration_ms: float, error: Node.Test.EventData.Error, ?``type``: string)
+                    : Details =
+                    jsNative
 
         module TestPass =
             [<Interface>]
@@ -182507,13 +182519,13 @@ module Test =
     module MockTracker =
         module Getter =
             type Result =
-                abstract mock: Test.MockFunctionContext<(unit -> obj)> with get, set
+                abstract mock: Node.Test.MockFunctionContext<(unit -> obj)> with get, set
 
                 [<Emit("$0($1...)")>]
                 abstract Invoke: unit -> obj
 
             type Result2<'Implementation> =
-                abstract mock: Test.MockFunctionContext<U2<'Implementation, (unit -> obj)>> with get, set
+                abstract mock: Node.Test.MockFunctionContext<U2<'Implementation, (unit -> obj)>> with get, set
 
                 [<Emit("$0($1...)")>]
                 abstract Invoke: unit -> obj
@@ -182551,7 +182563,7 @@ module Test =
                 /// Returns the name of the function. Function names are read-only and can not be changed.
                 /// </summary>
                 abstract name: string
-                abstract mock: Test.MockFunctionContext<Fable.Core.TS.Es.Function> with get, set
+                abstract mock: Node.Test.MockFunctionContext<Fable.Core.TS.Es.Function> with get, set
 
                 /// <summary>
                 /// Determines whether the given value inherits from this function if this function was used
@@ -182565,13 +182577,13 @@ module Test =
 
         module Setter =
             type Result =
-                abstract mock: Test.MockFunctionContext<(obj -> unit)> with get, set
+                abstract mock: Node.Test.MockFunctionContext<(obj -> unit)> with get, set
 
                 [<Emit("$0($1...)")>]
                 abstract Invoke: value: obj -> unit
 
             type Result2<'Implementation> =
-                abstract mock: Test.MockFunctionContext<U2<'Implementation, (obj -> unit)>> with get, set
+                abstract mock: Node.Test.MockFunctionContext<U2<'Implementation, (obj -> unit)>> with get, set
 
                 [<Emit("$0($1...)")>]
                 abstract Invoke: value: obj -> unit
@@ -182663,16 +182675,16 @@ module Test =
         /// The type of a function passed to test. The first argument to this function is a TestContext object.
         /// If the test uses callbacks, the callback function is passed as the second argument.
         /// </summary>
-        type TestFn = Test.TestFn
+        type TestFn = Node.Test.TestFn
 
         /// <summary>
         /// The type of a suite test function. The argument to this function is a SuiteContext object.
         /// </summary>
-        type SuiteFn = Test.SuiteFn
+        type SuiteFn = Node.Test.SuiteFn
 
-        type TestShard = Test.TestShard
+        type TestShard = Node.Test.TestShard
 
-        type RunOptions = Test.RunOptions
+        type RunOptions = Node.Test.RunOptions
 
         /// <summary>
         /// A successful call to <c>run()</c> will return a new <c>TestsStream</c> object, streaming a series of events representing the execution of the tests.
@@ -182680,7 +182692,7 @@ module Test =
         /// Some of the events are guaranteed to be emitted in the same order as the tests are defined, while others are emitted in the order that the tests execute.
         /// </summary>
         /// <remarks>@since v18.9.0, v16.19.0</remarks>
-        type TestsStream = Test.TestsStream
+        type TestsStream = Node.Test.TestsStream
 
         /// <summary>
         /// An instance of <c>TestContext</c> is passed to each test function in order to
@@ -182688,15 +182700,15 @@ module Test =
         /// exposed as part of the API.
         /// </summary>
         /// <remarks>@since v18.0.0, v16.17.0</remarks>
-        type TestContext = Test.TestContext
+        type TestContext = Node.Test.TestContext
 
-        type TestContextAssert = Test.TestContextAssert
+        type TestContextAssert = Node.Test.TestContextAssert
 
-        type AssertSnapshotOptions = Test.AssertSnapshotOptions
+        type AssertSnapshotOptions = Node.Test.AssertSnapshotOptions
 
-        type TestContextPlanOptions = Test.TestContextPlanOptions
+        type TestContextPlanOptions = Node.Test.TestContextPlanOptions
 
-        type TestContextWaitForOptions = Test.TestContextWaitForOptions
+        type TestContextWaitForOptions = Node.Test.TestContextWaitForOptions
 
         /// <summary>
         /// An instance of <c>SuiteContext</c> is passed to each suite function in order to
@@ -182704,36 +182716,36 @@ module Test =
         /// exposed as part of the API.
         /// </summary>
         /// <remarks>@since v18.7.0, v16.17.0</remarks>
-        type SuiteContext = Test.SuiteContext
+        type SuiteContext = Node.Test.SuiteContext
 
-        type TestOptions = Test.TestOptions
+        type TestOptions = Node.Test.TestOptions
 
         /// <summary>
         /// The hook function. The first argument is the context in which the hook is called.
         /// If the hook uses callbacks, the callback function is passed as the second argument.
         /// </summary>
-        type HookFn = Test.HookFn
+        type HookFn = Node.Test.HookFn
 
         /// <summary>
         /// The hook function. The first argument is a <c>TestContext</c> object.
         /// If the hook uses callbacks, the callback function is passed as the second argument.
         /// </summary>
-        type TestContextHookFn = Test.TestContextHookFn
+        type TestContextHookFn = Node.Test.TestContextHookFn
 
         /// <summary>
         /// Configuration options for hooks.
         /// </summary>
         /// <remarks>@since v18.8.0</remarks>
-        type HookOptions = Test.HookOptions
+        type HookOptions = Node.Test.HookOptions
 
-        type MockFunctionOptions = Test.MockFunctionOptions
+        type MockFunctionOptions = Node.Test.MockFunctionOptions
 
-        type MockMethodOptions = Test.MockMethodOptions
+        type MockMethodOptions = Node.Test.MockMethodOptions
 
         [<Erase>]
         type Mock<'F> = private Mock__ of obj
 
-        type MockModuleOptions = Test.MockModuleOptions
+        type MockModuleOptions = Node.Test.MockModuleOptions
 
         /// <summary>
         /// The <c>MockTracker</c> class is used to manage mocking functionality. The test runner
@@ -182741,25 +182753,25 @@ module Test =
         /// Each test also provides its own <c>MockTracker</c> instance via the test context's <c>mock</c> property.
         /// </summary>
         /// <remarks>@since v19.1.0, v18.13.0</remarks>
-        type MockTracker = Test.MockTracker
+        type MockTracker = Node.Test.MockTracker
 
-        type MockFunctionCall<'F, 'ReturnType, 'Args> = Test.MockFunctionCall<'F, 'ReturnType, 'Args>
+        type MockFunctionCall<'F, 'ReturnType, 'Args> = Node.Test.MockFunctionCall<'F, 'ReturnType, 'Args>
 
         /// <summary>
         /// The <c>MockFunctionContext</c> class is used to inspect or manipulate the behavior of
         /// mocks created via the <c>MockTracker</c> APIs.
         /// </summary>
         /// <remarks>@since v19.1.0, v18.13.0</remarks>
-        type MockFunctionContext<'F> = Test.MockFunctionContext<'F>
+        type MockFunctionContext<'F> = Node.Test.MockFunctionContext<'F>
 
         /// <remarks>@since v22.3.0</remarks>
         /// <remarks>@experimental</remarks>
-        type MockModuleContext = Test.MockModuleContext
+        type MockModuleContext = Node.Test.MockModuleContext
 
         /// <remarks>@since v22.20.0</remarks>
-        type MockPropertyContext<'PropertyType> = Test.MockPropertyContext<'PropertyType>
+        type MockPropertyContext<'PropertyType> = Node.Test.MockPropertyContext<'PropertyType>
 
-        type MockTimersOptions = Test.MockTimersOptions
+        type MockTimersOptions = Node.Test.MockTimersOptions
 
         /// <summary>
         /// Mocking timers is a technique commonly used in software testing to simulate and
@@ -182774,7 +182786,7 @@ module Test =
         /// </summary>
         /// <remarks>@since v20.4.0</remarks>
         /// <remarks>@experimental</remarks>
-        type MockTimers = Test.MockTimers
+        type MockTimers = Node.Test.MockTimers
 
     module TestsStream =
         module Compose =
@@ -193752,7 +193764,7 @@ module Url =
 
     module URLSearchParams =
         module ForEach =
-            type Fn = delegate of value: string * name: string * searchParams: Url.URLSearchParams -> unit
+            type Fn = delegate of value: string * name: string * searchParams: Node.Url.URLSearchParams -> unit
 
 /// <summary>node:util</summary>
 module Util =
