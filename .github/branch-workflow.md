@@ -25,6 +25,14 @@ green result is not a prerequisite for working on or reviewing the active slice.
 Test, catalogue-portability and title checks cover PRs targeting feature branches as well as
 `develop` and `master`. Release and publication workflows retain their protected-branch scope.
 
+Draft pull requests skip CI jobs, including the required check jobs and release PR packaging.
+Marking a PR ready for review triggers validation without requiring another push. Converting
+it back to draft cancels in-progress Test, catalogue-portability and Publish runs through their
+existing concurrency groups. Skipped jobs create no full-test evidence or artifacts. Push and
+manual workflows retain their existing behavior; draft status does not suppress branch validation
+or an explicitly requested manual run. These job conditions keep required check names visible
+without allocating runners for draft PRs.
+
 ## Branch protection and releases
 
 Both branches block deletion and force pushes, including for maintainers. Pull requests

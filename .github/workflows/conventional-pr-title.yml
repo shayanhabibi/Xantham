@@ -1,7 +1,7 @@
 name: PR title
 on:
   pull_request_target:
-    types: [opened, edited, reopened, synchronize]
+    types: [opened, edited, reopened, synchronize, ready_for_review, converted_to_draft]
   workflow_dispatch:
     inputs:
       pr:
@@ -13,6 +13,7 @@ permissions:
   pull-requests: read
 jobs:
   conventional-title:
+    if: github.event_name != 'pull_request_target' || !github.event.pull_request.draft
     runs-on: ubuntu-latest
     steps:
       # Read event metadata only: no checkout or execution of PR code.
