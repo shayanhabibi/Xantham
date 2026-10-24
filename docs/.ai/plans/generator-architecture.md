@@ -3379,8 +3379,15 @@ Ancestry still stops an application from re-entering one of its own declarations
 an application whose arguments wrap (anything beyond type parameters, primitives, literals and
 unions of those) consumes one unit of `ContractDepth` (1) when its members are followed, so
 mutually wrapping generic aliases admit a bounded number of instantiations instead of one per
-permutation of their declarations. Applications with plain arguments draw from a finite id set
-and are bounded by the per-type memo, which expands each type at most once per remaining depth.
+permutation of their declarations. Applications with plain arguments are bounded by the per-type
+memo, which expands each type at most once per remaining depth. Computed literal arguments are
+plain and unbounded in principle (`${S}k` spells out its path); measured on six to eight mutually
+recursive aliases, each appending its own digit, the table grows polynomially (209 entries at six,
+483 at eight), and a rule spending depth on literal arguments below an application left those
+counts unchanged, so none is applied.
 A generic call signature on an application keeps its parameters, return type and type
-parameters. The width-1 regressions cover a 20-deep interface diamond chain, six mutually
-wrapping interfaces and aliases, and `Mapper<T>`.
+parameters. A failed declaration-handle or seed lookup fails the pass. The width-1 regressions
+cover a 20-deep interface diamond chain, bounded by contract-walk visits per table entry through
+`resolveTypeTableObserved`; six mutually wrapping interfaces and aliases; six aliases over
+computed literal arguments; a callback below an application shared by two roots, in both root
+orders; and `Mapper<T>`.

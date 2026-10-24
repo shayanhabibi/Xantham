@@ -293,7 +293,8 @@ export declare function mapWith<T>(seed: T): Mapper<T>;
 
 
 /// Resolves `declaration` as a package's entry under a frontier width of one, so every
-/// generation past the seeds runs the width cutoff and the source-contract walk.
+/// generation past the seeds runs the width cutoff and the source-contract walk. Also returns
+/// the greatest ratio of contract-walk visits to table size.
 let private resolveAtWidthOne prefix (declaration: string) =
     use scratch = Scratch.directory prefix
     let directory = scratch.Path
@@ -301,16 +302,23 @@ let private resolveAtWidthOne prefix (declaration: string) =
     System.IO.File.WriteAllText(System.IO.Path.Combine(directory, "index.d.ts"), declaration)
     let configFile = System.IO.Path.Combine(directory, "xantham.json")
     System.IO.File.WriteAllText(configFile, """{"module":"Frontier","entry":"index.d.ts","lib":["esnext"],"types":[]}""")
+    let mutable ratio = 0.0
+    let observe visits tableSize = ratio <- max ratio (float visits / float (max 1 tableSize))
     let resolve = async {
         let! mailbox, ctx = Bootstrap.start (GeneratorConfig.loadFile configFile) directory
         use _ = mailbox :> System.IDisposable
         let! harvest, _ = Pipeline.runTier ctx Harvest.passes HarvestModel.Empty
-        let! resolved, _ = Pipeline.runTier ctx [ Resolve.resolveExportTypes; Resolve.resolveTypeTableWithWidth 1 ] (Pipeline.toResolve harvest)
+        let! resolved, _ = Pipeline.runTier ctx [ Resolve.resolveExportTypes; Resolve.resolveTypeTableObserved 1 observe ] (Pipeline.toResolve harvest)
         return resolved
     }
     let stopwatch = System.Diagnostics.Stopwatch.StartNew()
     let resolved = Async.RunSynchronously resolve
-    resolved, stopwatch.Elapsed
+    resolved, stopwatch.Elapsed, ratio
+
+/// Two fresh instantiations per generation keep the width cutoff engaged.
+let private widthKeepers =
+    [ "export interface Box<T> { value: T; next: Box<T[]> }"
+      "export interface Wide { left: Box<string>; right: Box<number> }" ]
 
 [<Tests>]
 let frontierCostTests =
@@ -328,9 +336,10 @@ let frontierCostTests =
                     "export interface Box<T> { value: T; next: Box<T[]> }"
                     "export interface Wide { left: Box<string>; right: Box<number> }"
                 ]
-            let resolved, elapsed = resolveAtWidthOne "frontier-diamond" declaration
+            let resolved, elapsed, ratio = resolveAtWidthOne "frontier-diamond" declaration
             Expect.isLessThan resolved.Types.Count 200 "the table holds each declaration once"
-            Expect.isLessThan elapsed.TotalSeconds 60.0 "the contract walk stays linear in the chain"
+            Expect.isLessThan ratio 4.0 "each contract walk visits a bounded multiple of the table"
+            Expect.isLessThan elapsed.TotalSeconds 60.0 "the contract walk finishes"
 
         testCase "mutually wrapping generic declarations stay bounded under the width cutoff" <| fun _ ->
             let count = 6
@@ -352,6 +361,47 @@ let frontierCostTests =
                     yield! wrapping "H" (fun i -> $"type H{i}<T> =")
                     "export declare const h: H1<string>;"
                 ]
-            let resolved, _ = resolveAtWidthOne "frontier-mutual" declaration
+            let resolved, _, _ = resolveAtWidthOne "frontier-mutual" declaration
             Expect.isLessThan resolved.Types.Count 400 "protection reaches a bounded number of wrapped instantiations"
+
+        testCase "mutually recursive aliases over computed literal arguments stay bounded" <| fun _ ->
+            let count = 6
+            // Each alias appends its own digit, so a literal argument spells out its path.
+            let declaration =
+                String.concat "\n" [
+                    for i in 1 .. count do
+                        let members =
+                            [ for j in 1 .. count do
+                                  if j <> i then $"m{j}: P{j}<`${{S}}{j}`>" ]
+                        let body = String.concat "; " members
+                        $"type P{i}<S extends string> = {{ {body} }}"
+                    "export declare const p: P1<\"\">;"
+                    yield! widthKeepers
+                ]
+            let resolved, _, ratio = resolveAtWidthOne "frontier-literal" declaration
+            Expect.isLessThan resolved.Types.Count 400 "computed literal arguments reach a bounded number of instantiations"
+            Expect.isLessThan ratio 10.0 "each contract walk visits a bounded multiple of the table"
+
+        testCase "a contract below a shared application survives whichever source root is walked first" <| fun _ ->
+            let lab first second =
+                String.concat "\n" (
+                    [ "type A<T> = { x: Mid<T>; cb: (v: T) => void };"
+                      "type Mid<T> = { z: A<number> };"
+                      first
+                      second ]
+                    @ widthKeepers)
+            let instance name = $"export declare const {name}: A<string>;"
+            let consumer name = $"export declare function {name}(m: Mid<string>): void;"
+            for order, declaration in
+                [ "instance first", lab (instance "a") (consumer "h")
+                  "consumer first", lab (consumer "c") (instance "z") ] do
+                let resolved, _, _ = resolveAtWidthOne "frontier-ancestry" declaration
+                let callbacks =
+                    resolved.Types
+                    |> Map.toList
+                    |> List.collect (fun (_, facts) -> facts.Members |> List.filter (fun member_ -> member_.Symbol.Name = "cb"))
+                Expect.isGreaterThanOrEqual callbacks.Length 2 $"{order}: both A instantiations carry cb"
+                for callback in callbacks do
+                    Expect.isTrue (Map.containsKey callback.TypeId resolved.Types) $"{order}: every cb callback is resolved"
+                    Expect.isFalse (Map.containsKey callback.TypeId resolved.NotFollowed) $"{order}: no cb callback is deferred"
     ]
