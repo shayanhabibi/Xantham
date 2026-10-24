@@ -3437,7 +3437,7 @@ let pipelineTests =
                           Expect.isFalse (body.Contains "type Thunk = (unit ->") "the source interface is not reduced to a cyclic function alias"
 
                           let generic = declarationBodyOf body "GenericThunk<'T>"
-                          Expect.stringContains generic "U2<'T, GenericThunk<'T>>" "recursive references retain the declaration's type argument"
+                          Expect.stringContains generic "abstract Invoke: unit -> GenericValue<'T>" "recursive references apply the alias over the declaration's type argument"
                           Expect.stringContains generic "abstract Invoke:" "generic recursive callbacks remain nominal"
                           Expect.stringContains body "type Reader = (unit -> Record)" "recursion through an object member already has a nominal boundary"
                           Expect.stringContains body "type Plain = (unit -> string)" "nonrecursive callbacks retain function ergonomics"
