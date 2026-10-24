@@ -1233,6 +1233,9 @@ type ResolvedSignature =
         /// A construct signature of an `abstract class`, which TypeScript refuses `new` on. It
         /// marks the class as one written to be derived from (§4.4).
         IsAbstract: bool
+        /// A construct signature of a `private constructor`, which TypeScript admits `new` on only
+        /// inside the class. The class stays a class; the binding carries no constructor for it.
+        IsPrivate: bool
         ReturnTypeId: int<typeId>
         /// The declaration's source text on one line, and the description of its own JSDoc.
         /// Carried by each signature of a set of two or more.
@@ -1288,7 +1291,12 @@ type TypeFacts =
         /// Flags of the type's own symbol: `Class`, or `Interface` merged with a variable for a
         /// constructable host interface. `None` where the type has no symbol.
         SymbolFlags: SymbolFlags
+        /// Public and protected members. A TypeScript-private member (the `private` modifier or a
+        /// `#name`) is inaccessible outside its class and is absent.
         Members: ResolvedMember list
+        /// The type has a TypeScript-private member. TypeScript then admits only the class's own
+        /// instances, never an object literal.
+        PrivateMembers: bool
         /// Index signatures (§4.10). Kept apart from `Members` because they are not properties:
         /// they have no name, and a type may carry one with no members at all.
         IndexInfos: ResolvedIndex list
@@ -1369,6 +1377,7 @@ module TypeFacts =
             NamespacePath = []
             SymbolFlags = SymbolFlags.None
             Members = []
+            PrivateMembers = false
             IndexInfos = []
             CallSignatures = []
             ConstructSignatures = []

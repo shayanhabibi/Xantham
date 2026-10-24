@@ -2863,7 +2863,9 @@ and internal objectRef
                                 |> Option.defaultValue "an anonymous class"
 
                             FsObj, [ Finding.make owner (TypeReference.ConstructorObjectNotDeclared constructs) ]
-                        | (Ship | Widen | Map _), _ when facts.Members.IsEmpty && facts.IndexInfos.IsEmpty ->
+                        | (Ship | Widen | Map _), _ when
+                            facts.Members.IsEmpty && facts.IndexInfos.IsEmpty && not facts.PrivateMembers
+                            ->
                             // A member-less object type maps completely to `obj`, and the
                             // declaration it would have taken would hold the same. An
                             // author-written name read from somewhere else stays a declaration
@@ -4746,6 +4748,7 @@ let internal shapeMembers
     // side is written in TypeScript, and so an existing golden's member order only grows.
     let constructors =
         facts.ConstructSignatures
+        |> List.filter (fun signature -> not signature.IsPrivate)
         |> List.collect (restOverloads model)
         |> List.map (fun signature ->
             let owner = $"{self}.Create"

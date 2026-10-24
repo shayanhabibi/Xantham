@@ -1679,6 +1679,57 @@ let pipelineTests =
                             $"{dropped} says why" ])
 
         yield!
+            fixtureTests "private-member-lab" (handFixture "private-member-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "private members: a TypeScript-private member is omitted, a protected or underscore one stays" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    // `private secret;` and `#private;` reach the .d.ts with no type: they bound
+                    // as `obj` (TR008) before.
+                    for omitted in [ "secret"; "rotate"; "registry"; "__#" ] do
+                        Expect.isFalse (source.Contains omitted) $"{omitted} is omitted"
+
+                    Expect.isFalse
+                        (rendered.Findings |> List.exists (fun finding -> finding.Key = "TR008"))
+                        "no private member reads as obj"
+
+                    Expect.stringContains source "abstract _legacy: float with get, set" "a public _name is public API"
+                    Expect.stringContains source "abstract balance: float with get, set" "a protected property stays"
+                    Expect.stringContains source "abstract audit: note: string -> unit" "a protected method stays"
+                    Expect.stringContains source "static member DEFAULT_OWNER: string = jsNative" "a public static stays"
+
+                  testCase "private members: a public getter over a private setter reads get-only" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.stringContains source "    abstract limit: float\n" "the setter is private"
+
+                  testCase "private members: a private constructor binds no constructor; the class keeps its statics" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.isFalse (source.Contains "static member Token () : Token") "no EmitConstructor"
+                    Expect.stringContains source "[<Import(\"Token.issue\", \"private-member-lab\")>]" "the factory stays"
+                    Expect.isFalse (source.Contains "Token2") "the class side is not a constructor object"
+
+                  testCase "private members: a class with private members is nominal" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    // Only the class's own instances satisfy it, so it is neither `obj` nor
+                    // constructed from an object literal.
+                    Expect.stringContains source "type Opaque =\n    interface end" "an empty interface, not obj"
+                    Expect.isFalse (source.Contains "static member Create (handle") "no Create"
+
+                    for name in [ "Account"; "AccountView"; "Opaque" ] do
+                        Expect.contains
+                            (rendered.Findings |> List.map (fun finding -> finding.Symbol, finding.Key))
+                            (name, "SP003")
+                            $"{name} refuses Create"
+
+                    Expect.stringContains source "static member Create (value: string) : Token" "a private constructor alone stays structural" ])
+
+        yield!
             fixtureTests "ctor-lab" (handFixture "ctor-lab") GeneratorConfig.Default (fun package ->
                 [ testCase "a constructor object is declared as its own interface (§4.4)" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)

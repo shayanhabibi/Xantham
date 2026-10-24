@@ -389,7 +389,9 @@ let shapeClasses: Pass<ShapeModel> =
 
                                     facts.ConstructSignatures
                                     |> List.collect (restOverloads model)
-                                    |> List.mapi (fun ordinal signature ->
+                                    |> List.indexed
+                                    |> List.filter (fun (_, signature) -> not signature.IsPrivate)
+                                    |> List.map (fun (ordinal, signature) ->
                                         let typeParameters, parameters, returns, signatureFindings =
                                             shapeSignature ctx model (Some name) name signature
 

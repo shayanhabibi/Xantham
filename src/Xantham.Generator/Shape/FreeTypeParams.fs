@@ -186,6 +186,7 @@ let private reuseAnonymousApplications includeUnnamed (model: ShapeModel) =
             left.TypeParameters = right.TypeParameters
             && left.HasRest = right.HasRest
             && left.IsAbstract = right.IsAbstract
+            && left.IsPrivate = right.IsPrivate
             && pairwise members left.Parameters right.Parameters
             && same left.ReturnTypeId right.ReturnTypeId
 

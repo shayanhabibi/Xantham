@@ -32,6 +32,10 @@ module private Reason =
     let Callable = "the declaration is callable, which no object literal is"
 
     [<Literal>]
+    let PrivateMembers =
+        "the declaration has a private member, so TypeScript admits only its class's instances"
+
+    [<Literal>]
     let SymbolKeyed =
         "a required well-known symbol member has no key a ParamObject literal can write"
 
@@ -71,7 +75,7 @@ let private isLiteralMember (m: FsMember) = (literalMember m).IsSome
 /// Why the declaration carries no `Create`, or `None` where one is synthesized. `members` is the
 /// property/method set the `Create` binds - a hybrid's `Invoke` reads its own call signatures
 /// and carries no `Create` parameter of its own.
-let private refusal (callable: bool) (decl: FsInterfaceDecl) (members: FsMember list) =
+let private refusal (callable: bool) (nominal: bool) (decl: FsInterfaceDecl) (members: FsMember list) =
     let methodNames =
         members
         |> List.choose (function
@@ -82,6 +86,8 @@ let private refusal (callable: bool) (decl: FsInterfaceDecl) (members: FsMember 
         Some Reason.EntrypointClass
     elif callable || decl.Members |> List.exists isInvoke then
         Some Reason.Callable
+    elif nominal then
+        Some Reason.PrivateMembers
     elif
         decl.Members |> List.exists isSymbolKeyed'
         || decl.Inherits |> List.exists (sequenceElement >> Option.isSome)
@@ -166,6 +172,17 @@ let synthesizeParamObjects: Pass<ShapeModel> =
                             | _ -> None)
                         |> Set.ofList
 
+                    // A declaration whose type has a private member admits only its class's
+                    // instances, never an object literal.
+                    let nominal =
+                        model.DeclNames
+                        |> Map.toList
+                        |> List.choose (fun (typeId, name) ->
+                            match Map.tryFind typeId model.Types with
+                            | Some facts when facts.PrivateMembers -> Some name
+                            | _ -> None)
+                        |> Set.ofList
+
                     let decls =
                         model.Decls
                         |> List.map (function
@@ -182,7 +199,7 @@ let synthesizeParamObjects: Pass<ShapeModel> =
                                 // binds only the properties and methods beside it.
                                 let members = decl.Members |> List.filter (isInvoke >> not)
 
-                                match refusal (Set.contains decl.Name callable) decl members with
+                                match refusal (Set.contains decl.Name callable) (Set.contains decl.Name nominal) decl members with
                                 | Some reason ->
                                     findings <-
                                         findings

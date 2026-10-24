@@ -1,0 +1,7 @@
+{
+    "name": "private-member-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "main": "index.js",
+    "description": "Hand-authored fixture for TypeScript-private class members: the `private` modifier and `#name` members are omitted, while `protected` members and a public `_underscore` member stay. Tracked in git, no npm install."
+}

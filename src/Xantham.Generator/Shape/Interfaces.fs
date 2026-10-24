@@ -14,11 +14,13 @@ let private declaresInterface (model: ShapeModel) (facts: TypeFacts) =
     (flag TypeFlags.Object facts
      // A constructor object is shape even with no properties of its own: `interface F { new
      // (): X }` has no members and one construct signature, and becomes an interface of one
-     // `Create` (§4.4).
+     // `Create` (§4.4). A class whose members are all private is nominal: it admits only its
+     // own instances, which an empty interface keeps apart from `obj`.
      && (not (
              facts.Members.IsEmpty
              && facts.IndexInfos.IsEmpty
              && facts.ConstructSignatures.IsEmpty
+             && not facts.PrivateMembers
          )
          || hasInterfaceCallSignatures model facts)
      // A pure index signature the checker gave no symbol of its own - reached through a

@@ -1152,6 +1152,103 @@ let private compilerLibDeclaresSymbol (ctx: Context) (key: string) : Async<bool>
                     return property.Declarations |> ValueOption.defaultValue [||] |> Array.exists isLibFile
     }
 
+/// Whether a class member declaration is TypeScript-private: it carries the `private` modifier,
+/// or its name is a private identifier (`#name`). A `protected` member and a public member named
+/// `_name` both read `false`.
+let private declarationPrivate (ctx: Context) (declaration: string) : Async<bool> =
+    async {
+        match NodeHandle.parse declaration with
+        | ValueNone -> return false
+        | ValueSome handle ->
+            let! file = sourceFile ctx handle.Path
+
+            return
+                match file with
+                | ValueNone -> false
+                | ValueSome file ->
+                    let node = Node.ofIndex<AnyNode> file handle.Index
+
+                    let modifiers, name =
+                        match node.Kind with
+                        | SyntaxKind.PropertyDeclaration ->
+                            let node = Node.retag<AnyNode, PropertyDeclaration> node
+                            PropertyDeclaration.modifiers node, PropertyDeclaration.name node
+                        | SyntaxKind.MethodDeclaration ->
+                            let node = Node.retag<AnyNode, MethodDeclaration> node
+                            MethodDeclaration.modifiers node, MethodDeclaration.name node
+                        | SyntaxKind.GetAccessor ->
+                            let node = Node.retag<AnyNode, GetAccessorDeclaration> node
+                            GetAccessorDeclaration.modifiers node, GetAccessorDeclaration.name node
+                        | SyntaxKind.SetAccessor ->
+                            let node = Node.retag<AnyNode, SetAccessorDeclaration> node
+                            SetAccessorDeclaration.modifiers node, SetAccessorDeclaration.name node
+                        | SyntaxKind.Constructor ->
+                            ConstructorDeclaration.modifiers (Node.retag<AnyNode, ConstructorDeclaration> node),
+                            ValueNone
+                        | SyntaxKind.Parameter ->
+                            ParameterDeclaration.modifiers (Node.retag<AnyNode, ParameterDeclaration> node), ValueNone
+                        | _ -> Seq.empty, ValueNone
+
+                    modifiers |> Seq.exists (fun modifier -> modifier.Kind = SyntaxKind.PrivateKeyword)
+                    || name |> ValueOption.exists (fun name -> name.Kind = SyntaxKind.PrivateIdentifier)
+    }
+
+/// Whether every declaration of a member is TypeScript-private (`declarationPrivate`). A member
+/// with no declaration reads `false`, as does an accessor pair whose getter is public.
+let private declaredPrivate (ctx: Context) (declarations: string array voption) : Async<bool> =
+    async {
+        match declarations |> ValueOption.defaultValue [||] with
+        | [||] -> return false
+        | declarations ->
+            let! verdicts = declarations |> Array.map (declarationPrivate ctx) |> Async.Parallel
+            return Array.forall id verdicts
+    }
+
+/// Whether an accessor property's setter is TypeScript-private behind a public getter: every
+/// `set` declaration is private and some declaration is not. Outside the class the property
+/// reads as `readonly`.
+let private privateSetter (ctx: Context) (declarations: string array voption) : Async<bool> =
+    async {
+        let declarations = declarations |> ValueOption.defaultValue [||]
+
+        let! facts =
+            declarations
+            |> Array.map (fun declaration ->
+                async {
+                    let! isPrivate = declarationPrivate ctx declaration
+
+                    let isSetter =
+                        NodeHandle.parse declaration
+                        |> ValueOption.exists (fun handle -> handle.Kind = SyntaxKind.SetAccessor)
+
+                    return isSetter, isPrivate
+                })
+            |> Async.Parallel
+
+        let setters = facts |> Array.filter fst
+
+        return
+            setters.Length > 0
+            && setters |> Array.forall snd
+            && facts |> Array.exists (snd >> not)
+    }
+
+/// The properties of a type that a binding carries, every property except a TypeScript-private
+/// one (`declaredPrivate`), and whether the type has a private property.
+let private publicPropertiesOfType (ctx: Context) (ty: TypeResponse) : Async<SymbolResponse array * bool> =
+    async {
+        let! properties = ctx.Session.getPropertiesOfType ty.Id
+        let properties = properties |> ValueOption.defaultValue [||]
+        let! privacy =
+            properties
+            |> Array.map (fun property -> declaredPrivate ctx property.Declarations)
+            |> Async.Parallel
+
+        return
+            Array.zip properties privacy |> Array.filter (snd >> not) |> Array.map fst,
+            Array.contains true privacy
+    }
+
 /// The well-known symbol referenced by a member's computed key: `Some "iterator"` for
 /// `[Symbol.iterator]`. A well-known symbol is a `SymbolConstructor` property declared by a
 /// `lib.*.d.ts` file of the program, or, when a package's augmentation is the program's only
@@ -1276,7 +1373,14 @@ let private resolveMember (ctx: Context) isProperty (property: SymbolResponse) =
         // `readonly` modifier is the checker's to see, so ask it.
         let! readOnly =
             if isProperty then
-                ctx.Session.isReadonlySymbol property.Reference
+                async {
+                    let! declared = ctx.Session.isReadonlySymbol property.Reference
+
+                    if declared then
+                        return true
+                    else
+                        return! privateSetter ctx property.Declarations
+                }
             else
                 async.Return false
 
@@ -1339,6 +1443,12 @@ let private resolveSignatures (ctx: Context) (trace: Trace option) (registers: R
                     let! parameters = ctx.Session.getParametersOfSignature signature.Id
                     let parameters = parameters |> ValueOption.defaultValue [||]
 
+                    let! isPrivate =
+                        match signature.Declaration with
+                        | ValueSome declaration when kind = SignatureKind.Construct ->
+                            declarationPrivate ctx declaration
+                        | _ -> async.Return false
+
                     let! parameterFacts =
                         parameters |> Array.map (resolveMember ctx false) |> Async.Parallel
 
@@ -1380,6 +1490,7 @@ let private resolveSignatures (ctx: Context) (trace: Trace option) (registers: R
                             HasRest = hasRest
                             TypeParameters = typeParameters |> Array.map _.TypeId |> Array.toList
                             IsAbstract = signature.Flags.HasFlag SignatureFlags.Abstract
+                            IsPrivate = isPrivate
                             ReturnTypeId = returnType.TypeId
                             Source = source
                             OwnDoc = ownDoc
@@ -1400,8 +1511,7 @@ let private resolveSignatures (ctx: Context) (trace: Trace option) (registers: R
 /// `A & B` are both sets, a property both declare typed as the intersection of its two types.
 let private deriveStructure (ctx: Context) (trace: Trace option) (registers: Registers) (ty: TypeResponse) =
     async {
-        let! properties = ctx.Session.getPropertiesOfType ty.Id
-        let properties = properties |> ValueOption.defaultValue [||]
+        let! properties, privateMembers = publicPropertiesOfType ctx ty
 
         let! members = properties |> Array.map (resolveMember ctx true) |> Async.Parallel
 
@@ -1437,6 +1547,7 @@ let private deriveStructure (ctx: Context) (trace: Trace option) (registers: Reg
         return
             {|
                 Members = members |> Array.map fst |> Array.toList
+                PrivateMembers = privateMembers
                 IndexInfos =
                     indexInfos
                     |> List.map (fun info ->
@@ -1697,6 +1808,7 @@ let private deriveFacts
             return
                 { TypeFacts.shallow ty with
                     Members = structure |> Option.map _.Members |> Option.defaultValue []
+                    PrivateMembers = structure |> Option.exists _.PrivateMembers
                     IndexInfos = structure |> Option.map _.IndexInfos |> Option.defaultValue []
                     CallSignatures = structure |> Option.map _.CallSignatures |> Option.defaultValue []
                     ConstructSignatures = structure |> Option.map _.ConstructSignatures |> Option.defaultValue []
@@ -2086,6 +2198,7 @@ let private deriveFacts
                             SymbolFlags = symbol |> ValueOption.map _.Flags |> ValueOption.defaultValue SymbolFlags.None
                             NamespacePath = namespacePath
                             Members = structure.Members
+                            PrivateMembers = structure.PrivateMembers
                             Declarations = []
                             DeclarationArguments = []
                             AliasDeclarations = []
@@ -2140,11 +2253,10 @@ let private deriveFacts
                 match keyOfOperand with
                 | ValueSome operand when operand.Flags.HasFlag TypeFlags.Object ->
                     async {
-                        let! properties = ctx.Session.getPropertiesOfType operand.Id
+                        let! properties, _ = publicPropertiesOfType ctx operand
 
                         return!
                             properties
-                            |> ValueOption.defaultValue [||]
                             |> Array.map (fun property -> ctx.Session.getTypeOfSymbol property.Reference)
                             |> Async.Parallel
                     }
@@ -3221,11 +3333,10 @@ let passes: Pass<ResolveModel> list =
 
 let internal customizationFacts (ctx: Context) (facts: TypeFacts) =
     async {
-        let! properties = ctx.Session.getPropertiesOfType facts.Response.Id
+        let! properties, privateMembers = publicPropertiesOfType ctx facts.Response
 
         let! members =
             properties
-            |> ValueOption.defaultValue [||]
             |> Array.map (resolveMember ctx true)
             |> Async.Parallel
 
@@ -3234,6 +3345,7 @@ let internal customizationFacts (ctx: Context) (facts: TypeFacts) =
         return
             { facts with
                 Members = members |> Array.map fst |> Array.toList
+                PrivateMembers = privateMembers
                 BaseTypes = bases |> ValueOption.defaultValue [||] |> Array.map _.TypeId |> Array.toList
             },
             (members |> Array.map snd |> Array.toList)
