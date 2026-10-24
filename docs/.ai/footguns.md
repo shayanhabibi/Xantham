@@ -80,6 +80,13 @@ that order (see "A name, owner or placement must never depend on checker type-id
 Generator passes). Regenerate Core.TS after reordering session queries, and diff its symbol
 names, not only its tiers.
 
+**A source read inside the type walk can move declaration ownership.** Reading every tuple's
+`labeledElementDeclarations` nodes in `deriveFacts` relocated the ten `WebAssembly.*Constructor`
+interfaces in Core.TS from `Dom.WebAssembly` to `Dom.GlobalThis.WebAssembly`, deterministically,
+with no other output change. The same reads in `resolve-rest-tuple-labels`, after the walk and
+limited to rest-parameter tuples, leave ownership as it was. Read a source fact the walk itself
+does not need in a pass after `resolve-type-table`.
+
 ## Declaration catalogs
 
 **TypeScript library ownership is logical, not a platform distribution.** Installed

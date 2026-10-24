@@ -1,4 +1,4 @@
-namespace Xantham.Generator
+﻿namespace Xantham.Generator
 
 open System
 open System.ComponentModel.DataAnnotations
@@ -1308,8 +1308,9 @@ type TypeFacts =
         /// of the table: deriving it drags all of `Array.prototype` in again for every distinct
         /// tuple shape, and nothing but these flags is wanted from it.
         TupleElements: ElementFlags list
-        /// A tuple's element labels, in element order, read off its target: `[start: number]`
-        /// carries `Some "start"`, an unlabelled element `None`. Empty for an unlabelled tuple.
+        /// The element labels of a tuple a rest parameter is typed by, in element order:
+        /// `[start: number]` carries `Some "start"`, an unlabelled element `None`. Empty for an
+        /// unlabelled tuple and for every other type.
         TupleLabels: string option list
         /// The arguments the type's *alias* was written with, by id (§4.9). On the declaration
         /// form of a generic alias these are its own parameters - `type Mapper<T> = (t: T) => T`

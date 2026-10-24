@@ -1776,29 +1776,18 @@ let private deriveFacts
             // The target is read for its flags and then dropped rather than followed - it is
             // the generic tuple type, so deriving it re-derives all of `Array.prototype` for
             // every distinct tuple shape.
-            let! tupleElements, tupleLabels =
+            let! tupleElements =
                 if ty.IsTupleType = ValueSome true then
                     async {
                         let! target = ctx.Session.getTargetOfType ty.Id
 
-                        let! labels =
-                            target.LabeledElementDeclarations
-                            |> ValueOption.defaultValue [||]
-                            |> Array.map (fun handle ->
-                                if isNull handle then
-                                    async.Return None
-                                else
-                                    declaredIdentifier ctx handle)
-                            |> Async.Sequential
-
                         return
                             target.ElementFlags
                             |> ValueOption.map Array.toList
-                            |> ValueOption.defaultValue [],
-                            Array.toList labels
+                            |> ValueOption.defaultValue []
                     }
                 else
-                    async.Return([], [])
+                    async.Return []
 
             // A generic alias hangs its parameters off the alias, not the type: the function
             // type behind `type Mapper<T> = (t: T) => T` reports none of its own. Only the
@@ -1942,7 +1931,6 @@ let private deriveFacts
                             |> Option.map (fun value -> value * uom<Measure.declFile>)
                         TypeArguments = referenceArguments |> List.map _.TypeId
                         TupleElements = tupleElements
-                        TupleLabels = tupleLabels
                         AliasTypeArguments = aliasTypeArguments |> List.map _.TypeId
                         BaseTypes = bases |> List.map _.TypeId
                     },
@@ -2109,7 +2097,7 @@ let private deriveFacts
                             AmbientClass = ambientClass
                             TypeArguments = typeArguments |> List.map _.TypeId
                             TupleElements = tupleElements
-                            TupleLabels = tupleLabels
+                            TupleLabels = []
                             AliasTypeArguments = aliasTypeArguments |> List.map _.TypeId
                             IntersectionMembers = []
                             Constraint = None
@@ -3164,12 +3152,71 @@ let private resolveAliasParameters: Pass<ResolveModel> =
                 }
     }
 
+/// Records the element labels of every tuple a rest parameter is typed by, directly or as a union
+/// arm, so its spread parameters are named as written. It reads after the walk, over a closed
+/// type table, and adds no type to it.
+let private resolveRestTupleLabels: Pass<ResolveModel> =
+    {
+        Name = "resolve-rest-tuple-labels"
+        Run =
+            fun ctx model ->
+                async {
+                    let isTuple id =
+                        Map.tryFind id model.Types
+                        |> Option.exists (fun facts -> facts.Response.IsTupleType = ValueSome true)
+
+                    let tuples =
+                        model.Types
+                        |> Map.toList
+                        |> List.collect (fun (_, facts) -> facts.CallSignatures @ facts.ConstructSignatures)
+                        |> List.filter _.HasRest
+                        |> List.choose (fun signature -> List.tryLast signature.Parameters)
+                        |> List.collect (fun rest ->
+                            match Map.tryFind rest.TypeId model.Types with
+                            | Some facts when facts.Response.Flags.HasFlag TypeFlags.Union -> facts.UnionMembers
+                            | _ -> [ rest.TypeId ])
+                        |> List.filter isTuple
+                        |> List.distinct
+
+                    let mutable types = model.Types
+
+                    for id in tuples do
+                        let! target = attempt (ctx.Session.getTargetOfType model.Types[id].Response.Id)
+
+                        match target with
+                        | Ok target ->
+                            let! labels =
+                                target.LabeledElementDeclarations
+                                |> ValueOption.defaultValue [||]
+                                |> Array.map (fun handle ->
+                                    if isNull handle then
+                                        async.Return None
+                                    else
+                                        declaredIdentifier ctx handle)
+                                |> Async.Sequential
+
+                            if labels |> Array.exists Option.isSome then
+                                types <-
+                                    types
+                                    |> Map.change
+                                        id
+                                        (Option.map (fun facts ->
+                                            { facts with
+                                                TupleLabels = Array.toList labels
+                                            }))
+                        | Error _ -> ()
+
+                    return Advanced { model with Types = types }
+                }
+    }
+
 let passes: Pass<ResolveModel> list =
     [
         resolveExportTypes
         resolveAliasParameters
         resolveTypeTable
         resolveDeclarationIdentities
+        resolveRestTupleLabels
     ]
 
 let internal customizationFacts (ctx: Context) (facts: TypeFacts) =
