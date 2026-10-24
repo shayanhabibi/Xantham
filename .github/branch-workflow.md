@@ -3,6 +3,14 @@
 Feature and dependency pull requests target `develop`. Release pull requests normally
 merge `develop` into `master` using a merge commit, preserving shared branch history.
 
+Draft pull requests skip CI jobs, including the required check jobs and release PR packaging.
+Marking a PR ready for review triggers validation without requiring another push. Converting
+it back to draft cancels in-progress Test, catalogue-portability and Publish runs through their
+existing concurrency groups. Skipped jobs create no full-test evidence or artifacts. Push and
+manual workflows retain their existing behavior; draft status does not suppress branch validation
+or an explicitly requested manual run. These job conditions keep required check names visible
+without allocating runners for draft PRs.
+
 Both branches block deletion and force pushes, including for maintainers. Pull requests
 require successful GitHub Actions checks, an up-to-date branch, and resolved review
 conversations. No additional approving reviewer is required. Auto-merge is available.

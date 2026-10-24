@@ -2,6 +2,7 @@ name: Test
 on:
   pull_request:
     branches: [develop, master]
+    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
   push:
     branches: [develop, master]
   workflow_dispatch:
@@ -21,6 +22,7 @@ concurrency:
 
 jobs:
   scope:
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     outputs:
       full: ${{ steps.scope.outputs.full }}
       reused: ${{ steps.develop-tests.outputs.reused || 'false' }}
@@ -61,7 +63,7 @@ jobs:
 
   test:
     needs: [scope, shards]
-    if: always()
+    if: always() && (github.event_name != 'pull_request' || !github.event.pull_request.draft)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
