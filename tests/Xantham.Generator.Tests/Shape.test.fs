@@ -5578,6 +5578,69 @@ let shapePassTests =
                 [ Escape, "Gone" ]
                 "the dropped export is a finding, not silence"
 
+        testCase "audit-coverage represents nested namespaces through their harvested members" <| fun _ ->
+            let shapes = Build.symbol 310 "Shapes" SymbolFlags.NamespaceModule
+            let inner = { Build.symbol 311 "Inner" SymbolFlags.NamespaceModule with Parent = ValueSome (Build.compactOf shapes) }
+            let lonely = { Build.symbol 312 "Lonely" SymbolFlags.Interface with Parent = ValueSome (Build.compactOf inner) }
+
+            let declared =
+                FsInterface
+                    { Name = "Globals.Shapes.Inner.Lonely"
+                      Callable = false
+                      Docs = ""
+                      Tags = []
+                      Order = None
+                      TypeParameters = []
+                      Inherits = []
+                      Members = []
+                      Entrypoint = None
+                      CreateOverloads = []
+                      Statics = [] }
+
+            let model =
+                { Build.shapeModel [] with
+                    Decls = [ declared ]
+                    Harvest =
+                        { HarvestModel.Empty with
+                            Exports =
+                                [ { Build.export "Shapes" shapes with HasValueExport = false }
+                                  { Build.export "Inner" inner with HasValueExport = false }
+                                  { Build.export "Lonely" lonely with HasValueExport = false } ] } }
+
+            let _, findings = Build.runPass Coverage.auditCoverage model
+            Expect.isEmpty findings "both namespace modules are represented through the declared child"
+
+        testCase "audit-coverage reports a namespace whose harvested members are missing" <| fun _ ->
+            let shapes = Build.symbol 310 "Shapes" SymbolFlags.NamespaceModule
+            let lonely = { Build.symbol 311 "Lonely" SymbolFlags.Interface with Parent = ValueSome (Build.compactOf shapes) }
+
+            let model =
+                { Build.shapeModel [] with
+                    Harvest =
+                        { HarvestModel.Empty with
+                            Exports =
+                                [ { Build.export "Shapes" shapes with HasValueExport = false }
+                                  { Build.export "Lonely" lonely with HasValueExport = false } ] } }
+
+            let _, findings = Build.runPass Coverage.auditCoverage model
+
+            Expect.equal
+                (findings |> List.map (fun f -> f.Tier, f.Symbol))
+                [ Escape, "Shapes"; Escape, "Lonely" ]
+                "the absent namespace module and its child each remain visible in the findings"
+
+        testCase "audit-coverage excuses a namespace with no harvested member" <| fun _ ->
+            let empty = Build.symbol 320 "Empty" SymbolFlags.NamespaceModule
+
+            let model =
+                { Build.shapeModel [] with
+                    Harvest =
+                        { HarvestModel.Empty with
+                            Exports = [ { Build.export "Empty" empty with HasValueExport = false } ] } }
+
+            let _, findings = Build.runPass Coverage.auditCoverage model
+            Expect.isEmpty findings "an empty type-only namespace has no emitted API"
+
         testCase "the pipeline fold stamps findings with the pass that made them" <| fun _ ->
             let degrading: Pass<int> =
                 { Name = "always-degrades"

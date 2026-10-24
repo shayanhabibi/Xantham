@@ -161,6 +161,9 @@ rewrites could fuse — do not fuse them; the seam is the test point.
 
 - **Invariant (tier exit):** the shaped model contains only `FsDecl` constructs the renderer
   has cases for, and `audit-coverage` has accounted for every export.
+  A namespace is represented through its harvested descendants, including declarations under
+  `Globals` or a subpath module. If all harvested children are absent, the namespace and its
+  missing children each receive `AC001`; an empty type-only namespace remains excused.
 
 ### Tier 4 — Render
 
