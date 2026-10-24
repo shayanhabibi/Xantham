@@ -7568,7 +7568,8 @@ let openIntersectionFixtureTests =
                 Expect.isFalse (source.Contains "module Listener") "a restating literal is not declared"
                 Expect.stringContains source "type Optional<'R> = (JS.Intersect<'R, Optional.Res> -> unit)" "a required member over an optional bound member is added"
                 Expect.stringContains source "type Retyped<'R when 'R :> Wide> = (JS.Intersect<'R, Retyped.Res> -> unit)" "a member retyped from the bound's is added"
-                Expect.stringContains source "abstract value: U2<'I, JS.Intersect<'T, 'I>> option with get, set" "an undefined & I arm is absence"
+                Expect.stringContains source "abstract value: U2<'I, JS.Intersect<'T, 'I>> with get, set" "an undefined & I arm beside I is dropped"
+                Expect.stringContains source "abstract padding: JS.Intersect<Base, 'T> option with get, set" "an undefined & T arm with no T arm hoists to option"
                 Expect.isFalse (source.Contains "JS.Intersect<unit") "a nullish operand is never carried"
                 // A closed application of a callback alias expands in place (§4.6 records the gap):
                 // `Handler<Base, Wide>` is not written as an application of `Handler`.

@@ -508,9 +508,11 @@ has no reference of its own (a generic mapped alias's body), still widen under `
 `tests/fixtures/open-intersection-lab` pins both readings, the primitive negative, and the two
 restate negatives: an optional bound member, and a bound member of another type.
 
-A nullish operand is absence, not an operand: `undefined & I` is inhabited by `undefined` alone,
-so a union arm of that form hoists to `option` with the other nullish arms (`(T | I | undefined) &
-I` reads `U2<'I, JS.Intersect<'T, 'I>> option`), and is never carried as `JS.Intersect<unit, 'I>`.
+A nullish operand is absence, not an operand, and is never carried as `JS.Intersect<unit, 'I>`.
+A union arm `undefined & I` beside an arm `I` is a subset of it and is dropped (`(T | I |
+undefined) & I` reads `U2<'I, JS.Intersect<'T, 'I>>`, still required); with no such arm it hoists
+to `option` with the other nullish arms (`(Base | undefined) & T` reads `JS.Intersect<Base, 'T>
+option`).
 
 Open gap — alias identity at a closed application. A callback alias applied to closed arguments
 expands in place (§4.9), and its intersection then has no type-parameter operand and flattens:

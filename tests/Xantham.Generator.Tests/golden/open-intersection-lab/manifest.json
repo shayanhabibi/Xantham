@@ -3,16 +3,16 @@
   "package": "open-intersection-lab",
   "module": "OpenIntersectionLab",
   "counts": {
-    "exact": 4,
-    "ergonomic": 17,
+    "exact": 5,
+    "ergonomic": 18,
     "widened": 5,
     "escape": 0
   },
   "passes": [
     {
       "pass": "SY - synthesize-anonymous",
-      "total": 7,
-      "exact": 7
+      "total": 8,
+      "exact": 8
     },
     {
       "pass": "shape-callbacks",
@@ -22,9 +22,9 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 9,
+      "total": 11,
       "exact": 1,
-      "ergonomic": 8
+      "ergonomic": 10
     },
     {
       "pass": "SA - shape-aliases",
@@ -40,8 +40,8 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 16,
-      "ergonomic": 14,
+      "total": 17,
+      "ergonomic": 15,
       "widened": 2
     }
   ]

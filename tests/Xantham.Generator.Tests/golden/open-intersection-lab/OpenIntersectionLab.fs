@@ -94,10 +94,15 @@ type Exports =
     [<Import("assign", "open-intersection-lab")>]
     static member assign<'T, 'U> (target: 'T, source: 'U) : JS.Intersect<'T, 'U> = jsNative
     /// <summary>
-    /// A nullish operand is absence: the <c>undefined &amp; I</c> arm of <c>value</c> reads as option.
+    /// A nullish operand is absence: the <c>undefined &amp; I</c> arm of <c>value</c> is a subset of the <c>I</c> arm.
     /// </summary>
     [<Import("initial", "open-intersection-lab")>]
     static member initial<'T, 'I> (options: Initial.Options<'I, 'T>) : unit = jsNative
+    /// <summary>
+    /// A nullish arm with no sibling arm to fall under hoists to option.
+    /// </summary>
+    [<Import("pad", "open-intersection-lab")>]
+    static member pad<'T> (options: Pad.Options<'T>) : unit = jsNative
 
 module Counted =
     [<Interface>]
@@ -117,9 +122,9 @@ module Handler =
 module Initial =
     [<Interface>]
     type Options<'I, 'T> =
-        abstract value: U2<'I, JS.Intersect<'T, 'I>> option with get, set
+        abstract value: U2<'I, JS.Intersect<'T, 'I>> with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?value: U2<'I, JS.Intersect<'T, 'I>>) : Options<'I, 'T> = jsNative
+        static member Create (value: U2<'I, JS.Intersect<'T, 'I>>) : Options<'I, 'T> = jsNative
 
 module Listen =
     module Handler =
@@ -137,6 +142,13 @@ module Optional =
         abstract req: Base with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (req: Base) : Res = jsNative
+
+module Pad =
+    [<Interface>]
+    type Options<'T> =
+        abstract padding: JS.Intersect<Base, 'T> option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?padding: JS.Intersect<Base, 'T>) : Options<'T> = jsNative
 
 module Retyped =
     [<Interface>]

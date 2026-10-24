@@ -192,13 +192,24 @@ let internal absenceAcross (model: ShapeModel) (ids: int<Measure.typeId> list) :
         FromVoid = spellings |> List.exists _.FromVoid
     }
 
-/// A union's members split into the hoisted nullish part (D1) and everything else.
+/// A union's members split into the hoisted nullish part (D1) and everything else. An arm
+/// `undefined & I` beside an arm `I` is a subset of that arm, and belongs to neither part.
 let internal splitNullish (model: ShapeModel) (facts: TypeFacts) =
+    let subsumed (m: TypeFacts) =
+        flag TypeFlags.Intersection m
+        && m.IntersectionMembers
+           |> List.forall (fun id ->
+               List.contains id facts.UnionMembers
+               || Map.tryFind id model.Types |> Option.exists isNullish)
+
     facts.UnionMembers
-    |> List.partition (fun id ->
+    |> List.choose (fun id ->
         match Map.tryFind id model.Types with
-        | Some m -> (absenceIn model m).IsAbsent
-        | None -> false)
+        | Some m when (absenceIn model m).IsAbsent && subsumed m -> None
+        | Some m -> Some(id, (absenceIn model m).IsAbsent)
+        | None -> Some(id, false))
+    |> List.partition snd
+    |> fun (nullish, rest) -> List.map fst nullish, List.map fst rest
 
 /// `true | false` after nullish hoisting: TS re-expands `boolean` inside larger unions, and
 /// the pair is just `bool` again.

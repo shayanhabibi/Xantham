@@ -36,5 +36,7 @@ export interface Other {
 export type Optional<R extends { req?: Base }> = (res: R & { req: Base }) => void;
 /** Negative: the literal's member has another type than the bound's. */
 export type Retyped<R extends Wide> = (res: R & { req: Other }) => void;
-/** A nullish operand is absence: the `undefined & I` arm of `value` reads as option. */
+/** A nullish operand is absence: the `undefined & I` arm of `value` is a subset of the `I` arm. */
 export declare function initial<T, I>(options: { value?: T | I } & { value: I }): void;
+/** A nullish arm with no sibling arm to fall under hoists to option. */
+export declare function pad<T>(options: { padding?: Base } & { padding: T }): void;
