@@ -347,6 +347,18 @@ Order of preference, decided per union after §4.2's categorization:
    7 - 6, 8 - 6, 9 - 1, above 9 - 9. Raising the cap to 9 recovers 60 of the corpus's 69
    widened sites; the remaining 9 sit at arity 10, 11 or 14 and stay `obj`).
 
+   **An application of a generic erased-union alias is written over its arguments**
+   (`tests/fixtures/union-alias-application-lab`): `type FunctionMaybe<'T> = U2<'T, (unit ->
+   'T)>` reads `FunctionMaybe<Live>` at `FunctionMaybe<Live>`, not `U2<string, (unit -> Live)>`.
+   The application is recognised through its alias symbol and arguments where the declared form
+   carries each of its parameters as an arm and the site corresponds arm for arm: a parameter
+   arm by its argument's constituents, any other arm by type, generic target or symbol. Nullish
+   arms the argument carries stay inside it (`FunctionMaybe<float option>`); optionality the
+   site adds wraps the application (`x?: FunctionMaybe<number>` reads `FunctionMaybe<float>
+   option`, through `NonNullableApplication`). An argument that widens to `obj` keeps the
+   flattened form, so the `U_n`-with-`obj` collapse is unchanged, and a transformed union over
+   another arm set (`NonNullable<FunctionMaybe<"x" | null>>`) is its own union.
+
    **Nine is a ceiling, not a preference.** Generating `U10`-`U100` into `Xantham.Fable.Core`
    under the `Fable.Core` namespace was proposed and rejected in wave thirteen: every `!^` cast
    resolves against one `op_ErasedCast` overload per case, so a range to 100 would add 5,005

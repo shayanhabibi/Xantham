@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "package": "union-alias-application-lab",
+  "module": "UnionAliasApplicationLab",
+  "counts": {
+    "exact": 4,
+    "ergonomic": 1,
+    "widened": 1,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SY - synthesize-anonymous",
+      "total": 2,
+      "exact": 2
+    },
+    {
+      "pass": "LU - classify-literal-unions",
+      "total": 2,
+      "exact": 2
+    },
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 6,
+      "ergonomic": 6
+    },
+    {
+      "pass": "SA - shape-aliases",
+      "total": 2,
+      "ergonomic": 1,
+      "widened": 1
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 1,
+      "ergonomic": 1
+    }
+  ]
+}

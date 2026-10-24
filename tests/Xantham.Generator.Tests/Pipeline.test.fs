@@ -7487,3 +7487,24 @@ let genericCallableInterfaceFixtureTests =
                 Expect.isFalse (code.Contains "type Identity =") "the base remains owned by the producer"
         ])
     ]
+
+[<Tests>]
+let unionAliasApplicationFixtureTests =
+    testList "union alias applications" [
+        yield! fixtureTests "union-alias-application-lab" (handFixture "union-alias-application-lab") GeneratorConfig.Default (fun package -> [
+            testCase "an erased-union alias application is written over its argument" <| fun _ ->
+                let rendered = Pipeline.generate GeneratorConfig.Default package |> Async.RunSynchronously
+                let source = rendered.Files |> List.head |> snd
+                Expect.stringContains source "type FunctionMaybe<'T> = U2<'T, (unit -> 'T)>" "the alias binds its parameter"
+                Expect.stringContains source "abstract mode: FunctionMaybe<Live> with get, set" "a named argument is applied"
+                Expect.stringContains source "abstract label: FunctionMaybe<string> with get, set" "a primitive argument is applied"
+                Expect.stringContains source "abstract count: FunctionMaybe<float option> option with get, set" "a nullable argument keeps its own option"
+                Expect.stringContains source "abstract size: FunctionMaybe<float> option with get, set" "optionality outside the argument stays outside the application"
+                Expect.stringContains source "abstract ``aria-live``: FunctionMaybe<Live option> option with get, set" "an anonymous literal argument is applied through its named twin"
+                Expect.stringContains source "abstract hint: FunctionMaybe<string> with get, set" "a literal absorbed by string applies string"
+                Expect.stringContains source "abstract flag: FunctionMaybe<Attrs.Flag.Result> with get, set" "a boolean-literal argument applies the enum its accessor returns"
+                Expect.stringContains source "type Plain = U2<string, (unit -> Plain.Result option)>" "a transformed union with another arm set is not an application"
+                Expect.isFalse (source.Contains "U2<string, (unit -> Live") "no literal arm widens to string beside its accessor"
+                Expect.isEmpty (rendered.Findings |> List.filter (fun finding -> finding.Key = "TR006" && finding.Symbol.StartsWith "Attrs")) "no literal arm of an application widens"
+        ])
+    ]

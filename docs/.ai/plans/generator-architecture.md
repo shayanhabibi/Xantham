@@ -633,7 +633,11 @@ Phases — each ends with the compile gate green on its fixtures:
     - *A generic union alias.* The union branch of derivation never asked for alias
       type arguments, so `type Ref<T> = T | ((value: T) => void)` reached shaping with no
       scope and rendered `obj`. It asks now, as the object and conditional branches
-      already did.
+      already did. Since 2026-10-24 an application of such an alias is written over its
+      arguments (`erasedAliasApplication`, `union-alias-application-lab`): `FunctionMaybe<Live>`
+      rather than `U2<string, (unit -> Live)>`, the declared form found by alias symbol and the
+      site matched arm for arm. `solid-js` widened 327 -> 169 and `TR006` 6,348 -> 1,342;
+      `ResourceSource<'S>` and `GenericValue<'T>` are now written by name.
     - *An anonymous object type hoisted out of a generic scope.* `each<T, U>(props: {
       items: T[]; render: (item: T) => U })` names `EachProps` for the parameter, and
       `EachProps` binds nothing of its own. A new pass (`bind-free-type-params`) walks

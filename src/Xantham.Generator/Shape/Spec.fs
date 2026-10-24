@@ -1204,6 +1204,102 @@ let internal isTaggedDeclaration (model: ShapeModel) (facts: TypeFacts) =
 let internal isObjectUnionDeclaration model facts =
     isTaggedDeclaration model facts || (erasedObjectUnionShape model facts).IsSome
 
+/// The declared generic erased-union alias a union applies, with its name, parameters and the
+/// site's arguments: `FunctionMaybe<Live>` for `{ (): Live } | Live`. Every declared parameter
+/// is an arm of the declared form. The site corresponds arm for arm: each parameter arm
+/// contributes its argument's constituents, and each other declared arm has exactly one
+/// instance arm of the same type, generic target or symbol.
+let internal erasedAliasApplication
+    (model: ShapeModel)
+    (site: TypeFacts)
+    : (string * int<Measure.typeId> list * int<Measure.typeId> list) option =
+    match site.Response.AliasSymbolId, site.Response.AliasArgumentTypeIds with
+    | ValueSome alias, ValueSome arguments when
+        arguments.Length > 0
+        && flag TypeFlags.Union site
+        && not (flag TypeFlags.Boolean site)
+        && not (Map.containsKey site.Response.TypeId model.DeclNames)
+        && arguments |> Array.forall (fun argument -> Map.containsKey argument model.Types)
+        ->
+        let arguments = Array.toList arguments
+
+        let declared =
+            model.DeclNames
+            |> Map.toSeq
+            |> Seq.tryPick (fun (typeId, name) ->
+                match Map.tryFind typeId model.Types with
+                | Some declared when
+                    typeId <> site.Response.TypeId
+                    && declared.Response.AliasSymbolId = ValueSome alias
+                    && flag TypeFlags.Union declared
+                    && not (flag TypeFlags.Boolean declared)
+                    && not (Map.containsKey typeId model.AliasApplications)
+                    && not (isObjectUnionDeclaration model declared)
+                    ->
+                    let parameters = declParamIds declared
+
+                    if
+                        parameters.Length = arguments.Length
+                        && declared.Response.AliasArgumentTypeIds
+                           |> ValueOption.map Array.toList = ValueSome parameters
+                        && parameters
+                           |> List.forall (fun parameter -> List.contains parameter declared.UnionMembers)
+                    then
+                        Some(name, declared, parameters)
+                    else
+                        None
+                | _ -> None)
+
+        match declared with
+        | Some(name, declared, parameters) ->
+            let instanceArms = site.UnionMembers
+            let substitution = List.zip parameters arguments |> Map.ofList
+
+            let constituents (argument: int<Measure.typeId>) =
+                match Map.tryFind argument model.Types with
+                | Some facts when flag TypeFlags.Union facts && not facts.UnionMembers.IsEmpty -> facts.UnionMembers
+                | Some facts when flag TypeFlags.Boolean facts ->
+                    instanceArms
+                    |> List.filter (fun id -> Map.tryFind id model.Types |> Option.exists (flag TypeFlags.BooleanLiteral))
+                | _ -> [ argument ]
+
+            let substituted =
+                parameters |> List.collect (fun parameter -> constituents substitution[parameter])
+
+            let corresponds (declaredArm: TypeFacts) (instanceArm: TypeFacts) =
+                declaredArm.Response.TypeId = instanceArm.Response.TypeId
+                || (declaredArm.Response.TargetTypeId.IsSome
+                    && declaredArm.Response.TargetTypeId = instanceArm.Response.TargetTypeId)
+                || (flag TypeFlags.Object declaredArm
+                    && flag TypeFlags.Object instanceArm
+                    && declaredArm.Response.SymbolId.IsSome
+                    && declaredArm.Response.SymbolId = instanceArm.Response.SymbolId)
+
+            let others =
+                instanceArms |> List.filter (fun id -> not (List.contains id substituted))
+
+            let matched =
+                declared.UnionMembers
+                |> List.filter (fun arm -> not (List.contains arm parameters))
+                |> List.map (fun arm ->
+                    match Map.tryFind arm model.Types with
+                    | Some declaredArm ->
+                        others
+                        |> List.filter (fun id -> Map.tryFind id model.Types |> Option.exists (corresponds declaredArm))
+                    | None -> [])
+
+            let corresponding =
+                substituted |> List.forall (fun id -> List.contains id instanceArms)
+                && matched |> List.forall (fun candidates -> candidates.Length = 1)
+                && (matched |> List.concat |> List.distinct |> List.sort) = List.sort others
+
+            if corresponding then
+                Some(name, parameters, arguments)
+            else
+                None
+        | None -> None
+    | _ -> None
+
 /// A tuple element the checker marked `...rest` or variadic. F# tuples are fixed-arity, so a
 /// tuple carrying one has no tuple form at all.
 let internal isVariadicElement (flags: ElementFlags) =
@@ -3108,6 +3204,31 @@ and internal unionRef
                 else
                     wrap (FsNamed name) []
             | None ->
+                // An erased-union alias application is written over its arguments. Nullish arms
+                // an argument carries stay inside it; optionality added at the site wraps it.
+                let aliasApplication =
+                    [
+                        Some(facts, false)
+                        facts.NonNullableApplication
+                        |> Option.bind (fun id -> Map.tryFind id model.Types)
+                        |> Option.map (fun site -> site, true)
+                    ]
+                    |> List.choose id
+                    |> List.tryPick (fun (site, wrapped) ->
+                        erasedAliasApplication model site
+                        |> Option.filter (fun (_, _, arguments) ->
+                            arguments
+                            |> List.forall (fun argument -> fst (typeRef ctx model self owner argument) <> FsObj))
+                        |> Option.map (fun application -> application, wrapped))
+
+                match aliasApplication with
+                | Some((name, parameters, arguments), wrapped) ->
+                    let reference, findings =
+                        appliedRefTo ctx model self owner name parameters arguments
+
+                    if wrapped then wrap reference findings else reference, findings
+                | None ->
+
                 match
                     facts.NonNullableApplication
                     |> Option.filter (fun application -> Map.containsKey application model.DeclNames)
