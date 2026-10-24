@@ -3370,8 +3370,10 @@ regeneration.
 The contract walk's cost is linear in the table. Contracts are computed once per generation and
 shared by the deferred-type retry and the width cutoff; declaration handles for the whole table
 are prefetched in chunks of 128, and the traversal itself is a synchronous work-stack loop. The
-canonical-seed-alias set is computed on the first oversized frontier, so a run that never crosses
-the width issues none of its lookups. A nominal declaration restarts the ancestry and the depth,
+canonical-seed-alias set is still computed before the first generation: deferring it to the first
+oversized frontier reorders checker queries, and with them the checker type ids, which moved 16
+Core.TS constructor objects (`WebAssembly.*Constructor`, `Intl.*Constructor`) under `GlobalThis`.
+A nominal declaration restarts the ancestry and the depth,
 so its contract is the same on every path and a diamond of interfaces is walked once per node.
 Ancestry still stops an application from re-entering one of its own declarations; in addition,
 an application whose arguments wrap (anything beyond type parameters, primitives, literals and

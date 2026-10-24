@@ -74,7 +74,11 @@ not invalidate a nested contract reached from a canonical owner. Mapped computat
 outside that traversal. Successful derivation removes both pending and `NotFollowed` entries. The
 contract walk must stay linear in the table: memoise per type, never per path. Path-keyed
 memoisation enumerates every path through an interface diamond, and declaration ancestry alone
-admits one instantiation per permutation of mutually wrapping generic aliases.
+admits one instantiation per permutation of mutually wrapping generic aliases. Moving a batch of
+checker queries changes the order checker type ids are assigned in, and Shape's naming reads that
+order: deferring the canonical-seed-alias lookups to the first oversized frontier moved Core.TS's
+namespace constructor objects under `GlobalThis` at equal tiers. Regenerate Core.TS after
+reordering session queries, and diff its symbol names, not only its tiers.
 
 ## Declaration catalogs
 

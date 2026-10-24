@@ -2283,34 +2283,28 @@ let internal resolveTypeTableWithWidth followWidth : Pass<ResolveModel> =
                             return canonical
                         }
 
-                    // Read only by `sourceContractIds`, so a run whose frontiers stay under the
-                    // width issues none of these lookups. A seed whose lookup fails is not canonical.
-                    let canonicalSeedAliases =
-                        lazy
-                            (async {
-                                let! seeds =
-                                    model.Types
-                                    |> Map.toList
-                                    |> List.filter (fun (_, facts) ->
-                                        facts.Response.AliasTypeArguments |> ValueOption.exists (Array.isEmpty >> not))
-                                    |> List.map (fun (id, facts) ->
-                                        async {
-                                            let! canonical = attempt (canonicalSourceType facts.Response)
-                                            return id, (canonical = Ok true)
-                                        })
-                                    |> Async.Parallel
+                    // Looked up before the first generation, so checker type ids are assigned in
+                    // the same order whether or not a frontier crosses the width. A seed whose
+                    // lookup fails is not canonical.
+                    let! seeds =
+                        model.Types
+                        |> Map.toList
+                        |> List.filter (fun (_, facts) ->
+                            facts.Response.AliasTypeArguments |> ValueOption.exists (Array.isEmpty >> not))
+                        |> List.map (fun (id, facts) ->
+                            async {
+                                let! canonical = attempt (canonicalSourceType facts.Response)
+                                return id, (canonical = Ok true)
+                            })
+                        |> Async.Parallel
 
-                                return
-                                    seeds
-                                    |> Array.choose (fun (id, canonical) -> if canonical then Some id else None)
-                                    |> Set.ofArray
-                             }
-                             |> Async.StartAsTask)
+                    let canonicalSeedAliases =
+                        seeds
+                        |> Array.choose (fun (id, canonical) -> if canonical then Some id else None)
+                        |> Set.ofArray
 
                     let sourceContractIds (table: Map<int<typeId>, TypeFacts>) =
                         async {
-                            let! canonicalSeedAliases = canonicalSeedAliases.Value |> Async.AwaitTask
-
                             let! handles =
                                 table
                                 |> Map.toList
