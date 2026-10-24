@@ -164,11 +164,27 @@ let internal absenceOf (facts: TypeFacts) =
 /// construction: a hoisted member sets at least one flag of the finding it raises.
 let internal isNullish (facts: TypeFacts) = (absenceOf facts).IsAbsent
 
+/// The spellings of absence a union arm is written with. An intersection with a nullish operand
+/// (`undefined & T`) is inhabited by that operand's absence alone, and carries its spelling.
+let internal absenceIn (model: ShapeModel) (facts: TypeFacts) =
+    if flag TypeFlags.Intersection facts then
+        let operands =
+            facts.IntersectionMembers
+            |> List.choose (fun id -> Map.tryFind id model.Types |> Option.map absenceOf)
+
+        {
+            FromNull = operands |> List.exists _.FromNull
+            FromUndefined = operands |> List.exists _.FromUndefined
+            FromVoid = operands |> List.exists _.FromVoid
+        }
+    else
+        absenceOf facts
+
 /// Every spelling appearing across a set of types.
 let internal absenceAcross (model: ShapeModel) (ids: int<Measure.typeId> list) : Absence =
     let spellings =
         ids
-        |> List.choose (fun id -> Map.tryFind id model.Types |> Option.map absenceOf)
+        |> List.choose (fun id -> Map.tryFind id model.Types |> Option.map (absenceIn model))
 
     {
         FromNull = spellings |> List.exists _.FromNull
@@ -181,7 +197,7 @@ let internal splitNullish (model: ShapeModel) (facts: TypeFacts) =
     facts.UnionMembers
     |> List.partition (fun id ->
         match Map.tryFind id model.Types with
-        | Some m -> isNullish m
+        | Some m -> (absenceIn model m).IsAbsent
         | None -> false)
 
 /// `true | false` after nullish hoisting: TS re-expands `boolean` inside larger unions, and
@@ -1551,10 +1567,9 @@ let internal uninhabitedOperand (model: ShapeModel) (facts: TypeFacts) =
                 | _ :: _, [ (_, survivor) ] -> Some(survivor, name)
                 | _ -> None)
 
-/// Whether an anonymous object operand adds nothing over the type-parameter operands beside it:
-/// each of its properties is declared by one parameter's bound under the same type, and is
-/// optional wherever the bound's is (§4.6). `R & { req: Base }` over `R extends { req: Base }` is
-/// `R`, and so is `T & {}`.
+/// Whether every property of an anonymous object operand is declared by a type-parameter
+/// operand's bound, under the same type id and at least as optional (§4.6). `R & { req: Base }`
+/// over `R extends { req: Base }` is `R`, and so is `T & {}`.
 let internal restatesBound (model: ShapeModel) (parameters: TypeFacts list) (operand: TypeFacts) =
     let declaredByBound (m: ResolvedMember) =
         parameters
@@ -1568,8 +1583,7 @@ let internal restatesBound (model: ShapeModel) (parameters: TypeFacts list) (ope
                     && declared.TypeId = m.TypeId
                     && (m.Optional || not declared.Optional))))
 
-    // A mapped or otherwise generic operand fills its members in at each instantiation, so an
-    // empty member list at the declaration states nothing.
+    // A mapped or generic operand is never read as restating the bound.
     let mapped =
         operand.Response.ObjectFlags
         |> ValueOption.exists (fun flags -> flags.HasFlag ObjectFlags.Mapped)
@@ -1585,14 +1599,15 @@ let internal restatesBound (model: ShapeModel) (parameters: TypeFacts list) (ope
     && operand.Members |> List.forall declaredByBound
 
 /// The operands an intersection over at least one type parameter is written as (§4.6): every
-/// operand except an object operand that restates the parameters' bounds. `None` without a
-/// type-parameter operand: `string & { count: number }` keeps no parameter to carry, while
-/// `string & U` keeps `U`.
+/// operand except an object operand that restates the parameters' bounds. `None` for an
+/// intersection without a type-parameter operand (`string & { count: number }`), and for one
+/// with a nullish operand (`undefined & T`), which a union reads as absence. `string & U` keeps
+/// both operands.
 let internal openOperands (model: ShapeModel) (facts: TypeFacts) =
     let operands = operandsOf model facts
     let parameters = operands |> List.filter (flag TypeFlags.TypeParameter)
 
-    if parameters.IsEmpty then
+    if parameters.IsEmpty || operands |> List.exists isNullish then
         None
     else
         operands

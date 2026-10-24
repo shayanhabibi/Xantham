@@ -71,6 +71,16 @@ type Names =
 /// </summary>
 type Tally = obj
 
+[<Interface>]
+type Other =
+    abstract name: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (name: string) : Other = jsNative
+
+type Optional<'R> = (JS.Intersect<'R, Optional.Res> -> unit)
+
+type Retyped<'R when 'R :> Wide> = (JS.Intersect<'R, Retyped.Res> -> unit)
+
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
@@ -83,6 +93,11 @@ type Exports =
     /// </summary>
     [<Import("assign", "open-intersection-lab")>]
     static member assign<'T, 'U> (target: 'T, source: 'U) : JS.Intersect<'T, 'U> = jsNative
+    /// <summary>
+    /// A nullish operand is absence: the <c>undefined &amp; I</c> arm of <c>value</c> reads as option.
+    /// </summary>
+    [<Import("initial", "open-intersection-lab")>]
+    static member initial<'T, 'I> (options: Initial.Options<'I, 'T>) : unit = jsNative
 
 module Counted =
     [<Interface>]
@@ -99,6 +114,13 @@ module Handler =
         [<ParamObject; Emit("$0")>]
         static member Create (currentTarget: 'T, target: Base) : E<'T> = jsNative
 
+module Initial =
+    [<Interface>]
+    type Options<'I, 'T> =
+        abstract value: U2<'I, JS.Intersect<'T, 'I>> option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?value: U2<'I, JS.Intersect<'T, 'I>>) : Options<'I, 'T> = jsNative
+
 module Listen =
     module Handler =
         [<Interface>]
@@ -108,6 +130,20 @@ module Listen =
             abstract target: Base with get, set
             [<ParamObject; Emit("$0")>]
             static member Create (id: float, currentTarget: Wide, target: Base) : E = jsNative
+
+module Optional =
+    [<Interface>]
+    type Res =
+        abstract req: Base with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (req: Base) : Res = jsNative
+
+module Retyped =
+    [<Interface>]
+    type Res =
+        abstract req: Other with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (req: Other) : Res = jsNative
 
 module WithChildren =
     [<Interface>]

@@ -29,3 +29,12 @@ export interface Pool<T> {
 export interface Names extends Pool<string> {}
 /** Negative: a primitive operand has no type parameter to keep, and widens as before. */
 export type Tally = string & { count: number };
+export interface Other {
+    name: string;
+}
+/** Negative: the bound's member is optional, so the literal's required member is added. */
+export type Optional<R extends { req?: Base }> = (res: R & { req: Base }) => void;
+/** Negative: the literal's member has another type than the bound's. */
+export type Retyped<R extends Wide> = (res: R & { req: Other }) => void;
+/** A nullish operand is absence: the `undefined & I` arm of `value` reads as option. */
+export declare function initial<T, I>(options: { value?: T | I } & { value: I }): void;

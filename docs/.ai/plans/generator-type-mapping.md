@@ -505,7 +505,24 @@ because the intersection does not upcast to its operands: a side is reached thro
 not by inheritance. An intersection without a type-parameter operand (`string & { count: number
 }`, or a conditional such as `InstanceType<Response> & { req: … }`), and one with an operand that
 has no reference of its own (a generic mapped alias's body), still widen under `TR018`.
-`tests/fixtures/open-intersection-lab` pins both readings and the primitive negative.
+`tests/fixtures/open-intersection-lab` pins both readings, the primitive negative, and the two
+restate negatives: an optional bound member, and a bound member of another type.
+
+A nullish operand is absence, not an operand: `undefined & I` is inhabited by `undefined` alone,
+so a union arm of that form hoists to `option` with the other nullish arms (`(T | I | undefined) &
+I` reads `U2<'I, JS.Intersect<'T, 'I>> option`), and is never carried as `JS.Intersect<unit, 'I>`.
+
+Open gap — alias identity at a closed application. A callback alias applied to closed arguments
+expands in place (§4.9), and its intersection then has no type-parameter operand and flattens:
+`listen(handler: Handler<Base, Wide>)` reads `(Listen.Handler.E -> unit)`, so a value typed
+`Handler<Base, Wide>` (whose parameter is `JS.Intersect<Base, Handler.E<Wide>>`) is not accepted
+there without a cast. Likewise solid-js `FlowComponent<'P, 'C>` re-expands `FlowProps<P, C>` as
+`JS.Intersect<'P, FlowComponent.Props.Members<'C>>`, nominally apart from
+`FlowProps.Members<'C>`. Closing it means writing an application of an open-intersection alias as
+that application, which is the generic-alias re-expansion item of §4.9.
+
+The restating reduction reports `TR049`, whose message names an empty operand; a restating
+non-empty operand has no key of its own yet.
 
 ### 4.7 Enums
 

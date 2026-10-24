@@ -7566,6 +7566,13 @@ let openIntersectionFixtureTests =
                 Expect.stringContains source "abstract narrow<'U>: other: 'U -> Pool<JS.Intersect<'T, 'U>>" "a primitive beside a parameter keeps the parameter"
                 Expect.isFalse (source.Contains "Pool<obj>") "an instantiated base agrees with its declaration and redeclares nothing"
                 Expect.isFalse (source.Contains "module Listener") "a restating literal is not declared"
+                Expect.stringContains source "type Optional<'R> = (JS.Intersect<'R, Optional.Res> -> unit)" "a required member over an optional bound member is added"
+                Expect.stringContains source "type Retyped<'R when 'R :> Wide> = (JS.Intersect<'R, Retyped.Res> -> unit)" "a member retyped from the bound's is added"
+                Expect.stringContains source "abstract value: U2<'I, JS.Intersect<'T, 'I>> option with get, set" "an undefined & I arm is absence"
+                Expect.isFalse (source.Contains "JS.Intersect<unit") "a nullish operand is never carried"
+                // A closed application of a callback alias expands in place (§4.6 records the gap):
+                // `Handler<Base, Wide>` is not written as an application of `Handler`.
+                Expect.stringContains source "static member listen (handler: (Listen.Handler.E -> unit)) : unit" "a closed application flattens its intersection"
 
                 let keyed key = rendered.Findings |> List.filter (fun finding -> finding.Key = key) |> List.map _.Symbol
                 Expect.stringContains source "type Exclusive<'T, 'U> = private Exclusive__ of obj" "a mapped operand is not read as restating the bound"

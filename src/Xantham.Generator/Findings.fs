@@ -553,8 +553,8 @@ type TypeReference =
     /// owner gives it (`Fable.Core.TS.Es.Symbol`). The interface also admits a boxed `Symbol`
     /// object, which `symbol` excludes.
     | [<Ergonomic>] SymbolAsLibInterface of name: string
-    /// An intersection over a type parameter, with members the parameter's bound does not
-    /// already declare, written as the support package's `JS.Intersect` over its operands. Each
+    /// An intersection over a type parameter whose other operands add members to the
+    /// parameter's bound, written as the support package's `JS.Intersect` over its operands. Each
     /// operand stays typed and is read through `Left`/`Right` rather than by inheritance.
     | [<Ergonomic>] OpenIntersectionCarried of operands: int
 
