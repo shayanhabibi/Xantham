@@ -7545,3 +7545,14 @@ let restTupleUnionFixtureTests =
                     "`x.next()` resolves to one overload"
         ])
     ]
+
+[<Tests>]
+let openIntersectionFixtureTests =
+    testList "open intersections" [
+        yield! fixtureTests "open-intersection-lab" (handFixture "open-intersection-lab") GeneratorConfig.Default (fun package -> [
+            testCase "an intersection over a type parameter keeps the parameter (§4.6)" <| fun _ ->
+                let rendered = Pipeline.generate GeneratorConfig.Default package |> Async.RunSynchronously
+                let source = rendered.Files |> List.head |> snd
+                Expect.stringContains source "type Tally" "the primitive negative is still declared"
+        ])
+    ]
