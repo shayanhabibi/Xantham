@@ -6340,7 +6340,7 @@ module Es =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat#Browser_compatibility">Compatibility</a>.
         /// </summary>
-        abstract RelativeTimeFormat: GlobalThis.Intl.RelativeTimeFormatConstructor
+        abstract RelativeTimeFormat: Intl.RelativeTimeFormatConstructor
         /// <summary>
         /// Constructor creates <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale">Intl.Locale</a>
         /// objects
@@ -6356,21 +6356,21 @@ module Es =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale">MDN</a>.
         /// </returns>
-        abstract Locale: GlobalThis.Intl.LocaleConstructor
+        abstract Locale: Intl.LocaleConstructor
         /// <summary>
         /// The <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames"><c>Intl.DisplayNames()</c></a>
         /// object enables the consistent translation of language, region and script display names.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames#browser_compatibility">Compatibility</a>.
         /// </summary>
-        abstract DisplayNames: GlobalThis.Intl.DisplayNamesConstructor
-        abstract ListFormat: GlobalThis.Intl.ListFormatConstructor
+        abstract DisplayNames: Intl.DisplayNamesConstructor
+        abstract ListFormat: Intl.ListFormatConstructor
         /// <summary>
         /// The <c>Intl.Segmenter</c> object enables locale-sensitive text segmentation, enabling you to get meaningful items (graphemes, words or sentences) from a string.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter">MDN</a>
         /// </summary>
-        abstract Segmenter: GlobalThis.Intl.SegmenterConstructor
+        abstract Segmenter: Intl.SegmenterConstructor
         /// <summary>
         /// Returns a sorted array of the supported collation, calendar, currency, numbering system, timezones, and units by the implementation.
         /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/supportedValuesOf">MDN</a>
@@ -6383,7 +6383,7 @@ module Es =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DurationFormat">MDN</a>
         /// </summary>
-        abstract DurationFormat: GlobalThis.Intl.DurationFormatConstructor
+        abstract DurationFormat: Intl.DurationFormatConstructor
 
         [<ParamObject; Emit("$0")>]
         static member Create
@@ -6393,13 +6393,13 @@ module Es =
                 DateTimeFormat: Intl.DateTimeFormatConstructor,
                 getCanonicalLocales: (U2<string, string[]> option -> string[]),
                 PluralRules: Intl.PluralRulesConstructor,
-                RelativeTimeFormat: GlobalThis.Intl.RelativeTimeFormatConstructor,
-                Locale: GlobalThis.Intl.LocaleConstructor,
-                DisplayNames: GlobalThis.Intl.DisplayNamesConstructor,
-                ListFormat: GlobalThis.Intl.ListFormatConstructor,
-                Segmenter: GlobalThis.Intl.SegmenterConstructor,
+                RelativeTimeFormat: Intl.RelativeTimeFormatConstructor,
+                Locale: Intl.LocaleConstructor,
+                DisplayNames: Intl.DisplayNamesConstructor,
+                ListFormat: Intl.ListFormatConstructor,
+                Segmenter: Intl.SegmenterConstructor,
                 supportedValuesOf: (Intl.SupportedValuesOf.Key -> string[]),
-                DurationFormat: GlobalThis.Intl.DurationFormatConstructor
+                DurationFormat: Intl.DurationFormatConstructor
             ) : Intl =
             jsNative
 
@@ -20270,39 +20270,6 @@ module Es =
             /// </summary>
             type RelativeTimeFormat = Fable.Core.TS.Es.Intl.RelativeTimeFormat
 
-            type RelativeTimeFormatConstructor =
-                /// <summary>
-                /// Returns an array containing those of the provided locales
-                /// that are supported in date and time formatting
-                /// without having to fall back to the runtime's default locale.
-                /// </summary>
-                /// <param name="locales">
-                /// - A string with a <a href="http://tools.ietf.org/html/rfc5646">BCP 47 language tag</a>, or an array of such strings.
-                /// For the general form and interpretation of the locales argument,
-                /// see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_identification_and_negotiation"><c>Intl</c> page</a>.
-                /// </param>
-                /// <param name="options">
-                /// - An <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/RelativeTimeFormat#Parameters">object</a>
-                /// with some or all of options of the formatting.
-                /// </param>
-                /// <returns>
-                /// An array containing those of the provided locales
-                /// that are supported in date and time formatting
-                /// without having to fall back to the runtime's default locale.
-                /// <br /><br />
-                /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/supportedLocalesOf">MDN</a>.
-                /// </returns>
-                abstract supportedLocalesOf:
-                    ?locales: Fable.Core.TS.Es.Intl.LocalesArgument *
-                    ?options: Fable.Core.TS.Es.Intl.RelativeTimeFormatOptions ->
-                        string[]
-
-                [<EmitConstructor>]
-                abstract Create:
-                    ?locales: Fable.Core.TS.Es.Intl.LocalesArgument *
-                    ?options: Fable.Core.TS.Es.Intl.RelativeTimeFormatOptions ->
-                        Fable.Core.TS.Es.Intl.RelativeTimeFormat
-
             type NumberFormatOptionsSignDisplayRegistry = Fable.Core.TS.Es.Intl.NumberFormatOptionsSignDisplayRegistry
 
             type NumberFormatOptionsSignDisplay = Fable.Core.TS.Es.Intl.NumberFormatOptionsSignDisplay
@@ -20330,12 +20297,6 @@ module Es =
             /// </returns>
             type Locale = Fable.Core.TS.Es.Intl.Locale
 
-            type LocaleConstructor =
-                [<EmitConstructor>]
-                abstract Create:
-                    tag: U2<string, Fable.Core.TS.Es.Intl.Locale> * ?options: Fable.Core.TS.Es.Intl.LocaleOptions ->
-                        Fable.Core.TS.Es.Intl.Locale
-
             type DisplayNamesFallback = Fable.Core.TS.Es.Intl.DisplayNamesFallback
 
             type DisplayNamesType = Fable.Core.TS.Es.Intl.DisplayNamesType
@@ -20353,31 +20314,6 @@ module Es =
             /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames#browser_compatibility">Compatibility</a>.
             /// </summary>
             type DisplayNames = Fable.Core.TS.Es.Intl.DisplayNames
-
-            type DisplayNamesConstructor =
-                /// <summary>
-                /// Returns an array containing those of the provided locales that are supported in display names without having to fall back to the runtime's default locale.
-                /// </summary>
-                /// <param name="locales">
-                /// A string with a BCP 47 language tag, or an array of such strings.
-                /// For the general form and interpretation of the <c>locales</c> argument, see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#locale_identification_and_negotiation">Intl</a>
-                /// page.
-                /// </param>
-                /// <param name="options">An object with a locale matcher.</param>
-                /// <returns>
-                /// An array of strings representing a subset of the given locale tags that are supported in display names without having to fall back to the runtime's default locale.
-                /// <br /><br />
-                /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames/supportedLocalesOf">MDN</a>.
-                /// </returns>
-                abstract supportedLocalesOf:
-                    ?locales: Fable.Core.TS.Es.Intl.LocalesArgument *
-                    ?options: Intl.DisplayNames.SupportedLocalesOf.Options ->
-                        string[]
-
-                [<EmitConstructor>]
-                abstract Create:
-                    locales: Fable.Core.TS.Es.Intl.LocalesArgument * options: Fable.Core.TS.Es.Intl.DisplayNamesOptions ->
-                        Fable.Core.TS.Es.Intl.DisplayNames
 
             type DateTimeRangeFormatPart = Fable.Core.TS.Es.Intl.DateTimeRangeFormatPart
 
@@ -20413,36 +20349,6 @@ module Es =
 
             type ListFormat = Fable.Core.TS.Es.Intl.ListFormat
 
-            type ListFormatConstructor =
-                /// <summary>
-                /// Returns an array containing those of the provided locales that are
-                /// supported in list formatting without having to fall back to the runtime's default locale.
-                /// </summary>
-                /// <param name="locales">
-                /// - A string with a <a href="http://tools.ietf.org/html/rfc5646">BCP 47 language tag</a>, or an array of such strings.
-                /// For the general form and interpretation of the <c>locales</c> argument,
-                /// see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_identification_and_negotiation"><c>Intl</c> page</a>.
-                /// </param>
-                /// <param name="options">
-                /// - An <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/ListFormat/supportedLocalesOf#parameters">object</a>.
-                /// with some or all possible options.
-                /// </param>
-                /// <returns>
-                /// An array of strings representing a subset of the given locale tags that are supported in list
-                /// formatting without having to fall back to the runtime's default locale.
-                /// <br /><br />
-                /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/ListFormat/supportedLocalesOf">MDN</a>.
-                /// </returns>
-                abstract supportedLocalesOf:
-                    locales: Fable.Core.TS.Es.Intl.LocalesArgument *
-                    ?options: Intl.ListFormat.SupportedLocalesOf.Options ->
-                        string[]
-
-                [<EmitConstructor>]
-                abstract Create:
-                    ?locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Fable.Core.TS.Es.Intl.ListFormatOptions ->
-                        Fable.Core.TS.Es.Intl.ListFormat
-
             /// <summary>
             /// An object with some or all properties of the <c>Intl.Segmenter</c> constructor <c>options</c> parameter.
             /// <br /><br />
@@ -20456,30 +20362,6 @@ module Es =
             /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter">MDN</a>
             /// </summary>
             type Segmenter = Fable.Core.TS.Es.Intl.Segmenter
-
-            type SegmenterConstructor =
-                /// <summary>
-                /// Returns an array containing those of the provided locales that are supported without having to fall back to the runtime's default locale.
-                /// </summary>
-                /// <param name="locales">
-                /// - A string with a <a href="http://tools.ietf.org/html/rfc5646">BCP 47 language tag</a>, or an array of such strings.
-                /// For the general form and interpretation of the <c>locales</c> argument,
-                /// see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_identification_and_negotiation"><c>Intl</c> page</a>.
-                /// </param>
-                /// <param name="options">
-                /// An <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter/supportedLocalesOf#parameters">object</a>.
-                /// with some or all possible options.
-                /// <br /><br />
-                /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter/supportedLocalesOf">MDN</a>
-                /// </param>
-                abstract supportedLocalesOf:
-                    locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Intl.Segmenter.SupportedLocalesOf.Options ->
-                        string[]
-
-                [<EmitConstructor>]
-                abstract Create:
-                    ?locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Fable.Core.TS.Es.Intl.SegmenterOptions ->
-                        Fable.Core.TS.Es.Intl.Segmenter
 
             type ResolvedSegmenterOptions = Fable.Core.TS.Es.Intl.ResolvedSegmenterOptions
 
@@ -20553,32 +20435,6 @@ module Es =
             /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DurationFormat">MDN</a>
             /// </summary>
             type DurationFormat = Fable.Core.TS.Es.Intl.DurationFormat
-
-            type DurationFormatConstructor =
-                /// <summary>
-                /// Returns an array containing those of the provided locales that are supported in display names without having to fall back to the runtime's default locale.
-                /// </summary>
-                /// <param name="locales">
-                /// A string with a BCP 47 language tag, or an array of such strings.
-                /// For the general form and interpretation of the <c>locales</c> argument, see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#locale_identification_and_negotiation">Intl</a>
-                /// page.
-                /// </param>
-                /// <param name="options">An object with a locale matcher.</param>
-                /// <returns>
-                /// An array of strings representing a subset of the given locale tags that are supported in display names without having to fall back to the runtime's default locale.
-                /// <br /><br />
-                /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DurationFormat/supportedLocalesOf">MDN</a>.
-                /// </returns>
-                abstract supportedLocalesOf:
-                    ?locales: Fable.Core.TS.Es.Intl.LocalesArgument *
-                    ?options: Intl.DurationFormat.SupportedLocalesOf.Options ->
-                        string[]
-
-                [<EmitConstructor>]
-                abstract Create:
-                    ?locales: Fable.Core.TS.Es.Intl.LocalesArgument *
-                    ?options: Fable.Core.TS.Es.Intl.DurationFormatOptions ->
-                        Fable.Core.TS.Es.Intl.DurationFormat
 
             type ResolvedDurationFormatOptions = Fable.Core.TS.Es.Intl.ResolvedDurationFormatOptions
 
@@ -21475,6 +21331,39 @@ module Es =
                 ) : RelativeTimeFormat =
                 jsNative
 
+        type RelativeTimeFormatConstructor =
+            /// <summary>
+            /// Returns an array containing those of the provided locales
+            /// that are supported in date and time formatting
+            /// without having to fall back to the runtime's default locale.
+            /// </summary>
+            /// <param name="locales">
+            /// - A string with a <a href="http://tools.ietf.org/html/rfc5646">BCP 47 language tag</a>, or an array of such strings.
+            /// For the general form and interpretation of the locales argument,
+            /// see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_identification_and_negotiation"><c>Intl</c> page</a>.
+            /// </param>
+            /// <param name="options">
+            /// - An <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/RelativeTimeFormat#Parameters">object</a>
+            /// with some or all of options of the formatting.
+            /// </param>
+            /// <returns>
+            /// An array containing those of the provided locales
+            /// that are supported in date and time formatting
+            /// without having to fall back to the runtime's default locale.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/supportedLocalesOf">MDN</a>.
+            /// </returns>
+            abstract supportedLocalesOf:
+                ?locales: Fable.Core.TS.Es.Intl.LocalesArgument *
+                ?options: Fable.Core.TS.Es.Intl.RelativeTimeFormatOptions ->
+                    string[]
+
+            [<EmitConstructor>]
+            abstract Create:
+                ?locales: Fable.Core.TS.Es.Intl.LocalesArgument *
+                ?options: Fable.Core.TS.Es.Intl.RelativeTimeFormatOptions ->
+                    Fable.Core.TS.Es.Intl.RelativeTimeFormat
+
         [<Interface>]
         type NumberFormatOptionsSignDisplayRegistry =
             abstract auto: unit
@@ -21673,6 +21562,12 @@ module Es =
                 ) : Locale =
                 jsNative
 
+        type LocaleConstructor =
+            [<EmitConstructor>]
+            abstract Create:
+                tag: U2<string, Fable.Core.TS.Es.Intl.Locale> * ?options: Fable.Core.TS.Es.Intl.LocaleOptions ->
+                    Fable.Core.TS.Es.Intl.Locale
+
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
         type DisplayNamesFallback =
             | [<CompiledName("code")>] Code
@@ -21770,6 +21665,30 @@ module Es =
                     resolvedOptions: (unit -> Fable.Core.TS.Es.Intl.ResolvedDisplayNamesOptions)
                 ) : DisplayNames =
                 jsNative
+
+        type DisplayNamesConstructor =
+            /// <summary>
+            /// Returns an array containing those of the provided locales that are supported in display names without having to fall back to the runtime's default locale.
+            /// </summary>
+            /// <param name="locales">
+            /// A string with a BCP 47 language tag, or an array of such strings.
+            /// For the general form and interpretation of the <c>locales</c> argument, see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#locale_identification_and_negotiation">Intl</a>
+            /// page.
+            /// </param>
+            /// <param name="options">An object with a locale matcher.</param>
+            /// <returns>
+            /// An array of strings representing a subset of the given locale tags that are supported in display names without having to fall back to the runtime's default locale.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames/supportedLocalesOf">MDN</a>.
+            /// </returns>
+            abstract supportedLocalesOf:
+                ?locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Intl.DisplayNames.SupportedLocalesOf.Options ->
+                    string[]
+
+            [<EmitConstructor>]
+            abstract Create:
+                locales: Fable.Core.TS.Es.Intl.LocalesArgument * options: Fable.Core.TS.Es.Intl.DisplayNamesOptions ->
+                    Fable.Core.TS.Es.Intl.DisplayNames
 
         [<Interface>]
         type DateTimeRangeFormatPart =
@@ -21888,6 +21807,35 @@ module Es =
                 ) : ListFormat =
                 jsNative
 
+        type ListFormatConstructor =
+            /// <summary>
+            /// Returns an array containing those of the provided locales that are
+            /// supported in list formatting without having to fall back to the runtime's default locale.
+            /// </summary>
+            /// <param name="locales">
+            /// - A string with a <a href="http://tools.ietf.org/html/rfc5646">BCP 47 language tag</a>, or an array of such strings.
+            /// For the general form and interpretation of the <c>locales</c> argument,
+            /// see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_identification_and_negotiation"><c>Intl</c> page</a>.
+            /// </param>
+            /// <param name="options">
+            /// - An <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/ListFormat/supportedLocalesOf#parameters">object</a>.
+            /// with some or all possible options.
+            /// </param>
+            /// <returns>
+            /// An array of strings representing a subset of the given locale tags that are supported in list
+            /// formatting without having to fall back to the runtime's default locale.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/ListFormat/supportedLocalesOf">MDN</a>.
+            /// </returns>
+            abstract supportedLocalesOf:
+                locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Intl.ListFormat.SupportedLocalesOf.Options ->
+                    string[]
+
+            [<EmitConstructor>]
+            abstract Create:
+                ?locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Fable.Core.TS.Es.Intl.ListFormatOptions ->
+                    Fable.Core.TS.Es.Intl.ListFormat
+
         /// <summary>
         /// An object with some or all properties of the <c>Intl.Segmenter</c> constructor <c>options</c> parameter.
         /// <br /><br />
@@ -21941,6 +21889,30 @@ module Es =
                     resolvedOptions: (unit -> Fable.Core.TS.Es.Intl.ResolvedSegmenterOptions)
                 ) : Segmenter =
                 jsNative
+
+        type SegmenterConstructor =
+            /// <summary>
+            /// Returns an array containing those of the provided locales that are supported without having to fall back to the runtime's default locale.
+            /// </summary>
+            /// <param name="locales">
+            /// - A string with a <a href="http://tools.ietf.org/html/rfc5646">BCP 47 language tag</a>, or an array of such strings.
+            /// For the general form and interpretation of the <c>locales</c> argument,
+            /// see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_identification_and_negotiation"><c>Intl</c> page</a>.
+            /// </param>
+            /// <param name="options">
+            /// An <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter/supportedLocalesOf#parameters">object</a>.
+            /// with some or all possible options.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter/supportedLocalesOf">MDN</a>
+            /// </param>
+            abstract supportedLocalesOf:
+                locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Intl.Segmenter.SupportedLocalesOf.Options ->
+                    string[]
+
+            [<EmitConstructor>]
+            abstract Create:
+                ?locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Fable.Core.TS.Es.Intl.SegmenterOptions ->
+                    Fable.Core.TS.Es.Intl.Segmenter
 
         [<Interface>]
         type ResolvedSegmenterOptions =
@@ -22293,6 +22265,31 @@ module Es =
                     resolvedOptions: (unit -> Fable.Core.TS.Es.Intl.ResolvedDurationFormatOptions)
                 ) : DurationFormat =
                 jsNative
+
+        type DurationFormatConstructor =
+            /// <summary>
+            /// Returns an array containing those of the provided locales that are supported in display names without having to fall back to the runtime's default locale.
+            /// </summary>
+            /// <param name="locales">
+            /// A string with a BCP 47 language tag, or an array of such strings.
+            /// For the general form and interpretation of the <c>locales</c> argument, see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#locale_identification_and_negotiation">Intl</a>
+            /// page.
+            /// </param>
+            /// <param name="options">An object with a locale matcher.</param>
+            /// <returns>
+            /// An array of strings representing a subset of the given locale tags that are supported in display names without having to fall back to the runtime's default locale.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DurationFormat/supportedLocalesOf">MDN</a>.
+            /// </returns>
+            abstract supportedLocalesOf:
+                ?locales: Fable.Core.TS.Es.Intl.LocalesArgument *
+                ?options: Intl.DurationFormat.SupportedLocalesOf.Options ->
+                    string[]
+
+            [<EmitConstructor>]
+            abstract Create:
+                ?locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Fable.Core.TS.Es.Intl.DurationFormatOptions ->
+                    Fable.Core.TS.Es.Intl.DurationFormat
 
         [<Interface>]
         type ResolvedDurationFormatOptions =
@@ -26733,57 +26730,57 @@ module Dom =
         /// <summary>
         /// The <b><c>WebAssembly.CompileError</c></b> object indicates an error during WebAssembly decoding or validation.
         /// </summary>
-        abstract CompileError: GlobalThis.WebAssembly.CompileErrorConstructor with get, set
+        abstract CompileError: WebAssembly.CompileErrorConstructor with get, set
         /// <summary>
         /// The <b><c>WebAssembly.Exception</c></b> object represents a runtime exception thrown from WebAssembly to JavaScript, or thrown from JavaScript to a WebAssembly exception handler.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Exception">MDN Reference</a>
         /// </summary>
-        abstract Exception: GlobalThis.WebAssembly.ExceptionConstructor with get, set
+        abstract Exception: WebAssembly.ExceptionConstructor with get, set
         /// <summary>
         /// A <b><c>WebAssembly.Global</c></b> object represents a global variable instance, accessible from both JavaScript and importable/exportable across one or more WebAssembly.Module instances. This allows dynamic linking of multiple modules.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Global">MDN Reference</a>
         /// </summary>
-        abstract Global: GlobalThis.WebAssembly.GlobalConstructor with get, set
+        abstract Global: WebAssembly.GlobalConstructor with get, set
         /// <summary>
         /// A <b><c>WebAssembly.Instance</c></b> object is a stateful, executable instance of a WebAssembly.Module. Instance objects contain all the Exported WebAssembly functions that allow calling into WebAssembly code from JavaScript.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Instance">MDN Reference</a>
         /// </summary>
-        abstract Instance: GlobalThis.WebAssembly.InstanceConstructor with get, set
+        abstract Instance: WebAssembly.InstanceConstructor with get, set
         /// <summary>
         /// The <b><c>WebAssembly.LinkError</c></b> object indicates an error during module instantiation (besides traps from the start function).
         /// </summary>
-        abstract LinkError: GlobalThis.WebAssembly.LinkErrorConstructor with get, set
+        abstract LinkError: WebAssembly.LinkErrorConstructor with get, set
         /// <summary>
         /// The <b><c>WebAssembly.Memory</c></b> object is a resizable ArrayBuffer or SharedArrayBuffer that holds raw bytes of memory accessed by a WebAssembly.Instance.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Memory">MDN Reference</a>
         /// </summary>
-        abstract Memory: GlobalThis.WebAssembly.MemoryConstructor with get, set
+        abstract Memory: WebAssembly.MemoryConstructor with get, set
         /// <summary>
         /// A <b><c>WebAssembly.Module</c></b> object contains stateless WebAssembly code that has already been compiled by the browser — this can be efficiently shared with Workers, and instantiated multiple times.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Module">MDN Reference</a>
         /// </summary>
-        abstract Module: GlobalThis.WebAssembly.ModuleConstructor with get, set
+        abstract Module: WebAssembly.ModuleConstructor with get, set
         /// <summary>
         /// The <b><c>WebAssembly.RuntimeError</c></b> object is the error type that is thrown whenever WebAssembly specifies a trap.
         /// </summary>
-        abstract RuntimeError: GlobalThis.WebAssembly.RuntimeErrorConstructor with get, set
+        abstract RuntimeError: WebAssembly.RuntimeErrorConstructor with get, set
         /// <summary>
         /// The <b><c>WebAssembly.Table</c></b> object is a JavaScript wrapper object — an array-like structure representing a WebAssembly table, which stores homogeneous references. A table created by JavaScript or in WebAssembly code will be accessible and mutable from both JavaScript and WebAssembly.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Table">MDN Reference</a>
         /// </summary>
-        abstract Table: GlobalThis.WebAssembly.TableConstructor with get, set
+        abstract Table: WebAssembly.TableConstructor with get, set
         /// <summary>
         /// The <b><c>WebAssembly.Tag</c></b> object defines a type of a WebAssembly exception that can be thrown to/from WebAssembly code.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Tag">MDN Reference</a>
         /// </summary>
-        abstract Tag: GlobalThis.WebAssembly.TagConstructor with get, set
+        abstract Tag: WebAssembly.TagConstructor with get, set
         abstract JSTag: WebAssembly.Tag with get, set
 
         /// <summary>
@@ -106640,30 +106637,12 @@ module Dom =
             /// </summary>
             type CompileError = Fable.Core.TS.Dom.WebAssembly.CompileError
 
-            type CompileErrorConstructor =
-                [<EmitConstructor>]
-                abstract Create: ?message: string -> Fable.Core.TS.Dom.WebAssembly.CompileError
-
-                /// <summary>
-                /// The <b><c>WebAssembly.CompileError</c></b> object indicates an error during WebAssembly decoding or validation.
-                /// </summary>
-                [<Emit("$0($1...)")>]
-                abstract Invoke: ?message: string -> Fable.Core.TS.Dom.WebAssembly.CompileError
-
             /// <summary>
             /// The <b><c>WebAssembly.Exception</c></b> object represents a runtime exception thrown from WebAssembly to JavaScript, or thrown from JavaScript to a WebAssembly exception handler.
             /// <br /><br />
             /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Exception">MDN Reference</a>
             /// </summary>
             type Exception = Fable.Core.TS.Dom.WebAssembly.Exception
-
-            type ExceptionConstructor =
-                [<EmitConstructor>]
-                abstract Create:
-                    exceptionTag: Fable.Core.TS.Dom.WebAssembly.Tag *
-                    payload: obj[] *
-                    ?options: Fable.Core.TS.Dom.WebAssembly.ExceptionOptions ->
-                        Fable.Core.TS.Dom.WebAssembly.Exception
 
             /// <summary>
             /// A <b><c>WebAssembly.Global</c></b> object represents a global variable instance, accessible from both JavaScript and importable/exportable across one or more WebAssembly.Module instances. This allows dynamic linking of multiple modules.
@@ -106672,12 +106651,6 @@ module Dom =
             /// </summary>
             type Global<'T> = Fable.Core.TS.Dom.WebAssembly.Global<'T>
 
-            type GlobalConstructor =
-                [<EmitConstructor>]
-                abstract Create<'T> :
-                    descriptor: Fable.Core.TS.Dom.WebAssembly.GlobalDescriptor<'T> * ?v: obj ->
-                        Fable.Core.TS.Dom.WebAssembly.Global<'T>
-
             /// <summary>
             /// A <b><c>WebAssembly.Instance</c></b> object is a stateful, executable instance of a WebAssembly.Module. Instance objects contain all the Exported WebAssembly functions that allow calling into WebAssembly code from JavaScript.
             /// <br /><br />
@@ -106685,27 +106658,10 @@ module Dom =
             /// </summary>
             type Instance = Fable.Core.TS.Dom.WebAssembly.Instance
 
-            type InstanceConstructor =
-                [<EmitConstructor>]
-                abstract Create:
-                    ``module``: Fable.Core.TS.Dom.WebAssembly.Module *
-                    ?importObject: Fable.Core.TS.Dom.WebAssembly.Imports ->
-                        Fable.Core.TS.Dom.WebAssembly.Instance
-
             /// <summary>
             /// The <b><c>WebAssembly.LinkError</c></b> object indicates an error during module instantiation (besides traps from the start function).
             /// </summary>
             type LinkError = Fable.Core.TS.Dom.WebAssembly.LinkError
-
-            type LinkErrorConstructor =
-                [<EmitConstructor>]
-                abstract Create: ?message: string -> Fable.Core.TS.Dom.WebAssembly.LinkError
-
-                /// <summary>
-                /// The <b><c>WebAssembly.LinkError</c></b> object indicates an error during module instantiation (besides traps from the start function).
-                /// </summary>
-                [<Emit("$0($1...)")>]
-                abstract Invoke: ?message: string -> Fable.Core.TS.Dom.WebAssembly.LinkError
 
             /// <summary>
             /// The <b><c>WebAssembly.Memory</c></b> object is a resizable ArrayBuffer or SharedArrayBuffer that holds raw bytes of memory accessed by a WebAssembly.Instance.
@@ -106714,11 +106670,6 @@ module Dom =
             /// </summary>
             type Memory = Fable.Core.TS.Dom.WebAssembly.Memory
 
-            type MemoryConstructor =
-                [<EmitConstructor>]
-                abstract Create:
-                    descriptor: Fable.Core.TS.Dom.WebAssembly.MemoryDescriptor -> Fable.Core.TS.Dom.WebAssembly.Memory
-
             /// <summary>
             /// A <b><c>WebAssembly.Module</c></b> object contains stateless WebAssembly code that has already been compiled by the browser — this can be efficiently shared with Workers, and instantiated multiple times.
             /// <br /><br />
@@ -106726,54 +106677,10 @@ module Dom =
             /// </summary>
             type Module = Fable.Core.TS.Dom.WebAssembly.Module
 
-            type ModuleConstructor =
-                /// <summary>
-                /// The WebAssembly.<b><c>Module.customSections()</c></b> static method returns a copy of the contents of all custom sections in the given module with the given string name.
-                /// <br /><br />
-                /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Module/customSections_static">MDN Reference</a>
-                /// </summary>
-                abstract customSections:
-                    moduleObject: Fable.Core.TS.Dom.WebAssembly.Module * sectionName: string ->
-                        Fable.Core.TS.Es.ArrayBuffer[]
-
-                /// <summary>
-                /// The WebAssembly.<b><c>Module.exports()</c></b> static method returns an array containing descriptions of all the declared exports of the given Module.
-                /// <br /><br />
-                /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Module/exports_static">MDN Reference</a>
-                /// </summary>
-                abstract exports:
-                    moduleObject: Fable.Core.TS.Dom.WebAssembly.Module ->
-                        Fable.Core.TS.Dom.WebAssembly.ModuleExportDescriptor[]
-
-                /// <summary>
-                /// The WebAssembly.<b><c>Module.imports()</c></b> static method returns an array containing descriptions of all the declared imports of the given Module.
-                /// <br /><br />
-                /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Module/imports_static">MDN Reference</a>
-                /// </summary>
-                abstract imports:
-                    moduleObject: Fable.Core.TS.Dom.WebAssembly.Module ->
-                        Fable.Core.TS.Dom.WebAssembly.ModuleImportDescriptor[]
-
-                [<EmitConstructor>]
-                abstract Create:
-                    bytes: Fable.Core.TS.Dom.AllowSharedBufferSource *
-                    ?options: Fable.Core.TS.Dom.WebAssembly.WebAssemblyCompileOptions ->
-                        Fable.Core.TS.Dom.WebAssembly.Module
-
             /// <summary>
             /// The <b><c>WebAssembly.RuntimeError</c></b> object is the error type that is thrown whenever WebAssembly specifies a trap.
             /// </summary>
             type RuntimeError = Fable.Core.TS.Dom.WebAssembly.RuntimeError
-
-            type RuntimeErrorConstructor =
-                [<EmitConstructor>]
-                abstract Create: ?message: string -> Fable.Core.TS.Dom.WebAssembly.RuntimeError
-
-                /// <summary>
-                /// The <b><c>WebAssembly.RuntimeError</c></b> object is the error type that is thrown whenever WebAssembly specifies a trap.
-                /// </summary>
-                [<Emit("$0($1...)")>]
-                abstract Invoke: ?message: string -> Fable.Core.TS.Dom.WebAssembly.RuntimeError
 
             /// <summary>
             /// The <b><c>WebAssembly.Table</c></b> object is a JavaScript wrapper object — an array-like structure representing a WebAssembly table, which stores homogeneous references. A table created by JavaScript or in WebAssembly code will be accessible and mutable from both JavaScript and WebAssembly.
@@ -106782,22 +106689,12 @@ module Dom =
             /// </summary>
             type Table = Fable.Core.TS.Dom.WebAssembly.Table
 
-            type TableConstructor =
-                [<EmitConstructor>]
-                abstract Create:
-                    descriptor: Fable.Core.TS.Dom.WebAssembly.TableDescriptor * ?value: obj ->
-                        Fable.Core.TS.Dom.WebAssembly.Table
-
             /// <summary>
             /// The <b><c>WebAssembly.Tag</c></b> object defines a type of a WebAssembly exception that can be thrown to/from WebAssembly code.
             /// <br /><br />
             /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Tag">MDN Reference</a>
             /// </summary>
             type Tag = Fable.Core.TS.Dom.WebAssembly.Tag
-
-            type TagConstructor =
-                [<EmitConstructor>]
-                abstract Create: ``type``: Fable.Core.TS.Dom.WebAssembly.TagType -> Fable.Core.TS.Dom.WebAssembly.Tag
 
             type ExceptionOptions = Fable.Core.TS.Dom.WebAssembly.ExceptionOptions
 
@@ -107047,6 +106944,16 @@ module Dom =
             [<ParamObject; Emit("$0")>]
             static member Create(name: string, message: string, ?stack: string, ?cause: obj) : CompileError = jsNative
 
+        type CompileErrorConstructor =
+            [<EmitConstructor>]
+            abstract Create: ?message: string -> Fable.Core.TS.Dom.WebAssembly.CompileError
+
+            /// <summary>
+            /// The <b><c>WebAssembly.CompileError</c></b> object indicates an error during WebAssembly decoding or validation.
+            /// </summary>
+            [<Emit("$0($1...)")>]
+            abstract Invoke: ?message: string -> Fable.Core.TS.Dom.WebAssembly.CompileError
+
         /// <summary>
         /// The <b><c>WebAssembly.Exception</c></b> object represents a runtime exception thrown from WebAssembly to JavaScript, or thrown from JavaScript to a WebAssembly exception handler.
         /// <br /><br />
@@ -107082,6 +106989,14 @@ module Dom =
                 ) : Exception =
                 jsNative
 
+        type ExceptionConstructor =
+            [<EmitConstructor>]
+            abstract Create:
+                exceptionTag: Fable.Core.TS.Dom.WebAssembly.Tag *
+                payload: obj[] *
+                ?options: Fable.Core.TS.Dom.WebAssembly.ExceptionOptions ->
+                    Fable.Core.TS.Dom.WebAssembly.Exception
+
         /// <summary>
         /// A <b><c>WebAssembly.Global</c></b> object represents a global variable instance, accessible from both JavaScript and importable/exportable across one or more WebAssembly.Module instances. This allows dynamic linking of multiple modules.
         /// <br /><br />
@@ -107103,6 +107018,12 @@ module Dom =
             [<ParamObject; Emit("$0")>]
             static member Create(value: obj, valueOf: (unit -> obj)) : Global<'T> = jsNative
 
+        type GlobalConstructor =
+            [<EmitConstructor>]
+            abstract Create<'T> :
+                descriptor: Fable.Core.TS.Dom.WebAssembly.GlobalDescriptor<'T> * ?v: obj ->
+                    Fable.Core.TS.Dom.WebAssembly.Global<'T>
+
         /// <summary>
         /// A <b><c>WebAssembly.Instance</c></b> object is a stateful, executable instance of a WebAssembly.Module. Instance objects contain all the Exported WebAssembly functions that allow calling into WebAssembly code from JavaScript.
         /// <br /><br />
@@ -107120,6 +107041,12 @@ module Dom =
             [<ParamObject; Emit("$0")>]
             static member Create(exports: Fable.Core.TS.Dom.WebAssembly.Exports) : Instance = jsNative
 
+        type InstanceConstructor =
+            [<EmitConstructor>]
+            abstract Create:
+                ``module``: Fable.Core.TS.Dom.WebAssembly.Module * ?importObject: Fable.Core.TS.Dom.WebAssembly.Imports ->
+                    Fable.Core.TS.Dom.WebAssembly.Instance
+
         /// <summary>
         /// The <b><c>WebAssembly.LinkError</c></b> object indicates an error during module instantiation (besides traps from the start function).
         /// </summary>
@@ -107129,6 +107056,16 @@ module Dom =
 
             [<ParamObject; Emit("$0")>]
             static member Create(name: string, message: string, ?stack: string, ?cause: obj) : LinkError = jsNative
+
+        type LinkErrorConstructor =
+            [<EmitConstructor>]
+            abstract Create: ?message: string -> Fable.Core.TS.Dom.WebAssembly.LinkError
+
+            /// <summary>
+            /// The <b><c>WebAssembly.LinkError</c></b> object indicates an error during module instantiation (besides traps from the start function).
+            /// </summary>
+            [<Emit("$0($1...)")>]
+            abstract Invoke: ?message: string -> Fable.Core.TS.Dom.WebAssembly.LinkError
 
         /// <summary>
         /// The <b><c>WebAssembly.Memory</c></b> object is a resizable ArrayBuffer or SharedArrayBuffer that holds raw bytes of memory accessed by a WebAssembly.Instance.
@@ -107162,12 +107099,50 @@ module Dom =
                 ) : Memory =
                 jsNative
 
+        type MemoryConstructor =
+            [<EmitConstructor>]
+            abstract Create:
+                descriptor: Fable.Core.TS.Dom.WebAssembly.MemoryDescriptor -> Fable.Core.TS.Dom.WebAssembly.Memory
+
         /// <summary>
         /// A <b><c>WebAssembly.Module</c></b> object contains stateless WebAssembly code that has already been compiled by the browser — this can be efficiently shared with Workers, and instantiated multiple times.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Module">MDN Reference</a>
         /// </summary>
         type Module = obj
+
+        type ModuleConstructor =
+            /// <summary>
+            /// The WebAssembly.<b><c>Module.customSections()</c></b> static method returns a copy of the contents of all custom sections in the given module with the given string name.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Module/customSections_static">MDN Reference</a>
+            /// </summary>
+            abstract customSections:
+                moduleObject: Fable.Core.TS.Dom.WebAssembly.Module * sectionName: string ->
+                    Fable.Core.TS.Es.ArrayBuffer[]
+
+            /// <summary>
+            /// The WebAssembly.<b><c>Module.exports()</c></b> static method returns an array containing descriptions of all the declared exports of the given Module.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Module/exports_static">MDN Reference</a>
+            /// </summary>
+            abstract exports:
+                moduleObject: Fable.Core.TS.Dom.WebAssembly.Module ->
+                    Fable.Core.TS.Dom.WebAssembly.ModuleExportDescriptor[]
+
+            /// <summary>
+            /// The WebAssembly.<b><c>Module.imports()</c></b> static method returns an array containing descriptions of all the declared imports of the given Module.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Module/imports_static">MDN Reference</a>
+            /// </summary>
+            abstract imports:
+                moduleObject: Fable.Core.TS.Dom.WebAssembly.Module ->
+                    Fable.Core.TS.Dom.WebAssembly.ModuleImportDescriptor[]
+
+            [<EmitConstructor>]
+            abstract Create:
+                bytes: AllowSharedBufferSource * ?options: Fable.Core.TS.Dom.WebAssembly.WebAssemblyCompileOptions ->
+                    Fable.Core.TS.Dom.WebAssembly.Module
 
         /// <summary>
         /// The <b><c>WebAssembly.RuntimeError</c></b> object is the error type that is thrown whenever WebAssembly specifies a trap.
@@ -107178,6 +107153,16 @@ module Dom =
 
             [<ParamObject; Emit("$0")>]
             static member Create(name: string, message: string, ?stack: string, ?cause: obj) : RuntimeError = jsNative
+
+        type RuntimeErrorConstructor =
+            [<EmitConstructor>]
+            abstract Create: ?message: string -> Fable.Core.TS.Dom.WebAssembly.RuntimeError
+
+            /// <summary>
+            /// The <b><c>WebAssembly.RuntimeError</c></b> object is the error type that is thrown whenever WebAssembly specifies a trap.
+            /// </summary>
+            [<Emit("$0($1...)")>]
+            abstract Invoke: ?message: string -> Fable.Core.TS.Dom.WebAssembly.RuntimeError
 
         /// <summary>
         /// The <b><c>WebAssembly.Table</c></b> object is a JavaScript wrapper object — an array-like structure representing a WebAssembly table, which stores homogeneous references. A table created by JavaScript or in WebAssembly code will be accessible and mutable from both JavaScript and WebAssembly.
@@ -107221,12 +107206,22 @@ module Dom =
                 ) : Table =
                 jsNative
 
+        type TableConstructor =
+            [<EmitConstructor>]
+            abstract Create:
+                descriptor: Fable.Core.TS.Dom.WebAssembly.TableDescriptor * ?value: obj ->
+                    Fable.Core.TS.Dom.WebAssembly.Table
+
         /// <summary>
         /// The <b><c>WebAssembly.Tag</c></b> object defines a type of a WebAssembly exception that can be thrown to/from WebAssembly code.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Tag">MDN Reference</a>
         /// </summary>
         type Tag = obj
+
+        type TagConstructor =
+            [<EmitConstructor>]
+            abstract Create: ``type``: Fable.Core.TS.Dom.WebAssembly.TagType -> Fable.Core.TS.Dom.WebAssembly.Tag
 
         [<Interface>]
         type ExceptionOptions =
