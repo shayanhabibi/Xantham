@@ -3434,3 +3434,23 @@ cover a 20-deep interface diamond chain, bounded by contract-walk visits per tab
 `resolveTypeTableObserved`; six mutually wrapping interfaces and aliases; six aliases over
 computed literal arguments; a callback below an application shared by two roots, in both root
 orders; and `Mapper<T>`.
+
+### TypeScript-private members (2026-10-24)
+
+Resolve omits a TypeScript-private property: every declaration carries the `private` modifier or
+a `#name` (`PrivateKeyword` in the declaration's modifiers, or a `PrivateIdentifier` name). A
+leading underscore is never read; `protected` members stay. The omission is Exact and records no
+finding. `TypeFacts.PrivateMembers` records that a type had one: such a type admits only its
+class's instances, so it is declared even with no other member (`interface end`, never the TR047
+`obj`), and `synthesize-paramobjects` refuses its `Create` (SP003). A `private constructor` sets
+`ResolvedSignature.IsPrivate`; the construct signature stays, so the class keeps its class
+identity and statics, and shape-classes and constructor objects emit no constructor for it. A
+public getter over a private setter reads get-only. private-member-lab is the lab.
+
+Measured against a base regeneration: private members account for no TR008 in Core.TS, Node or
+the npm goldens (solid-js's private members are in seroval, which it does not emit). Core.TS moves
+RawJSON and RawJSONInstance, whose `#isRawJson` brand read as `unknown` → `obj` (TR009 338 → 336,
+SP001 1,179 → 1,177, SP003 504 → 506); the lib-ship and catalog-library-entry labs move
+lib.scripthost's SafeArray and VarDate. Node loses fourteen `[<EmitConstructor>]` exports of private constructors (`Cipher`,
+`Hash`, `Stats`, `REPLServer` and others). Catalogue identity keys do not move; RawJSON's `api`
+hash in Core.TS's `declarations.json` does.
