@@ -826,7 +826,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
             pathOf export
             @ [
                 underNamespace
-                    (namespacePath model.Harvest.Namespaces export.DeclaringNamespace)
+                    (exportNamespacePath model.Harvest.Namespaces export)
                     (Naming.pascalSegment (fsName fallback export))
             ]
             |> String.concat ".")
@@ -837,7 +837,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
 
         let stem =
             underNamespace
-                (namespacePath model.Harvest.Namespaces export.DeclaringNamespace)
+                (exportNamespacePath model.Harvest.Namespaces export)
                 (Naming.pascalSegment (fsName fallback export))
 
         let root = underPrefix stem

@@ -181,6 +181,19 @@ export namespace Markup {
 /** Reads the DOM `Element` beside a namespace member of that name. */
 export declare function mount(host: Element): Markup.Element;
 
+export namespace Original {
+    export interface Item<T> { value: T }
+    export namespace Inner {
+        export interface Leaf<T> { item: Item<T> }
+    }
+}
+export import PublicAlias = Original;
+export namespace AliasHolder {
+    export import First = Original;
+    export import Second = Original;
+}
+export declare function readAlias(): PublicAlias.Inner.Leaf<string>;
+
 /** A class merged with a namespace of types. */
 export declare class Queue {
     push(item: Queue.Item): void;

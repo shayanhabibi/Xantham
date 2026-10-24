@@ -94,6 +94,7 @@ let private harvestPublicPath
                                 ExportName = name
                                 Symbol = symbol
                                 DeclaringNamespace = None
+                                NamespacePath = None
                                 HasValueExport = hasValueExport
                                 Docs = ""
                                 Tags = []
@@ -224,6 +225,7 @@ let private harvestAmbientModule (ctx: Context) (moduleSymbol: SymbolResponse) =
                                     ExportName = name
                                     Symbol = origin
                                     DeclaringNamespace = None
+                                    NamespacePath = None
                                     HasValueExport = hasValueExport
                                     Docs = ""
                                     Tags = []
@@ -460,6 +462,7 @@ let harvestGlobals: Pass<HarvestModel> =
                                             ExportName = symbol.Name
                                             Symbol = symbol
                                             DeclaringNamespace = None
+                                            NamespacePath = None
                                             HasValueExport = hasAny SymbolFlags.Value symbol.Flags
                                             Docs = ""
                                             Tags = []
@@ -478,6 +481,7 @@ let harvestGlobals: Pass<HarvestModel> =
                                             ExportName = symbol.Name
                                             Symbol = symbol
                                             DeclaringNamespace = None
+                                            NamespacePath = None
                                             HasValueExport = false
                                             Docs = ""
                                             Tags = []
@@ -624,6 +628,7 @@ let harvestNamespaceMembers: Pass<HarvestModel> =
                                 ExportName = symbol.Name
                                 Symbol = symbol
                                 DeclaringNamespace = None
+                                NamespacePath = None
                                 HasValueExport = hasAny SymbolFlags.Value symbol.Flags
                                 Docs = ""
                                 Tags = []
@@ -632,7 +637,18 @@ let harvestNamespaceMembers: Pass<HarvestModel> =
                             })
                         |> Array.toList
 
-                    let rec walk visited (path: string) (origin: ExportOrigin) (ns: SymbolResponse) =
+                    let canonicalPath (symbol: SymbolResponse) fallback =
+                        Map.tryFind symbol.SymbolId model.Namespaces
+                        |> Option.map (fun name -> name / uom<symbolName>)
+                        |> Option.defaultValue fallback
+
+                    let rec walk
+                        visited
+                        (path: string)
+                        (sourcePath: string)
+                        (origin: ExportOrigin)
+                        (ns: SymbolResponse)
+                        =
                         async {
                             let! exports = ctx.Session.getExportsOfModule ns.Reference
 
@@ -653,6 +669,7 @@ let harvestNamespaceMembers: Pass<HarvestModel> =
                                         ExportName = name
                                         Symbol = symbol
                                         DeclaringNamespace = Some ns.SymbolId
+                                        NamespacePath = Some path
                                         HasValueExport = false
                                         Docs = ""
                                         Tags = []
@@ -664,19 +681,22 @@ let harvestNamespaceMembers: Pass<HarvestModel> =
                                 async {
                                     match pending with
                                     | [] -> return visited, found, named
-                                    | (_, (symbol: SymbolResponse)) :: rest when
+                                    | (exportName, (symbol: SymbolResponse)) :: rest when
                                         isNamespace symbol && not (Set.contains symbol.SymbolId visited)
                                         ->
-                                        let nested = $"{path}.{symbol.Name}"
+                                        let nested = $"{path}.{exportName}"
+                                        let sourceNested = canonicalPath symbol $"{sourcePath}.{symbol.Name}"
 
-                                        let! visited, inner, innerNamed =
-                                            walk (Set.add symbol.SymbolId visited) nested origin symbol
+                                        let! _, inner, innerNamed =
+                                            walk (Set.add symbol.SymbolId visited) nested sourceNested origin symbol
 
                                         return!
                                             descend
                                                 visited
                                                 (found @ inner)
-                                                (named @ [ symbol.SymbolId, nested * uom<symbolName> ] @ innerNamed)
+                                                (named
+                                                 @ [ symbol.SymbolId, sourceNested * uom<symbolName> ]
+                                                 @ innerNamed)
                                                 rest
                                     | _ :: rest -> return! descend visited found named rest
                                 }
@@ -689,12 +709,16 @@ let harvestNamespaceMembers: Pass<HarvestModel> =
                     let seeds =
                         exports
                         |> List.filter (fun export -> isNamespace export.Symbol && ships export.Symbol)
-                        |> List.distinctBy _.Symbol.SymbolId
+                        |> List.distinctBy (fun export -> export.Origin, export.ExportName, export.Symbol.SymbolId)
+                        |> List.sortBy (fun export -> export.ExportName <> export.Symbol.Name)
 
                     let pathOf (seed: HarvestedExport) =
-                        Map.tryFind seed.Symbol.SymbolId model.Namespaces
-                        |> Option.map (fun name -> name / uom<symbolName>)
-                        |> Option.defaultValue seed.Symbol.Name
+                        if seed.ExportName <> seed.Symbol.Name && seed.ExportName <> "default" then
+                            seed.ExportName
+                        else
+                            Map.tryFind seed.Symbol.SymbolId model.Namespaces
+                            |> Option.map (fun name -> name / uom<symbolName>)
+                            |> Option.defaultValue seed.Symbol.Name
 
                     let! _, harvested, named =
                         seeds
@@ -703,12 +727,20 @@ let harvestNamespaceMembers: Pass<HarvestModel> =
                                 async {
                                     let! visited, found, named = state
                                     let path = pathOf seed
-                                    let! visited, inner, innerNamed = walk visited path seed.Origin seed.Symbol
+                                    let sourcePath = canonicalPath seed.Symbol seed.Symbol.Name
+
+                                    let! _, inner, innerNamed =
+                                        walk
+                                            (Set.singleton seed.Symbol.SymbolId)
+                                            path
+                                            sourcePath
+                                            seed.Origin
+                                            seed.Symbol
 
                                     return
                                         visited,
                                         found @ inner,
-                                        named @ [ seed.Symbol.SymbolId, path * uom<symbolName> ] @ innerNamed
+                                        named @ [ seed.Symbol.SymbolId, sourcePath * uom<symbolName> ] @ innerNamed
                                 })
                             (async.Return(seeds |> List.map _.Symbol.SymbolId |> Set.ofList, [], []))
 
@@ -718,7 +750,11 @@ let harvestNamespaceMembers: Pass<HarvestModel> =
                                 Exports =
                                     exports @ harvested
                                     |> List.distinctBy (fun export ->
-                                        export.Origin, export.DeclaringNamespace, export.ExportName, export.Symbol.SymbolId)
+                                        export.Origin,
+                                        export.DeclaringNamespace,
+                                        export.NamespacePath,
+                                        export.ExportName,
+                                        export.Symbol.SymbolId)
                                 Namespaces =
                                     named
                                     |> List.fold

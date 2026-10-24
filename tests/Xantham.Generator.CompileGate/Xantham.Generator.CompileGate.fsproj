@@ -66,6 +66,7 @@
         <Compile Include="GroupedDomAliasesConsumer.fs" />
         <Compile Include="UnionArmOverloadConsumer.fs" />
         <Compile Include="CustomizationConsumer.fs" />
+        <Compile Include="NamespaceAliasConsumer.fs" />
     </ItemGroup>
 
     <ItemGroup>

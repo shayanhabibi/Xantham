@@ -3443,6 +3443,17 @@ let pipelineTests =
                           let body = moduleBodyOf source "Reexports"
                           Expect.stringContains body "type SharedCode =" "the namespace occurrence survives beside its root declaration"
 
+                      testCase "namespace aliases preserve their public generic member paths" <| fun _ ->
+                          let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                          let source = rendered.Files |> List.head |> snd
+                          let aliases = moduleBodyOf source "PublicAlias"
+                          Expect.stringContains aliases "type Item<'T> = Original.Item<'T>" "the namespace alias preserves the generic member"
+                          Expect.stringContains (moduleBodyOf aliases "Inner") "type Leaf<'T> = Original.Inner.Leaf<'T>" "nested members retain the alias occurrence path"
+                          let holder = moduleBodyOf source "AliasHolder"
+                          for name in [ "First"; "Second" ] do
+                              let nested = moduleBodyOf (moduleBodyOf holder name) "Inner"
+                              Expect.stringContains nested "type Leaf<'T> = Original.Inner.Leaf<'T>" "sibling aliases retain their paths without replacing source ownership"
+
                       testCase "reached members retain private nested namespace ancestry" <| fun _ ->
                           let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                           let source = rendered.Files |> List.head |> snd

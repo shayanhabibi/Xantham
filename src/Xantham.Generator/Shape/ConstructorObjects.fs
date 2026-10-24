@@ -1,4 +1,4 @@
-﻿module Xantham.Generator.Shape.ConstructorObjects
+module Xantham.Generator.Shape.ConstructorObjects
 
 open Xantham.Generator
 open Xantham.Generator.Measure
@@ -24,7 +24,7 @@ let nameConstructorObjects: Pass<ShapeModel> =
                         | Some typeId when not (Map.containsKey typeId found) ->
                             let name =
                                 underNamespace
-                                    (namespacePath model.Harvest.Namespaces export.DeclaringNamespace)
+                                    (exportNamespacePath model.Harvest.Namespaces export)
                                     (fsName fallback export)
 
                             Map.add typeId name found
@@ -153,7 +153,7 @@ let nameConstructorObjects: Pass<ShapeModel> =
             | Some typeId ->
                 let path =
                     underNamespace
-                        (namespacePath model.Harvest.Namespaces export.DeclaringNamespace)
+                        (exportNamespacePath model.Harvest.Namespaces export)
                         (Naming.typeNameSegment (Naming.pascalSegment (fsName fallback export)))
 
                 if hasAny SymbolFlags.Class export.Symbol.Flags then

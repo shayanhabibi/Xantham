@@ -44,6 +44,8 @@ let declarationExports (ctx: Context) (model: ShapeModel) =
                     ExportLayout.depthOf model.RuntimePackage hasEntryOwner owner,
                     ExportLayout.ownerSpecifier owner,
                     export.ExportName <> export.Symbol.Name,
+                    exportNamespacePath model.Harvest.Namespaces export
+                    <> namespacePath model.Harvest.Namespaces export.DeclaringNamespace,
                     index)
                 |> snd
             )
@@ -77,7 +79,7 @@ let nameExports: Pass<ShapeModel> =
                     /// The module name an export nests under, where its symbol is written inside
                     /// a namespace this run names.
                     let namespaceOf (export: HarvestedExport) =
-                        namespacePath model.Harvest.Namespaces export.DeclaringNamespace
+                        exportNamespacePath model.Harvest.Namespaces export
 
                     /// Where a declaration was harvested from, in the words a manifest reads.
                     let originOf (export: HarvestedExport) =

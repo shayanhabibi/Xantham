@@ -64,6 +64,12 @@ let internal namespacePath namespaces parent =
         |> Array.map Naming.pascalSegment
         |> String.concat ".")
 
+/// The public path of an export occurrence, which can differ from its source namespace.
+let internal exportNamespacePath namespaces (export: HarvestedExport) =
+    match export.NamespacePath with
+    | Some path -> Some(path.Split '.' |> Array.map Naming.pascalSegment |> String.concat ".")
+    | None -> namespacePath namespaces export.DeclaringNamespace
+
 /// Places a declaration inside its source namespace, when it has one.
 let internal underNamespace path name =
     match path with

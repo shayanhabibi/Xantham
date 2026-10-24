@@ -127,7 +127,7 @@ let shapeAliases: Pass<ShapeModel> =
                                         (exportPath export
                                          @ [
                                              underNamespace
-                                                 (namespacePath model.Harvest.Namespaces export.DeclaringNamespace)
+                                                 (exportNamespacePath model.Harvest.Namespaces export)
                                                  (Naming.typeNameSegment (fsName fallback export))
                                          ])
 

@@ -138,6 +138,8 @@ type Exports =
     /// </summary>
     [<Import("joinCluster", "nested-name-lab")>]
     static member joinCluster (node: Cluster.Node) : Node = jsNative
+    [<Import("clusterItem", "nested-name-lab")>]
+    static member clusterItem () : Cluster.Inner.PrivateItem = jsNative
     /// <summary>
     /// A namespace with a value beside its types.
     /// </summary>
@@ -155,11 +157,28 @@ type Exports =
     /// </summary>
     [<Import("mount", "nested-name-lab")>]
     static member mount (host: Fable.Core.TS.Dom.Element) : Markup.Element = jsNative
+    [<Import("AliasHolder", "nested-name-lab")>]
+    static member AliasHolder: obj = jsNative
+    [<Import("readAlias", "nested-name-lab")>]
+    static member readAlias () : Original.Inner.Leaf<string> = jsNative
     /// <summary>
     /// A class merged with a namespace of types.
     /// </summary>
     [<Import("Queue", "nested-name-lab"); EmitConstructor>]
     static member Queue () : Queue = jsNative
+
+module AliasHolder =
+    module First =
+        type Item<'T> = Original.Item<'T>
+
+        module Inner =
+            type Leaf<'T> = Original.Inner.Leaf<'T>
+
+    module Second =
+        type Item<'T> = Original.Item<'T>
+
+        module Inner =
+            type Leaf<'T> = Original.Inner.Leaf<'T>
 
 module Choice =
     [<Interface>]
@@ -185,6 +204,13 @@ module Cluster =
         abstract peers: float with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (peers: float) : Node = jsNative
+
+    module Inner =
+        [<Interface>]
+        type PrivateItem =
+            abstract key: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (key: string) : PrivateItem = jsNative
 
 module Configure =
     [<Interface>]
@@ -241,6 +267,20 @@ module NestedNameLabGlobal =
         [<ParamObject; Emit("$0")>]
         static member Create (u: float) : Unreached = jsNative
 
+module Original =
+    [<Interface>]
+    type Item<'T> =
+        abstract value: 'T with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (value: 'T) : Item<'T> = jsNative
+
+    module Inner =
+        [<Interface>]
+        type Leaf<'T> =
+            abstract item: Original.Item<'T> with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (item: Original.Item<'T>) : Leaf<'T> = jsNative
+
 module Pick =
     [<Interface>]
     type Extra =
@@ -294,6 +334,12 @@ module Pool =
             abstract inner: bool with get, set
             [<ParamObject; Emit("$0")>]
             static member Create (inner: bool) : Node = jsNative
+
+module PublicAlias =
+    type Item<'T> = Original.Item<'T>
+
+    module Inner =
+        type Leaf<'T> = Original.Inner.Leaf<'T>
 
 module Queue =
     [<Interface>]

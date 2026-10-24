@@ -3341,3 +3341,11 @@ source alias reinterprets its own alias parameters. This keeps `GlobalThis.Array
 and makes `GlobalThis.Partial<'T>` the same F# type as the canonical `Partial<'T>`, rather
 than a second erased wrapper. The compiler-library consumer gate pins both assignability
 and generic arity.
+
+Namespace traversal retains both the canonical source path and each public export path.
+`HarvestedExport.NamespacePath` records occurrence ancestry, while `Namespaces` remains the
+source-symbol map. Traversal uses ancestor symbols to stop cycles without suppressing a sibling
+alias of the same namespace. Declaration selection prefers a canonical occurrence; other paths
+emit type abbreviations forwarding generic parameters. The nested-name lab and its consumer
+compile gate cover a root namespace alias, nested members, and two sibling aliases sharing the
+same source types.

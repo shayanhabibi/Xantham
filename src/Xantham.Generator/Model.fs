@@ -1135,6 +1135,9 @@ type HarvestedExport =
         /// The namespace exporting this occurrence. An alias can be exported from a different
         /// namespace than its resolved target symbol, whose identity remains unchanged.
         DeclaringNamespace: SymbolKey option
+        /// Public namespace path for this export occurrence, including namespace aliases.
+        /// The canonical namespace map remains keyed by the resolved source symbol.
+        NamespacePath: string option
         /// The entry exposes this symbol as a value, through no type-only import/export edge.
         /// The origin symbol's value flags alone do not establish a runtime export.
         HasValueExport: bool
