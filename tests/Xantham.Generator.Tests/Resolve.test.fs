@@ -224,6 +224,8 @@ type Calls<S extends string> = (() => Calls<`${S}l`>) | ((x:S) => Calls<`${S}r`>
 export declare const calls:Calls<"">;
 type Inputs<S extends string> = (left:Inputs<`${S}l`>, right:Inputs<`${S}r`>) => void;
 export declare const inputs:Inputs<"">;
+type Mapper<T> = <U>(value: T, project: (v: T) => U) => U[];
+export declare function mapWith<T>(seed: T): Mapper<T>;
 """
         System.IO.File.WriteAllText(System.IO.Path.Combine(directory, "index.d.ts"), declaration)
         let configFile = System.IO.Path.Combine(directory, "xantham.json")
@@ -280,4 +282,76 @@ export declare const inputs:Inputs<"">;
         let details = resolved.Types[hydratedSignature.Parameters[1].TypeId]
         let hydratedValue = details.Members |> List.find (fun member_ -> member_.Symbol.Name = "value")
         Expect.contains resolved.Types[hydratedValue.TypeId].UnionMembers hydrate.CallSignatures.Head.TypeParameters.Head "the substituted callback keeps the enclosing function type parameter"
-        Expect.isLessThan resolved.Types.Count 1000 "generic expansion terminates under the bounded frontier"
+        let mapWith = resolved.Types |> Map.toList |> List.map snd |> List.find (fun facts -> facts.SymbolName |> Option.exists (fun name -> string name = "mapWith"))
+        let mapper = resolved.Types[mapWith.CallSignatures.Head.ReturnTypeId]
+        let mapSignature = mapper.CallSignatures |> List.exactlyOne
+        let project = mapSignature.Parameters |> List.find (fun parameter -> parameter.Symbol.Name = "project")
+        Expect.isTrue (Map.containsKey project.TypeId resolved.Types) "a generic signature on an alias application retains its callback parameter"
+        Expect.isTrue (Map.containsKey mapSignature.ReturnTypeId resolved.Types) "and its return type"
+        Expect.isTrue (Map.containsKey mapSignature.TypeParameters.Head resolved.Types) "and its own type parameter"
+        Expect.isLessThan resolved.Types.Count 200 "generic expansion terminates under the bounded frontier"
+
+
+/// Resolves `declaration` as a package's entry under a frontier width of one, so every
+/// generation past the seeds runs the width cutoff and the source-contract walk.
+let private resolveAtWidthOne prefix (declaration: string) =
+    use scratch = Scratch.directory prefix
+    let directory = scratch.Path
+    System.IO.File.WriteAllText(System.IO.Path.Combine(directory, "package.json"), $"""{{"name":"{prefix}-lab","version":"1.0.0","types":"index.d.ts"}}""")
+    System.IO.File.WriteAllText(System.IO.Path.Combine(directory, "index.d.ts"), declaration)
+    let configFile = System.IO.Path.Combine(directory, "xantham.json")
+    System.IO.File.WriteAllText(configFile, """{"module":"Frontier","entry":"index.d.ts","lib":["esnext"],"types":[]}""")
+    let resolve = async {
+        let! mailbox, ctx = Bootstrap.start (GeneratorConfig.loadFile configFile) directory
+        use _ = mailbox :> System.IDisposable
+        let! harvest, _ = Pipeline.runTier ctx Harvest.passes HarvestModel.Empty
+        let! resolved, _ = Pipeline.runTier ctx [ Resolve.resolveExportTypes; Resolve.resolveTypeTableWithWidth 1 ] (Pipeline.toResolve harvest)
+        return resolved
+    }
+    let stopwatch = System.Diagnostics.Stopwatch.StartNew()
+    let resolved = Async.RunSynchronously resolve
+    resolved, stopwatch.Elapsed
+
+[<Tests>]
+let frontierCostTests =
+    testList "resolve oversized frontier cost" [
+        testCase "a diamond chain of interfaces resolves in time linear in its depth" <| fun _ ->
+            let depth = 20
+            let declaration =
+                String.concat "\n" [
+                    for k in 0 .. depth - 1 do
+                        $"export interface L{k} {{ a: A{k + 1}; b: B{k + 1} }}"
+                        $"export interface A{k + 1} {{ n: L{k + 1} }}"
+                        $"export interface B{k + 1} {{ n: L{k + 1} }}"
+                    $"export interface L{depth} {{ leaf: string }}"
+                    // Two fresh instantiations per generation keep the width cutoff engaged.
+                    "export interface Box<T> { value: T; next: Box<T[]> }"
+                    "export interface Wide { left: Box<string>; right: Box<number> }"
+                ]
+            let resolved, elapsed = resolveAtWidthOne "frontier-diamond" declaration
+            Expect.isLessThan resolved.Types.Count 200 "the table holds each declaration once"
+            Expect.isLessThan elapsed.TotalSeconds 60.0 "the contract walk stays linear in the chain"
+
+        testCase "mutually wrapping generic declarations stay bounded under the width cutoff" <| fun _ ->
+            let count = 6
+            // An interface instantiation is derived as identity; an alias instantiation of an
+            // object literal is derived with its members, which wrap every other alias again.
+            let wrapping name (head: int -> string) =
+                [
+                    for i in 1 .. count do
+                        let members =
+                            [ for j in 1 .. count do
+                                  if j <> i then $"m{j}: {name}{j}<{name}{i}<T>>" ]
+                        let body = String.concat "; " members
+                        $"{head i} {{ {body} }}"
+                ]
+            let declaration =
+                String.concat "\n" [
+                    yield! wrapping "G" (fun i -> $"export interface G{i}<T>")
+                    "export declare const g: G1<string>;"
+                    yield! wrapping "H" (fun i -> $"type H{i}<T> =")
+                    "export declare const h: H1<string>;"
+                ]
+            let resolved, _ = resolveAtWidthOne "frontier-mutual" declaration
+            Expect.isLessThan resolved.Types.Count 400 "protection reaches a bounded number of wrapped instantiations"
+    ]
