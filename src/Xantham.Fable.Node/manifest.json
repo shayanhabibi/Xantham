@@ -3,9 +3,9 @@
   "package": "@types/node",
   "module": "Node",
   "counts": {
-    "exact": 944,
-    "ergonomic": 2181,
-    "widened": 604,
+    "exact": 1023,
+    "ergonomic": 2179,
+    "widened": 598,
     "escape": 4
   },
   "passes": [
@@ -45,9 +45,9 @@
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 83,
-      "ergonomic": 39,
-      "widened": 44
+      "total": 60,
+      "ergonomic": 25,
+      "widened": 35
     },
     {
       "pass": "SC - shape-classes",
@@ -84,9 +84,9 @@
     },
     {
       "pass": "RA - repair-arity",
-      "total": 8,
+      "total": 3,
       "ergonomic": 1,
-      "widened": 7
+      "widened": 2
     },
     {
       "pass": "resolve-export-collisions",

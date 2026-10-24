@@ -6340,7 +6340,7 @@ module Es =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat#Browser_compatibility">Compatibility</a>.
         /// </summary>
-        abstract RelativeTimeFormat: Intl.RelativeTimeFormatConstructor
+        abstract RelativeTimeFormat: GlobalThis.Intl.RelativeTimeFormatConstructor
         /// <summary>
         /// Constructor creates <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale">Intl.Locale</a>
         /// objects
@@ -6356,21 +6356,21 @@ module Es =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale">MDN</a>.
         /// </returns>
-        abstract Locale: Intl.LocaleConstructor
+        abstract Locale: GlobalThis.Intl.LocaleConstructor
         /// <summary>
         /// The <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames"><c>Intl.DisplayNames()</c></a>
         /// object enables the consistent translation of language, region and script display names.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames#browser_compatibility">Compatibility</a>.
         /// </summary>
-        abstract DisplayNames: Intl.DisplayNamesConstructor
-        abstract ListFormat: Intl.ListFormatConstructor
+        abstract DisplayNames: GlobalThis.Intl.DisplayNamesConstructor
+        abstract ListFormat: GlobalThis.Intl.ListFormatConstructor
         /// <summary>
         /// The <c>Intl.Segmenter</c> object enables locale-sensitive text segmentation, enabling you to get meaningful items (graphemes, words or sentences) from a string.
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter">MDN</a>
         /// </summary>
-        abstract Segmenter: Intl.SegmenterConstructor
+        abstract Segmenter: GlobalThis.Intl.SegmenterConstructor
         /// <summary>
         /// Returns a sorted array of the supported collation, calendar, currency, numbering system, timezones, and units by the implementation.
         /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/supportedValuesOf">MDN</a>
@@ -6383,7 +6383,7 @@ module Es =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DurationFormat">MDN</a>
         /// </summary>
-        abstract DurationFormat: Intl.DurationFormatConstructor
+        abstract DurationFormat: GlobalThis.Intl.DurationFormatConstructor
 
         [<ParamObject; Emit("$0")>]
         static member Create
@@ -6393,13 +6393,13 @@ module Es =
                 DateTimeFormat: Intl.DateTimeFormatConstructor,
                 getCanonicalLocales: (U2<string, string[]> option -> string[]),
                 PluralRules: Intl.PluralRulesConstructor,
-                RelativeTimeFormat: Intl.RelativeTimeFormatConstructor,
-                Locale: Intl.LocaleConstructor,
-                DisplayNames: Intl.DisplayNamesConstructor,
-                ListFormat: Intl.ListFormatConstructor,
-                Segmenter: Intl.SegmenterConstructor,
+                RelativeTimeFormat: GlobalThis.Intl.RelativeTimeFormatConstructor,
+                Locale: GlobalThis.Intl.LocaleConstructor,
+                DisplayNames: GlobalThis.Intl.DisplayNamesConstructor,
+                ListFormat: GlobalThis.Intl.ListFormatConstructor,
+                Segmenter: GlobalThis.Intl.SegmenterConstructor,
                 supportedValuesOf: (Intl.SupportedValuesOf.Key -> string[]),
-                DurationFormat: Intl.DurationFormatConstructor
+                DurationFormat: GlobalThis.Intl.DurationFormatConstructor
             ) : Intl =
             jsNative
 
@@ -19522,7 +19522,7 @@ module Es =
         /// </summary>
         type DecoratorContext = Fable.Core.TS.Es.DecoratorContext
 
-        type DecoratorMetadataObject = obj
+        type DecoratorMetadataObject = Fable.Core.TS.Es.DecoratorMetadataObject
 
         type DecoratorMetadata = obj
 
@@ -19642,8 +19642,7 @@ module Es =
 
         type IteratorReturnResult<'TReturn> = Fable.Core.TS.Es.IteratorReturnResult<'TReturn>
 
-        type IteratorResult<'T, 'TReturn> =
-            U2<Fable.Core.TS.Es.IteratorReturnResult<'TReturn>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
+        type IteratorResult<'T, 'TReturn> = Fable.Core.TS.Es.IteratorResult<'T, 'TReturn>
 
         type Iterator<'T, 'TReturn, 'TNext> = Fable.Core.TS.Es.Iterator<'T, 'TReturn, 'TNext>
 
@@ -19663,7 +19662,7 @@ module Es =
         /// Defines the <c>TReturn</c> type used for built-in iterators produced by <c>Array</c>, <c>Map</c>, <c>Set</c>, and others.
         /// This is <c>undefined</c> when <c>strictBuiltInIteratorReturn</c> is <c>true</c>; otherwise, this is <c>any</c>.
         /// </summary>
-        type BuiltinIteratorReturn = unit
+        type BuiltinIteratorReturn = Fable.Core.TS.Es.BuiltinIteratorReturn
 
         type ArrayIterator<'T> = Fable.Core.TS.Es.ArrayIterator<'T>
 
@@ -19708,8 +19707,7 @@ module Es =
         /// </summary>
         type AsyncIteratorObject<'T, 'TReturn, 'TNext> = Fable.Core.TS.Es.AsyncIteratorObject<'T, 'TReturn, 'TNext>
 
-        [<Erase>]
-        type FlatArray<'Arr, 'Depth> = private FlatArray__ of obj
+        type FlatArray<'Arr, 'Depth> = Fable.Core.TS.Es.FlatArray<'Arr, 'Depth>
 
         type BigIntToLocaleStringOptions = Fable.Core.TS.Es.BigIntToLocaleStringOptions
 
@@ -19778,7 +19776,7 @@ module Es =
 
         type Symbol = Fable.Core.TS.Es.Symbol
 
-        type PropertyKey = obj
+        type PropertyKey = Fable.Core.TS.Es.PropertyKey
 
         type PropertyDescriptor = Fable.Core.TS.Es.PropertyDescriptor
 
@@ -19801,14 +19799,12 @@ module Es =
         /// <summary>
         /// Extracts the type of the 'this' parameter of a function type, or 'unknown' if the function type has no 'this' parameter.
         /// </summary>
-        [<Erase>]
-        type ThisParameterType<'T> = private ThisParameterType__ of obj
+        type ThisParameterType<'T> = Fable.Core.TS.Es.ThisParameterType<'T>
 
         /// <summary>
         /// Removes the 'this' parameter from a function type.
         /// </summary>
-        [<Erase>]
-        type OmitThisParameter<'T> = private OmitThisParameter__ of obj
+        type OmitThisParameter<'T> = Fable.Core.TS.Es.OmitThisParameter<'T>
 
         type CallableFunction = Fable.Core.TS.Es.CallableFunction
 
@@ -19916,11 +19912,11 @@ module Es =
         /// </summary>
         type JSON = Fable.Core.TS.Es.JSON
 
-        type ReadonlyArray = obj
+        type ReadonlyArray<'T> = Fable.Core.TS.Es.ReadonlyArray<'T>
 
         type ConcatArray<'T> = Fable.Core.TS.Es.ConcatArray<'T>
 
-        type Array = obj
+        type Array<'T> = Fable.Core.TS.Es.Array<'T>
 
         type ArrayConstructor = Fable.Core.TS.Es.ArrayConstructor
 
@@ -19938,94 +19934,79 @@ module Es =
         /// <summary>
         /// Recursively unwraps the "awaited type" of a type. Non-promise "thenables" should resolve to <c>never</c>. This emulates the behavior of <c>await</c>.
         /// </summary>
-        [<Erase>]
-        type Awaited<'T> = private Awaited__ of obj
+        type Awaited<'T> = Fable.Core.TS.Es.Awaited<'T>
 
         type ArrayLike<'T> = Fable.Core.TS.Es.ArrayLike<'T>
 
         /// <summary>
         /// Make all properties in T optional
         /// </summary>
-        [<Erase>]
-        type Partial<'T> = private Partial__ of obj
+        type Partial<'T> = Fable.Core.TS.Es.Partial<'T>
 
         /// <summary>
         /// Make all properties in T required
         /// </summary>
-        [<Erase>]
-        type Required<'T> = private Required__ of obj
+        type Required<'T> = Fable.Core.TS.Es.Required<'T>
 
         /// <summary>
         /// Make all properties in T readonly
         /// </summary>
-        [<Erase>]
-        type Readonly<'T> = private Readonly__ of obj
+        type Readonly<'T> = Fable.Core.TS.Es.Readonly<'T>
 
         /// <summary>
         /// From T, pick a set of properties whose keys are in the union K
         /// </summary>
-        [<Erase>]
-        type Pick<'T, 'K> = private Pick__ of obj
+        type Pick<'T, 'K> = Fable.Core.TS.Es.Pick<'T, 'K>
 
         /// <summary>
         /// Construct a type with a set of properties K of type T
         /// </summary>
-        [<Erase>]
-        type Record<'K, 'T> = private Record__ of obj
+        type Record<'K, 'T> = Fable.Core.TS.Es.Record<'K, 'T>
 
         /// <summary>
         /// Exclude from T those types that are assignable to U
         /// </summary>
-        [<Erase>]
-        type Exclude<'T, 'U> = private Exclude__ of 'T
+        type Exclude<'T, 'U> = Fable.Core.TS.Es.Exclude<'T, 'U>
 
         /// <summary>
         /// Extract from T those types that are assignable to U
         /// </summary>
-        [<Erase>]
-        type Extract<'T, 'U> = private Extract__ of 'T
+        type Extract<'T, 'U> = Fable.Core.TS.Es.Extract<'T, 'U>
 
         /// <summary>
         /// Construct a type with the properties of T except for those in type K.
         /// </summary>
-        [<Erase>]
-        type Omit<'T, 'K> = private Omit__ of obj
+        type Omit<'T, 'K> = Fable.Core.TS.Es.Omit<'T, 'K>
 
         /// <summary>
         /// Exclude null and undefined from T
         /// </summary>
-        [<Erase>]
-        type NonNullable<'T> = private NonNullable__ of obj
+        type NonNullable<'T> = Fable.Core.TS.Es.NonNullable<'T>
 
         /// <summary>
         /// Obtain the parameters of a function type in a tuple
         /// </summary>
-        [<Erase>]
-        type Parameters<'T> = private Parameters__ of obj
+        type Parameters<'T> = Fable.Core.TS.Es.Parameters<'T>
 
         /// <summary>
         /// Obtain the parameters of a constructor function type in a tuple
         /// </summary>
-        [<Erase>]
-        type ConstructorParameters<'T> = private ConstructorParameters__ of obj
+        type ConstructorParameters<'T> = Fable.Core.TS.Es.ConstructorParameters<'T>
 
         /// <summary>
         /// Obtain the return type of a function type
         /// </summary>
-        [<Erase>]
-        type ReturnType<'T> = private ReturnType__ of obj
+        type ReturnType<'T> = Fable.Core.TS.Es.ReturnType<'T>
 
         /// <summary>
         /// Obtain the return type of a constructor function type
         /// </summary>
-        [<Erase>]
-        type InstanceType<'T> = private InstanceType__ of obj
+        type InstanceType<'T> = Fable.Core.TS.Es.InstanceType<'T>
 
         /// <summary>
         /// Convert string literal type to uppercase
         /// </summary>
-        [<Erase>]
-        type Uppercase<'S> = private Uppercase__ of obj
+        type Uppercase<'S> = Fable.Core.TS.Es.Uppercase<'S>
 
         /// <summary>
         /// Convert string literal type to lowercase
@@ -20054,14 +20035,14 @@ module Es =
         /// <summary>
         /// Marker for contextual 'this' type
         /// </summary>
-        type ThisType = obj
+        type ThisType<'T> = Fable.Core.TS.Es.ThisType<'T>
 
         /// <summary>
         /// Stores types to be used with WeakSet, WeakMap, WeakRef, and FinalizationRegistry
         /// </summary>
         type WeakKeyTypes = Fable.Core.TS.Es.WeakKeyTypes
 
-        type WeakKey = obj
+        type WeakKey = Fable.Core.TS.Es.WeakKey
 
         /// <summary>
         /// Represents a raw buffer of binary data, which is used to store data for the
@@ -20076,7 +20057,7 @@ module Es =
         /// </summary>
         type ArrayBufferTypes = Fable.Core.TS.Es.ArrayBufferTypes
 
-        type ArrayBufferLike = U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>
+        type ArrayBufferLike = Fable.Core.TS.Es.ArrayBufferLike
 
         type ArrayBufferConstructor = Fable.Core.TS.Es.ArrayBufferConstructor
 
@@ -20175,6 +20156,601 @@ module Es =
         type AsyncDisposableStackConstructor = Fable.Core.TS.Es.AsyncDisposableStackConstructor
 
         type AbstractModuleSource = Fable.Core.TS.Es.AbstractModuleSource
+
+        module Intl =
+            type DateTimeFormatPartTypesRegistry = Fable.Core.TS.Es.Intl.DateTimeFormatPartTypesRegistry
+
+            type DateTimeFormatPartTypes = Fable.Core.TS.Es.Intl.DateTimeFormatPartTypes
+
+            type DateTimeFormatPart = Fable.Core.TS.Es.Intl.DateTimeFormatPart
+
+            type LDMLPluralRule = Fable.Core.TS.Es.Intl.LDMLPluralRule
+
+            type PluralRuleType = Fable.Core.TS.Es.Intl.PluralRuleType
+
+            type PluralRulesOptions = Fable.Core.TS.Es.Intl.PluralRulesOptions
+
+            type ResolvedPluralRulesOptions = Fable.Core.TS.Es.Intl.ResolvedPluralRulesOptions
+
+            type PluralRules = Fable.Core.TS.Es.Intl.PluralRules
+
+            type PluralRulesConstructor = Fable.Core.TS.Es.Intl.PluralRulesConstructor
+
+            type NumberFormatPartTypeRegistry = Fable.Core.TS.Es.Intl.NumberFormatPartTypeRegistry
+
+            type NumberFormatPartTypes = Fable.Core.TS.Es.Intl.NumberFormatPartTypes
+
+            type NumberFormatPart = Fable.Core.TS.Es.Intl.NumberFormatPart
+
+            /// <summary>
+            /// A string that is a valid <a href="https://unicode.org/reports/tr35/#Unicode_locale_identifier">Unicode BCP 47 Locale Identifier</a>.
+            /// <br /><br />
+            /// For example: "fa", "es-MX", "zh-Hant-TW".
+            /// <br /><br />
+            /// See <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#locales_argument">MDN - Intl - locales argument</a>.
+            /// </summary>
+            type UnicodeBCP47LocaleIdentifier = string
+
+            /// <summary>
+            /// Unit to use in the relative time internationalized message.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/format#Parameters">MDN</a>.
+            /// </summary>
+            type RelativeTimeFormatUnit = Fable.Core.TS.Es.Intl.RelativeTimeFormatUnit
+
+            /// <summary>
+            /// Value of the <c>unit</c> property in objects returned by
+            /// <c>Intl.RelativeTimeFormat.prototype.formatToParts()</c>. <c>formatToParts</c> and
+            /// <c>format</c> methods accept either singular or plural unit names as input,
+            /// but <c>formatToParts</c> only outputs singular (e.g. "day") not plural (e.g.
+            /// "days").
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/formatToParts#Using_formatToParts">MDN</a>.
+            /// </summary>
+            type RelativeTimeFormatUnitSingular = Fable.Core.TS.Es.Intl.RelativeTimeFormatUnitSingular
+
+            /// <summary>
+            /// The locale matching algorithm to use.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_negotiation">MDN</a>.
+            /// </summary>
+            type RelativeTimeFormatLocaleMatcher = Fable.Core.TS.Es.Intl.RelativeTimeFormatLocaleMatcher
+
+            /// <summary>
+            /// The format of output message.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/RelativeTimeFormat#Parameters">MDN</a>.
+            /// </summary>
+            type RelativeTimeFormatNumeric = Fable.Core.TS.Es.Intl.RelativeTimeFormatNumeric
+
+            /// <summary>
+            /// The length of the internationalized message.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/RelativeTimeFormat#Parameters">MDN</a>.
+            /// </summary>
+            type RelativeTimeFormatStyle = Fable.Core.TS.Es.Intl.RelativeTimeFormatStyle
+
+            /// <summary>
+            /// The locale or locales to use
+            /// <br /><br />
+            /// See <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#locales_argument">MDN - Intl - locales argument</a>.
+            /// </summary>
+            type LocalesArgument = Fable.Core.TS.Es.Intl.LocalesArgument
+
+            /// <summary>
+            /// An object with some or all of properties of <c>options</c> parameter
+            /// of <c>Intl.RelativeTimeFormat</c> constructor.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/RelativeTimeFormat#Parameters">MDN</a>.
+            /// </summary>
+            type RelativeTimeFormatOptions = Fable.Core.TS.Es.Intl.RelativeTimeFormatOptions
+
+            /// <summary>
+            /// An object with properties reflecting the locale
+            /// and formatting options computed during initialization
+            /// of the <c>Intl.RelativeTimeFormat</c> object
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/resolvedOptions#Description">MDN</a>.
+            /// </summary>
+            type ResolvedRelativeTimeFormatOptions = Fable.Core.TS.Es.Intl.ResolvedRelativeTimeFormatOptions
+
+            /// <summary>
+            /// An object representing the relative time format in parts
+            /// that can be used for custom locale-aware formatting.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/formatToParts#Using_formatToParts">MDN</a>.
+            /// </summary>
+            type RelativeTimeFormatPart = Fable.Core.TS.Es.Intl.RelativeTimeFormatPart
+
+            /// <summary>
+            /// The <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/RelativeTimeFormat"><c>Intl.RelativeTimeFormat</c></a>
+            /// object is a constructor for objects that enable language-sensitive relative time formatting.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat#Browser_compatibility">Compatibility</a>.
+            /// </summary>
+            type RelativeTimeFormat = Fable.Core.TS.Es.Intl.RelativeTimeFormat
+
+            type RelativeTimeFormatConstructor =
+                /// <summary>
+                /// Returns an array containing those of the provided locales
+                /// that are supported in date and time formatting
+                /// without having to fall back to the runtime's default locale.
+                /// </summary>
+                /// <param name="locales">
+                /// - A string with a <a href="http://tools.ietf.org/html/rfc5646">BCP 47 language tag</a>, or an array of such strings.
+                /// For the general form and interpretation of the locales argument,
+                /// see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_identification_and_negotiation"><c>Intl</c> page</a>.
+                /// </param>
+                /// <param name="options">
+                /// - An <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/RelativeTimeFormat#Parameters">object</a>
+                /// with some or all of options of the formatting.
+                /// </param>
+                /// <returns>
+                /// An array containing those of the provided locales
+                /// that are supported in date and time formatting
+                /// without having to fall back to the runtime's default locale.
+                /// <br /><br />
+                /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/supportedLocalesOf">MDN</a>.
+                /// </returns>
+                abstract supportedLocalesOf:
+                    ?locales: Fable.Core.TS.Es.Intl.LocalesArgument *
+                    ?options: Fable.Core.TS.Es.Intl.RelativeTimeFormatOptions ->
+                        string[]
+
+                [<EmitConstructor>]
+                abstract Create:
+                    ?locales: Fable.Core.TS.Es.Intl.LocalesArgument *
+                    ?options: Fable.Core.TS.Es.Intl.RelativeTimeFormatOptions ->
+                        Fable.Core.TS.Es.Intl.RelativeTimeFormat
+
+            type NumberFormatOptionsSignDisplayRegistry = Fable.Core.TS.Es.Intl.NumberFormatOptionsSignDisplayRegistry
+
+            type NumberFormatOptionsSignDisplay = Fable.Core.TS.Es.Intl.NumberFormatOptionsSignDisplay
+
+            type LocaleHourCycleKey = Fable.Core.TS.Es.Intl.LocaleHourCycleKey
+
+            type LocaleCollationCaseFirst = Fable.Core.TS.Es.Intl.LocaleCollationCaseFirst
+
+            type LocaleOptions = Fable.Core.TS.Es.Intl.LocaleOptions
+
+            /// <summary>
+            /// Constructor creates <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale">Intl.Locale</a>
+            /// objects
+            /// </summary>
+            /// <param name="tag">
+            /// - A string with a <a href="http://tools.ietf.org/html/rfc5646">BCP 47 language tag</a>.
+            /// For the general form and interpretation of the locales argument,
+            /// see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_identification_and_negotiation"><c>Intl</c> page</a>.
+            /// </param>
+            /// <param name="options">- An <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/Locale#Parameters">object</a> with some or all of options of the locale.</param>
+            /// <returns>
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale">Intl.Locale</a> object.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale">MDN</a>.
+            /// </returns>
+            type Locale = Fable.Core.TS.Es.Intl.Locale
+
+            type LocaleConstructor =
+                [<EmitConstructor>]
+                abstract Create:
+                    tag: U2<string, Fable.Core.TS.Es.Intl.Locale> * ?options: Fable.Core.TS.Es.Intl.LocaleOptions ->
+                        Fable.Core.TS.Es.Intl.Locale
+
+            type DisplayNamesFallback = Fable.Core.TS.Es.Intl.DisplayNamesFallback
+
+            type DisplayNamesType = Fable.Core.TS.Es.Intl.DisplayNamesType
+
+            type DisplayNamesLanguageDisplay = Fable.Core.TS.Es.Intl.DisplayNamesLanguageDisplay
+
+            type DisplayNamesOptions = Fable.Core.TS.Es.Intl.DisplayNamesOptions
+
+            type ResolvedDisplayNamesOptions = Fable.Core.TS.Es.Intl.ResolvedDisplayNamesOptions
+
+            /// <summary>
+            /// The <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames"><c>Intl.DisplayNames()</c></a>
+            /// object enables the consistent translation of language, region and script display names.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames#browser_compatibility">Compatibility</a>.
+            /// </summary>
+            type DisplayNames = Fable.Core.TS.Es.Intl.DisplayNames
+
+            type DisplayNamesConstructor =
+                /// <summary>
+                /// Returns an array containing those of the provided locales that are supported in display names without having to fall back to the runtime's default locale.
+                /// </summary>
+                /// <param name="locales">
+                /// A string with a BCP 47 language tag, or an array of such strings.
+                /// For the general form and interpretation of the <c>locales</c> argument, see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#locale_identification_and_negotiation">Intl</a>
+                /// page.
+                /// </param>
+                /// <param name="options">An object with a locale matcher.</param>
+                /// <returns>
+                /// An array of strings representing a subset of the given locale tags that are supported in display names without having to fall back to the runtime's default locale.
+                /// <br /><br />
+                /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames/supportedLocalesOf">MDN</a>.
+                /// </returns>
+                abstract supportedLocalesOf:
+                    ?locales: Fable.Core.TS.Es.Intl.LocalesArgument *
+                    ?options: Intl.DisplayNames.SupportedLocalesOf.Options ->
+                        string[]
+
+                [<EmitConstructor>]
+                abstract Create:
+                    locales: Fable.Core.TS.Es.Intl.LocalesArgument * options: Fable.Core.TS.Es.Intl.DisplayNamesOptions ->
+                        Fable.Core.TS.Es.Intl.DisplayNames
+
+            type DateTimeRangeFormatPart = Fable.Core.TS.Es.Intl.DateTimeRangeFormatPart
+
+            /// <summary>
+            /// The locale matching algorithm to use.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/ListFormat/ListFormat#parameters">MDN</a>.
+            /// </summary>
+            type ListFormatLocaleMatcher = Fable.Core.TS.Es.Intl.ListFormatLocaleMatcher
+
+            /// <summary>
+            /// The format of output message.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/ListFormat/ListFormat#parameters">MDN</a>.
+            /// </summary>
+            type ListFormatType = Fable.Core.TS.Es.Intl.ListFormatType
+
+            /// <summary>
+            /// The length of the formatted message.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/ListFormat/ListFormat#parameters">MDN</a>.
+            /// </summary>
+            type ListFormatStyle = Fable.Core.TS.Es.Intl.ListFormatStyle
+
+            /// <summary>
+            /// An object with some or all properties of the <c>Intl.ListFormat</c> constructor <c>options</c> parameter.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/ListFormat/ListFormat#parameters">MDN</a>.
+            /// </summary>
+            type ListFormatOptions = Fable.Core.TS.Es.Intl.ListFormatOptions
+
+            type ResolvedListFormatOptions = Fable.Core.TS.Es.Intl.ResolvedListFormatOptions
+
+            type ListFormat = Fable.Core.TS.Es.Intl.ListFormat
+
+            type ListFormatConstructor =
+                /// <summary>
+                /// Returns an array containing those of the provided locales that are
+                /// supported in list formatting without having to fall back to the runtime's default locale.
+                /// </summary>
+                /// <param name="locales">
+                /// - A string with a <a href="http://tools.ietf.org/html/rfc5646">BCP 47 language tag</a>, or an array of such strings.
+                /// For the general form and interpretation of the <c>locales</c> argument,
+                /// see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_identification_and_negotiation"><c>Intl</c> page</a>.
+                /// </param>
+                /// <param name="options">
+                /// - An <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/ListFormat/supportedLocalesOf#parameters">object</a>.
+                /// with some or all possible options.
+                /// </param>
+                /// <returns>
+                /// An array of strings representing a subset of the given locale tags that are supported in list
+                /// formatting without having to fall back to the runtime's default locale.
+                /// <br /><br />
+                /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/ListFormat/supportedLocalesOf">MDN</a>.
+                /// </returns>
+                abstract supportedLocalesOf:
+                    locales: Fable.Core.TS.Es.Intl.LocalesArgument *
+                    ?options: Intl.ListFormat.SupportedLocalesOf.Options ->
+                        string[]
+
+                [<EmitConstructor>]
+                abstract Create:
+                    ?locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Fable.Core.TS.Es.Intl.ListFormatOptions ->
+                        Fable.Core.TS.Es.Intl.ListFormat
+
+            /// <summary>
+            /// An object with some or all properties of the <c>Intl.Segmenter</c> constructor <c>options</c> parameter.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter/Segmenter#parameters">MDN</a>
+            /// </summary>
+            type SegmenterOptions = Fable.Core.TS.Es.Intl.SegmenterOptions
+
+            /// <summary>
+            /// The <c>Intl.Segmenter</c> object enables locale-sensitive text segmentation, enabling you to get meaningful items (graphemes, words or sentences) from a string.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter">MDN</a>
+            /// </summary>
+            type Segmenter = Fable.Core.TS.Es.Intl.Segmenter
+
+            type SegmenterConstructor =
+                /// <summary>
+                /// Returns an array containing those of the provided locales that are supported without having to fall back to the runtime's default locale.
+                /// </summary>
+                /// <param name="locales">
+                /// - A string with a <a href="http://tools.ietf.org/html/rfc5646">BCP 47 language tag</a>, or an array of such strings.
+                /// For the general form and interpretation of the <c>locales</c> argument,
+                /// see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_identification_and_negotiation"><c>Intl</c> page</a>.
+                /// </param>
+                /// <param name="options">
+                /// An <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter/supportedLocalesOf#parameters">object</a>.
+                /// with some or all possible options.
+                /// <br /><br />
+                /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter/supportedLocalesOf">MDN</a>
+                /// </param>
+                abstract supportedLocalesOf:
+                    locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Intl.Segmenter.SupportedLocalesOf.Options ->
+                        string[]
+
+                [<EmitConstructor>]
+                abstract Create:
+                    ?locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Fable.Core.TS.Es.Intl.SegmenterOptions ->
+                        Fable.Core.TS.Es.Intl.Segmenter
+
+            type ResolvedSegmenterOptions = Fable.Core.TS.Es.Intl.ResolvedSegmenterOptions
+
+            type SegmentIterator<'T> = Fable.Core.TS.Es.Intl.SegmentIterator<'T>
+
+            /// <summary>
+            /// A <c>Segments</c> object is an iterable collection of the segments of a text string. It is returned by a call to the <c>segment()</c> method of an <c>Intl.Segmenter</c> object.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter/segment/Segments">MDN</a>
+            /// </summary>
+            type Segments = Fable.Core.TS.Es.Intl.Segments
+
+            type SegmentData = Fable.Core.TS.Es.Intl.SegmentData
+
+            type NumberFormatRangePartTypeRegistry = Fable.Core.TS.Es.Intl.NumberFormatRangePartTypeRegistry
+
+            type NumberFormatRangePartTypes = Fable.Core.TS.Es.Intl.NumberFormatRangePartTypes
+
+            type NumberRangeFormatPart = Fable.Core.TS.Es.Intl.NumberRangeFormatPart
+
+            type StringNumericLiteral = Fable.Core.TS.Es.Intl.StringNumericLiteral
+
+            /// <summary>
+            /// The locale matching algorithm to use.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_negotiation">MDN</a>.
+            /// </summary>
+            type DurationFormatLocaleMatcher = Fable.Core.TS.Es.Intl.DurationFormatLocaleMatcher
+
+            /// <summary>
+            /// The style of the formatted duration.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DurationFormat/DurationFormat#style">MDN</a>.
+            /// </summary>
+            type DurationFormatStyle = Fable.Core.TS.Es.Intl.DurationFormatStyle
+
+            /// <summary>
+            /// Whether to always display a unit, or only if it is non-zero.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DurationFormat/DurationFormat#display">MDN</a>.
+            /// </summary>
+            type DurationFormatDisplayOption = Fable.Core.TS.Es.Intl.DurationFormatDisplayOption
+
+            /// <summary>
+            /// Value of the <c>unit</c> property in duration objects
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DurationFormat/format#duration">MDN</a>.
+            /// </summary>
+            type DurationFormatUnit = Fable.Core.TS.Es.Intl.DurationFormatUnit
+
+            type DurationFormatUnitSingular = Fable.Core.TS.Es.Intl.DurationFormatUnitSingular
+
+            /// <summary>
+            /// An object representing the relative time format in parts
+            /// that can be used for custom locale-aware formatting.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DurationFormat/formatToParts">MDN</a>.
+            /// </summary>
+            type DurationFormatPart = Fable.Core.TS.Es.Intl.DurationFormatPart
+
+            /// <summary>
+            /// An object with some or all properties of the <c>Intl.DurationFormat</c> constructor <c>options</c> parameter.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DurationFormat/DurationFormat#parameters">MDN</a>
+            /// </summary>
+            type DurationFormatOptions = Fable.Core.TS.Es.Intl.DurationFormatOptions
+
+            /// <summary>
+            /// The Intl.DurationFormat object enables language-sensitive duration formatting.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DurationFormat">MDN</a>
+            /// </summary>
+            type DurationFormat = Fable.Core.TS.Es.Intl.DurationFormat
+
+            type DurationFormatConstructor =
+                /// <summary>
+                /// Returns an array containing those of the provided locales that are supported in display names without having to fall back to the runtime's default locale.
+                /// </summary>
+                /// <param name="locales">
+                /// A string with a BCP 47 language tag, or an array of such strings.
+                /// For the general form and interpretation of the <c>locales</c> argument, see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#locale_identification_and_negotiation">Intl</a>
+                /// page.
+                /// </param>
+                /// <param name="options">An object with a locale matcher.</param>
+                /// <returns>
+                /// An array of strings representing a subset of the given locale tags that are supported in display names without having to fall back to the runtime's default locale.
+                /// <br /><br />
+                /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DurationFormat/supportedLocalesOf">MDN</a>.
+                /// </returns>
+                abstract supportedLocalesOf:
+                    ?locales: Fable.Core.TS.Es.Intl.LocalesArgument *
+                    ?options: Intl.DurationFormat.SupportedLocalesOf.Options ->
+                        string[]
+
+                [<EmitConstructor>]
+                abstract Create:
+                    ?locales: Fable.Core.TS.Es.Intl.LocalesArgument *
+                    ?options: Fable.Core.TS.Es.Intl.DurationFormatOptions ->
+                        Fable.Core.TS.Es.Intl.DurationFormat
+
+            type ResolvedDurationFormatOptions = Fable.Core.TS.Es.Intl.ResolvedDurationFormatOptions
+
+            type CollatorOptions = Fable.Core.TS.Es.Intl.CollatorOptions
+
+            type ResolvedCollatorOptions = Fable.Core.TS.Es.Intl.ResolvedCollatorOptions
+
+            type Collator = Fable.Core.TS.Es.Intl.Collator
+
+            type CollatorConstructor = Fable.Core.TS.Es.Intl.CollatorConstructor
+
+            type NumberFormatOptionsStyleRegistry = Fable.Core.TS.Es.Intl.NumberFormatOptionsStyleRegistry
+
+            type NumberFormatOptionsStyle = Fable.Core.TS.Es.Intl.NumberFormatOptionsStyle
+
+            type NumberFormatOptionsCurrencyDisplayRegistry =
+                Fable.Core.TS.Es.Intl.NumberFormatOptionsCurrencyDisplayRegistry
+
+            type NumberFormatOptionsCurrencyDisplay = Fable.Core.TS.Es.Intl.NumberFormatOptionsCurrencyDisplay
+
+            type NumberFormatOptionsUseGroupingRegistry = Fable.Core.TS.Es.Intl.NumberFormatOptionsUseGroupingRegistry
+
+            type NumberFormatOptionsUseGrouping = Fable.Core.TS.Es.Intl.NumberFormatOptionsUseGrouping
+
+            type ResolvedNumberFormatOptionsUseGrouping = Fable.Core.TS.Es.Intl.ResolvedNumberFormatOptionsUseGrouping
+
+            type NumberFormatOptions = Fable.Core.TS.Es.Intl.NumberFormatOptions
+
+            type ResolvedNumberFormatOptions = Fable.Core.TS.Es.Intl.ResolvedNumberFormatOptions
+
+            type NumberFormat = Fable.Core.TS.Es.Intl.NumberFormat
+
+            type NumberFormatConstructor = Fable.Core.TS.Es.Intl.NumberFormatConstructor
+
+            type DateTimeFormatOptions = Fable.Core.TS.Es.Intl.DateTimeFormatOptions
+
+            type ResolvedDateTimeFormatOptions = Fable.Core.TS.Es.Intl.ResolvedDateTimeFormatOptions
+
+            type DateTimeFormat = Fable.Core.TS.Es.Intl.DateTimeFormat
+
+            type DateTimeFormatConstructor = Fable.Core.TS.Es.Intl.DateTimeFormatConstructor
+
+            type FormattableTemporalObject = Fable.Core.TS.Es.Intl.FormattableTemporalObject
+
+            /// <summary>
+            /// An object representing text typesetting information associated with the Locale data specified in UTS 35's Layouts Elements.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/getTextInfo#return_value">MDN Reference</a>
+            /// </summary>
+            type TextInfo = Fable.Core.TS.Es.Intl.TextInfo
+
+            /// <summary>
+            /// An object representing week information associated with the Locale data specified in UTS 35's Week Elements.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Locale/getWeekInfo#return_value">MDN Reference</a>
+            /// </summary>
+            type WeekInfo = Fable.Core.TS.Es.Intl.WeekInfo
+
+        module Temporal =
+            type CalendarLike = Fable.Core.TS.Es.Temporal.CalendarLike
+
+            type DurationLike = Fable.Core.TS.Es.Temporal.DurationLike
+
+            type InstantLike = Fable.Core.TS.Es.Temporal.InstantLike
+
+            type PlainDateLike = Fable.Core.TS.Es.Temporal.PlainDateLike
+
+            type PlainDateTimeLike = Fable.Core.TS.Es.Temporal.PlainDateTimeLike
+
+            type PlainMonthDayLike = Fable.Core.TS.Es.Temporal.PlainMonthDayLike
+
+            type PlainTimeLike = Fable.Core.TS.Es.Temporal.PlainTimeLike
+
+            type PlainYearMonthLike = Fable.Core.TS.Es.Temporal.PlainYearMonthLike
+
+            type TimeZoneLike = Fable.Core.TS.Es.Temporal.TimeZoneLike
+
+            type ZonedDateTimeLike = Fable.Core.TS.Es.Temporal.ZonedDateTimeLike
+
+            type PartialTemporalLike<'T> = Fable.Core.TS.Es.Temporal.PartialTemporalLike<'T>
+
+            type DateLikeObject = Fable.Core.TS.Es.Temporal.DateLikeObject
+
+            type DateTimeLikeObject = Fable.Core.TS.Es.Temporal.DateTimeLikeObject
+
+            type DurationLikeObject = Fable.Core.TS.Es.Temporal.DurationLikeObject
+
+            type TimeLikeObject = Fable.Core.TS.Es.Temporal.TimeLikeObject
+
+            type YearMonthLikeObject = Fable.Core.TS.Es.Temporal.YearMonthLikeObject
+
+            type ZonedDateTimeLikeObject = Fable.Core.TS.Es.Temporal.ZonedDateTimeLikeObject
+
+            type DateUnit = Fable.Core.TS.Es.Temporal.DateUnit
+
+            type TimeUnit = Fable.Core.TS.Es.Temporal.TimeUnit
+
+            type PluralizeUnit<'T> = Fable.Core.TS.Es.Temporal.PluralizeUnit<'T>
+
+            type DisambiguationOptions = Fable.Core.TS.Es.Temporal.DisambiguationOptions
+
+            type OverflowOptions = Fable.Core.TS.Es.Temporal.OverflowOptions
+
+            type TransitionOptions = Fable.Core.TS.Es.Temporal.TransitionOptions
+
+            type RoundingOptions<'Units> = Fable.Core.TS.Es.Temporal.RoundingOptions<'Units>
+
+            type RoundingOptionsWithLargestUnit<'Units> =
+                Fable.Core.TS.Es.Temporal.RoundingOptionsWithLargestUnit<'Units>
+
+            type ToStringRoundingOptions<'Units> = Fable.Core.TS.Es.Temporal.ToStringRoundingOptions<'Units>
+
+            type ToStringRoundingOptionsWithFractionalSeconds<'Units> =
+                Fable.Core.TS.Es.Temporal.ToStringRoundingOptionsWithFractionalSeconds<'Units>
+
+            type PlainDateToStringOptions = Fable.Core.TS.Es.Temporal.PlainDateToStringOptions
+
+            type PlainDateToZonedDateTimeOptions = Fable.Core.TS.Es.Temporal.PlainDateToZonedDateTimeOptions
+
+            type PlainDate = Fable.Core.TS.Es.Temporal.PlainDate
+
+            type PlainDateConstructor = Fable.Core.TS.Es.Temporal.PlainDateConstructor
+
+            type PlainTimeToStringOptions = Fable.Core.TS.Es.Temporal.PlainTimeToStringOptions
+
+            type PlainTime = Fable.Core.TS.Es.Temporal.PlainTime
+
+            type PlainTimeConstructor = Fable.Core.TS.Es.Temporal.PlainTimeConstructor
+
+            type PlainDateTimeToStringOptions = Fable.Core.TS.Es.Temporal.PlainDateTimeToStringOptions
+
+            type PlainDateTime = Fable.Core.TS.Es.Temporal.PlainDateTime
+
+            type PlainDateTimeConstructor = Fable.Core.TS.Es.Temporal.PlainDateTimeConstructor
+
+            type ZonedDateTimeToStringOptions = Fable.Core.TS.Es.Temporal.ZonedDateTimeToStringOptions
+
+            type ZonedDateTimeFromOptions = Fable.Core.TS.Es.Temporal.ZonedDateTimeFromOptions
+
+            type ZonedDateTime = Fable.Core.TS.Es.Temporal.ZonedDateTime
+
+            type ZonedDateTimeConstructor = Fable.Core.TS.Es.Temporal.ZonedDateTimeConstructor
+
+            type DurationRelativeToOptions = Fable.Core.TS.Es.Temporal.DurationRelativeToOptions
+
+            type DurationRoundingOptions = Fable.Core.TS.Es.Temporal.DurationRoundingOptions
+
+            type DurationToStringOptions = Fable.Core.TS.Es.Temporal.DurationToStringOptions
+
+            type DurationTotalOptions = Fable.Core.TS.Es.Temporal.DurationTotalOptions
+
+            type Duration = Fable.Core.TS.Es.Temporal.Duration
+
+            type DurationConstructor = Fable.Core.TS.Es.Temporal.DurationConstructor
+
+            type InstantToStringOptions = Fable.Core.TS.Es.Temporal.InstantToStringOptions
+
+            type Instant = Fable.Core.TS.Es.Temporal.Instant
+
+            type InstantConstructor = Fable.Core.TS.Es.Temporal.InstantConstructor
+
+            type PlainYearMonthToPlainDateOptions = Fable.Core.TS.Es.Temporal.PlainYearMonthToPlainDateOptions
+
+            type PlainYearMonth = Fable.Core.TS.Es.Temporal.PlainYearMonth
+
+            type PlainYearMonthConstructor = Fable.Core.TS.Es.Temporal.PlainYearMonthConstructor
+
+            type PlainMonthDayToPlainDateOptions = Fable.Core.TS.Es.Temporal.PlainMonthDayToPlainDateOptions
+
+            type PlainMonthDay = Fable.Core.TS.Es.Temporal.PlainMonthDay
+
+            type PlainMonthDayConstructor = Fable.Core.TS.Es.Temporal.PlainMonthDayConstructor
 
     module Int16Array =
         module Every =
@@ -20899,39 +21475,6 @@ module Es =
                 ) : RelativeTimeFormat =
                 jsNative
 
-        type RelativeTimeFormatConstructor =
-            /// <summary>
-            /// Returns an array containing those of the provided locales
-            /// that are supported in date and time formatting
-            /// without having to fall back to the runtime's default locale.
-            /// </summary>
-            /// <param name="locales">
-            /// - A string with a <a href="http://tools.ietf.org/html/rfc5646">BCP 47 language tag</a>, or an array of such strings.
-            /// For the general form and interpretation of the locales argument,
-            /// see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_identification_and_negotiation"><c>Intl</c> page</a>.
-            /// </param>
-            /// <param name="options">
-            /// - An <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/RelativeTimeFormat#Parameters">object</a>
-            /// with some or all of options of the formatting.
-            /// </param>
-            /// <returns>
-            /// An array containing those of the provided locales
-            /// that are supported in date and time formatting
-            /// without having to fall back to the runtime's default locale.
-            /// <br /><br />
-            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/RelativeTimeFormat/supportedLocalesOf">MDN</a>.
-            /// </returns>
-            abstract supportedLocalesOf:
-                ?locales: Fable.Core.TS.Es.Intl.LocalesArgument *
-                ?options: Fable.Core.TS.Es.Intl.RelativeTimeFormatOptions ->
-                    string[]
-
-            [<EmitConstructor>]
-            abstract Create:
-                ?locales: Fable.Core.TS.Es.Intl.LocalesArgument *
-                ?options: Fable.Core.TS.Es.Intl.RelativeTimeFormatOptions ->
-                    Fable.Core.TS.Es.Intl.RelativeTimeFormat
-
         [<Interface>]
         type NumberFormatOptionsSignDisplayRegistry =
             abstract auto: unit
@@ -21130,12 +21673,6 @@ module Es =
                 ) : Locale =
                 jsNative
 
-        type LocaleConstructor =
-            [<EmitConstructor>]
-            abstract Create:
-                tag: U2<string, Fable.Core.TS.Es.Intl.Locale> * ?options: Fable.Core.TS.Es.Intl.LocaleOptions ->
-                    Fable.Core.TS.Es.Intl.Locale
-
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
         type DisplayNamesFallback =
             | [<CompiledName("code")>] Code
@@ -21233,30 +21770,6 @@ module Es =
                     resolvedOptions: (unit -> Fable.Core.TS.Es.Intl.ResolvedDisplayNamesOptions)
                 ) : DisplayNames =
                 jsNative
-
-        type DisplayNamesConstructor =
-            /// <summary>
-            /// Returns an array containing those of the provided locales that are supported in display names without having to fall back to the runtime's default locale.
-            /// </summary>
-            /// <param name="locales">
-            /// A string with a BCP 47 language tag, or an array of such strings.
-            /// For the general form and interpretation of the <c>locales</c> argument, see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#locale_identification_and_negotiation">Intl</a>
-            /// page.
-            /// </param>
-            /// <param name="options">An object with a locale matcher.</param>
-            /// <returns>
-            /// An array of strings representing a subset of the given locale tags that are supported in display names without having to fall back to the runtime's default locale.
-            /// <br /><br />
-            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DisplayNames/supportedLocalesOf">MDN</a>.
-            /// </returns>
-            abstract supportedLocalesOf:
-                ?locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Intl.DisplayNames.SupportedLocalesOf.Options ->
-                    string[]
-
-            [<EmitConstructor>]
-            abstract Create:
-                locales: Fable.Core.TS.Es.Intl.LocalesArgument * options: Fable.Core.TS.Es.Intl.DisplayNamesOptions ->
-                    Fable.Core.TS.Es.Intl.DisplayNames
 
         [<Interface>]
         type DateTimeRangeFormatPart =
@@ -21375,35 +21888,6 @@ module Es =
                 ) : ListFormat =
                 jsNative
 
-        type ListFormatConstructor =
-            /// <summary>
-            /// Returns an array containing those of the provided locales that are
-            /// supported in list formatting without having to fall back to the runtime's default locale.
-            /// </summary>
-            /// <param name="locales">
-            /// - A string with a <a href="http://tools.ietf.org/html/rfc5646">BCP 47 language tag</a>, or an array of such strings.
-            /// For the general form and interpretation of the <c>locales</c> argument,
-            /// see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_identification_and_negotiation"><c>Intl</c> page</a>.
-            /// </param>
-            /// <param name="options">
-            /// - An <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/ListFormat/supportedLocalesOf#parameters">object</a>.
-            /// with some or all possible options.
-            /// </param>
-            /// <returns>
-            /// An array of strings representing a subset of the given locale tags that are supported in list
-            /// formatting without having to fall back to the runtime's default locale.
-            /// <br /><br />
-            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/ListFormat/supportedLocalesOf">MDN</a>.
-            /// </returns>
-            abstract supportedLocalesOf:
-                locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Intl.ListFormat.SupportedLocalesOf.Options ->
-                    string[]
-
-            [<EmitConstructor>]
-            abstract Create:
-                ?locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Fable.Core.TS.Es.Intl.ListFormatOptions ->
-                    Fable.Core.TS.Es.Intl.ListFormat
-
         /// <summary>
         /// An object with some or all properties of the <c>Intl.Segmenter</c> constructor <c>options</c> parameter.
         /// <br /><br />
@@ -21457,30 +21941,6 @@ module Es =
                     resolvedOptions: (unit -> Fable.Core.TS.Es.Intl.ResolvedSegmenterOptions)
                 ) : Segmenter =
                 jsNative
-
-        type SegmenterConstructor =
-            /// <summary>
-            /// Returns an array containing those of the provided locales that are supported without having to fall back to the runtime's default locale.
-            /// </summary>
-            /// <param name="locales">
-            /// - A string with a <a href="http://tools.ietf.org/html/rfc5646">BCP 47 language tag</a>, or an array of such strings.
-            /// For the general form and interpretation of the <c>locales</c> argument,
-            /// see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_identification_and_negotiation"><c>Intl</c> page</a>.
-            /// </param>
-            /// <param name="options">
-            /// An <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter/supportedLocalesOf#parameters">object</a>.
-            /// with some or all possible options.
-            /// <br /><br />
-            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter/supportedLocalesOf">MDN</a>
-            /// </param>
-            abstract supportedLocalesOf:
-                locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Intl.Segmenter.SupportedLocalesOf.Options ->
-                    string[]
-
-            [<EmitConstructor>]
-            abstract Create:
-                ?locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Fable.Core.TS.Es.Intl.SegmenterOptions ->
-                    Fable.Core.TS.Es.Intl.Segmenter
 
         [<Interface>]
         type ResolvedSegmenterOptions =
@@ -21833,31 +22293,6 @@ module Es =
                     resolvedOptions: (unit -> Fable.Core.TS.Es.Intl.ResolvedDurationFormatOptions)
                 ) : DurationFormat =
                 jsNative
-
-        type DurationFormatConstructor =
-            /// <summary>
-            /// Returns an array containing those of the provided locales that are supported in display names without having to fall back to the runtime's default locale.
-            /// </summary>
-            /// <param name="locales">
-            /// A string with a BCP 47 language tag, or an array of such strings.
-            /// For the general form and interpretation of the <c>locales</c> argument, see the <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#locale_identification_and_negotiation">Intl</a>
-            /// page.
-            /// </param>
-            /// <param name="options">An object with a locale matcher.</param>
-            /// <returns>
-            /// An array of strings representing a subset of the given locale tags that are supported in display names without having to fall back to the runtime's default locale.
-            /// <br /><br />
-            /// <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl/DurationFormat/supportedLocalesOf">MDN</a>.
-            /// </returns>
-            abstract supportedLocalesOf:
-                ?locales: Fable.Core.TS.Es.Intl.LocalesArgument *
-                ?options: Intl.DurationFormat.SupportedLocalesOf.Options ->
-                    string[]
-
-            [<EmitConstructor>]
-            abstract Create:
-                ?locales: Fable.Core.TS.Es.Intl.LocalesArgument * ?options: Fable.Core.TS.Es.Intl.DurationFormatOptions ->
-                    Fable.Core.TS.Es.Intl.DurationFormat
 
         [<Interface>]
         type ResolvedDurationFormatOptions =
@@ -99610,9 +100045,9 @@ module Dom =
 
         type WriteParams = Fable.Core.TS.Dom.WriteParams
 
-        type NodeFilter = U2<(Fable.Core.TS.Dom.Node -> float), NodeFilter2>
+        type NodeFilter = Fable.Core.TS.Dom.NodeFilter
 
-        type XPathNSResolver = U2<(string option -> string option), XPathNSResolver2>
+        type XPathNSResolver = Fable.Core.TS.Dom.XPathNSResolver
 
         /// <summary>
         /// The <b><c>ANGLE_instanced_arrays</c></b> extension is part of the WebGL API and allows to draw the same object, or groups of similar objects multiple times, if they share the same vertex data, primitive count and type.
@@ -105481,109 +105916,71 @@ module Dom =
         /// <remarks>@deprecated Directly use HTMLElementTagNameMap or SVGElementTagNameMap as appropriate, instead.</remarks>
         type ElementTagNameMap = Fable.Core.TS.Dom.ElementTagNameMap
 
-        type AlgorithmIdentifier = U2<string, Fable.Core.TS.Dom.Algorithm>
+        type AlgorithmIdentifier = Fable.Core.TS.Dom.AlgorithmIdentifier
 
-        type AllowSharedBufferSource =
-            U3<
-                Fable.Core.TS.Es.ArrayBuffer,
-                Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBufferLike>,
-                Fable.Core.TS.Es.SharedArrayBuffer
-             >
+        type AllowSharedBufferSource = Fable.Core.TS.Dom.AllowSharedBufferSource
 
-        type AutoFill = string
+        type AutoFill = Fable.Core.TS.Dom.AutoFill
 
         type AutoFillField = Fable.Core.TS.Dom.AutoFillField
 
-        type AutoFillSection = string
+        type AutoFillSection = Fable.Core.TS.Dom.AutoFillSection
 
-        type Base64URLString = string
+        type Base64URLString = Fable.Core.TS.Dom.Base64URLString
 
-        type BigInteger = Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>
+        type BigInteger = Fable.Core.TS.Dom.BigInteger
 
-        type BlobPart =
-            U4<
-                string,
-                Fable.Core.TS.Es.ArrayBuffer,
-                Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBuffer>,
-                Fable.Core.TS.Dom.Blob
-             >
+        type BlobPart = Fable.Core.TS.Dom.BlobPart
 
-        type BluetoothServiceUUID = U2<string, float>
+        type BluetoothServiceUUID = Fable.Core.TS.Dom.BluetoothServiceUUID
 
-        type BodyInit =
-            U7<
-                string,
-                Fable.Core.TS.Es.ArrayBuffer,
-                Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBuffer>,
-                Fable.Core.TS.Dom.Blob,
-                Fable.Core.TS.Dom.FormData,
-                Fable.Core.TS.Dom.ReadableStream<obj>,
-                Fable.Core.TS.Dom.URLSearchParams
-             >
+        type BodyInit = Fable.Core.TS.Dom.BodyInit
 
-        type BufferSource =
-            U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBuffer>>
+        type BufferSource = Fable.Core.TS.Dom.BufferSource
 
         type COSEAlgorithmIdentifier = float
 
-        type CSSKeywordish = U2<string, Fable.Core.TS.Dom.CSSKeywordValue>
+        type CSSKeywordish = Fable.Core.TS.Dom.CSSKeywordish
 
-        type CSSNumberish = U2<float, Fable.Core.TS.Dom.CSSNumericValue>
+        type CSSNumberish = Fable.Core.TS.Dom.CSSNumberish
 
-        type CSSPerspectiveValue = U3<string, Fable.Core.TS.Dom.CSSKeywordValue, Fable.Core.TS.Dom.CSSNumericValue>
+        type CSSPerspectiveValue = Fable.Core.TS.Dom.CSSPerspectiveValue
 
-        type CSSUnparsedSegment = U2<string, Fable.Core.TS.Dom.CSSVariableReferenceValue>
+        type CSSUnparsedSegment = Fable.Core.TS.Dom.CSSUnparsedSegment
 
-        type CanvasImageSource =
-            U7<
-                Fable.Core.TS.Dom.HTMLCanvasElement,
-                Fable.Core.TS.Dom.HTMLImageElement,
-                Fable.Core.TS.Dom.HTMLVideoElement,
-                Fable.Core.TS.Dom.ImageBitmap,
-                Fable.Core.TS.Dom.OffscreenCanvas,
-                Fable.Core.TS.Dom.SVGImageElement,
-                Fable.Core.TS.Dom.VideoFrame
-             >
+        type CanvasImageSource = Fable.Core.TS.Dom.CanvasImageSource
 
-        type ClipboardItemData = JS.Promise<U2<string, Fable.Core.TS.Dom.Blob>>
+        type ClipboardItemData = Fable.Core.TS.Dom.ClipboardItemData
 
-        type ClipboardItems = Fable.Core.TS.Dom.ClipboardItem[]
+        type ClipboardItems = Fable.Core.TS.Dom.ClipboardItems
 
-        type ConstrainBoolean = U2<bool, Fable.Core.TS.Dom.ConstrainBooleanParameters>
+        type ConstrainBoolean = Fable.Core.TS.Dom.ConstrainBoolean
 
-        type ConstrainBooleanOrDOMString = U3<string, bool, Fable.Core.TS.Dom.ConstrainBooleanOrDOMStringParameters>
+        type ConstrainBooleanOrDOMString = Fable.Core.TS.Dom.ConstrainBooleanOrDOMString
 
-        type ConstrainDOMString = U3<string, string[], Fable.Core.TS.Dom.ConstrainDOMStringParameters>
+        type ConstrainDOMString = Fable.Core.TS.Dom.ConstrainDOMString
 
-        type ConstrainDouble = U2<float, Fable.Core.TS.Dom.ConstrainDoubleRange>
+        type ConstrainDouble = Fable.Core.TS.Dom.ConstrainDouble
 
-        type ConstrainULong = U2<float, Fable.Core.TS.Dom.ConstrainULongRange>
+        type ConstrainULong = Fable.Core.TS.Dom.ConstrainULong
 
-        type CookieList = Fable.Core.TS.Dom.CookieListItem[]
+        type CookieList = Fable.Core.TS.Dom.CookieList
 
         type DOMHighResTimeStamp = float
 
         type EpochTimeStamp = float
 
-        type EventListenerOrEventListenerObject =
-            U2<Fable.Core.TS.Dom.EventListener, Fable.Core.TS.Dom.EventListenerObject>
+        type EventListenerOrEventListenerObject = Fable.Core.TS.Dom.EventListenerOrEventListenerObject
 
-        type FileSystemWriteChunkType =
-            U5<
-                string,
-                Fable.Core.TS.Es.ArrayBuffer,
-                Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBuffer>,
-                Fable.Core.TS.Dom.Blob,
-                Fable.Core.TS.Dom.WriteParams
-             >
+        type FileSystemWriteChunkType = Fable.Core.TS.Dom.FileSystemWriteChunkType
 
-        type Float32List = U2<float[], Fable.Core.TS.Es.Float32Array<Fable.Core.TS.Es.ArrayBufferLike>>
+        type Float32List = Fable.Core.TS.Dom.Float32List
 
-        type FormDataEntryValue = U2<string, Fable.Core.TS.Dom.File>
+        type FormDataEntryValue = Fable.Core.TS.Dom.FormDataEntryValue
 
         type GLbitfield = float
 
-        type GLboolean = bool
+        type GLboolean = Fable.Core.TS.Dom.GLboolean
 
         type GLclampf = float
 
@@ -105605,38 +106002,21 @@ module Dom =
 
         type GLuint64 = float
 
-        type GPUBindingResource =
-            U6<
-                Fable.Core.TS.Dom.GPUBuffer,
-                Fable.Core.TS.Dom.GPUBufferBinding,
-                Fable.Core.TS.Dom.GPUExternalTexture,
-                Fable.Core.TS.Dom.GPUSampler,
-                Fable.Core.TS.Dom.GPUTexture,
-                Fable.Core.TS.Dom.GPUTextureView
-             >
+        type GPUBindingResource = Fable.Core.TS.Dom.GPUBindingResource
 
         type GPUBufferDynamicOffset = float
 
         type GPUBufferUsageFlags = float
 
-        type GPUColor = U2<float[], Fable.Core.TS.Dom.GPUColorDict>
+        type GPUColor = Fable.Core.TS.Dom.GPUColor
 
         type GPUColorWriteFlags = float
 
-        type GPUCopyExternalImageSource =
-            U7<
-                Fable.Core.TS.Dom.HTMLCanvasElement,
-                Fable.Core.TS.Dom.HTMLImageElement,
-                Fable.Core.TS.Dom.HTMLVideoElement,
-                Fable.Core.TS.Dom.ImageBitmap,
-                Fable.Core.TS.Dom.ImageData,
-                Fable.Core.TS.Dom.OffscreenCanvas,
-                Fable.Core.TS.Dom.VideoFrame
-             >
+        type GPUCopyExternalImageSource = Fable.Core.TS.Dom.GPUCopyExternalImageSource
 
         type GPUDepthBias = float
 
-        type GPUExtent3D = U2<float[], Fable.Core.TS.Dom.GPUExtent3DDict>
+        type GPUExtent3D = Fable.Core.TS.Dom.GPUExtent3D
 
         type GPUFlagsConstant = float
 
@@ -105648,9 +106028,9 @@ module Dom =
 
         type GPUMapModeFlags = float
 
-        type GPUOrigin2D = U2<float[], Fable.Core.TS.Dom.GPUOrigin2DDict>
+        type GPUOrigin2D = Fable.Core.TS.Dom.GPUOrigin2D
 
-        type GPUOrigin3D = U2<float[], Fable.Core.TS.Dom.GPUOrigin3DDict>
+        type GPUOrigin3D = Fable.Core.TS.Dom.GPUOrigin3D
 
         type GPUPipelineConstantValue = float
 
@@ -105672,142 +106052,89 @@ module Dom =
 
         type GPUTextureUsageFlags = float
 
-        type HTMLOrSVGImageElement = U2<Fable.Core.TS.Dom.HTMLImageElement, Fable.Core.TS.Dom.SVGImageElement>
+        type HTMLOrSVGImageElement = Fable.Core.TS.Dom.HTMLOrSVGImageElement
 
-        type HTMLOrSVGScriptElement = U2<Fable.Core.TS.Dom.HTMLScriptElement, Fable.Core.TS.Dom.SVGScriptElement>
+        type HTMLOrSVGScriptElement = Fable.Core.TS.Dom.HTMLOrSVGScriptElement
 
         type HashAlgorithmIdentifier = U2<string, Fable.Core.TS.Dom.Algorithm>
 
-        type HeadersInit = U3<(string * string)[], Fable.Core.TS.Dom.Headers, JS.Record<string, string>>
+        type HeadersInit = Fable.Core.TS.Dom.HeadersInit
 
-        type IDBValidKey =
-            U6<
-                string,
-                float,
-                obj[],
-                Fable.Core.TS.Es.ArrayBuffer,
-                Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBuffer>,
-                Fable.Core.TS.Es.Date
-             >
+        type IDBValidKey = Fable.Core.TS.Dom.IDBValidKey
 
-        type ImageBitmapSource =
-            U9<
-                Fable.Core.TS.Dom.Blob,
-                Fable.Core.TS.Dom.HTMLCanvasElement,
-                Fable.Core.TS.Dom.HTMLImageElement,
-                Fable.Core.TS.Dom.HTMLVideoElement,
-                Fable.Core.TS.Dom.ImageBitmap,
-                Fable.Core.TS.Dom.ImageData,
-                Fable.Core.TS.Dom.OffscreenCanvas,
-                Fable.Core.TS.Dom.SVGImageElement,
-                Fable.Core.TS.Dom.VideoFrame
-             >
+        type ImageBitmapSource = Fable.Core.TS.Dom.ImageBitmapSource
 
-        type ImageBufferSource =
-            U4<
-                Fable.Core.TS.Es.ArrayBuffer,
-                Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBufferLike>,
-                Fable.Core.TS.Dom.ReadableStream<obj>,
-                Fable.Core.TS.Es.SharedArrayBuffer
-             >
+        type ImageBufferSource = Fable.Core.TS.Dom.ImageBufferSource
 
-        type ImageDataArray = Fable.Core.TS.Es.Uint8ClampedArray<Fable.Core.TS.Es.ArrayBuffer>
+        type ImageDataArray = Fable.Core.TS.Dom.ImageDataArray
 
-        type Int32List = U2<float[], Fable.Core.TS.Es.Int32Array<Fable.Core.TS.Es.ArrayBufferLike>>
+        type Int32List = Fable.Core.TS.Dom.Int32List
 
-        type LineAndPositionSetting = U2<float, string>
+        type LineAndPositionSetting = Fable.Core.TS.Dom.LineAndPositionSetting
 
-        type MediaProvider = U3<Fable.Core.TS.Dom.Blob, Fable.Core.TS.Dom.MediaSource, Fable.Core.TS.Dom.MediaStream>
+        type MediaProvider = Fable.Core.TS.Dom.MediaProvider
 
-        type MessageEventSource =
-            U3<Fable.Core.TS.Dom.MessagePort, Fable.Core.TS.Dom.ServiceWorker, Fable.Core.TS.Dom.Window>
+        type MessageEventSource = Fable.Core.TS.Dom.MessageEventSource
 
         type MutationRecordType = Fable.Core.TS.Dom.MutationRecordType
 
         type NamedCurve = string
 
-        type OffscreenRenderingContext =
-            U5<
-                Fable.Core.TS.Dom.GPUCanvasContext,
-                Fable.Core.TS.Dom.ImageBitmapRenderingContext,
-                Fable.Core.TS.Dom.OffscreenCanvasRenderingContext2D,
-                Fable.Core.TS.Dom.WebGL2RenderingContext,
-                Fable.Core.TS.Dom.WebGLRenderingContext
-             >
+        type OffscreenRenderingContext = Fable.Core.TS.Dom.OffscreenRenderingContext
 
-        type OnBeforeUnloadEventHandler = Fable.Core.TS.Dom.OnBeforeUnloadEventHandlerNonNull option
+        type OnBeforeUnloadEventHandler = Fable.Core.TS.Dom.OnBeforeUnloadEventHandler
 
-        type OnErrorEventHandler = Fable.Core.TS.Dom.OnErrorEventHandlerNonNull option
+        type OnErrorEventHandler = Fable.Core.TS.Dom.OnErrorEventHandler
 
-        [<Erase>]
-        type OptionalPostfixToken<'T> = private OptionalPostfixToken__ of string
+        type OptionalPostfixToken<'T> = Fable.Core.TS.Dom.OptionalPostfixToken<'T>
 
-        [<Erase>]
-        type OptionalPrefixToken<'T> = private OptionalPrefixToken__ of string
+        type OptionalPrefixToken<'T> = Fable.Core.TS.Dom.OptionalPrefixToken<'T>
 
-        type PerformanceEntryList = Fable.Core.TS.Dom.PerformanceEntry[]
+        type PerformanceEntryList = Fable.Core.TS.Dom.PerformanceEntryList
 
-        type PublicKeyCredentialClientCapabilities = JS.Record<string, bool>
+        type PublicKeyCredentialClientCapabilities = Fable.Core.TS.Dom.PublicKeyCredentialClientCapabilities
 
         type RTCRtpReceiverTransform = obj
 
         type RTCRtpSenderTransform = obj
 
-        type ReadableStreamController<'T> =
-            U2<Fable.Core.TS.Dom.ReadableByteStreamController, Fable.Core.TS.Dom.ReadableStreamDefaultController<'T>>
+        type ReadableStreamController<'T> = Fable.Core.TS.Dom.ReadableStreamController<'T>
 
-        type ReadableStreamReadResult<'T> =
-            U2<Fable.Core.TS.Dom.ReadableStreamReadDoneResult<'T>, Fable.Core.TS.Dom.ReadableStreamReadValueResult<'T>>
+        type ReadableStreamReadResult<'T> = Fable.Core.TS.Dom.ReadableStreamReadResult<'T>
 
-        type ReadableStreamReader<'T> =
-            U2<Fable.Core.TS.Dom.ReadableStreamBYOBReader, Fable.Core.TS.Dom.ReadableStreamDefaultReader<'T>>
+        type ReadableStreamReader<'T> = Fable.Core.TS.Dom.ReadableStreamReader<'T>
 
-        type RenderingContext =
-            U5<
-                Fable.Core.TS.Dom.CanvasRenderingContext2D,
-                Fable.Core.TS.Dom.GPUCanvasContext,
-                Fable.Core.TS.Dom.ImageBitmapRenderingContext,
-                Fable.Core.TS.Dom.WebGL2RenderingContext,
-                Fable.Core.TS.Dom.WebGLRenderingContext
-             >
+        type RenderingContext = Fable.Core.TS.Dom.RenderingContext
 
-        type ReportList = Fable.Core.TS.Dom.Report[]
+        type ReportList = Fable.Core.TS.Dom.ReportList
 
-        type RequestInfo = U2<string, Fable.Core.TS.Dom.Request>
+        type RequestInfo = Fable.Core.TS.Dom.RequestInfo
 
-        type SanitizerAttribute = U2<string, Fable.Core.TS.Dom.SanitizerAttributeNamespace>
+        type SanitizerAttribute = Fable.Core.TS.Dom.SanitizerAttribute
 
-        type SanitizerElement = U2<string, Fable.Core.TS.Dom.SanitizerElementNamespace>
+        type SanitizerElement = Fable.Core.TS.Dom.SanitizerElement
 
-        type SanitizerElementWithAttributes = U2<string, Fable.Core.TS.Dom.SanitizerElementNamespaceWithAttributes>
+        type SanitizerElementWithAttributes = Fable.Core.TS.Dom.SanitizerElementWithAttributes
 
-        type SanitizerPI = U2<string, Fable.Core.TS.Dom.SanitizerProcessingInstruction>
+        type SanitizerPI = Fable.Core.TS.Dom.SanitizerPI
 
         type SelectionDirection = Fable.Core.TS.Dom.SelectionDirection
 
-        type TexImageSource = Fable.Core.TS.Dom.GPUCopyExternalImageSource
+        type TexImageSource = Fable.Core.TS.Dom.TexImageSource
 
-        type TimerHandler = U2<string, Fable.Core.TS.Es.Function>
+        type TimerHandler = Fable.Core.TS.Dom.TimerHandler
 
-        type Transferable = obj
+        type Transferable = Fable.Core.TS.Dom.Transferable
 
-        type URLPatternInput = U2<string, Fable.Core.TS.Dom.URLPatternInit>
+        type URLPatternInput = Fable.Core.TS.Dom.URLPatternInput
 
-        type Uint32List = U2<float[], Fable.Core.TS.Es.Uint32Array<Fable.Core.TS.Es.ArrayBufferLike>>
+        type Uint32List = Fable.Core.TS.Dom.Uint32List
 
-        type VibratePattern = U2<float, float[]>
+        type VibratePattern = Fable.Core.TS.Dom.VibratePattern
 
         type WindowProxy = Fable.Core.TS.Dom.Window
 
-        type XMLHttpRequestBodyInit =
-            U6<
-                string,
-                Fable.Core.TS.Es.ArrayBuffer,
-                Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBuffer>,
-                Fable.Core.TS.Dom.Blob,
-                Fable.Core.TS.Dom.FormData,
-                Fable.Core.TS.Dom.URLSearchParams
-             >
+        type XMLHttpRequestBodyInit = Fable.Core.TS.Dom.XMLHttpRequestBodyInit
 
         type AacBitstreamFormat = Fable.Core.TS.Dom.AacBitstreamFormat
 
@@ -105841,11 +106168,11 @@ module Dom =
 
         type AutoFillContactKind = Fable.Core.TS.Dom.AutoFillContactKind
 
-        type AutoFillCredentialField = string
+        type AutoFillCredentialField = Fable.Core.TS.Dom.AutoFillCredentialField
 
         type AutoFillNormalField = Fable.Core.TS.Dom.AutoFillNormalField
 
-        type AutoKeyword = string
+        type AutoKeyword = Fable.Core.TS.Dom.AutoKeyword
 
         type AutomationRate = Fable.Core.TS.Dom.AutomationRate
 
@@ -105907,7 +106234,7 @@ module Dom =
 
         type DOMParserSupportedType = Fable.Core.TS.Dom.DOMParserSupportedType
 
-        type DigitalCredentialPresentationProtocol = string
+        type DigitalCredentialPresentationProtocol = Fable.Core.TS.Dom.DigitalCredentialPresentationProtocol
 
         type DirectionSetting = Fable.Core.TS.Dom.DirectionSetting
 
@@ -106135,7 +106462,7 @@ module Dom =
 
         type PresentationStyle = Fable.Core.TS.Dom.PresentationStyle
 
-        type PublicKeyCredentialType = string
+        type PublicKeyCredentialType = Fable.Core.TS.Dom.PublicKeyCredentialType
 
         type PushEncryptionKeyName = Fable.Core.TS.Dom.PushEncryptionKeyName
 
@@ -106177,7 +106504,7 @@ module Dom =
 
         type RTCQualityLimitationReason = Fable.Core.TS.Dom.RTCQualityLimitationReason
 
-        type RTCRtcpMuxPolicy = string
+        type RTCRtcpMuxPolicy = Fable.Core.TS.Dom.RTCRtcpMuxPolicy
 
         type RTCRtpTransceiverDirection = Fable.Core.TS.Dom.RTCRtpTransceiverDirection
 
@@ -106191,9 +106518,9 @@ module Dom =
 
         type RTCStatsType = Fable.Core.TS.Dom.RTCStatsType
 
-        type ReadableStreamReaderMode = string
+        type ReadableStreamReaderMode = Fable.Core.TS.Dom.ReadableStreamReaderMode
 
-        type ReadableStreamType = string
+        type ReadableStreamType = Fable.Core.TS.Dom.ReadableStreamType
 
         type ReadyState = Fable.Core.TS.Dom.ReadyState
 
@@ -106225,7 +106552,7 @@ module Dom =
 
         type ResponseType = Fable.Core.TS.Dom.ResponseType
 
-        type SanitizerPresets = string
+        type SanitizerPresets = Fable.Core.TS.Dom.SanitizerPresets
 
         type ScrollAxis = Fable.Core.TS.Dom.ScrollAxis
 
@@ -106277,7 +106604,7 @@ module Dom =
 
         type VideoTransferCharacteristics = Fable.Core.TS.Dom.VideoTransferCharacteristics
 
-        type WakeLockType = string
+        type WakeLockType = Fable.Core.TS.Dom.WakeLockType
 
         type WebGLPowerPreference = Fable.Core.TS.Dom.WebGLPowerPreference
 
@@ -106306,6 +106633,111 @@ module Dom =
         type FileSystemDirectoryHandleAsyncIterator<'T> = Fable.Core.TS.Dom.FileSystemDirectoryHandleAsyncIterator<'T>
 
         type ReadableStreamAsyncIterator<'T> = Fable.Core.TS.Dom.ReadableStreamAsyncIterator<'T>
+
+        module WebAssembly =
+            /// <summary>
+            /// The <b><c>WebAssembly.CompileError</c></b> object indicates an error during WebAssembly decoding or validation.
+            /// </summary>
+            type CompileError = Fable.Core.TS.Dom.WebAssembly.CompileError
+
+            /// <summary>
+            /// The <b><c>WebAssembly.Exception</c></b> object represents a runtime exception thrown from WebAssembly to JavaScript, or thrown from JavaScript to a WebAssembly exception handler.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Exception">MDN Reference</a>
+            /// </summary>
+            type Exception = Fable.Core.TS.Dom.WebAssembly.Exception
+
+            /// <summary>
+            /// A <b><c>WebAssembly.Global</c></b> object represents a global variable instance, accessible from both JavaScript and importable/exportable across one or more WebAssembly.Module instances. This allows dynamic linking of multiple modules.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Global">MDN Reference</a>
+            /// </summary>
+            type Global<'T> = Fable.Core.TS.Dom.WebAssembly.Global<'T>
+
+            /// <summary>
+            /// A <b><c>WebAssembly.Instance</c></b> object is a stateful, executable instance of a WebAssembly.Module. Instance objects contain all the Exported WebAssembly functions that allow calling into WebAssembly code from JavaScript.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Instance">MDN Reference</a>
+            /// </summary>
+            type Instance = Fable.Core.TS.Dom.WebAssembly.Instance
+
+            /// <summary>
+            /// The <b><c>WebAssembly.LinkError</c></b> object indicates an error during module instantiation (besides traps from the start function).
+            /// </summary>
+            type LinkError = Fable.Core.TS.Dom.WebAssembly.LinkError
+
+            /// <summary>
+            /// The <b><c>WebAssembly.Memory</c></b> object is a resizable ArrayBuffer or SharedArrayBuffer that holds raw bytes of memory accessed by a WebAssembly.Instance.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Memory">MDN Reference</a>
+            /// </summary>
+            type Memory = Fable.Core.TS.Dom.WebAssembly.Memory
+
+            /// <summary>
+            /// A <b><c>WebAssembly.Module</c></b> object contains stateless WebAssembly code that has already been compiled by the browser — this can be efficiently shared with Workers, and instantiated multiple times.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Module">MDN Reference</a>
+            /// </summary>
+            type Module = Fable.Core.TS.Dom.WebAssembly.Module
+
+            /// <summary>
+            /// The <b><c>WebAssembly.RuntimeError</c></b> object is the error type that is thrown whenever WebAssembly specifies a trap.
+            /// </summary>
+            type RuntimeError = Fable.Core.TS.Dom.WebAssembly.RuntimeError
+
+            /// <summary>
+            /// The <b><c>WebAssembly.Table</c></b> object is a JavaScript wrapper object — an array-like structure representing a WebAssembly table, which stores homogeneous references. A table created by JavaScript or in WebAssembly code will be accessible and mutable from both JavaScript and WebAssembly.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Table">MDN Reference</a>
+            /// </summary>
+            type Table = Fable.Core.TS.Dom.WebAssembly.Table
+
+            /// <summary>
+            /// The <b><c>WebAssembly.Tag</c></b> object defines a type of a WebAssembly exception that can be thrown to/from WebAssembly code.
+            /// <br /><br />
+            /// <a href="https://developer.mozilla.org/docs/WebAssembly/Reference/JavaScript_interface/Tag">MDN Reference</a>
+            /// </summary>
+            type Tag = Fable.Core.TS.Dom.WebAssembly.Tag
+
+            type ExceptionOptions = Fable.Core.TS.Dom.WebAssembly.ExceptionOptions
+
+            type GlobalDescriptor<'T> = Fable.Core.TS.Dom.WebAssembly.GlobalDescriptor<'T>
+
+            type MemoryDescriptor = Fable.Core.TS.Dom.WebAssembly.MemoryDescriptor
+
+            type ModuleExportDescriptor = Fable.Core.TS.Dom.WebAssembly.ModuleExportDescriptor
+
+            type ModuleImportDescriptor = Fable.Core.TS.Dom.WebAssembly.ModuleImportDescriptor
+
+            type TableDescriptor = Fable.Core.TS.Dom.WebAssembly.TableDescriptor
+
+            type TagType = Fable.Core.TS.Dom.WebAssembly.TagType
+
+            type ValueTypeMap = Fable.Core.TS.Dom.WebAssembly.ValueTypeMap
+
+            type WebAssemblyCompileOptions = Fable.Core.TS.Dom.WebAssembly.WebAssemblyCompileOptions
+
+            type WebAssemblyInstantiatedSource = Fable.Core.TS.Dom.WebAssembly.WebAssemblyInstantiatedSource
+
+            type AddressType = Fable.Core.TS.Dom.WebAssembly.AddressType
+
+            type ImportExportKind = Fable.Core.TS.Dom.WebAssembly.ImportExportKind
+
+            type TableKind = Fable.Core.TS.Dom.WebAssembly.TableKind
+
+            type AddressValue = Fable.Core.TS.Dom.WebAssembly.AddressValue
+
+            type ExportValue = Fable.Core.TS.Dom.WebAssembly.ExportValue
+
+            type Exports = Fable.Core.TS.Dom.WebAssembly.Exports
+
+            type ImportValue = Fable.Core.TS.Dom.WebAssembly.ImportValue
+
+            type Imports = Fable.Core.TS.Dom.WebAssembly.Imports
+
+            type ModuleImports = Fable.Core.TS.Dom.WebAssembly.ModuleImports
+
+            type ValueType = Fable.Core.TS.Dom.WebAssembly.ValueType
 
     module HTMLButtonElement =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
