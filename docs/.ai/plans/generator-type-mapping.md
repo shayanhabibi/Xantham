@@ -844,6 +844,14 @@ Fable F# tuples *are* JS arrays — a happy exact match:
 - Rest elements (`[A, ...B[]]`) → no F# tuple form; erased type + indexer/head accessors, or
   `obj[]` Escape. Recommend the erased carrier with typed accessors.
 - `readonly` tuples → same mapping; readonly-ness doc-noted.
+- A fixed tuple as a rest parameter's type (`...args: [a: A, b: B]`) → the parameters it stands
+  for. A rest parameter over a union of fixed tuples (`...args: [end: number] | [start: number,
+  end: number]`, `next(...[value]: [] | [TNext])`) → one overload per tuple, in ascending arity.
+  Exact: TypeScript's signature help shows the same overload set. Arms differing only by
+  trailing `undefined`/`void` elements compile to one F# call and are written once, at the
+  shortest. Element names come from the rest parameter's array binding pattern, then the tuple's
+  labels, then position. A union with a variadic arm keeps the `[<ParamArray>]` form (TR028/TR029).
+  Callback positions (delegates, ParamObject `Create` parameters) still read the first signature.
 
 ### 4.13 Modules, namespaces, exports, declaration merging
 

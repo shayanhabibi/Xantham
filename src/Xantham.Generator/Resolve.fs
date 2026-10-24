@@ -558,6 +558,68 @@ let private signatureSource (ctx: Context) (declaration: string voption) : Async
             | _ -> return None
     }
 
+/// The identifier a declaration node at `handle` is named by: a labelled tuple element, or a
+/// parameter whose name is an identifier.
+let private declaredIdentifier (ctx: Context) (handle: string) : Async<string option> =
+    async {
+        match NodeHandle.parse handle with
+        | ValueNone -> return None
+        | ValueSome handle ->
+            match! attempt (sourceFile ctx handle.Path) with
+            | Ok(ValueSome source) ->
+                let node = Node.ofIndex<AnyNode> source handle.Index
+
+                let name =
+                    match node.Kind with
+                    | SyntaxKind.NamedTupleMember ->
+                        Node.retag<AnyNode, NamedTupleMember> node
+                        |> NamedTupleMember.name
+                        |> ValueOption.bind _.Text
+                    | SyntaxKind.Parameter ->
+                        Node.retag<AnyNode, ParameterDeclaration> node
+                        |> ParameterDeclaration.name
+                        |> ValueOption.filter (fun name -> name.Kind = SyntaxKind.Identifier)
+                        |> ValueOption.bind _.Text
+                    | _ -> ValueNone
+
+                return ValueOption.toOption name
+            | _ -> return None
+    }
+
+/// The names an array binding pattern on a rest parameter writes, by position.
+let private restPatternNames (ctx: Context) (parameter: SymbolResponse) : Async<string option list> =
+    async {
+        match parameter.Declarations |> ValueOption.defaultValue [||] with
+        | [| declaration |] ->
+            match NodeHandle.parse declaration with
+            | ValueNone -> return []
+            | ValueSome handle ->
+                match! attempt (sourceFile ctx handle.Path) with
+                | Ok(ValueSome source) ->
+                    let node = Node.ofIndex<AnyNode> source handle.Index
+
+                    if node.Kind <> SyntaxKind.Parameter then
+                        return []
+                    else
+                        match Node.retag<AnyNode, ParameterDeclaration> node |> ParameterDeclaration.name with
+                        | ValueSome name when name.Kind = SyntaxKind.ArrayBindingPattern ->
+                            return
+                                Node.retag<BindingName, BindingPattern> name
+                                |> BindingPattern.elements
+                                |> Seq.map (fun element ->
+                                    if element.Kind <> SyntaxKind.BindingElement then
+                                        None
+                                    else
+                                        match BindingElement.dotDotDotToken element, BindingElement.name element with
+                                        | ValueNone, ValueSome name when name.Kind = SyntaxKind.Identifier ->
+                                            ValueOption.toOption name.Text
+                                        | _ -> None)
+                                |> Seq.toList
+                        | _ -> return []
+                | _ -> return []
+        | _ -> return []
+    }
+
 /// A type alias can bind unused parameters that disappear from its resolved type. Read the
 /// declaring alias rather than attaching that fact to a type shared with nongeneric aliases.
 let internal declarationHasTypeParameters (ctx: Context) (symbol: SymbolResponse) =
@@ -1305,15 +1367,23 @@ let private resolveSignatures (ctx: Context) (trace: Trace option) (registers: R
                         else
                             async.Return None
 
+                    let hasRest = signature.Flags.HasFlag SignatureFlags.HasRestParameter
+
+                    let! restPattern =
+                        match Array.tryLast parameters with
+                        | Some rest when hasRest -> restPatternNames ctx rest
+                        | _ -> async.Return []
+
                     return
                         {
                             Parameters = parameterFacts |> Array.map fst |> Array.toList
-                            HasRest = signature.Flags.HasFlag SignatureFlags.HasRestParameter
+                            HasRest = hasRest
                             TypeParameters = typeParameters |> Array.map _.TypeId |> Array.toList
                             IsAbstract = signature.Flags.HasFlag SignatureFlags.Abstract
                             ReturnTypeId = returnType.TypeId
                             Source = source
                             OwnDoc = ownDoc
+                            RestPatternNames = restPattern
                         },
                         [
                             yield! channel trace $"{label}-parameter" (parameterFacts |> Array.map snd |> Array.toList)
@@ -1706,18 +1776,29 @@ let private deriveFacts
             // The target is read for its flags and then dropped rather than followed - it is
             // the generic tuple type, so deriving it re-derives all of `Array.prototype` for
             // every distinct tuple shape.
-            let! tupleElements =
+            let! tupleElements, tupleLabels =
                 if ty.IsTupleType = ValueSome true then
                     async {
                         let! target = ctx.Session.getTargetOfType ty.Id
 
+                        let! labels =
+                            target.LabeledElementDeclarations
+                            |> ValueOption.defaultValue [||]
+                            |> Array.map (fun handle ->
+                                if isNull handle then
+                                    async.Return None
+                                else
+                                    declaredIdentifier ctx handle)
+                            |> Async.Sequential
+
                         return
                             target.ElementFlags
                             |> ValueOption.map Array.toList
-                            |> ValueOption.defaultValue []
+                            |> ValueOption.defaultValue [],
+                            Array.toList labels
                     }
                 else
-                    async.Return []
+                    async.Return([], [])
 
             // A generic alias hangs its parameters off the alias, not the type: the function
             // type behind `type Mapper<T> = (t: T) => T` reports none of its own. Only the
@@ -1861,6 +1942,7 @@ let private deriveFacts
                             |> Option.map (fun value -> value * uom<Measure.declFile>)
                         TypeArguments = referenceArguments |> List.map _.TypeId
                         TupleElements = tupleElements
+                        TupleLabels = tupleLabels
                         AliasTypeArguments = aliasTypeArguments |> List.map _.TypeId
                         BaseTypes = bases |> List.map _.TypeId
                     },
@@ -2027,6 +2109,7 @@ let private deriveFacts
                             AmbientClass = ambientClass
                             TypeArguments = typeArguments |> List.map _.TypeId
                             TupleElements = tupleElements
+                            TupleLabels = tupleLabels
                             AliasTypeArguments = aliasTypeArguments |> List.map _.TypeId
                             IntersectionMembers = []
                             Constraint = None

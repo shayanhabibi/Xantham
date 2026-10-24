@@ -1240,6 +1240,9 @@ type ResolvedSignature =
         /// The JSDoc of the signature's own declaration, where the signature is one of several
         /// overloads and the declaration is available.
         OwnDoc: OverloadDoc option
+        /// The names an array binding pattern on the rest parameter writes, by position:
+        /// `...[value]` carries `[ Some "value" ]`, a hole or a nested pattern `None`.
+        RestPatternNames: string option list
     }
 
 /// A conditional type's mapping facts (§4.11).
@@ -1305,6 +1308,9 @@ type TypeFacts =
         /// of the table: deriving it drags all of `Array.prototype` in again for every distinct
         /// tuple shape, and nothing but these flags is wanted from it.
         TupleElements: ElementFlags list
+        /// A tuple's element labels, in element order, read off its target: `[start: number]`
+        /// carries `Some "start"`, an unlabelled element `None`. Empty for an unlabelled tuple.
+        TupleLabels: string option list
         /// The arguments the type's *alias* was written with, by id (§4.9). On the declaration
         /// form of a generic alias these are its own parameters - `type Mapper<T> = (t: T) => T`
         /// leaves the function type itself parameterless, so this is the only place `T` appears.
@@ -1370,6 +1376,7 @@ module TypeFacts =
             AmbientClass = None
             TypeArguments = []
             TupleElements = []
+            TupleLabels = []
             AliasTypeArguments = []
             IntersectionMembers = []
             Constraint = None

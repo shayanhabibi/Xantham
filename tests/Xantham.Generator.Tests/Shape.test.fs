@@ -832,6 +832,69 @@ let typeRefTests =
             Expect.equal reference (FsArray FsString) "widened to its element"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
 
+        testCase "a rest parameter over a union of fixed tuples stands for one overload per tuple" <| fun _ ->
+            // `(...args: [string, number] | [] | [undefined] | [number])`: ascending arity, and
+            // `[undefined]` written once with `[]`, which F# compiles to the same call.
+            let arms =
+                { Build.facts (Build.typeResponse 14 TypeFlags.Union) with
+                    UnionMembers = [ 10<typeId>; 11<typeId>; 12<typeId>; 13<typeId> ] }
+
+            let labelled =
+                { tuple 10 [ 1; 2 ] [ ElementFlags.Required; ElementFlags.Required ] with
+                    TupleLabels = [ Some "key"; None ] }
+
+            let model =
+                Build.shapeModel (
+                    labelled
+                    :: tuple 11 [] []
+                    :: tuple 12 [ 5 ] [ ElementFlags.Required ]
+                    :: tuple 13 [ 2 ] [ ElementFlags.Required ]
+                    :: arms
+                    :: Build.primitives
+                )
+
+            let signature =
+                { Build.signature [ Build.resolvedMember (Build.symbol 30 "args" SymbolFlags.FunctionScopedVariable) 14 ] 4 with
+                    HasRest = true }
+
+            let overloads = Spec.restOverloads model signature
+
+            Expect.equal
+                (overloads |> List.map (fun s -> s.HasRest, s.Parameters |> List.map (fun p -> p.Symbol.Name, int p.TypeId)))
+                [ false, []; false, [ "args", 2 ]; false, [ "key", 1; "args1", 2 ] ]
+                "one overload per distinct call, a label naming its element"
+
+        testCase "a union with a variadic tuple arm keeps the rest form" <| fun _ ->
+            let arms =
+                { Build.facts (Build.typeResponse 14 TypeFlags.Union) with
+                    UnionMembers = [ 10<typeId>; 11<typeId> ] }
+
+            let model =
+                Build.shapeModel (
+                    tuple 10 [ 1 ] [ ElementFlags.Required ]
+                    :: tuple 11 [ 1; 2 ] [ ElementFlags.Required; ElementFlags.Rest ]
+                    :: arms
+                    :: Build.primitives
+                )
+
+            let signature =
+                { Build.signature [ Build.resolvedMember (Build.symbol 30 "args" SymbolFlags.FunctionScopedVariable) 14 ] 4 with
+                    HasRest = true }
+
+            Expect.equal (Spec.restOverloads model signature) [ signature ] "unchanged"
+
+        testCase "a binding pattern names a spread tuple's elements" <| fun _ ->
+            let model = Build.shapeModel (tuple 10 [ 1 ] [ ElementFlags.Required ] :: Build.primitives)
+
+            let signature =
+                { Build.signature [ Build.resolvedMember (Build.symbol 30 "__0" SymbolFlags.FunctionScopedVariable) 10 ] 4 with
+                    HasRest = true
+                    RestPatternNames = [ Some "value" ] }
+
+            let expanded = Spec.expandTupleRest model signature
+
+            Expect.equal (expanded.Parameters |> List.map _.Symbol.Name) [ "value" ] "`...[value]: [T]` is `value: T`"
+
         testCase "a type parameter in scope names its variable (§4.9)" <| fun _ ->
             let model =
                 { Build.shapeModel (typeParam 20 "T" :: Build.primitives) with

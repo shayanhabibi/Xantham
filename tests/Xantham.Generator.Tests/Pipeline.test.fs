@@ -7512,3 +7512,35 @@ let unionAliasApplicationFixtureTests =
                 Expect.isEmpty (rendered.Findings |> List.filter (fun finding -> finding.Key = "TR006" && finding.Symbol.StartsWith "Attrs")) "no literal arm of an application widens"
         ])
     ]
+
+[<Tests>]
+let restTupleUnionFixtureTests =
+    testList "rest tuple unions" [
+        yield! fixtureTests "rest-tuple-union-lab" (handFixture "rest-tuple-union-lab") GeneratorConfig.Default (fun package -> [
+            testCase "a rest parameter over a union of fixed tuples is one overload per tuple" <| fun _ ->
+                let rendered = Pipeline.generate GeneratorConfig.Default package |> Async.RunSynchronously
+                let source = rendered.Files |> List.head |> snd
+                Expect.stringContains source "abstract next: unit -> 'T\n" "the empty tuple is a call of no arguments"
+                Expect.stringContains source "abstract next: value: 'TNext -> 'T\n" "a one-element tuple keeps the binding pattern's name"
+                Expect.stringContains source "static member range (``end``: float) : float[]" "the one-element arm, named by its label"
+                Expect.stringContains source "static member range (start: float, ``end``: float) : float[]" "the two-element arm"
+                Expect.stringContains source "static member range (start: float, ``end``: float, step: float) : float[]" "the three-element arm"
+                Expect.stringContains source "abstract move: offset: float -> unit" "a class method expands too"
+                Expect.stringContains source "abstract move: line: float * column: float -> unit" "each of its arms"
+                Expect.isFalse (source.Contains "__0") "no binding-pattern placeholder reaches a parameter name"
+                Expect.stringContains source "[<ParamArray>] args: " "a variadic arm keeps the rest form"
+                let restTuple =
+                    rendered.Findings
+                    |> List.filter (fun finding -> finding.Key = "TR029")
+                    |> List.map _.Symbol
+                Expect.isFalse (restTuple |> List.exists (fun symbol -> symbol.StartsWith "Step" || symbol.StartsWith "range" || symbol.StartsWith "Cursor")) "an expanded rest widens nothing"
+            testCase "an instantiation collapsing two arms onto one F# signature writes it once" <| fun _ ->
+                let rendered = Pipeline.generate GeneratorConfig.Default package |> Async.RunSynchronously
+                let source = rendered.Files |> List.head |> snd
+                let start = source.IndexOf "type VoidStep ="
+                Expect.isGreaterThanOrEqual start 0 "VoidStep is declared"
+                let body = source.Substring(start, (let e = source.IndexOf("\ntype ", start + 1) in if e < 0 then source.Length - start else e - start))
+                let unitCalls = body.Split('\n') |> Array.filter (fun line -> line.Contains "next: unit -> string")
+                Expect.isLessThanOrEqual unitCalls.Length 1 "`x.next()` resolves to one overload"
+        ])
+    ]

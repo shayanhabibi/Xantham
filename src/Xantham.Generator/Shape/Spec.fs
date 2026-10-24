@@ -1317,6 +1317,63 @@ let internal tupleElementFlags (facts: TypeFacts) =
     else
         facts.TypeArguments |> List.map (fun _ -> ElementFlags.Required)
 
+/// A tuple without a variadic element: one F# parameter per element.
+let private isFixedTuple (facts: TypeFacts) =
+    isTuple facts && not (tupleElementFlags facts |> List.exists isVariadicElement)
+
+/// `signature` with its rest parameter replaced by the elements of the fixed tuple `facts`.
+/// An element is named by the rest parameter's binding pattern (`...[value]`), then by the
+/// tuple's label (`[start: number]`), then by position. A name already taken by another
+/// parameter falls back to position.
+let private spreadTuple (signature: ResolvedSignature) (rest: ResolvedMember) (facts: TypeFacts) =
+    let flags = tupleElementFlags facts
+    let leading = List.truncate (signature.Parameters.Length - 1) signature.Parameters
+
+    let positional index =
+        if flags.Length = 1 then
+            rest.Symbol.Name
+        else
+            $"{rest.Symbol.Name}{index}"
+
+    let written index =
+        match List.tryItem index signature.RestPatternNames |> Option.flatten with
+        | Some name -> Some name
+        | None -> List.tryItem index facts.TupleLabels |> Option.flatten
+
+    let declared = List.init flags.Length written
+
+    let distinct =
+        let names = declared |> List.choose id
+        let taken = leading |> List.map _.Symbol.Name |> Set.ofList
+
+        List.length (List.distinct names) = names.Length
+        && names |> List.forall (fun name -> not (Set.contains name taken))
+
+    let elementName index =
+        match declared[index] with
+        | Some name when distinct -> name
+        | _ -> positional index
+
+    let expanded =
+        List.mapi2
+            (fun index (element: ElementFlags) typeId ->
+                { rest with
+                    Symbol =
+                        { rest.Symbol with
+                            Name = elementName index
+                        }
+                    Optional = element.HasFlag ElementFlags.Optional
+                    TypeId = typeId
+                })
+            flags
+            facts.TypeArguments
+
+    { signature with
+        Parameters = leading @ expanded
+        HasRest = false
+        RestPatternNames = []
+    }
+
 /// A signature whose tuple-typed rest parameter is written out as the parameters it stands for
 /// (§4.12). `(...args: [value: T]) => R` is TypeScript's spelling of `(value: T) => R` and
 /// `(...args: []) => R` of `() => R`: each element becomes an ordinary parameter, an optional
@@ -1325,37 +1382,43 @@ let internal expandTupleRest (model: ShapeModel) (signature: ResolvedSignature) 
     match signature.HasRest, List.tryLast signature.Parameters with
     | true, Some rest ->
         match Map.tryFind rest.TypeId model.Types with
-        | Some facts when isTuple facts && not (tupleElementFlags facts |> List.exists isVariadicElement) ->
-            let flags = tupleElementFlags facts
-
-            // One element keeps the rest parameter's own name; several are told apart by
-            // position, the tuple's labels being cosmetic and absent from the wire.
-            let elementName index =
-                if flags.Length = 1 then
-                    rest.Symbol.Name
-                else
-                    $"{rest.Symbol.Name}{index}"
-
-            let expanded =
-                List.mapi2
-                    (fun index (element: ElementFlags) typeId ->
-                        { rest with
-                            Symbol =
-                                { rest.Symbol with
-                                    Name = elementName index
-                                }
-                            Optional = element.HasFlag ElementFlags.Optional
-                            TypeId = typeId
-                        })
-                    flags
-                    facts.TypeArguments
-
-            { signature with
-                Parameters = List.truncate (signature.Parameters.Length - 1) signature.Parameters @ expanded
-                HasRest = false
-            }
+        | Some facts when isFixedTuple facts -> spreadTuple signature rest facts
         | _ -> signature
     | _ -> signature
+
+/// The overloads a signature stands for (§4.12): a rest parameter over a union of fixed tuples,
+/// `(...args: [end: number] | [start: number, end: number])`, is one overload per tuple, in
+/// ascending arity. Arms that differ only by trailing `undefined` or `void` elements are written
+/// once, at the shortest. Every other signature stands for itself, through `expandTupleRest`.
+let internal restOverloads (model: ShapeModel) (signature: ResolvedSignature) : ResolvedSignature list =
+    let arms =
+        match signature.HasRest, List.tryLast signature.Parameters with
+        | true, Some rest ->
+            match Map.tryFind rest.TypeId model.Types with
+            | Some facts when flag TypeFlags.Union facts && not (flag TypeFlags.Boolean facts) ->
+                let members = facts.UnionMembers |> List.map (fun id -> Map.tryFind id model.Types)
+
+                if members.Length > 1 && members |> List.forall (Option.exists isFixedTuple) then
+                    Some(rest, List.choose id members)
+                else
+                    None
+            | _ -> None
+        | _ -> None
+
+    match arms with
+    | None -> [ expandTupleRest model signature ]
+    | Some(rest, tuples) ->
+        let unitLike id =
+            Map.tryFind id model.Types
+            |> Option.exists (fun facts -> flag TypeFlags.Undefined facts || flag TypeFlags.Void facts)
+
+        let callKey (facts: TypeFacts) =
+            facts.TypeArguments |> List.rev |> List.skipWhile unitLike |> List.rev
+
+        tuples
+        |> List.sortBy _.TypeArguments.Length
+        |> List.distinctBy callKey
+        |> List.map (spreadTuple signature rest)
 
 /// The generic declaration an instantiation points back at, when this run declares it. A
 /// generic declaration is its own target, so only a genuine instantiation matches.
@@ -4157,6 +4220,7 @@ let internal shapeHook
 
     let overloads =
         callSignaturesOf model m.TypeId
+        |> List.collect (restOverloads model)
         |> List.map (fun signature ->
             let typeParameters, parameters, returns, signatureFindings =
                 shapeSignature ctx model (Some self) owner signature
@@ -4378,6 +4442,7 @@ let internal shapeMembers
                 let keyed = declared && isLiteralKeyed model m memberFacts
 
                 memberFacts.CallSignatures
+                |> List.collect (restOverloads model)
                 |> List.map (fun signature ->
                     match if keyed then literalKeys model signature else [] with
                     | [] ->
@@ -4482,6 +4547,7 @@ let internal shapeMembers
                     ]
                 else
                     signatures
+                    |> List.collect (restOverloads model)
                     |> List.map (fun signature ->
                         let typeParameters, parameters, returns, signatureFindings =
                             shapeSignature ctx model (Some self) owner signature
@@ -4526,6 +4592,7 @@ let internal shapeMembers
     // side is written in TypeScript, and so an existing golden's member order only grows.
     let constructors =
         facts.ConstructSignatures
+        |> List.collect (restOverloads model)
         |> List.map (fun signature ->
             let owner = $"{self}.Create"
 

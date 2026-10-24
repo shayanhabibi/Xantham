@@ -334,6 +334,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                                         []
                                     else
                                         facts.CallSignatures
+                                        |> List.collect (restOverloads model)
                                         |> List.map (fun signature ->
                                             let typeParameters, parameters, returns, signatureFindings =
                                                 shapeSignature
