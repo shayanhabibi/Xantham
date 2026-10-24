@@ -299,9 +299,13 @@ Policy question with a recommended default:
   - instance side: F# interface (as above, plus `inherit` for base classes);
   - static side + constructor: members on an `Exports`-style erased type or a
     `[<Import>]`-bound `IClassNameStatic` interface with `[<EmitConstructor>]`.
-  - `abstract`/`protected`/`private` members: private dropped (they are not API), protected
-    dropped with doc note (open: emit under an attribute-gated interface?), abstract same as
-    concrete on the instance interface.
+  - `abstract`/`protected`/`private` members: a TypeScript-private member (the `private`
+    modifier or a `#name` on every declaration, never a leading underscore) is omitted, an
+    Exact omission with no finding; protected members stay; abstract same as concrete on the
+    instance interface. A `private constructor` binds no `[<EmitConstructor>]`, and the class
+    keeps its statics. A public getter over a private setter reads get-only. A type with a
+    private member is nominal (`TypeFacts.PrivateMembers`): it is declared even with no other
+    member (`interface end`, not `obj`), and it refuses the ParamObject `Create` (SP003).
 - **Callable + properties hybrids** (function with attached props) → interface with an
   `[<Emit "$0($1...)">]` `Invoke` member plus the properties. Ergonomic.
 - **Well-known symbol members** (W4, 2026-10-13) → `[Symbol.iterator]` is `inherit seq<'T>` at

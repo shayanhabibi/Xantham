@@ -199,7 +199,13 @@ let synthesizeParamObjects: Pass<ShapeModel> =
                                 // binds only the properties and methods beside it.
                                 let members = decl.Members |> List.filter (isInvoke >> not)
 
-                                match refusal (Set.contains decl.Name callable) (Set.contains decl.Name nominal) decl members with
+                                match
+                                    refusal
+                                        (Set.contains decl.Name callable)
+                                        (Set.contains decl.Name nominal)
+                                        decl
+                                        members
+                                with
                                 | Some reason ->
                                     findings <-
                                         findings

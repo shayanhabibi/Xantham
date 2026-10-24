@@ -1189,8 +1189,10 @@ let private declarationPrivate (ctx: Context) (declaration: string) : Async<bool
                             ParameterDeclaration.modifiers (Node.retag<AnyNode, ParameterDeclaration> node), ValueNone
                         | _ -> Seq.empty, ValueNone
 
-                    modifiers |> Seq.exists (fun modifier -> modifier.Kind = SyntaxKind.PrivateKeyword)
-                    || name |> ValueOption.exists (fun name -> name.Kind = SyntaxKind.PrivateIdentifier)
+                    modifiers
+                    |> Seq.exists (fun modifier -> modifier.Kind = SyntaxKind.PrivateKeyword)
+                    || name
+                       |> ValueOption.exists (fun name -> name.Kind = SyntaxKind.PrivateIdentifier)
     }
 
 /// Whether every declaration of a member is TypeScript-private (`declarationPrivate`). A member
@@ -1239,14 +1241,13 @@ let private publicPropertiesOfType (ctx: Context) (ty: TypeResponse) : Async<Sym
     async {
         let! properties = ctx.Session.getPropertiesOfType ty.Id
         let properties = properties |> ValueOption.defaultValue [||]
+
         let! privacy =
             properties
             |> Array.map (fun property -> declaredPrivate ctx property.Declarations)
             |> Async.Parallel
 
-        return
-            Array.zip properties privacy |> Array.filter (snd >> not) |> Array.map fst,
-            Array.contains true privacy
+        return Array.zip properties privacy |> Array.filter (snd >> not) |> Array.map fst, Array.contains true privacy
     }
 
 /// The well-known symbol referenced by a member's computed key: `Some "iterator"` for
@@ -3335,10 +3336,7 @@ let internal customizationFacts (ctx: Context) (facts: TypeFacts) =
     async {
         let! properties, privateMembers = publicPropertiesOfType ctx facts.Response
 
-        let! members =
-            properties
-            |> Array.map (resolveMember ctx true)
-            |> Async.Parallel
+        let! members = properties |> Array.map (resolveMember ctx true) |> Async.Parallel
 
         let! bases = ctx.Session.getBaseTypes facts.Response.Id
 
