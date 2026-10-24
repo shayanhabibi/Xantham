@@ -890,7 +890,7 @@ let pipelineTests =
                     // rather than the bare name its own module shadows.
                     Expect.stringContains
                         source
-                        "static member describe (session: Lab.Session) : string = jsNative"
+                        "static member describe (session: AmbientModuleLab.AmbientLab.Lab.Session) : string = jsNative"
                         "a cross-module reference is qualified relative to the root module"
 
                   testCase "each specifier module documents the specifier it groups" <| fun _ ->
