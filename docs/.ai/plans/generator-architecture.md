@@ -3596,3 +3596,10 @@ nested reordered binders, forward correction and recursive positive/negative con
 The initial generated consumer fails FS0001 before the fix; the corrected consumer compiles
 and rejects a different nominal dependent contract. Full Zod and corpus evidence belongs to
 the follow-up integration gate.
+
+The follow-up catalogue contract advances API version 13 to 14 for the specialized dependent
+constraints and cyclic-application fallback. Identity version 8, inference version 5,
+customization version 1 and contract version 1 remain unchanged: source identity, inference
+profile normalization and metadata interpretation retain their existing meanings. API-13
+producers are rejected before traversal, and the complete owner family must be regenerated
+with the same API-14 candidate.
