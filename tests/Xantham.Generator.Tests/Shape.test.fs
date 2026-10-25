@@ -2763,7 +2763,7 @@ let shapePassTests =
 
             let reference, findings = Spec.typeRef Build.context model None "res" 86<typeId>
             Expect.equal reference (FsTypeVar "R") "the parameter is the whole intersection"
-            Expect.equal (findings |> List.map _.Key) [ "TR049" ] "an exact reduction"
+            Expect.equal (findings |> List.map _.Key) [ "TR073" ] "an exact restating reduction"
 
         testCase "an operand adding members over a type parameter is carried beside it (§4.6)" <| fun _ ->
             // `P & { count: number }`: `JS.Intersect` keeps the parameter and the declared operand.

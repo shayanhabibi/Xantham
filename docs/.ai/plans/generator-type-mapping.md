@@ -479,7 +479,7 @@ of them now have an answer; the fourth (a type-parameter operand) is answered be
 *Landed (fidelity W5) — the type-parameter operand.* An intersection with at least one
 type-parameter operand keeps the parameters. Two readings, decided per operand:
 
-- **An object operand restating a parameter's bound reduces away** (`TR049`, Exact). An
+- **An object operand restating a parameter's bound reduces away** (`TR073`, Exact). An
   anonymous operand whose every property the bound of a type-parameter operand declares under
   the same type id, and optional wherever the bound's is, adds nothing: `R & { req: Base }` over
   `R extends Wide` is `'R`, and `T & {}` (`NonNullable<T>`) is `'T`.
@@ -523,8 +523,7 @@ there without a cast. Likewise solid-js `FlowComponent<'P, 'C>` re-expands `Flow
 `FlowProps.Members<'C>`. Closing it means writing an application of an open-intersection alias as
 that application, which is the generic-alias re-expansion item of §4.9.
 
-The restating reduction reports `TR049`, whose message names an empty operand; a restating
-non-empty operand has no key of its own yet.
+An empty operand (`T & {}`) reports `TR049`; an operand restating the bound reports `TR073`.
 
 ### 4.7 Enums
 

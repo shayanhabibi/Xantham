@@ -2685,7 +2685,20 @@ and internal openIntersectionRef
 
             match rendered |> List.map fst with
             | [ single ] ->
-                Some(single, findings @ [ Finding.make owner TypeReference.EmptyIntersectionOperandReduced ])
+                let keptIds = kept |> List.map _.Response.TypeId
+
+                let reduction =
+                    if
+                        operandsOf model facts
+                        |> List.exists (fun operand ->
+                            not (List.contains operand.Response.TypeId keptIds)
+                            && not operand.Members.IsEmpty)
+                    then
+                        TypeReference.RestatingIntersectionOperandReduced
+                    else
+                        TypeReference.EmptyIntersectionOperandReduced
+
+                Some(single, findings @ [ Finding.make owner reduction ])
             | references ->
                 let carried =
                     references

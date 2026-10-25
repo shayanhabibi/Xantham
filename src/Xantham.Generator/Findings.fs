@@ -151,6 +151,7 @@ module FindingCodes =
             "TR.ConditionalResolvedToConstraint", "TR068"
             "TR.SymbolAsLibInterface", "TR069"
             "TR.OpenIntersectionCarried", "TR072"
+            "TR.RestatingIntersectionOperandReduced", "TR073"
             "TP.UnnamedTypeParameter", "TP001"
             "TP.ConstraintDropped", "TP002"
             "TP.GenericFunctionHoisted", "TP003"
@@ -557,6 +558,9 @@ type TypeReference =
     /// parameter's bound, written as the support package's `JS.Intersect` over its operands. Each
     /// operand stays typed and is read through `Left`/`Right` rather than by inheritance.
     | [<Ergonomic>] OpenIntersectionCarried of operands: int
+    /// An object operand restating a type parameter's bound reduces away, and the parameter is
+    /// the type: `R & { req: Base }` over `R extends Wide` is `'R`.
+    | [<Exact>] RestatingIntersectionOperandReduced
 
     interface IFindingKind with
         member this.Message =
@@ -688,6 +692,8 @@ type TypeReference =
                 $"symbol written as the compiler lib's Symbol interface {name}, which also admits a boxed Symbol object"
             | OpenIntersectionCarried operands ->
                 $"intersection over a type parameter written as JS.Intersect over its {operands} operands; each is read through Left/Right, not by inheritance (§4.6)"
+            | RestatingIntersectionOperandReduced ->
+                "intersection operand restating the type parameter's bound reduced away; the parameter is the type (§4.6)"
 
 /// Type parameter binding: `Shape.typeParamsOf`, `aliasTypeParams`, key variables and erasure.
 [<Prefix "TP">]

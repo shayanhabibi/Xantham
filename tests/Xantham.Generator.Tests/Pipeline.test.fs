@@ -7578,6 +7578,7 @@ let openIntersectionFixtureTests =
                 let keyed key = rendered.Findings |> List.filter (fun finding -> finding.Key = key) |> List.map _.Symbol
                 Expect.stringContains source "type Exclusive<'T, 'U> = private Exclusive__ of obj" "a mapped operand is not read as restating the bound"
                 Expect.equal (keyed "TR018") [ "Exclusive"; "Tally" ] "an operand with no reference of its own, and a primitive operand, widen"
-                Expect.equal (keyed "TR049") [ "Listener(res)"; "Defined" ] "the reductions are exact"
+                Expect.equal (keyed "TR073") [ "Listener(res)" ] "the restating reduction is exact"
+                Expect.equal (keyed "TR049") [ "Defined" ] "the empty reduction is exact"
         ])
     ]
