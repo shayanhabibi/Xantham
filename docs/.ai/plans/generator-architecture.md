@@ -1509,6 +1509,17 @@ runtime acceptance tasks in the export-module plan are still pending.
 
 ## Export collision resolution (2026-09-12)
 
+Source-identical function overloads retain TypeScript's first applicable return before this
+pass (2026-10-25, `census-source-overloads-lab`). `shape-exports` compares compiler parameter
+type identities and optionality on nongeneric, non-rest function declarations with source facts
+and no explicit receiver. A later identical input signature is unreachable under TypeScript's
+source-order overload selection, so it contributes no return alternative. Resolve records
+`HasThisParameter` from the compiler signature; Shape remains pure. Filtering retains each
+surviving member's original expanded `SignatureOrdinal`, including gaps, for provenance.
+Distinct TypeScript inputs that merely compile to the same F# parameter types keep the late
+collision policy below. Generic, rest, receiver-bearing and declarationless signatures keep
+that policy as well.
+
 The late `resolve-export-collisions` pass keeps every candidate an owner's value exports
 produce. Under one exported name: repeated occurrences of one declaration consolidate
 (`DO006`, Exact); different declarations mapping to one F# signature, return included,

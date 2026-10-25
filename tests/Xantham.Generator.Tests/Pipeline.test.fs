@@ -7698,3 +7698,42 @@ let censusCallableProvenanceFixtureTests =
                 Expect.stringContains source "abstract constructable:" "a callable constructor stays a value"
         ])
     ]
+
+[<Tests>]
+let censusSourceOverloadsFixtureTests =
+    testList "census source overloads" [
+        yield! fixtureTests "census-source-overloads-lab" (handFixture "census-source-overloads-lab") GeneratorConfig.Default (fun package -> [
+            testCase "identical source inputs retain the first applicable return" <| fun _ ->
+                let rendered = Pipeline.generate GeneratorConfig.Default package |> Async.RunSynchronously
+                let source = rendered.Files |> List.head |> snd
+                Expect.stringContains source "static member pick (value: string) : string" "the first TypeScript overload owns the return"
+                Expect.stringContains source "static member pick (value: float) : float" "a later distinct overload remains"
+                Expect.stringContains source "static member optional (?value: string) : string" "identical optional inputs preserve the first return"
+                let losses = rendered.Findings |> List.filter (fun finding -> finding.Key = "DO008" && (finding.Symbol = "Exports.pick" || finding.Symbol = "Exports.optional"))
+                Expect.isEmpty losses "unreachable return alternatives do not widen a source-identical call"
+            testCase "retained exports keep their original signature ordinals" <| fun _ ->
+                let members =
+                    async {
+                        let! mailbox, ctx = Bootstrap.start GeneratorConfig.Default package
+                        use _ = mailbox :> IDisposable
+                        let! harvest, _ = Pipeline.runTier ctx Harvest.passes HarvestModel.Empty
+                        let! resolve, _ = Pipeline.runTier ctx Resolve.passes (Pipeline.toResolve harvest)
+                        let beforeExports = Shape.Passes.passes |> List.takeWhile (fun pass -> pass.Name <> "shape-exports")
+                        let initial = Pipeline.toShape (GeneratorConfig.runtimePackage ctx.Config ctx.PackageName) resolve
+                        let! prepared, _ = Pipeline.runTier ctx beforeExports initial
+                        let! shaped, _ = Pipeline.runTier ctx [ Shape.Exports.shapeExports ] prepared
+                        return shaped.ExportMembers |> List.filter (fun member_ -> member_.ExportName = "pick")
+                    } |> Async.RunSynchronously
+                Expect.equal (members |> List.map _.SignatureOrdinal) [ Some 0; Some 2 ] "the number overload remains source ordinal two"
+                match members |> List.last |> _.Member.Body with
+                | ExportFunction([ parameter ], FsFloat) -> Expect.equal parameter.Type FsFloat "ordinal two still authenticates the numeric input"
+                | other -> failtestf "Expected the retained numeric call, got %A" other
+            testCase "source order and erased input distinctions retain their meaning" <| fun _ ->
+                let rendered = Pipeline.generate GeneratorConfig.Default package |> Async.RunSynchronously
+                let source = rendered.Files |> List.head |> snd
+                Expect.stringContains source "static member reverse (value: string) : U2<string, float>" "a broad first return stays broad"
+                let unioned = rendered.Findings |> List.filter (fun finding -> finding.Key = "DO008") |> List.map _.Symbol
+                for symbol in [ "Exports.literal"; "Exports.generic"; "Exports.receiver"; "Exports.rest" ] do
+                    Expect.contains unioned symbol "distinct literals, generic signatures, receivers and rest signatures retain collision handling"
+        ])
+    ]

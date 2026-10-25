@@ -572,3 +572,15 @@ the retained declarations, including ExportSpecifier aliases resolved to Functio
 A PropertySignature or PropertyDeclaration keeps the property form; required pure-callable
 guards still apply in Spec and customization Semantics. The namespace intersection lab reproduces
 the same compiler shape without importing the entire global scope.
+
+## Source-identical overloads precede emitted signature collisions (2026-10-25)
+
+Two source overloads with identical compiler parameter types and optionality select the first
+return in TypeScript. For example `readlinkSync(path, options?: EncodingOption): string`
+precedes an overload with the same inputs returning `string | Buffer`; unioning those returns
+loses precision. Compare source identities before shaping, rather than only the compiled F#
+parameter key. A receiver is separate from `getParametersOfSignature`: the compiler's
+`SignatureResponse.ThisParameter` supplies `ResolvedSignature.HasThisParameter`. Generic,
+rest and explicit-receiver signatures retain their existing collision policy. Assign expanded
+signature ordinals before filtering, so a later retained overload keeps its authenticated
+source ordinal rather than its new position.
