@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "compiler": "498f59d207e22c40f1ecc218dfa67d1db25629a231bd0948c3db92df7457afc7",
-  "generator": "e52b276afe596dd2068a800904dc7bc09f4df92aa01091cf548bacf8c6874e87",
+  "generator": "7f7ab57c24ef92538ffb03fe4ebf2107f8ce8fe700f240efd04d79ff96387843",
   "inferenceProfile": "d2f99097bf8701703dbad824988206bf0800602c089c9094d2b66092c161b32f",
   "owner": "FableCoreTsInput",
   "inputs": [
@@ -1801288,7 +1801288,7 @@
     }
   ],
   "compatibility": {
-    "apiVersion": 13,
+    "apiVersion": 14,
     "contractVersion": 1,
     "customizationVersion": 1,
     "identityVersion": 8,

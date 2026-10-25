@@ -3603,3 +3603,10 @@ customization version 1 and contract version 1 remain unchanged: source identity
 profile normalization and metadata interpretation retain their existing meanings. API-13
 producers are rejected before traversal, and the complete owner family must be regenerated
 with the same API-14 candidate.
+
+The API-14 regeneration passes all 161 golden-writing tests. All 157 existing corpus/Core.TS/
+Node manifests retain their tiers, symbol counts and per-symbol tiers against source6bc;
+the new Zod lab is the sole added manifest. Core.TS changes only its catalogue compatibility
+and producer fingerprint plus the matching input stamp. Both Core.TS and Node binding text
+remain unchanged. Full latest CloudEdge consumer compilation and runtime gates follow this
+artifact milestone.
