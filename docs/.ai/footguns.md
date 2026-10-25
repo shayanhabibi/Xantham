@@ -97,6 +97,16 @@ the global scope for a script. The ambient-root lab begins with its module to re
 
 ## Declaration catalogs
 
+**A complete constraint can disappear from naming without a resource omission.**
+An object alias such as `Env` has a TypeLiteral symbol; a consumer that reaches it only through
+a generic bound must retain the alias name. Catalog Resolve recovers the alias name only for
+actual Constraint/Default targets whose source TypeLiteral and TypeAlias declarations are
+authenticated and whose checker-declared alias type equals the bound type. Anonymous naming
+follows declaration and signature type parameters, then their source-named bounds/defaults.
+Inline structural bounds retain their existing constraint policy. A transformed application
+that keeps an alias symbol cannot claim the original alias name through this recovery.
+The bound-alias naming lab checks owner/consumer API agreement and imported nominal rejection.
+
 **Anonymous intersections can inherit different reachable parents in different runs.**
 `BotEnterprise.botManagement: BotBase & { ja3Hash: string }` is the same checker contract
 when reached through `Combined = BotEnterprise & Other`, but a producer reaches Combined

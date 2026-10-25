@@ -594,6 +594,20 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                 facts.NonNullableAlias |> Option.iter (walk path order)
                 facts.NonNullableApplication |> Option.iter (walk path order)
 
+                if flag TypeFlags.TypeParameter facts then
+                    for bound in Option.toList facts.Constraint @ Option.toList facts.Default do
+                        match Map.tryFind bound model.Types with
+                        | Some boundFacts when
+                            (boundFacts.SymbolName |> Option.exists (isSyntheticName >> not))
+                            && (hasAny (SymbolFlags.Interface ||| SymbolFlags.Class) boundFacts.SymbolFlags
+                                || not boundFacts.AliasDeclarations.IsEmpty)
+                            ->
+                            walk path order bound
+                        | _ -> ()
+
+                for parameter in declParamIds facts do
+                    walk path order parameter
+
                 // The generic declaration behind an instantiation is named ahead of it, so
                 // `Ready<T>` reached only through `Resource<T> = Ready<T> | ...` declares
                 // `Ready<'T>` once and instantiations are applications of it (§4.9).
@@ -731,6 +745,9 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                         @ (facts.AmbientClass |> Option.map snd |> Option.defaultValue [])
 
                     for signature in signatures do
+                        for parameter in signature.TypeParameters do
+                            walk (into "TypeParameter") order parameter
+
                         for p in signature.Parameters do
                             walk (into (Naming.pascalSegment p.Symbol.Name)) order p.TypeId
 

@@ -1335,6 +1335,12 @@ applied arguments retain their distinctions. Every direct arm must have complete
 contract evidence; primitive or unavailable/cyclic arms retain the earlier fallback. Existing
 source and F# API authentication rejects stale sources and incompatible union representations.
 This is part of identity compatibility 8 and is covered by the census owner-union lab.
+Catalog bound naming preserves source object aliases reached only through declaration or
+signature type parameters. Resolve authenticates the bound's TypeLiteral and alias declaration
+handles and requires exact checker-declared type equality before recovering its source name.
+Anonymous naming follows source-named constraints/defaults; inline structural constraints retain
+their existing policy. The bound-alias naming lab compares producer/consumer APIs and compiles
+valid and invalid consumers. Catalogue source, API and constraint guards remain unchanged.
 Opaque dependency aliases retain their argument owners and applications in identity, including
 the source dependencies of concrete defaults, even when member facts are intentionally widened.
 Anonymous literal unions use their literal values for identity; named aliases and enum members

@@ -7112,6 +7112,12 @@ let censusOwnerUnionIdentityTests =
     ]
 
 [<Tests>]
+let censusBoundAliasNamingTests =
+    testList "census bound alias naming fixture" [
+        yield! fixtureTests "census-bound-alias-naming-lab" (handFixture "census-bound-alias-naming-lab") GeneratorConfig.Default (fun _ -> [])
+    ]
+
+[<Tests>]
 let groupedDomAliasTests =
     testList "grouped DOM alias fixture" [
         yield!

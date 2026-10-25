@@ -3281,6 +3281,16 @@ let resolveDeclarationIdentities: Pass<ResolveModel> =
                     then
                         return Advanced model
                     else
+                        let bounds =
+                            model.Types
+                            |> Map.toList
+                            |> List.collect (fun (_, facts) ->
+                                if facts.Response.Flags.HasFlag TypeFlags.TypeParameter then
+                                    Option.toList facts.Constraint @ Option.toList facts.Default
+                                else
+                                    [])
+                            |> Set.ofList
+
                         let! types =
                             model.Types
                             |> Map.toArray
@@ -3302,9 +3312,48 @@ let resolveDeclarationIdentities: Pass<ResolveModel> =
                                     let! arguments = ctx.Session.getAliasTypeArgumentsOfType (typeId / uom<_>)
                                     let! alias = ctx.Session.getAliasSymbolOfType (typeId / uom<_>)
 
+                                    let! boundAlias =
+                                        match alias with
+                                        | ValueSome alias when
+                                            Set.contains typeId bounds
+                                            && facts.Response.Flags.HasFlag TypeFlags.Object
+                                            && not declarations.IsEmpty
+                                            && declarations
+                                               |> List.forall (fun declaration ->
+                                                   NodeHandle.parse (declaration / uom<_>)
+                                                   |> ValueOption.exists (fun handle ->
+                                                       handle.Kind = SyntaxKind.TypeLiteral))
+                                            && alias.Flags.HasFlag SymbolFlags.TypeAlias
+                                            && (alias.DeclarationHandles
+                                                |> ValueOption.exists (fun handles ->
+                                                    handles.Length > 0
+                                                    && handles
+                                                       |> Array.forall (fun declaration ->
+                                                           NodeHandle.parse (declaration / uom<_>)
+                                                           |> ValueOption.exists (fun handle ->
+                                                               handle.Kind = SyntaxKind.TypeAliasDeclaration))))
+                                            ->
+                                            async {
+                                                let! declared =
+                                                    attempt (ctx.Session.getDeclaredTypeOfSymbol alias.Reference)
+
+                                                return
+                                                    match declared with
+                                                    | Ok declared when declared.TypeId = typeId -> Some alias
+                                                    | _ -> None
+                                            }
+                                        | _ -> async.Return None
+
                                     return
                                         typeId,
                                         { facts with
+                                            SymbolName =
+                                                boundAlias |> Option.map _.SymbolName |> Option.orElse facts.SymbolName
+                                            SymbolParent =
+                                                boundAlias
+                                                |> Option.bind (fun symbol ->
+                                                    symbol.ParentSymbolId |> ValueOption.toOption)
+                                                |> Option.orElse facts.SymbolParent
                                             Declarations = declarations
                                             DeclarationArguments =
                                                 arguments |> ValueOption.defaultValue [||] |> Array.toList
