@@ -509,6 +509,41 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                         facts.Declarations
 
                 if List.isEmpty handles then
+                    let unionIdentity =
+                        if facts.AliasDeclarations.IsEmpty && not facts.UnionMembers.IsEmpty then
+                            let constituents =
+                                facts.UnionMembers |> List.choose (fun child -> Map.tryFind child shape.Types)
+
+                            let nominal (constituent: TypeFacts) =
+                                not constituent.Declarations.IsEmpty
+                                && constituent.Declarations
+                                   |> List.forall (fun handle ->
+                                       NodeHandle.parse (handle / uom<declHandle>)
+                                       |> ValueOption.exists (fun node ->
+                                           node.Kind = SyntaxKind.InterfaceDeclaration
+                                           || node.Kind = SyntaxKind.ClassDeclaration))
+
+                            if
+                                constituents.Length = facts.UnionMembers.Length
+                                && List.forall nominal constituents
+                            then
+                                let contracts =
+                                    facts.UnionMembers |> List.choose (typeIdentity (id :: visited) bindings)
+
+                                if contracts.Length = facts.UnionMembers.Length then
+                                    Some(
+                                        identity
+                                            "source-union"
+                                            (constituents |> List.collect _.Declarations)
+                                            (contracts |> List.map _.Key |> List.sort)
+                                    )
+                                else
+                                    None
+                            else
+                                None
+                        else
+                            None
+
                     let intersectionIdentity =
                         if facts.AliasDeclarations.IsEmpty && not facts.IntersectionMembers.IsEmpty then
                             let constituents =
@@ -536,7 +571,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                         else
                             None
 
-                    match intersectionIdentity, facts.NonNullableAlias with
+                    match Option.orElse unionIdentity intersectionIdentity, facts.NonNullableAlias with
                     | Some identity, _ -> Some identity
                     | None, Some alias ->
                         typeIdentity (id :: visited) bindings alias

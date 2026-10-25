@@ -1327,6 +1327,14 @@ identity. Incomplete or recursive constituent evidence retains the existing fall
 ownership retains the earlier canonical snapshot. The owner-intersection lab compares producer
 and consumer identities with different reachable parents and compiles their shared member API.
 Identity compatibility advances to 8; API and inference policy are unchanged by this correction.
+Anonymous unions of actual source-declared interface/class arms also use directly authenticated
+constituent contracts and normalized declaration handles before parent roles (2026-10-25).
+Sorted arm identity keys make this a union-of-nominal-contracts equivalence: repeated anonymous
+occurrences and arm order share identity, while independent nominal sources, named aliases and
+applied arguments retain their distinctions. Every direct arm must have complete source and
+contract evidence; primitive or unavailable/cyclic arms retain the earlier fallback. Existing
+source and F# API authentication rejects stale sources and incompatible union representations.
+This is part of identity compatibility 8 and is covered by the census owner-union lab.
 Opaque dependency aliases retain their argument owners and applications in identity, including
 the source dependencies of concrete defaults, even when member facts are intentionally widened.
 Anonymous literal unions use their literal values for identity; named aliases and enum members

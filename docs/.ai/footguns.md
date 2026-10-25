@@ -111,6 +111,20 @@ The source-ownership snapshot still precedes parent-role inference. The
 independent source contracts, consumer compilation and stale/API rejection. Identity contract 8
 requires regenerating earlier catalogues; this change alone alters neither API nor inference policy.
 
+**An anonymous union of nominal arms has a source contract independent of reachable parents.**
+The `tlsClientAuth: Auth | Placeholder` member can acquire Combined's parent role in a producer
+and Shield's in a consumer while both emit the same tagged union. Alias-less, declaration-less
+unions of actual source-declared interface/class arms use sorted direct arm identity contracts
+and normalized arm declaration handles. Two written anonymous unions over the same applied
+nominal arms intentionally share this contract; the compiler exposes no independent union
+occurrence handle. Distinct nominal source declarations, named aliases and concrete arguments
+retain their identities. Every arm must authenticate directly before parent-role inference;
+primitive, missing, cyclic or declaration-less arm evidence retains the existing fallback.
+API and source checks still reject incompatible representations or stale contracts. The
+`census-owner-union-identity-lab` covers reachability, order, repeated occurrences, independent
+source arms, generic applications, aliases and conservative fallback. This correction belongs
+to identity contract 8 alongside source-anchored intersections.
+
 **TypeScript library ownership is logical, not a platform distribution.** Installed
 `lib/lib.*.d.ts` files from `typescript` and recognized `@typescript/typescript-<rid>`
 packages share package identity `typescript`, their package-relative library path and
