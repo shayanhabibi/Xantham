@@ -321,6 +321,59 @@ let private widthKeepers =
       "export interface Wide { left: Box<string>; right: Box<number> }" ]
 
 [<Tests>]
+let frontierDeclaredAliasTests =
+    testCase "resolve oversized frontier preserves canonical generic alias operands" <| fun _ ->
+        use scratch = Scratch.directory "frontier-declared-alias"
+        let directory = scratch.Path
+        System.IO.File.WriteAllText(System.IO.Path.Combine(directory, "package.json"), """{"name":"frontier-declared-alias-lab","version":"1.0.0","types":"index.d.ts"}""")
+        let declaration = String.concat "\n" ([
+            "interface Response { text(): string }"
+            "type TypedResponse<T = unknown, U extends number = number, F extends string = T extends string ? 'text' : 'json'> = { _data: T; _status: U; _format: F };"
+            "type Parsed<T> = T extends object ? { [K in keyof T]: Parsed<T[K]> } : T;"
+            "type JsonReturn<T, U extends number> = Response & TypedResponse<Parsed<T>, U, 'json'>;"
+            "export interface Api { json<T, U extends number>(value: T, status: U): JsonReturn<T, U> }"
+        ] @ [
+            // Keep two distinct source contracts in every generation: interface applications
+            // alone become identity reads and stop exerting width pressure too early.
+            for index in 0 .. 11 do
+                for side in [ "Left"; "Right" ] do
+                    yield $"export interface {side}{index} {{ next: {side}{index + 1} }}"
+            yield "export interface Left12 { value: string }"
+            yield "export interface Right12 { value: number }"
+        ] @ widthKeepers)
+        System.IO.File.WriteAllText(System.IO.Path.Combine(directory, "index.d.ts"), declaration)
+        let configFile = System.IO.Path.Combine(directory, "xantham.json")
+        System.IO.File.WriteAllText(configFile, """{"module":"Frontier","entry":"index.d.ts","lib":["esnext"],"types":[],"declarationCatalog":true}""")
+        let resolve = async {
+            let! mailbox, ctx = Bootstrap.start (GeneratorConfig.loadFile configFile) directory
+            use _ = mailbox :> System.IDisposable
+            let! harvest, _ = Pipeline.runTier ctx Harvest.passes HarvestModel.Empty
+            let! resolved, _ = Pipeline.runTier ctx [ Resolve.resolveExportTypes; Resolve.resolveTypeTableWithWidth 1 ] (Pipeline.toResolve harvest)
+            let! aliases =
+                resolved.Types |> Map.toList |> List.map (fun (_, facts) -> async {
+                    let! alias = ctx.Session.getAliasSymbolOfType facts.Response.Id
+                    return alias
+                }) |> Async.Sequential
+            let alias = aliases |> Array.choose ValueOption.toOption |> Array.find (fun symbol -> symbol.Name = "JsonReturn")
+            let! declared = ctx.Session.getDeclaredTypeOfSymbol alias.Reference
+            return resolved, declared.TypeId
+        }
+        let resolved, declaredId = Async.RunSynchronously resolve
+        let declared = resolved.Types[declaredId]
+        let api = resolved.Types |> Map.toList |> List.map snd |> List.find (fun facts -> facts.SymbolName |> Option.exists (fun name -> string name = "Api"))
+        let method_ = api.Members |> List.find (fun member_ -> member_.Symbol.Name = "json")
+        let application = resolved.Types[method_.TypeId].CallSignatures.Head.ReturnTypeId
+        Expect.notEqual application declaredId "a method-parameter application is not the declared alias form"
+        Expect.equal resolved.Types[application].AliasTypeArguments.Length 2 "the application retains both signature arguments"
+        Expect.equal declared.IntersectionMembers.Length 2 "the compiler's declared alias form retains both operands"
+        for operand in declared.IntersectionMembers do
+            Expect.isTrue (Map.containsKey operand resolved.Types) "the canonical operand survives unrelated frontier pressure"
+            Expect.isFalse (Map.containsKey operand resolved.NotFollowed) "the operand is not left deferred"
+        let payload = declared.IntersectionMembers |> List.map (fun id -> resolved.Types[id]) |> List.find (fun facts -> facts.Members |> List.exists (fun member_ -> member_.Symbol.Name = "_data"))
+        Expect.equal payload.Members.Length 3 "the canonical applied operand retains its written contract"
+        Expect.isLessThan resolved.Types.Count 250 "canonical protection does not open unbounded applications"
+
+[<Tests>]
 let frontierCostTests =
     testList "resolve oversized frontier cost" [
         testCase "a diamond chain of interfaces resolves in time linear in its depth" <| fun _ ->

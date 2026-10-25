@@ -3549,3 +3549,19 @@ spellings retain their mapping; literal overload allocation also reserves synthe
 An impossible-key method on an ambient entrypoint class retains `MB007`: its abstract
 override contract needs separate exact-name override evidence. A concrete forwarding member
 cannot replace that contract. The entrypoint negative fixture pins the retained loss.
+
+### Resolve: canonical generic alias contract roots (2026-10-25)
+
+The bounded source-contract walk includes canonical generic aliases discovered after the export
+seeds. Eligibility requires actual source generic TypeAliasDeclaration nodes and the exact type
+ID returned by getDeclaredTypeOfSymbol for the alias. Per-type authentication and per-symbol
+declared-type queries are memoized. These finite declared forms restart contract traversal;
+applications keep the existing ancestry and ContractDepth limits, including method applications
+whose arguments happen to be type parameters. Width 32768 and the depth cutoff remain unchanged.
+
+The Hono/Chanfana Resolve-only diagnostic fails before this change because the canonical
+JSONRespondReturn intersection's TypedResponse operand is deferred, then passes with both
+operands retained. Its body takes 44.60 seconds before and 48.52 seconds after; resolved table
+size changes 149382 to 149402. The small width-one lab covers canonical/application distinction,
+and existing source-method, diamond, mutual wrapping/computed-literal and shared-root cost tests
+remain bounded. Catalogue source/API and applied-generic ownership guards are unchanged.

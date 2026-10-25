@@ -631,3 +631,20 @@ parameter key. A receiver is separate from `getParametersOfSignature`: the compi
 rest and explicit-receiver signatures retain their existing collision policy. Assign expanded
 signature ordinals before filtering, so a later retained overload keeps its authenticated
 source ordinal rather than its new position.
+
+## Declared generic alias operands survive frontier pressure (2026-10-25)
+
+Catalogue discovery can add a non-exported generic alias's declared form after the initial
+Resolve seeds. That form is a source contract even when its response carries alias arguments.
+Protect its written operand closure only after authenticating actual generic TypeAliasDeclaration
+nodes and exact equality with getDeclaredTypeOfSymbol. All-type-parameter arguments alone are
+insufficient: a method's application has its own binders and is not the alias declaration.
+Cache authentication per type and declared-type lookup per alias symbol. Applications retain
+the existing ancestry/depth limits; unavailable source or compiler evidence grants no exemption.
+
+The real Hono JSONRespondReturn canonical intersection lost its TypedResponse operand at width
+32768 while complete method applications survived. Selecting a complete application as the
+canonical form would change binder provenance. Keep the canonical source form instead; do not
+raise the global width budget or relax catalogue API/source authentication. Simple reductions
+with array or conditional arguments did not reproduce the cutoff: retained real-source RED/GREEN
+evidence is required alongside the small width-one positive and bounded-expansion regressions.

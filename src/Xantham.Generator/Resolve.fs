@@ -2698,6 +2698,98 @@ let internal resolveTypeTableObserved followWidth (observe: int -> int -> unit) 
                         |> Array.choose (fun (id, canonical) -> if canonical then Some id else None)
                         |> Set.ofArray
 
+                    let declaredAliasTypes =
+                        ConcurrentDictionary<SymbolKey, Lazy<System.Threading.Tasks.Task<int>>>()
+
+                    let canonicalAliases =
+                        ConcurrentDictionary<int, Lazy<System.Threading.Tasks.Task<bool>>>()
+
+                    // A catalogue can discover a non-exported generic alias after the seeds.
+                    // Its declared form owns a finite written operand closure. Signature-parameter
+                    // applications can look identical here; only the checker's exact declared ID
+                    // authenticates the form, and unavailable source evidence grants no exemption.
+                    let canonicalGenericAlias (ty: TypeResponse) =
+                        canonicalAliases
+                            .GetOrAdd(
+                                ty.Id,
+                                fun _ ->
+                                    lazy
+                                        (async {
+                                            let! result =
+                                                attempt (
+                                                    async {
+                                                        let! alias = ctx.Session.getAliasSymbolOfType ty.Id
+
+                                                        match alias with
+                                                        | ValueNone -> return false
+                                                        | ValueSome alias ->
+                                                            let! declarations =
+                                                                alias.Declarations
+                                                                |> ValueOption.defaultValue [||]
+                                                                |> Array.map (fun declaration ->
+                                                                    async {
+                                                                        match NodeHandle.parse declaration with
+                                                                        | ValueNone -> return false
+                                                                        | ValueSome handle ->
+                                                                            let! source = sourceFile ctx handle.Path
+
+                                                                            return
+                                                                                source
+                                                                                |> ValueOption.exists (fun source ->
+                                                                                    let node =
+                                                                                        Node.ofIndex<AnyNode>
+                                                                                            source
+                                                                                            handle.Index
+
+                                                                                    node.Kind =
+                                                                                        SyntaxKind
+                                                                                            .TypeAliasDeclaration
+                                                                                    && (Node.retag<
+                                                                                            AnyNode,
+                                                                                            TypeAliasDeclaration
+                                                                                         >
+                                                                                            node
+                                                                                        |> TypeAliasDeclaration
+                                                                                            .typeParameters
+                                                                                        |> Seq.isEmpty
+                                                                                        |> not))
+                                                                    })
+                                                                |> Async.Sequential
+
+                                                            if
+                                                                Array.isEmpty declarations
+                                                                || not (Array.forall id declarations)
+                                                            then
+                                                                return false
+                                                            else
+                                                                let lookup =
+                                                                    declaredAliasTypes.GetOrAdd(
+                                                                        alias.SymbolId,
+                                                                        fun _ ->
+                                                                            lazy
+                                                                                (async {
+                                                                                    let! declared =
+                                                                                        ctx.Session
+                                                                                            .getDeclaredTypeOfSymbol
+                                                                                            alias.Reference
+
+                                                                                    return declared.Id
+                                                                                 }
+                                                                                 |> Async.StartAsTask)
+                                                                    )
+
+                                                                let! declared = lookup.Value |> Async.AwaitTask
+                                                                return declared = ty.Id
+                                                    }
+                                                )
+
+                                            return result |> Result.defaultValue false
+                                         }
+                                         |> Async.StartAsTask)
+                            )
+                            .Value
+                        |> Async.AwaitTask
+
                     let sourceContractIds (table: Map<int<typeId>, TypeFacts>) =
                         async {
                             let! handles =
@@ -2709,12 +2801,32 @@ let internal resolveTypeTableObserved followWidth (observe: int -> int -> unit) 
                                     |> List.map (fun (id, facts: TypeFacts) ->
                                         async {
                                             let! handles = sourceDeclarationHandles facts.Response
-                                            return id, Set.ofList handles
+
+                                            let! canonical =
+                                                if
+                                                    facts.Response.AliasTypeArguments
+                                                    |> ValueOption.exists (Array.isEmpty >> not)
+                                                then
+                                                    canonicalGenericAlias facts.Response
+                                                else
+                                                    async.Return false
+
+                                            return id, Set.ofList handles, canonical
                                         })
                                     |> Async.Parallel)
                                 |> Async.Sequential
 
-                            let declarationsOf = handles |> Array.concat |> dict
+                            let declarationsOf =
+                                handles
+                                |> Array.concat
+                                |> Array.map (fun (id, handles, _) -> id, handles)
+                                |> dict
+
+                            let canonicalDeclaredAliases =
+                                handles
+                                |> Array.concat
+                                |> Array.choose (fun (id, _, canonical) -> if canonical then Some id else None)
+                                |> Set.ofArray
 
                             let nominalDeclaration (facts: TypeFacts) =
                                 facts.Response.ObjectFlags
@@ -2779,6 +2891,7 @@ let internal resolveTypeTableObserved followWidth (observe: int -> int -> unit) 
                                     let aliasApplication =
                                         response.AliasTypeArguments |> ValueOption.exists (Array.isEmpty >> not)
                                         && not (Set.contains id canonicalSeedAliases)
+                                        && not (Set.contains id canonicalDeclaredAliases)
 
                                     let instantiated =
                                         aliasApplication || response.Target |> ValueOption.exists ((<>) response.Id)
@@ -2857,7 +2970,11 @@ let internal resolveTypeTableObserved followWidth (observe: int -> int -> unit) 
                                                         push true parameter
 
                             for KeyValue(id, facts) in table do
-                                if nominalDeclaration facts || Map.containsKey id model.Types then
+                                if
+                                    nominalDeclaration facts
+                                    || Map.containsKey id model.Types
+                                    || Set.contains id canonicalDeclaredAliases
+                                then
                                     pending.Push(Set.empty, ContractDepth, true, id)
 
                                     while pending.Count > 0 do
