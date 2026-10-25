@@ -558,6 +558,68 @@ let private signatureSource (ctx: Context) (declaration: string voption) : Async
             | _ -> return None
     }
 
+/// The identifier a declaration node at `handle` is named by: a labelled tuple element, or a
+/// parameter whose name is an identifier.
+let private declaredIdentifier (ctx: Context) (handle: string) : Async<string option> =
+    async {
+        match NodeHandle.parse handle with
+        | ValueNone -> return None
+        | ValueSome handle ->
+            match! attempt (sourceFile ctx handle.Path) with
+            | Ok(ValueSome source) ->
+                let node = Node.ofIndex<AnyNode> source handle.Index
+
+                let name =
+                    match node.Kind with
+                    | SyntaxKind.NamedTupleMember ->
+                        Node.retag<AnyNode, NamedTupleMember> node
+                        |> NamedTupleMember.name
+                        |> ValueOption.bind _.Text
+                    | SyntaxKind.Parameter ->
+                        Node.retag<AnyNode, ParameterDeclaration> node
+                        |> ParameterDeclaration.name
+                        |> ValueOption.filter (fun name -> name.Kind = SyntaxKind.Identifier)
+                        |> ValueOption.bind _.Text
+                    | _ -> ValueNone
+
+                return ValueOption.toOption name
+            | _ -> return None
+    }
+
+/// The names an array binding pattern on a rest parameter writes, by position.
+let private restPatternNames (ctx: Context) (parameter: SymbolResponse) : Async<string option list> =
+    async {
+        match parameter.Declarations |> ValueOption.defaultValue [||] with
+        | [| declaration |] ->
+            match NodeHandle.parse declaration with
+            | ValueNone -> return []
+            | ValueSome handle ->
+                match! attempt (sourceFile ctx handle.Path) with
+                | Ok(ValueSome source) ->
+                    let node = Node.ofIndex<AnyNode> source handle.Index
+
+                    if node.Kind <> SyntaxKind.Parameter then
+                        return []
+                    else
+                        match Node.retag<AnyNode, ParameterDeclaration> node |> ParameterDeclaration.name with
+                        | ValueSome name when name.Kind = SyntaxKind.ArrayBindingPattern ->
+                            return
+                                Node.retag<BindingName, BindingPattern> name
+                                |> BindingPattern.elements
+                                |> Seq.map (fun element ->
+                                    if element.Kind <> SyntaxKind.BindingElement then
+                                        None
+                                    else
+                                        match BindingElement.dotDotDotToken element, BindingElement.name element with
+                                        | ValueNone, ValueSome name when name.Kind = SyntaxKind.Identifier ->
+                                            ValueOption.toOption name.Text
+                                        | _ -> None)
+                                |> Seq.toList
+                        | _ -> return []
+                | _ -> return []
+        | _ -> return []
+    }
+
 /// A type alias can bind unused parameters that disappear from its resolved type. Read the
 /// declaring alias rather than attaching that fact to a type shared with nongeneric aliases.
 let internal declarationHasTypeParameters (ctx: Context) (symbol: SymbolResponse) =
@@ -1014,11 +1076,189 @@ let private declaredByInfer (ctx: Context) (parameter: TypeResponse) : Async<boo
                        |> ValueOption.exists (fun parent -> parent.Kind = SyntaxKind.InferType)
     }
 
+let private isLibFile (declaration: string) =
+    match NodeHandle.parse declaration with
+    | ValueSome declaration ->
+        let file = System.IO.Path.GetFileName declaration.Path
+
+        file.StartsWith("lib.", System.StringComparison.Ordinal)
+        && file.EndsWith(".d.ts", System.StringComparison.Ordinal)
+    | ValueNone -> false
+
+/// A program over the compiler's complete ECMAScript lib (`esnext`), rooted at the lib file
+/// declaring the program's global `Symbol`, one per connection and created on first use. `None`
+/// when the program declares no lib `Symbol` to root it at.
+let private compilerLibPrograms =
+    System.Runtime.CompilerServices.ConditionalWeakTable<
+        TscMailbox,
+        Lazy<System.Threading.Tasks.Task<Session<TscMailbox> option>>
+     >()
+
+let private compilerLibProgram (ctx: Context) : Async<Session<TscMailbox> option> =
+    compilerLibPrograms
+        .GetValue(
+            ctx.Session.Transport,
+            fun mailbox ->
+                lazy
+                    (async {
+                        let! symbol = ctx.Session.resolveName ("Symbol", SymbolFlags.Value)
+
+                        let root =
+                            symbol
+                            |> ValueOption.bind _.Declarations
+                            |> ValueOption.defaultValue [||]
+                            |> Array.tryFind isLibFile
+                            |> Option.bind (NodeHandle.parse >> ValueOption.toOption)
+
+                        match root with
+                        | None -> return None
+                        | Some root ->
+                            let! snapshot =
+                                mailbox.createSnapshot (
+                                    createPrograms =
+                                        [|
+                                            { CreateSnapshotProgramParams.Default with
+                                                RootFiles = ValueSome [| DocumentIdentifier.FileName root.Path |]
+                                                CompilerOptions =
+                                                    { RawCompilerOptions.Default with
+                                                        Lib = ValueSome [| "esnext" |]
+                                                    }
+                                            }
+                                        |]
+                                )
+
+                            return Some(mailbox.Session snapshot)
+                     }
+                     |> Async.StartAsTask)
+        )
+        .Value
+    |> Async.AwaitTask
+
+/// Whether the compiler's complete ECMAScript lib declares `Symbol.<key>`, independent of the
+/// program's `lib` option.
+let private compilerLibDeclaresSymbol (ctx: Context) (key: string) : Async<bool> =
+    async {
+        match! compilerLibProgram ctx with
+        | None -> return false
+        | Some session ->
+            match! session.resolveName ("Symbol", SymbolFlags.Value) with
+            | ValueNone -> return false
+            | ValueSome symbol ->
+                let! constructor = session.getTypeOfSymbol symbol.Reference
+
+                match! session.getPropertyOfType (constructor.Id, key) with
+                | ValueNone -> return false
+                | ValueSome property ->
+                    return property.Declarations |> ValueOption.defaultValue [||] |> Array.exists isLibFile
+    }
+
+/// Whether a class member declaration is TypeScript-private: it carries the `private` modifier,
+/// or its name is a private identifier (`#name`). A `protected` member and a public member named
+/// `_name` both read `false`.
+let private declarationPrivate (ctx: Context) (declaration: string) : Async<bool> =
+    async {
+        match NodeHandle.parse declaration with
+        | ValueNone -> return false
+        | ValueSome handle ->
+            let! file = sourceFile ctx handle.Path
+
+            return
+                match file with
+                | ValueNone -> false
+                | ValueSome file ->
+                    let node = Node.ofIndex<AnyNode> file handle.Index
+
+                    let modifiers, name =
+                        match node.Kind with
+                        | SyntaxKind.PropertyDeclaration ->
+                            let node = Node.retag<AnyNode, PropertyDeclaration> node
+                            PropertyDeclaration.modifiers node, PropertyDeclaration.name node
+                        | SyntaxKind.MethodDeclaration ->
+                            let node = Node.retag<AnyNode, MethodDeclaration> node
+                            MethodDeclaration.modifiers node, MethodDeclaration.name node
+                        | SyntaxKind.GetAccessor ->
+                            let node = Node.retag<AnyNode, GetAccessorDeclaration> node
+                            GetAccessorDeclaration.modifiers node, GetAccessorDeclaration.name node
+                        | SyntaxKind.SetAccessor ->
+                            let node = Node.retag<AnyNode, SetAccessorDeclaration> node
+                            SetAccessorDeclaration.modifiers node, SetAccessorDeclaration.name node
+                        | SyntaxKind.Constructor ->
+                            ConstructorDeclaration.modifiers (Node.retag<AnyNode, ConstructorDeclaration> node),
+                            ValueNone
+                        | SyntaxKind.Parameter ->
+                            ParameterDeclaration.modifiers (Node.retag<AnyNode, ParameterDeclaration> node), ValueNone
+                        | _ -> Seq.empty, ValueNone
+
+                    modifiers
+                    |> Seq.exists (fun modifier -> modifier.Kind = SyntaxKind.PrivateKeyword)
+                    || name
+                       |> ValueOption.exists (fun name -> name.Kind = SyntaxKind.PrivateIdentifier)
+    }
+
+/// Whether every declaration of a member is TypeScript-private (`declarationPrivate`). A member
+/// with no declaration reads `false`, as does an accessor pair whose getter is public.
+let private declaredPrivate (ctx: Context) (declarations: string array voption) : Async<bool> =
+    async {
+        match declarations |> ValueOption.defaultValue [||] with
+        | [||] -> return false
+        | declarations ->
+            let! verdicts = declarations |> Array.map (declarationPrivate ctx) |> Async.Parallel
+            return Array.forall id verdicts
+    }
+
+/// Whether an accessor property's setter is TypeScript-private behind a public getter: every
+/// `set` declaration is private and some declaration is not. Outside the class the property
+/// reads as `readonly`.
+let private privateSetter (ctx: Context) (declarations: string array voption) : Async<bool> =
+    async {
+        let declarations = declarations |> ValueOption.defaultValue [||]
+
+        let! facts =
+            declarations
+            |> Array.map (fun declaration ->
+                async {
+                    let! isPrivate = declarationPrivate ctx declaration
+
+                    let isSetter =
+                        NodeHandle.parse declaration
+                        |> ValueOption.exists (fun handle -> handle.Kind = SyntaxKind.SetAccessor)
+
+                    return isSetter, isPrivate
+                })
+            |> Async.Parallel
+
+        let setters = facts |> Array.filter fst
+
+        return
+            setters.Length > 0
+            && setters |> Array.forall snd
+            && facts |> Array.exists (snd >> not)
+    }
+
+/// The properties of a type that a binding carries, every property except a TypeScript-private
+/// one (`declaredPrivate`), and whether the type has a private property.
+let private publicPropertiesOfType (ctx: Context) (ty: TypeResponse) : Async<SymbolResponse array * bool> =
+    async {
+        let! properties = ctx.Session.getPropertiesOfType ty.Id
+        let properties = properties |> ValueOption.defaultValue [||]
+
+        let! privacy =
+            properties
+            |> Array.map (fun property -> declaredPrivate ctx property.Declarations)
+            |> Async.Parallel
+
+        return Array.zip properties privacy |> Array.filter (snd >> not) |> Array.map fst, Array.contains true privacy
+    }
+
 /// The well-known symbol referenced by a member's computed key: `Some "iterator"` for
 /// `[Symbol.iterator]`. A well-known symbol is a `SymbolConstructor` property declared by a
-/// `lib.*.d.ts` file. A key referencing a package's own `unique symbol` reads `None`, including
-/// one escaped as `__@iterator@<id>`, as does a `SymbolConstructor` property declared solely by a
-/// package's augmentation (`Symbol.observable`).
+/// `lib.*.d.ts` file of the program, or, when a package's augmentation is the program's only
+/// declaration (`Symbol.asyncDispose` under `lib: ["es2020"]`), by the compiler's complete
+/// ECMAScript lib; the key then resolves to a property of the program's global
+/// `SymbolConstructor` through the global `Symbol`. A key referencing a package's own
+/// `unique symbol` reads `None`, including one escaped as `__@iterator@<id>` or keyed through a
+/// namespace-local `Symbol`, as does a `SymbolConstructor` property absent from the compiler's lib
+/// (`Symbol.observable`).
 let private wellKnownSymbol (ctx: Context) (property: SymbolResponse) : Async<string option> =
     async {
         match
@@ -1073,15 +1313,16 @@ let private wellKnownSymbol (ctx: Context) (property: SymbolResponse) : Async<st
                                 ->
                                 key.Text
                                 |> ValueOption.toOption
-                                |> Option.map (fun text -> text, Node.index key, key.Kind)
+                                |> Option.map (fun text ->
+                                    text, (Node.index key, key.Kind), (Node.index receiver, receiver.Kind))
                             | _ -> None
                         | _ -> None
                     | _ -> None
 
             match candidate with
             | None -> return None
-            | Some(text, index, kind) ->
-                let! symbol =
+            | Some(text, (keyIndex, keyKind), (receiverIndex, receiverKind)) ->
+                let symbolAt index kind =
                     ctx.Session.getSymbolAtLocation (
                         NodeHandle.format
                             {
@@ -1091,18 +1332,34 @@ let private wellKnownSymbol (ctx: Context) (property: SymbolResponse) : Async<st
                             }
                     )
 
-                let declaredByLib =
-                    symbol
-                    |> ValueOption.bind _.Declarations
-                    |> ValueOption.defaultValue [||]
-                    |> Array.exists (fun declaration ->
-                        match NodeHandle.parse declaration with
-                        | ValueSome declaration ->
-                            let file = System.IO.Path.GetFileName declaration.Path
+                let! symbol = symbolAt keyIndex keyKind
 
-                            file.StartsWith("lib.", System.StringComparison.Ordinal)
-                            && file.EndsWith(".d.ts", System.StringComparison.Ordinal)
-                        | ValueNone -> false)
+                let declarations =
+                    symbol |> ValueOption.bind _.Declarations |> ValueOption.defaultValue [||]
+
+                let! declaredByLib =
+                    if Array.exists isLibFile declarations then
+                        async.Return true
+                    elif Array.isEmpty declarations then
+                        async.Return false
+                    else
+                        async {
+                            let! receiver = symbolAt receiverIndex receiverKind
+                            let! globalSymbol = ctx.Session.resolveName ("Symbol", SymbolFlags.Value)
+
+                            match receiver, globalSymbol, symbol with
+                            | ValueSome receiver, ValueSome globalSymbol, ValueSome symbol when
+                                receiver.SymbolId = globalSymbol.SymbolId
+                                ->
+                                let! constructor = ctx.Session.getTypeOfSymbol globalSymbol.Reference
+                                let! property = ctx.Session.getPropertyOfType (constructor.Id, text)
+
+                                match property with
+                                | ValueSome property when property.SymbolId = symbol.SymbolId ->
+                                    return! compilerLibDeclaresSymbol ctx text
+                                | _ -> return false
+                            | _ -> return false
+                        }
 
                 return if declaredByLib then Some text else None
     }
@@ -1117,7 +1374,14 @@ let private resolveMember (ctx: Context) isProperty (property: SymbolResponse) =
         // `readonly` modifier is the checker's to see, so ask it.
         let! readOnly =
             if isProperty then
-                ctx.Session.isReadonlySymbol property.Reference
+                async {
+                    let! declared = ctx.Session.isReadonlySymbol property.Reference
+
+                    if declared then
+                        return true
+                    else
+                        return! privateSetter ctx property.Declarations
+                }
             else
                 async.Return false
 
@@ -1180,6 +1444,12 @@ let private resolveSignatures (ctx: Context) (trace: Trace option) (registers: R
                     let! parameters = ctx.Session.getParametersOfSignature signature.Id
                     let parameters = parameters |> ValueOption.defaultValue [||]
 
+                    let! isPrivate =
+                        match signature.Declaration with
+                        | ValueSome declaration when kind = SignatureKind.Construct ->
+                            declarationPrivate ctx declaration
+                        | _ -> async.Return false
+
                     let! parameterFacts =
                         parameters |> Array.map (resolveMember ctx false) |> Async.Parallel
 
@@ -1208,15 +1478,24 @@ let private resolveSignatures (ctx: Context) (trace: Trace option) (registers: R
                         else
                             async.Return None
 
+                    let hasRest = signature.Flags.HasFlag SignatureFlags.HasRestParameter
+
+                    let! restPattern =
+                        match Array.tryLast parameters with
+                        | Some rest when hasRest -> restPatternNames ctx rest
+                        | _ -> async.Return []
+
                     return
                         {
                             Parameters = parameterFacts |> Array.map fst |> Array.toList
-                            HasRest = signature.Flags.HasFlag SignatureFlags.HasRestParameter
+                            HasRest = hasRest
                             TypeParameters = typeParameters |> Array.map _.TypeId |> Array.toList
                             IsAbstract = signature.Flags.HasFlag SignatureFlags.Abstract
+                            IsPrivate = isPrivate
                             ReturnTypeId = returnType.TypeId
                             Source = source
                             OwnDoc = ownDoc
+                            RestPatternNames = restPattern
                         },
                         [
                             yield! channel trace $"{label}-parameter" (parameterFacts |> Array.map snd |> Array.toList)
@@ -1233,8 +1512,7 @@ let private resolveSignatures (ctx: Context) (trace: Trace option) (registers: R
 /// `A & B` are both sets, a property both declare typed as the intersection of its two types.
 let private deriveStructure (ctx: Context) (trace: Trace option) (registers: Registers) (ty: TypeResponse) =
     async {
-        let! properties = ctx.Session.getPropertiesOfType ty.Id
-        let properties = properties |> ValueOption.defaultValue [||]
+        let! properties, privateMembers = publicPropertiesOfType ctx ty
 
         let! members = properties |> Array.map (resolveMember ctx true) |> Async.Parallel
 
@@ -1270,6 +1548,7 @@ let private deriveStructure (ctx: Context) (trace: Trace option) (registers: Reg
         return
             {|
                 Members = members |> Array.map fst |> Array.toList
+                PrivateMembers = privateMembers
                 IndexInfos =
                     indexInfos
                     |> List.map (fun info ->
@@ -1530,6 +1809,7 @@ let private deriveFacts
             return
                 { TypeFacts.shallow ty with
                     Members = structure |> Option.map _.Members |> Option.defaultValue []
+                    PrivateMembers = structure |> Option.exists _.PrivateMembers
                     IndexInfos = structure |> Option.map _.IndexInfos |> Option.defaultValue []
                     CallSignatures = structure |> Option.map _.CallSignatures |> Option.defaultValue []
                     ConstructSignatures = structure |> Option.map _.ConstructSignatures |> Option.defaultValue []
@@ -1539,6 +1819,22 @@ let private deriveFacts
                 channel trace "intersection-members" members
                 @ channel trace "alias-type-arguments" aliasTypeArguments
                 @ (structure |> Option.map _.Discovered |> Option.defaultValue [])
+        elif has TypeFlags.ESSymbol || has TypeFlags.UniqueESSymbol then
+            // The apparent type of `symbol` is the compiler lib's global `Symbol` interface,
+            // followed as a nominal edge so a reference is written through the lib owner's name.
+            let! apparent = ctx.Session.getApparentType ty.Id
+
+            let apparent =
+                if apparent.Id <> ty.Id && apparent.Flags.HasFlag TypeFlags.Object then
+                    Some apparent
+                else
+                    None
+
+            return
+                { TypeFacts.shallow ty with
+                    SymbolApparentType = apparent |> Option.map _.TypeId
+                },
+                channel trace "symbol-apparent" (Option.toList apparent)
         elif has TypeFlags.EnumLiteral then
             // An enum member: its symbol names the F# enum case (§4.7); the value is already
             // on the response.
@@ -1903,6 +2199,7 @@ let private deriveFacts
                             SymbolFlags = symbol |> ValueOption.map _.Flags |> ValueOption.defaultValue SymbolFlags.None
                             NamespacePath = namespacePath
                             Members = structure.Members
+                            PrivateMembers = structure.PrivateMembers
                             Declarations = []
                             DeclarationArguments = []
                             AliasDeclarations = []
@@ -1914,6 +2211,7 @@ let private deriveFacts
                             AmbientClass = ambientClass
                             TypeArguments = typeArguments |> List.map _.TypeId
                             TupleElements = tupleElements
+                            TupleLabels = []
                             AliasTypeArguments = aliasTypeArguments |> List.map _.TypeId
                             IntersectionMembers = []
                             Constraint = None
@@ -1930,6 +2228,7 @@ let private deriveFacts
                             NonNullableApplication = None
                             AliasIdentity = None
                             UnresolvedName = None
+                            SymbolApparentType = None
                         },
                         discovered
         elif has TypeFlags.TypeParameter && ty.IsThisType <> ValueSome true then
@@ -1955,11 +2254,10 @@ let private deriveFacts
                 match keyOfOperand with
                 | ValueSome operand when operand.Flags.HasFlag TypeFlags.Object ->
                     async {
-                        let! properties = ctx.Session.getPropertiesOfType operand.Id
+                        let! properties, _ = publicPropertiesOfType ctx operand
 
                         return!
                             properties
-                            |> ValueOption.defaultValue [||]
                             |> Array.map (fun property -> ctx.Session.getTypeOfSymbol property.Reference)
                             |> Async.Parallel
                     }
@@ -2967,29 +3265,85 @@ let private resolveAliasParameters: Pass<ResolveModel> =
                 }
     }
 
+/// Records the element labels of every tuple a rest parameter is typed by, directly or as a union
+/// arm, so its spread parameters are named as written. It reads after the walk, over a closed
+/// type table, and adds no type to it.
+let private resolveRestTupleLabels: Pass<ResolveModel> =
+    {
+        Name = "resolve-rest-tuple-labels"
+        Run =
+            fun ctx model ->
+                async {
+                    let isTuple id =
+                        Map.tryFind id model.Types
+                        |> Option.exists (fun facts -> facts.Response.IsTupleType = ValueSome true)
+
+                    let tuples =
+                        model.Types
+                        |> Map.toList
+                        |> List.collect (fun (_, facts) -> facts.CallSignatures @ facts.ConstructSignatures)
+                        |> List.filter _.HasRest
+                        |> List.choose (fun signature -> List.tryLast signature.Parameters)
+                        |> List.collect (fun rest ->
+                            match Map.tryFind rest.TypeId model.Types with
+                            | Some facts when facts.Response.Flags.HasFlag TypeFlags.Union -> facts.UnionMembers
+                            | _ -> [ rest.TypeId ])
+                        |> List.filter isTuple
+                        |> List.distinct
+
+                    let mutable types = model.Types
+
+                    for id in tuples do
+                        let! target = attempt (ctx.Session.getTargetOfType model.Types[id].Response.Id)
+
+                        match target with
+                        | Ok target ->
+                            let! labels =
+                                target.LabeledElementDeclarations
+                                |> ValueOption.defaultValue [||]
+                                |> Array.map (fun handle ->
+                                    if isNull handle then
+                                        async.Return None
+                                    else
+                                        declaredIdentifier ctx handle)
+                                |> Async.Sequential
+
+                            if labels |> Array.exists Option.isSome then
+                                types <-
+                                    types
+                                    |> Map.change
+                                        id
+                                        (Option.map (fun facts ->
+                                            { facts with
+                                                TupleLabels = Array.toList labels
+                                            }))
+                        | Error _ -> ()
+
+                    return Advanced { model with Types = types }
+                }
+    }
+
 let passes: Pass<ResolveModel> list =
     [
         resolveExportTypes
         resolveAliasParameters
         resolveTypeTable
         resolveDeclarationIdentities
+        resolveRestTupleLabels
     ]
 
 let internal customizationFacts (ctx: Context) (facts: TypeFacts) =
     async {
-        let! properties = ctx.Session.getPropertiesOfType facts.Response.Id
+        let! properties, privateMembers = publicPropertiesOfType ctx facts.Response
 
-        let! members =
-            properties
-            |> ValueOption.defaultValue [||]
-            |> Array.map (resolveMember ctx true)
-            |> Async.Parallel
+        let! members = properties |> Array.map (resolveMember ctx true) |> Async.Parallel
 
         let! bases = ctx.Session.getBaseTypes facts.Response.Id
 
         return
             { facts with
                 Members = members |> Array.map fst |> Array.toList
+                PrivateMembers = privateMembers
                 BaseTypes = bases |> ValueOption.defaultValue [||] |> Array.map _.TypeId |> Array.toList
             },
             (members |> Array.map snd |> Array.toList)

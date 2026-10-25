@@ -115,7 +115,7 @@ module Es =
         /// <summary>
         /// The name of the decorated class element.
         /// </summary>
-        abstract name: obj
+        abstract name: U2<string, Symbol>
         /// <summary>
         /// A value indicating whether the class element is a static (<c>true</c>) or instance (<c>false</c>) element.
         /// </summary>
@@ -165,7 +165,7 @@ module Es =
         [<ParamObject; Emit("({ kind: 'method', ...$0 })")>]
         static member Create
             (
-                name: obj,
+                name: U2<string, Symbol>,
                 ``static``: bool,
                 ``private``: bool,
                 access: ClassMethodDecoratorContext.Access<'This, 'Value>,
@@ -216,7 +216,7 @@ module Es =
         /// <summary>
         /// The name of the decorated class element.
         /// </summary>
-        abstract name: obj
+        abstract name: U2<string, Symbol>
         /// <summary>
         /// A value indicating whether the class element is a static (<c>true</c>) or instance (<c>false</c>) element.
         /// </summary>
@@ -240,7 +240,7 @@ module Es =
         [<ParamObject; Emit("({ kind: 'getter', ...$0 })")>]
         static member Create
             (
-                name: obj,
+                name: U2<string, Symbol>,
                 ``static``: bool,
                 ``private``: bool,
                 access: ClassGetterDecoratorContext.Access<'This, 'Value>,
@@ -291,7 +291,7 @@ module Es =
         /// <summary>
         /// The name of the decorated class element.
         /// </summary>
-        abstract name: obj
+        abstract name: U2<string, Symbol>
         /// <summary>
         /// A value indicating whether the class element is a static (<c>true</c>) or instance (<c>false</c>) element.
         /// </summary>
@@ -315,7 +315,7 @@ module Es =
         [<ParamObject; Emit("({ kind: 'setter', ...$0 })")>]
         static member Create
             (
-                name: obj,
+                name: U2<string, Symbol>,
                 ``static``: bool,
                 ``private``: bool,
                 access: ClassSetterDecoratorContext.Access<'This, 'Value>,
@@ -366,7 +366,7 @@ module Es =
         /// <summary>
         /// The name of the decorated class element.
         /// </summary>
-        abstract name: obj
+        abstract name: U2<string, Symbol>
         /// <summary>
         /// A value indicating whether the class element is a static (<c>true</c>) or instance (<c>false</c>) element.
         /// </summary>
@@ -389,7 +389,7 @@ module Es =
         [<ParamObject; Emit("({ kind: 'accessor', ...$0 })")>]
         static member Create
             (
-                name: obj,
+                name: U2<string, Symbol>,
                 ``static``: bool,
                 ``private``: bool,
                 access: ClassAccessorDecoratorContext.Access<'This, 'Value>,
@@ -500,7 +500,7 @@ module Es =
         /// <summary>
         /// The name of the decorated class element.
         /// </summary>
-        abstract name: obj
+        abstract name: U2<string, Symbol>
         /// <summary>
         /// A value indicating whether the class element is a static (<c>true</c>) or instance (<c>false</c>) element.
         /// </summary>
@@ -523,7 +523,7 @@ module Es =
         [<ParamObject; Emit("({ kind: 'field', ...$0 })")>]
         static member Create
             (
-                name: obj,
+                name: U2<string, Symbol>,
                 ``static``: bool,
                 ``private``: bool,
                 access: ClassFieldDecoratorContext.Access<'This, 'Value>,
@@ -566,28 +566,30 @@ module Es =
         [<Emit("$0($1...)")>]
         abstract Invoke<'TFunction when 'TFunction :> Function> : target: 'TFunction -> 'TFunction option
 
-    type PropertyDecorator = delegate of target: Object * propertyKey: obj -> unit
+    type PropertyDecorator = delegate of target: Object * propertyKey: U2<string, Symbol> -> unit
 
     [<Fickl.Core.CallableInterface>]
     type MethodDecorator =
         [<Emit("$0($1...)")>]
         abstract Invoke<'T> :
-            target: Object * propertyKey: obj * descriptor: TypedPropertyDescriptor<'T> ->
+            target: Object * propertyKey: U2<string, Symbol> * descriptor: TypedPropertyDescriptor<'T> ->
                 TypedPropertyDescriptor<'T> option
 
-    type ParameterDecorator = delegate of target: Object * propertyKey: obj option * parameterIndex: float -> unit
+    type ParameterDecorator =
+        delegate of target: Object * propertyKey: U2<string, Symbol> option * parameterIndex: float -> unit
 
     type Apply<'T> = delegate of target: 'T * thisArg: obj * argArray: obj[] -> obj
 
     type Construct<'T> = delegate of target: 'T * argArray: obj[] * newTarget: Function -> obj
 
-    type DefineProperty<'T> = delegate of target: 'T * property: obj * attributes: PropertyDescriptor -> bool
+    type DefineProperty<'T> =
+        delegate of target: 'T * property: U2<string, Symbol> * attributes: PropertyDescriptor -> bool
 
-    type DeleteProperty<'T> = delegate of target: 'T * p: obj -> bool
+    type DeleteProperty<'T> = delegate of target: 'T * p: U2<string, Symbol> -> bool
 
-    type Get<'T> = delegate of target: 'T * p: obj * receiver: obj -> obj
+    type Get<'T> = delegate of target: 'T * p: U2<string, Symbol> * receiver: obj -> obj
 
-    type GetOwnPropertyDescriptor<'T> = delegate of target: 'T * p: obj -> PropertyDescriptor option
+    type GetOwnPropertyDescriptor<'T> = delegate of target: 'T * p: U2<string, Symbol> -> PropertyDescriptor option
 
     type GlobalThis =
         abstract NaN: float with get, set
@@ -6316,7 +6318,7 @@ module Es =
         abstract globalThis: GlobalThis
         abstract undefined: unit
 
-    type Has<'T> = delegate of target: 'T * p: obj -> bool
+    type Has<'T> = delegate of target: 'T * p: U2<string, Symbol> -> bool
 
     [<Interface>]
     type Intl =
@@ -6508,13 +6510,8 @@ module Es =
         /// </param>
         abstract find: predicate: Fable.Core.TS.Es.ArrayIterator.Find.Predicate2<'T> -> 'T option
 
-    [<Interface>]
     type RawJSONInstance =
-        abstract ``__#1@#isRawJson``: obj with get, set
         abstract rawJSON: string
-
-        [<ParamObject; Emit("$0")>]
-        static member Create(``__#1@#isRawJson``: obj, rawJSON: string) : RawJSONInstance = jsNative
 
     type Reflect =
         /// <summary>
@@ -6613,7 +6610,7 @@ module Es =
         /// are those that are defined directly on that object, and are not inherited from the object's prototype.
         /// </summary>
         /// <param name="target">Object that contains the own properties.</param>
-        abstract ownKeys: target: obj -> obj[]
+        abstract ownKeys: target: obj -> U2<string, Symbol>[]
         /// <summary>
         /// Prevents the addition of new properties to an object.
         /// </summary>
@@ -6648,7 +6645,7 @@ module Es =
         /// <returns>Whether setting the prototype was successful.</returns>
         abstract setPrototypeOf: target: obj * ?proto: obj -> bool
 
-    type Set2<'T> = delegate of target: 'T * p: obj * newValue: obj * receiver: obj -> bool
+    type Set2<'T> = delegate of target: 'T * p: U2<string, Symbol> * newValue: obj * receiver: obj -> bool
 
     type SetPrototypeOf<'T> = delegate of target: 'T * v: obj option -> bool
 
@@ -6848,7 +6845,7 @@ module Es =
         /// <returns>a new Set containing all the elements in this Set and also all the elements in the argument.</returns>
         abstract union<'U> : other: ReadonlySetLike<'U> -> Set<U2<'T, 'U>>
         /// <returns>a new Set containing all the elements which are both in this Set and in the argument.</returns>
-        abstract intersection<'U> : other: ReadonlySetLike<'U> -> Set<obj>
+        abstract intersection<'U> : other: ReadonlySetLike<'U> -> Set<JS.Intersect<'T, 'U>>
         /// <returns>a new Set containing all the elements in this Set which are not also in the argument.</returns>
         abstract difference<'U> : other: ReadonlySetLike<'U> -> Set<'T>
         /// <returns>a new Set containing all the elements which are in either this Set or in the argument, but not in both.</returns>
@@ -6898,7 +6895,7 @@ module Es =
         /// <returns>a new Set containing all the elements in this Set and also all the elements in the argument.</returns>
         abstract union<'U> : other: ReadonlySetLike<'U> -> Set<U2<'T, 'U>>
         /// <returns>a new Set containing all the elements which are both in this Set and in the argument.</returns>
-        abstract intersection<'U> : other: ReadonlySetLike<'U> -> Set<obj>
+        abstract intersection<'U> : other: ReadonlySetLike<'U> -> Set<JS.Intersect<'T, 'U>>
         /// <returns>a new Set containing all the elements in this Set which are not also in the argument.</returns>
         abstract difference<'U> : other: ReadonlySetLike<'U> -> Set<'T>
         /// <returns>a new Set containing all the elements which are in either this Set or in the argument, but not in both.</returns>
@@ -7079,7 +7076,7 @@ module Es =
         /// A method that returns the default iterator for an object. Called by the semantics of the
         /// for-of statement.
         /// </summary>
-        abstract iterator: obj
+        abstract iterator: Symbol
         /// <summary>
         /// A reference to the prototype.
         /// </summary>
@@ -7089,85 +7086,85 @@ module Es =
         /// Otherwise, returns a new symbol with this key.
         /// </summary>
         /// <param name="key">key to search for.</param>
-        abstract ``for``: key: string -> obj
+        abstract ``for``: key: string -> Symbol
         /// <summary>
         /// Returns a key from the global symbol registry matching the given Symbol if found.
         /// Otherwise, returns undefined.
         /// </summary>
         /// <param name="sym">Symbol to find the key for.</param>
-        abstract keyFor: sym: obj -> string option
+        abstract keyFor: sym: Symbol -> string option
         /// <summary>
         /// A method that determines if a constructor object recognizes an object as one of the
         /// constructor’s instances. Called by the semantics of the instanceof operator.
         /// </summary>
-        abstract hasInstance: obj
+        abstract hasInstance: Symbol
         /// <summary>
         /// A Boolean value that if true indicates that an object should flatten to its array elements
         /// by Array.prototype.concat.
         /// </summary>
-        abstract isConcatSpreadable: obj
+        abstract isConcatSpreadable: Symbol
         /// <summary>
         /// A regular expression method that matches the regular expression against a string. Called
         /// by the String.prototype.match method.
         /// </summary>
-        abstract ``match``: obj
+        abstract ``match``: Symbol
         /// <summary>
         /// A regular expression method that replaces matched substrings of a string. Called by the
         /// String.prototype.replace method.
         /// </summary>
-        abstract replace: obj
+        abstract replace: Symbol
         /// <summary>
         /// A regular expression method that returns the index within a string that matches the
         /// regular expression. Called by the String.prototype.search method.
         /// </summary>
-        abstract search: obj
+        abstract search: Symbol
         /// <summary>
         /// A function valued property that is the constructor function that is used to create
         /// derived objects.
         /// </summary>
-        abstract species: obj
+        abstract species: Symbol
         /// <summary>
         /// A regular expression method that splits a string at the indices that match the regular
         /// expression. Called by the String.prototype.split method.
         /// </summary>
-        abstract split: obj
+        abstract split: Symbol
         /// <summary>
         /// A method that converts an object to a corresponding primitive value.
         /// Called by the ToPrimitive abstract operation.
         /// </summary>
-        abstract toPrimitive: obj
+        abstract toPrimitive: Symbol
         /// <summary>
         /// A String value that is used in the creation of the default string description of an object.
         /// Called by the built-in method Object.prototype.toString.
         /// </summary>
-        abstract toStringTag: obj
+        abstract toStringTag: Symbol
         /// <summary>
         /// An Object whose truthy properties are properties that are excluded from the 'with'
         /// environment bindings of the associated objects.
         /// </summary>
-        abstract unscopables: obj
+        abstract unscopables: Symbol
         /// <summary>
         /// A method that returns the default async iterator for an object. Called by the semantics of
         /// the for-await-of statement.
         /// </summary>
-        abstract asyncIterator: obj
+        abstract asyncIterator: Symbol
         /// <summary>
         /// A regular expression method that matches the regular expression against a string. Called
         /// by the String.prototype.matchAll method.
         /// </summary>
-        abstract matchAll: obj
-        abstract metadata: obj
+        abstract matchAll: Symbol
+        abstract metadata: Symbol
         /// <summary>
         /// A method that is used to release resources held by an object. Called by the semantics of the <c>using</c> statement.
         /// </summary>
-        abstract dispose: obj
+        abstract dispose: Symbol
         /// <summary>
         /// A method that is used to asynchronously release resources held by an object. Called by the semantics of the <c>await using</c> statement.
         /// </summary>
-        abstract asyncDispose: obj
+        abstract asyncDispose: Symbol
 
         [<Emit("$0($1...)")>]
-        abstract Invoke: ?description: Fable.Core.TS.Dom.BluetoothServiceUUID -> obj
+        abstract Invoke: ?description: Fable.Core.TS.Dom.BluetoothServiceUUID -> Symbol
 
     [<Interface>]
     type IteratorYieldResult<'TYield> =
@@ -7187,22 +7184,11 @@ module Es =
 
     type IteratorResult<'T, 'TReturn> = U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>
 
-    [<Interface>]
     type Iterator<'T, 'TReturn, 'TNext> =
-        abstract next:
-            [<ParamArray>] __0: U2<obj[], 'TNext[]> -> U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>
-
+        abstract next: unit -> U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>
+        abstract next: value: 'TNext -> U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>
         abstract ``return``: ('TReturn option -> U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>) option with get, set
         abstract throw: (obj option -> U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>) option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                next: (U2<obj[], 'TNext[]> -> U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>),
-                ?``return``: ('TReturn option -> U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>),
-                ?throw: (obj option -> U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>)
-            ) : Iterator<'T, 'TReturn, 'TNext> =
-            jsNative
 
     type Iterable<'T, 'TReturn, 'TNext> =
         inherit seq<'T>
@@ -7366,7 +7352,6 @@ module Es =
 
     type ArrayIterator<'T> =
         inherit IteratorObject<'T, unit, obj>
-        abstract next: [<ParamArray>] __0: obj[] -> U2<IteratorReturnResult<unit>, IteratorYieldResult<'T>>
         /// <summary>
         /// Creates an iterator whose values are the result of applying the callback to the values from this iterator.
         /// </summary>
@@ -7459,7 +7444,6 @@ module Es =
 
     type MapIterator<'T> =
         inherit IteratorObject<'T, unit, obj>
-        abstract next: [<ParamArray>] __0: obj[] -> U2<IteratorReturnResult<unit>, IteratorYieldResult<'T>>
 
         /// <summary>
         /// Creates an iterator whose values are the result of applying the callback to the values from this iterator.
@@ -7564,7 +7548,6 @@ module Es =
 
     type SetIterator<'T> =
         inherit IteratorObject<'T, unit, obj>
-        abstract next: [<ParamArray>] __0: obj[] -> U2<IteratorReturnResult<unit>, IteratorYieldResult<'T>>
 
         /// <summary>
         /// Creates an iterator whose values are the result of applying the callback to the values from this iterator.
@@ -7829,7 +7812,6 @@ module Es =
 
     type StringIterator<'T> =
         inherit IteratorObject<'T, unit, obj>
-        abstract next: [<ParamArray>] __0: obj[] -> U2<IteratorReturnResult<unit>, IteratorYieldResult<'T>>
 
         /// <summary>
         /// Creates an iterator whose values are the result of applying the callback to the values from this iterator.
@@ -7991,7 +7973,7 @@ module Es =
         /// A trap for <c>Reflect.ownKeys()</c>.
         /// </summary>
         /// <param name="target">The original object which is being proxied.</param>
-        abstract ownKeys: ('T -> ArrayLike<obj>) option with get, set
+        abstract ownKeys: ('T -> ArrayLike<U2<string, Symbol>>) option with get, set
         /// <summary>
         /// A trap for <c>Object.preventExtensions()</c>.
         /// </summary>
@@ -8024,7 +8006,7 @@ module Es =
                 ?getPrototypeOf: ('T -> obj option),
                 ?has: Has<'T>,
                 ?isExtensible: ('T -> bool),
-                ?ownKeys: ('T -> ArrayLike<obj>),
+                ?ownKeys: ('T -> ArrayLike<U2<string, Symbol>>),
                 ?preventExtensions: ('T -> bool),
                 ?set: Set2<'T>,
                 ?setPrototypeOf: SetPrototypeOf<'T>
@@ -8483,28 +8465,15 @@ module Es =
         [<Emit("$0($1...)")>]
         abstract Invoke: [<ParamArray>] args: string[] -> AsyncGeneratorFunction
 
-    [<Interface>]
     type AsyncIterator<'T, 'TReturn, 'TNext> =
-        abstract next:
-            [<ParamArray>] __0: U2<obj[], 'TNext[]> ->
-                JS.Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>
+        abstract next: unit -> JS.Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>
+        abstract next: value: 'TNext -> JS.Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>
 
         abstract ``return``:
             (U2<'TReturn, JS.Promise<'TReturn>> option
                     -> JS.Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>) option with get, set
 
         abstract throw: (obj option -> JS.Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>) option with get, set
-
-        [<ParamObject; Emit("$0")>]
-        static member Create
-            (
-                next: (U2<obj[], 'TNext[]> -> JS.Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>),
-                ?``return``:
-                    (U2<'TReturn, JS.Promise<'TReturn>> option
-                            -> JS.Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>),
-                ?throw: (obj option -> JS.Promise<U2<IteratorReturnResult<'TReturn>, IteratorYieldResult<'T>>>)
-            ) : AsyncIterator<'T, 'TReturn, 'TNext> =
-            jsNative
 
     type AsyncIterable<'T, 'TReturn, 'TNext> =
         [<Emit("$0[Symbol.asyncIterator]()")>]
@@ -9695,7 +9664,6 @@ module Es =
 
     type RegExpStringIterator<'T> =
         inherit IteratorObject<'T, unit, obj>
-        abstract next: [<ParamArray>] __0: obj[] -> U2<IteratorReturnResult<unit>, IteratorYieldResult<'T>>
 
         /// <summary>
         /// Creates an iterator whose values are the result of applying the callback to the values from this iterator.
@@ -10628,12 +10596,8 @@ module Es =
     /// <summary>
     /// A frozen object containing JSON text for a primitive value, created by <c>JSON.rawJSON()</c>.
     /// </summary>
-    [<Interface>]
     type RawJSON =
         inherit RawJSONInstance
-
-        [<ParamObject; Emit("$0")>]
-        static member Create(``__#1@#isRawJson``: obj, rawJSON: string) : RawJSON = jsNative
 
     type Symbol =
         /// <summary>
@@ -10643,7 +10607,7 @@ module Es =
         /// <summary>
         /// Returns the primitive value of the specified object.
         /// </summary>
-        abstract valueOf: unit -> obj
+        abstract valueOf: unit -> Symbol
         /// <summary>
         /// Expose the [[Description]] internal slot of a symbol directly.
         /// </summary>
@@ -10653,12 +10617,12 @@ module Es =
         /// Converts a Symbol object to a symbol.
         /// </summary>
         [<Emit("$0[Symbol.toPrimitive]($1...)")>]
-        abstract SymbolToPrimitive: hint: string -> obj
+        abstract SymbolToPrimitive: hint: string -> Symbol
 
         [<Emit("$0[Symbol.toStringTag]")>]
         abstract SymbolToStringTag: string
 
-    type PropertyKey = obj
+    type PropertyKey = U3<string, float, Symbol>
 
     [<Interface>]
     type PropertyDescriptor =
@@ -10689,7 +10653,7 @@ module Es =
         abstract Item: float -> PropertyDescriptor with get, set
 
         [<EmitIndexer>]
-        abstract Item: obj -> PropertyDescriptor with get, set
+        abstract Item: Symbol -> PropertyDescriptor with get, set
 
     /// <summary>
     /// Provides functionality common to all JavaScript objects.
@@ -10845,7 +10809,7 @@ module Es =
         /// <param name="source3">The third source object from which to copy properties.</param>
         /// <param name="target">The target object to copy to.</param>
         /// <param name="sources">One or more source objects from which to copy properties</param>
-        abstract assign<'T, 'U> : target: 'T * source: 'U -> obj
+        abstract assign<'T, 'U> : target: 'T * source: 'U -> JS.Intersect<'T, 'U>
         /// <summary>
         /// Copy the values of all of the enumerable own properties from one or more source objects to a
         /// target object. Returns the target object.
@@ -10861,7 +10825,8 @@ module Es =
         /// <param name="source3">The third source object from which to copy properties.</param>
         /// <param name="target">The target object to copy to.</param>
         /// <param name="sources">One or more source objects from which to copy properties</param>
-        abstract assign<'T, 'U, 'V> : target: 'T * source1: 'U * source2: 'V -> obj
+        abstract assign<'T, 'U, 'V> : target: 'T * source1: 'U * source2: 'V -> JS.Intersect<'T, JS.Intersect<'U, 'V>>
+
         /// <summary>
         /// Copy the values of all of the enumerable own properties from one or more source objects to a
         /// target object. Returns the target object.
@@ -10877,7 +10842,10 @@ module Es =
         /// <param name="source3">The third source object from which to copy properties.</param>
         /// <param name="target">The target object to copy to.</param>
         /// <param name="sources">One or more source objects from which to copy properties</param>
-        abstract assign<'T, 'U, 'V, 'W> : target: 'T * source1: 'U * source2: 'V * source3: 'W -> obj
+        abstract assign<'T, 'U, 'V, 'W> :
+            target: 'T * source1: 'U * source2: 'V * source3: 'W ->
+                JS.Intersect<'T, JS.Intersect<'U, JS.Intersect<'V, 'W>>>
+
         /// <summary>
         /// Copy the values of all of the enumerable own properties from one or more source objects to a
         /// target object. Returns the target object.
@@ -10898,7 +10866,7 @@ module Es =
         /// Returns an array of all symbol properties found directly on object o.
         /// </summary>
         /// <param name="o">Object to retrieve the symbols from.</param>
-        abstract getOwnPropertySymbols: o: obj -> obj[]
+        abstract getOwnPropertySymbols: o: obj -> Symbol[]
         /// <summary>
         /// Returns true if the values are the same value, false otherwise.
         /// </summary>
@@ -13182,8 +13150,7 @@ module Es =
     /// <summary>
     /// Exclude null and undefined from T
     /// </summary>
-    [<Erase>]
-    type NonNullable<'T> = private NonNullable__ of obj
+    type NonNullable<'T> = 'T
 
     /// <summary>
     /// Obtain the parameters of a function type in a tuple
@@ -13251,10 +13218,10 @@ module Es =
     [<Interface>]
     type WeakKeyTypes =
         abstract ``object``: obj with get, set
-        abstract symbol: obj with get, set
+        abstract symbol: Symbol with get, set
 
         [<ParamObject; Emit("$0")>]
-        static member Create(``object``: obj, symbol: obj) : WeakKeyTypes = jsNative
+        static member Create(``object``: obj, symbol: Symbol) : WeakKeyTypes = jsNative
 
     type WeakKey = obj
 
@@ -19159,7 +19126,7 @@ module Es =
             abstract Item: float -> obj with get, set
 
             [<EmitIndexer>]
-            abstract Item: obj -> obj with get, set
+            abstract Item: Symbol -> obj with get, set
 
     module ElementTagNameMap =
         type Base =
@@ -21927,7 +21894,6 @@ module Es =
 
         type SegmentIterator<'T> =
             inherit IteratorObject<'T, unit, obj>
-            abstract next: [<ParamArray>] __0: obj[] -> U2<IteratorReturnResult<unit>, IteratorYieldResult<'T>>
 
             /// <summary>
             /// Creates an iterator whose values are the result of applying the callback to the values from this iterator.
@@ -23302,13 +23268,9 @@ module Es =
             [<Interface>]
             type Options4<'TPadding> =
                 inherit Fable.Core.TS.Es.IteratorConstructor.Zip.Options5<'TPadding>
-                /// <summary>
-                /// Values used when an input is exhausted before the others.
-                /// </summary>
-                abstract padding: obj with get, set
 
                 [<ParamObject; Emit("({ mode: 'longest', ...$0 })")>]
-                static member Create(padding: obj) : Options4<'TPadding> = jsNative
+                static member Create(?padding: obj) : Options4<'TPadding> = jsNative
 
             [<Interface>]
             type Options5<'TPadding> =
@@ -23360,13 +23322,9 @@ module Es =
             [<Interface>]
             type Options<'TPadding> =
                 inherit Fable.Core.TS.Es.IteratorConstructor.Zip.Options5<'TPadding>
-                /// <summary>
-                /// Values used when an input is exhausted before the others.
-                /// </summary>
-                abstract padding: obj with get, set
 
                 [<ParamObject; Emit("({ mode: 'longest', ...$0 })")>]
-                static member Create(padding: obj) : Options<'TPadding> = jsNative
+                static member Create(?padding: obj) : Options<'TPadding> = jsNative
 
             [<Interface>]
             type Options3 =
@@ -29175,7 +29133,7 @@ module Dom =
         inherit MediaCapabilitiesInfo
         abstract keySystemAccess: MediaKeySystemAccess option with get, set
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"keySystemAccess\": o[\"keySystemAccess\"] ?? null}))($0)")>]
         static member Create
             (powerEfficient: bool, smooth: bool, supported: bool, ?keySystemAccess: MediaKeySystemAccess)
             : MediaCapabilitiesDecodingInfo =
@@ -33956,7 +33914,8 @@ module Dom =
         /// </summary>
         abstract pseudoElement: string
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 animationName: string,
@@ -34025,7 +33984,8 @@ module Dom =
         /// </summary>
         abstract timelineTime: CSSNumberish option
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTime\": o[\"currentTime\"] ?? null, \"timelineTime\": o[\"timelineTime\"] ?? null, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 bubbles: bool,
@@ -34075,7 +34035,8 @@ module Dom =
         /// </summary>
         abstract duration: CSSNumberish option
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("(o => ({...o, \"currentTime\": o[\"currentTime\"] ?? null, \"duration\": o[\"duration\"] ?? null}))($0)")>]
         static member Create(?currentTime: CSSNumberish, ?duration: CSSNumberish) : AnimationTimeline = jsNative
 
     type AnimationTimelineConstructor =
@@ -34415,7 +34376,7 @@ module Dom =
         /// </summary>
         abstract copyTo: destination: AllowSharedBufferSource * options: AudioDataCopyToOptions -> unit
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"format\": o[\"format\"] ?? null}))($0)")>]
         static member Create
             (
                 duration: float,
@@ -35011,7 +34972,8 @@ module Dom =
         /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/AudioProcessingEvent/playbackTime">MDN Reference</a></remarks>
         abstract playbackTime: float
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 inputBuffer: AudioBuffer,
@@ -35244,7 +35206,7 @@ module Dom =
         /// </summary>
         abstract userHandle: Fable.Core.TS.Es.ArrayBuffer option
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"userHandle\": o[\"userHandle\"] ?? null}))($0)")>]
         static member Create
             (
                 authenticatorData: Fable.Core.TS.Es.ArrayBuffer,
@@ -35621,7 +35583,8 @@ module Dom =
         /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/BeforeUnloadEvent/returnValue">MDN Reference</a></remarks>
         abstract returnValue: obj with get, set
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 returnValue: obj,
@@ -35790,7 +35753,8 @@ module Dom =
         /// </summary>
         abstract timecode: float
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 data: Blob,
@@ -35871,7 +35835,7 @@ module Dom =
         /// </summary>
         abstract text: unit -> JS.Promise<string>
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"body\": o[\"body\"] ?? null}))($0)")>]
         static member Create
             (
                 bodyUsed: bool,
@@ -36051,7 +36015,7 @@ module Dom =
         abstract conditionText: string
 
         [<ParamObject;
-          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
+          Emit("(o => ({STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...o, \"parentRule\": o[\"parentRule\"] ?? null, \"parentStyleSheet\": o[\"parentStyleSheet\"] ?? null}))($0)")>]
         static member Create
             (
                 conditionText: string,
@@ -36107,7 +36071,7 @@ module Dom =
         abstract containerQuery: string
 
         [<ParamObject;
-          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
+          Emit("(o => ({STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...o, \"parentRule\": o[\"parentRule\"] ?? null, \"parentStyleSheet\": o[\"parentStyleSheet\"] ?? null}))($0)")>]
         static member Create
             (
                 conditions: CSSContainerCondition[],
@@ -36208,7 +36172,7 @@ module Dom =
         abstract system: string with get, set
 
         [<ParamObject;
-          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
+          Emit("(o => ({STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...o, \"parentRule\": o[\"parentRule\"] ?? null, \"parentStyleSheet\": o[\"parentStyleSheet\"] ?? null}))($0)")>]
         static member Create
             (
                 additiveSymbols: string,
@@ -36290,7 +36254,7 @@ module Dom =
         abstract style: CSSFontFaceDescriptors with get, set
 
         [<ParamObject;
-          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
+          Emit("(o => ({STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...o, \"parentRule\": o[\"parentRule\"] ?? null, \"parentStyleSheet\": o[\"parentStyleSheet\"] ?? null}))($0)")>]
         static member Create
             (
                 style: CSSFontFaceDescriptors,
@@ -36325,7 +36289,7 @@ module Dom =
         abstract fontFamily: string with get, set
 
         [<ParamObject;
-          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
+          Emit("(o => ({STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...o, \"parentRule\": o[\"parentRule\"] ?? null, \"parentStyleSheet\": o[\"parentStyleSheet\"] ?? null}))($0)")>]
         static member Create
             (
                 fontFamily: string,
@@ -36382,7 +36346,7 @@ module Dom =
         abstract overrideColors: string
 
         [<ParamObject;
-          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
+          Emit("(o => ({STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...o, \"parentRule\": o[\"parentRule\"] ?? null, \"parentStyleSheet\": o[\"parentStyleSheet\"] ?? null}))($0)")>]
         static member Create
             (
                 basePalette: string,
@@ -36428,7 +36392,7 @@ module Dom =
         abstract insertRule: rule: string * ?index: float -> float
 
         [<ParamObject;
-          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
+          Emit("(o => ({STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...o, \"parentRule\": o[\"parentRule\"] ?? null, \"parentStyleSheet\": o[\"parentStyleSheet\"] ?? null}))($0)")>]
         static member Create
             (
                 cssRules: CSSRuleList,
@@ -36500,7 +36464,7 @@ module Dom =
         abstract supportsText: string option
 
         [<ParamObject;
-          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
+          Emit("(o => ({STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...o, \"layerName\": o[\"layerName\"] ?? null, \"styleSheet\": o[\"styleSheet\"] ?? null, \"supportsText\": o[\"supportsText\"] ?? null, \"parentRule\": o[\"parentRule\"] ?? null, \"parentStyleSheet\": o[\"parentStyleSheet\"] ?? null}))($0)")>]
         static member Create
             (
                 href: string,
@@ -36549,7 +36513,7 @@ module Dom =
         abstract style: CSSStyleDeclaration with get, set
 
         [<ParamObject;
-          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
+          Emit("(o => ({STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...o, \"parentRule\": o[\"parentRule\"] ?? null, \"parentStyleSheet\": o[\"parentStyleSheet\"] ?? null}))($0)")>]
         static member Create
             (
                 keyText: string,
@@ -36663,7 +36627,7 @@ module Dom =
         abstract name: string
 
         [<ParamObject;
-          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
+          Emit("(o => ({STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...o, \"parentRule\": o[\"parentRule\"] ?? null, \"parentStyleSheet\": o[\"parentStyleSheet\"] ?? null}))($0)")>]
         static member Create
             (
                 name: string,
@@ -36701,7 +36665,7 @@ module Dom =
         abstract nameList: string[]
 
         [<ParamObject;
-          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
+          Emit("(o => ({STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...o, \"parentRule\": o[\"parentRule\"] ?? null, \"parentStyleSheet\": o[\"parentStyleSheet\"] ?? null}))($0)")>]
         static member Create
             (
                 nameList: string[],
@@ -37082,7 +37046,7 @@ module Dom =
         abstract media: MediaList with get, set
 
         [<ParamObject;
-          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
+          Emit("(o => ({STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...o, \"parentRule\": o[\"parentRule\"] ?? null, \"parentStyleSheet\": o[\"parentStyleSheet\"] ?? null}))($0)")>]
         static member Create
             (
                 media: MediaList,
@@ -37127,7 +37091,7 @@ module Dom =
         abstract prefix: string
 
         [<ParamObject;
-          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
+          Emit("(o => ({STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...o, \"parentRule\": o[\"parentRule\"] ?? null, \"parentStyleSheet\": o[\"parentStyleSheet\"] ?? null}))($0)")>]
         static member Create
             (
                 namespaceURI: string,
@@ -37159,7 +37123,7 @@ module Dom =
         abstract style: CSSStyleDeclaration with get, set
 
         [<ParamObject;
-          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
+          Emit("(o => ({STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...o, \"parentRule\": o[\"parentRule\"] ?? null, \"parentStyleSheet\": o[\"parentStyleSheet\"] ?? null}))($0)")>]
         static member Create
             (
                 style: CSSStyleDeclaration,
@@ -37382,7 +37346,7 @@ module Dom =
         abstract style: CSSPageDescriptors with get, set
 
         [<ParamObject;
-          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
+          Emit("(o => ({STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...o, \"parentRule\": o[\"parentRule\"] ?? null, \"parentStyleSheet\": o[\"parentStyleSheet\"] ?? null}))($0)")>]
         static member Create
             (
                 selectorText: string,
@@ -37756,7 +37720,7 @@ module Dom =
         abstract style: CSSPositionTryDescriptors with get, set
 
         [<ParamObject;
-          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
+          Emit("(o => ({STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...o, \"parentRule\": o[\"parentRule\"] ?? null, \"parentStyleSheet\": o[\"parentStyleSheet\"] ?? null}))($0)")>]
         static member Create
             (
                 name: string,
@@ -37826,7 +37790,7 @@ module Dom =
         abstract syntax: string
 
         [<ParamObject;
-          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
+          Emit("(o => ({STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...o, \"initialValue\": o[\"initialValue\"] ?? null, \"parentRule\": o[\"parentRule\"] ?? null, \"parentStyleSheet\": o[\"parentStyleSheet\"] ?? null}))($0)")>]
         static member Create
             (
                 inherits: bool,
@@ -37955,7 +37919,7 @@ module Dom =
         abstract FONT_FEATURE_VALUES_RULE: float
 
         [<ParamObject;
-          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
+          Emit("(o => ({STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...o, \"parentRule\": o[\"parentRule\"] ?? null, \"parentStyleSheet\": o[\"parentStyleSheet\"] ?? null}))($0)")>]
         static member Create
             (cssText: string, ``type``: float, ?parentRule: CSSRule, ?parentStyleSheet: CSSStyleSheet)
             : CSSRule =
@@ -38202,7 +38166,7 @@ module Dom =
         abstract start: string option
 
         [<ParamObject;
-          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
+          Emit("(o => ({STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...o, \"end\": o[\"end\"] ?? null, \"start\": o[\"start\"] ?? null, \"parentRule\": o[\"parentRule\"] ?? null, \"parentStyleSheet\": o[\"parentStyleSheet\"] ?? null}))($0)")>]
         static member Create
             (
                 cssRules: CSSRuleList,
@@ -38321,7 +38285,7 @@ module Dom =
         inherit CSSGroupingRule
 
         [<ParamObject;
-          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
+          Emit("(o => ({STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...o, \"parentRule\": o[\"parentRule\"] ?? null, \"parentStyleSheet\": o[\"parentStyleSheet\"] ?? null}))($0)")>]
         static member Create
             (
                 cssRules: CSSRuleList,
@@ -41717,7 +41681,7 @@ module Dom =
         abstract styleMap: StylePropertyMap
 
         [<ParamObject;
-          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
+          Emit("(o => ({STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...o, \"parentRule\": o[\"parentRule\"] ?? null, \"parentStyleSheet\": o[\"parentStyleSheet\"] ?? null}))($0)")>]
         static member Create
             (
                 selectorText: string,
@@ -41802,7 +41766,8 @@ module Dom =
         /// </summary>
         abstract replaceSync: text: string -> unit
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("(o => ({...o, \"ownerRule\": o[\"ownerRule\"] ?? null, \"href\": o[\"href\"] ?? null, \"ownerNode\": o[\"ownerNode\"] ?? null, \"parentStyleSheet\": o[\"parentStyleSheet\"] ?? null, \"title\": o[\"title\"] ?? null}))($0)")>]
         static member Create
             (
                 cssRules: CSSRuleList,
@@ -41871,7 +41836,7 @@ module Dom =
         inherit CSSConditionRule
 
         [<ParamObject;
-          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
+          Emit("(o => ({STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...o, \"parentRule\": o[\"parentRule\"] ?? null, \"parentStyleSheet\": o[\"parentStyleSheet\"] ?? null}))($0)")>]
         static member Create
             (
                 conditionText: string,
@@ -42109,7 +42074,7 @@ module Dom =
         /// </summary>
         abstract variable: string with get, set
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"fallback\": o[\"fallback\"] ?? null}))($0)")>]
         static member Create(variable: string, ?fallback: CSSUnparsedValue) : CSSVariableReferenceValue = jsNative
 
     type CSSVariableReferenceValueConstructor =
@@ -42150,7 +42115,7 @@ module Dom =
         abstract types: string[]
 
         [<ParamObject;
-          Emit("({ STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...$0 })")>]
+          Emit("(o => ({STYLE_RULE: 1, CHARSET_RULE: 2, IMPORT_RULE: 3, MEDIA_RULE: 4, FONT_FACE_RULE: 5, PAGE_RULE: 6, MARGIN_RULE: 9, NAMESPACE_RULE: 10, KEYFRAMES_RULE: 7, KEYFRAME_RULE: 8, SUPPORTS_RULE: 12, COUNTER_STYLE_RULE: 11, FONT_FEATURE_VALUES_RULE: 14, ...o, \"parentRule\": o[\"parentRule\"] ?? null, \"parentStyleSheet\": o[\"parentStyleSheet\"] ?? null}))($0)")>]
         static member Create
             (
                 navigation: string,
@@ -43141,7 +43106,8 @@ module Dom =
         /// </summary>
         abstract clipboardData: DataTransfer option
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"clipboardData\": o[\"clipboardData\"] ?? null, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 bubbles: bool,
@@ -43243,7 +43209,8 @@ module Dom =
         /// </summary>
         abstract wasClean: bool
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 code: float,
@@ -43383,7 +43350,8 @@ module Dom =
         /// </summary>
         abstract source: Element option
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"source\": o[\"source\"] ?? null, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 command: string,
@@ -43447,7 +43415,8 @@ module Dom =
         abstract initCompositionEvent:
             typeArg: string * ?bubblesArg: bool * ?cancelableArg: bool * ?viewArg: Window * ?dataArg: string -> unit
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null, \"view\": o[\"view\"] ?? null}))($0)")>]
         static member Create
             (
                 data: string,
@@ -43543,7 +43512,8 @@ module Dom =
         /// </summary>
         abstract skipped: bool
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 skipped: bool,
@@ -43620,7 +43590,8 @@ module Dom =
         /// </summary>
         abstract deleted: CookieListItem[]
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 changed: CookieListItem[],
@@ -44083,7 +44054,8 @@ module Dom =
         /// <remarks>@deprecated <a href="https://developer.mozilla.org/docs/Web/API/CustomEvent/initCustomEvent">MDN Reference</a></remarks>
         abstract initCustomEvent: ``type``: string * ?bubbles: bool * ?cancelable: bool * ?detail: 'T -> unit
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 detail: 'T,
@@ -45705,7 +45677,8 @@ module Dom =
         /// </summary>
         abstract rotationRate: DeviceMotionEventRotationRate option
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"acceleration\": o[\"acceleration\"] ?? null, \"accelerationIncludingGravity\": o[\"accelerationIncludingGravity\"] ?? null, \"rotationRate\": o[\"rotationRate\"] ?? null, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 interval: float,
@@ -45764,7 +45737,8 @@ module Dom =
         /// </summary>
         abstract z: float option
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("(o => ({...o, \"x\": o[\"x\"] ?? null, \"y\": o[\"y\"] ?? null, \"z\": o[\"z\"] ?? null}))($0)")>]
         static member Create(?x: float, ?y: float, ?z: float) : DeviceMotionEventAcceleration = jsNative
 
     /// <summary>
@@ -45794,7 +45768,8 @@ module Dom =
         /// </summary>
         abstract gamma: float option
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("(o => ({...o, \"alpha\": o[\"alpha\"] ?? null, \"beta\": o[\"beta\"] ?? null, \"gamma\": o[\"gamma\"] ?? null}))($0)")>]
         static member Create(?alpha: float, ?beta: float, ?gamma: float) : DeviceMotionEventRotationRate = jsNative
 
     /// <summary>
@@ -45831,7 +45806,8 @@ module Dom =
         /// </summary>
         abstract gamma: float option
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"alpha\": o[\"alpha\"] ?? null, \"beta\": o[\"beta\"] ?? null, \"gamma\": o[\"gamma\"] ?? null, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 absolute: bool,
@@ -47305,7 +47281,8 @@ module Dom =
         /// </summary>
         abstract getAnimations: unit -> Animation[]
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("(o => ({...o, \"activeElement\": o[\"activeElement\"] ?? null, \"customElementRegistry\": o[\"customElementRegistry\"] ?? null, \"fullscreenElement\": o[\"fullscreenElement\"] ?? null, \"pictureInPictureElement\": o[\"pictureInPictureElement\"] ?? null, \"pointerLockElement\": o[\"pointerLockElement\"] ?? null}))($0)")>]
         static member Create
             (
                 adoptedStyleSheets: CSSStyleSheet[],
@@ -47415,7 +47392,8 @@ module Dom =
         /// </summary>
         abstract window: Window
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 window: Window,
@@ -47454,7 +47432,8 @@ module Dom =
     type DocumentTimeline =
         inherit AnimationTimeline
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("(o => ({...o, \"currentTime\": o[\"currentTime\"] ?? null, \"duration\": o[\"duration\"] ?? null}))($0)")>]
         static member Create(?currentTime: CSSNumberish, ?duration: CSSNumberish) : DocumentTimeline = jsNative
 
     type DocumentTimelineConstructor =
@@ -48598,7 +48577,7 @@ module Dom =
         /// </summary>
         abstract copyTo: destination: AllowSharedBufferSource -> unit
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"duration\": o[\"duration\"] ?? null}))($0)")>]
         static member Create
             (
                 byteLength: float,
@@ -48651,7 +48630,7 @@ module Dom =
         /// </summary>
         abstract copyTo: destination: AllowSharedBufferSource -> unit
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"duration\": o[\"duration\"] ?? null}))($0)")>]
         static member Create
             (
                 byteLength: float,
@@ -48705,7 +48684,8 @@ module Dom =
         /// </summary>
         abstract message: string
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 colno: float,
@@ -48858,7 +48838,8 @@ module Dom =
         /// <remarks>TypeScript type: <c>3</c></remarks>
         abstract BUBBLING_PHASE: float
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 bubbles: bool,
@@ -49860,7 +49841,8 @@ module Dom =
         /// </summary>
         abstract relatedTarget: EventTarget option
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"relatedTarget\": o[\"relatedTarget\"] ?? null, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null, \"view\": o[\"view\"] ?? null}))($0)")>]
         static member Create
             (
                 bubbles: bool,
@@ -50147,7 +50129,8 @@ module Dom =
         /// </summary>
         abstract fontfaces: FontFace[]
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 fontfaces: FontFace[],
@@ -50286,7 +50269,8 @@ module Dom =
         /// </summary>
         abstract formData: FormData
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 formData: FormData,
@@ -51967,7 +51951,8 @@ module Dom =
         /// </summary>
         abstract error: GPUError
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 error: GPUError,
@@ -52154,7 +52139,8 @@ module Dom =
         /// </summary>
         abstract gamepad: Gamepad
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 gamepad: Gamepad,
@@ -52335,7 +52321,8 @@ module Dom =
         /// </summary>
         abstract toJSON: unit -> obj
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("(o => ({...o, \"altitude\": o[\"altitude\"] ?? null, \"altitudeAccuracy\": o[\"altitudeAccuracy\"] ?? null, \"heading\": o[\"heading\"] ?? null, \"speed\": o[\"speed\"] ?? null}))($0)")>]
         static member Create
             (
                 accuracy: float,
@@ -57658,7 +57645,8 @@ module Dom =
         /// </summary>
         abstract oldURL: string
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 newURL: string,
@@ -59169,7 +59157,8 @@ module Dom =
         /// </summary>
         abstract oldVersion: float
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"newVersion\": o[\"newVersion\"] ?? null, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 oldVersion: float,
@@ -59697,7 +59686,7 @@ module Dom =
         /// </summary>
         abstract unobserve: target: Element -> unit
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"root\": o[\"root\"] ?? null}))($0)")>]
         static member Create
             (
                 rootMargin: string,
@@ -59766,7 +59755,7 @@ module Dom =
         /// </summary>
         abstract time: float
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"rootBounds\": o[\"rootBounds\"] ?? null}))($0)")>]
         static member Create
             (
                 boundingClientRect: DOMRectReadOnly,
@@ -59997,7 +59986,8 @@ module Dom =
         /// </summary>
         abstract setKeyframes: ?keyframes: U2<Keyframe[], PropertyIndexedKeyframes> -> unit
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("(o => ({...o, \"pseudoElement\": o[\"pseudoElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 composite: CompositeOperation,
@@ -60069,7 +60059,8 @@ module Dom =
         /// </summary>
         abstract url: string
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("(o => ({...o, \"element\": o[\"element\"] ?? null, \"presentationTime\": o[\"presentationTime\"] ?? null}))($0)")>]
         static member Create
             (
                 id: string,
@@ -60099,7 +60090,7 @@ module Dom =
         /// </summary>
         abstract sheet: CSSStyleSheet option
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"sheet\": o[\"sheet\"] ?? null}))($0)")>]
         static member Create(?sheet: CSSStyleSheet) : LinkStyle = jsNative
 
     /// <summary>
@@ -60373,7 +60364,8 @@ module Dom =
         /// </summary>
         abstract port: MIDIPort option
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"port\": o[\"port\"] ?? null, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 bubbles: bool,
@@ -60480,7 +60472,8 @@ module Dom =
         /// </summary>
         abstract data: Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer> option
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"data\": o[\"data\"] ?? null, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 bubbles: bool,
@@ -60917,7 +60910,8 @@ module Dom =
         /// </summary>
         abstract initDataType: string
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"initData\": o[\"initData\"] ?? null, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 initDataType: string,
@@ -61048,7 +61042,8 @@ module Dom =
         /// </summary>
         abstract messageType: MediaKeyMessageType
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 message: Fable.Core.TS.Es.ArrayBuffer,
@@ -61513,7 +61508,8 @@ module Dom =
         /// </summary>
         abstract media: string
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 matches: bool,
@@ -61747,7 +61743,7 @@ module Dom =
         /// </summary>
         abstract setPositionState: ?state: MediaPositionState -> unit
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"metadata\": o[\"metadata\"] ?? null}))($0)")>]
         static member Create
             (
                 playbackState: MediaSessionPlaybackState,
@@ -62253,7 +62249,8 @@ module Dom =
         /// </summary>
         abstract track: MediaStreamTrack
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 track: MediaStreamTrack,
@@ -62811,7 +62808,8 @@ module Dom =
         /// </summary>
         abstract ``type``: MutationRecordType
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("(o => ({...o, \"attributeName\": o[\"attributeName\"] ?? null, \"attributeNamespace\": o[\"attributeNamespace\"] ?? null, \"nextSibling\": o[\"nextSibling\"] ?? null, \"oldValue\": o[\"oldValue\"] ?? null, \"previousSibling\": o[\"previousSibling\"] ?? null}))($0)")>]
         static member Create
             (
                 addedNodes: NodeList,
@@ -63168,7 +63166,7 @@ module Dom =
         /// </summary>
         abstract navigationType: NavigationType
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"from\": o[\"from\"] ?? null}))($0)")>]
         static member Create
             (entry: NavigationHistoryEntry, navigationType: NavigationType, ?from: NavigationHistoryEntry)
             : NavigationActivation =
@@ -63199,7 +63197,8 @@ module Dom =
         /// </summary>
         abstract navigationType: NavigationType option
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"navigationType\": o[\"navigationType\"] ?? null, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 from: NavigationHistoryEntry,
@@ -64527,7 +64526,7 @@ module Dom =
         /// </summary>
         abstract previousNode: unit -> Node option
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"filter\": o[\"filter\"] ?? null}))($0)")>]
         static member Create
             (
                 pointerBeforeReferenceNode: bool,
@@ -64624,7 +64623,8 @@ module Dom =
         /// </summary>
         abstract previousElementSibling: Element option
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("(o => ({...o, \"nextElementSibling\": o[\"nextElementSibling\"] ?? null, \"previousElementSibling\": o[\"previousElementSibling\"] ?? null}))($0)")>]
         static member Create
             (?nextElementSibling: Element, ?previousElementSibling: Element)
             : NonDocumentTypeChildNode =
@@ -65064,7 +65064,8 @@ module Dom =
         /// </summary>
         abstract renderedBuffer: AudioBuffer
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 renderedBuffer: AudioBuffer,
@@ -65435,7 +65436,8 @@ module Dom =
         /// </summary>
         abstract viewTransition: ViewTransition option
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"viewTransition\": o[\"viewTransition\"] ?? null, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 bubbles: bool,
@@ -65485,7 +65487,8 @@ module Dom =
         /// </summary>
         abstract viewTransition: ViewTransition option
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"activation\": o[\"activation\"] ?? null, \"viewTransition\": o[\"viewTransition\"] ?? null, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 bubbles: bool,
@@ -65530,7 +65533,8 @@ module Dom =
         /// </summary>
         abstract persisted: bool
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 persisted: bool,
@@ -65570,7 +65574,7 @@ module Dom =
         /// </summary>
         abstract presentationTime: float option
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"presentationTime\": o[\"presentationTime\"] ?? null}))($0)")>]
         static member Create(paintTime: float, ?presentationTime: float) : PaintTimingMixin = jsNative
 
     /// <summary>
@@ -65935,7 +65939,8 @@ module Dom =
         /// </summary>
         abstract methodName: string
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 methodDetails: obj,
@@ -66102,7 +66107,8 @@ module Dom =
         /// </summary>
         abstract updateWith: detailsPromise: U2<PaymentDetailsUpdate, JS.Promise<PaymentDetailsUpdate>> -> unit
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 updateWith: (U2<PaymentDetailsUpdate, JS.Promise<PaymentDetailsUpdate>> -> unit),
@@ -66513,7 +66519,7 @@ module Dom =
         /// </summary>
         abstract target: Node option
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 cancelable: bool,
@@ -66837,7 +66843,7 @@ module Dom =
         inherit PerformanceEntry
         inherit PaintTimingMixin
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"presentationTime\": o[\"presentationTime\"] ?? null}))($0)")>]
         static member Create
             (
                 toJSON: (unit -> obj),
@@ -67325,7 +67331,8 @@ module Dom =
         /// </summary>
         abstract pictureInPictureWindow: PictureInPictureWindow
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 pictureInPictureWindow: PictureInPictureWindow,
@@ -67620,7 +67627,8 @@ module Dom =
         /// </summary>
         abstract state: obj
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 hasUAVisualTransition: bool,
@@ -67665,7 +67673,7 @@ module Dom =
         /// </summary>
         abstract popoverTargetElement: Element option with get, set
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"popoverTargetElement\": o[\"popoverTargetElement\"] ?? null}))($0)")>]
         static member Create(popoverTargetAction: string, ?popoverTargetElement: Element) : PopoverTargetAttributes =
             jsNative
 
@@ -67721,7 +67729,8 @@ module Dom =
         /// </summary>
         abstract total: float
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"target\": o[\"target\"] ?? null, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null}))($0)")>]
         static member Create
             (
                 lengthComputable: bool,
@@ -67773,7 +67782,8 @@ module Dom =
         /// </summary>
         abstract reason: obj
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 promise: JS.Promise<obj>,
@@ -67843,7 +67853,7 @@ module Dom =
         /// </summary>
         abstract toJSON: unit -> U2<AuthenticationResponseJSON, RegistrationResponseJSON>
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"authenticatorAttachment\": o[\"authenticatorAttachment\"] ?? null}))($0)")>]
         static member Create
             (
                 rawId: Fable.Core.TS.Es.ArrayBuffer,
@@ -68019,7 +68029,7 @@ module Dom =
         /// </summary>
         abstract unsubscribe: unit -> JS.Promise<bool>
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"expirationTime\": o[\"expirationTime\"] ?? null}))($0)")>]
         static member Create
             (
                 endpoint: string,
@@ -68056,7 +68066,7 @@ module Dom =
         /// </summary>
         abstract userVisibleOnly: bool
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"applicationServerKey\": o[\"applicationServerKey\"] ?? null}))($0)")>]
         static member Create
             (userVisibleOnly: bool, ?applicationServerKey: Fable.Core.TS.Es.ArrayBuffer)
             : PushSubscriptionOptions =
@@ -68192,7 +68202,8 @@ module Dom =
         /// </summary>
         abstract tone: string
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 tone: string,
@@ -68431,7 +68442,8 @@ module Dom =
         /// </summary>
         abstract channel: RTCDataChannel
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 channel: RTCDataChannel,
@@ -68665,7 +68677,7 @@ module Dom =
         abstract sentAlert: float option
 
         [<ParamObject;
-          Emit("({ INDEX_SIZE_ERR: 1, DOMSTRING_SIZE_ERR: 2, HIERARCHY_REQUEST_ERR: 3, WRONG_DOCUMENT_ERR: 4, INVALID_CHARACTER_ERR: 5, NO_DATA_ALLOWED_ERR: 6, NO_MODIFICATION_ALLOWED_ERR: 7, NOT_FOUND_ERR: 8, NOT_SUPPORTED_ERR: 9, INUSE_ATTRIBUTE_ERR: 10, INVALID_STATE_ERR: 11, SYNTAX_ERR: 12, INVALID_MODIFICATION_ERR: 13, NAMESPACE_ERR: 14, INVALID_ACCESS_ERR: 15, VALIDATION_ERR: 16, TYPE_MISMATCH_ERR: 17, SECURITY_ERR: 18, NETWORK_ERR: 19, ABORT_ERR: 20, URL_MISMATCH_ERR: 21, QUOTA_EXCEEDED_ERR: 22, TIMEOUT_ERR: 23, INVALID_NODE_TYPE_ERR: 24, DATA_CLONE_ERR: 25, ...$0 })")>]
+          Emit("(o => ({INDEX_SIZE_ERR: 1, DOMSTRING_SIZE_ERR: 2, HIERARCHY_REQUEST_ERR: 3, WRONG_DOCUMENT_ERR: 4, INVALID_CHARACTER_ERR: 5, NO_DATA_ALLOWED_ERR: 6, NO_MODIFICATION_ALLOWED_ERR: 7, NOT_FOUND_ERR: 8, NOT_SUPPORTED_ERR: 9, INUSE_ATTRIBUTE_ERR: 10, INVALID_STATE_ERR: 11, SYNTAX_ERR: 12, INVALID_MODIFICATION_ERR: 13, NAMESPACE_ERR: 14, INVALID_ACCESS_ERR: 15, VALIDATION_ERR: 16, TYPE_MISMATCH_ERR: 17, SECURITY_ERR: 18, NETWORK_ERR: 19, ABORT_ERR: 20, URL_MISMATCH_ERR: 21, QUOTA_EXCEEDED_ERR: 22, TIMEOUT_ERR: 23, INVALID_NODE_TYPE_ERR: 24, DATA_CLONE_ERR: 25, ...o, \"receivedAlert\": o[\"receivedAlert\"] ?? null, \"sctpCauseCode\": o[\"sctpCauseCode\"] ?? null, \"sdpLineNumber\": o[\"sdpLineNumber\"] ?? null, \"sentAlert\": o[\"sentAlert\"] ?? null}))($0)")>]
         static member Create
             (
                 errorDetail: RTCErrorDetailType,
@@ -68700,7 +68712,8 @@ module Dom =
         /// </summary>
         abstract error: RTCError
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 error: RTCError,
@@ -68827,7 +68840,8 @@ module Dom =
         /// </summary>
         abstract toJSON: unit -> RTCIceCandidateInit
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("(o => ({...o, \"address\": o[\"address\"] ?? null, \"component\": o[\"component\"] ?? null, \"foundation\": o[\"foundation\"] ?? null, \"port\": o[\"port\"] ?? null, \"priority\": o[\"priority\"] ?? null, \"protocol\": o[\"protocol\"] ?? null, \"relatedAddress\": o[\"relatedAddress\"] ?? null, \"relatedPort\": o[\"relatedPort\"] ?? null, \"sdpMLineIndex\": o[\"sdpMLineIndex\"] ?? null, \"sdpMid\": o[\"sdpMid\"] ?? null, \"tcpType\": o[\"tcpType\"] ?? null, \"type\": o[\"type\"] ?? null, \"usernameFragment\": o[\"usernameFragment\"] ?? null}))($0)")>]
         static member Create
             (
                 candidate: string,
@@ -69365,7 +69379,8 @@ module Dom =
         /// </summary>
         abstract url: string
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"address\": o[\"address\"] ?? null, \"port\": o[\"port\"] ?? null, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 errorCode: float,
@@ -69414,7 +69429,8 @@ module Dom =
         /// </summary>
         abstract candidate: RTCIceCandidate option
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"candidate\": o[\"candidate\"] ?? null, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 bubbles: bool,
@@ -69499,7 +69515,8 @@ module Dom =
         /// </summary>
         abstract getSynchronizationSources: unit -> RTCRtpSynchronizationSource[]
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("(o => ({...o, \"jitterBufferTarget\": o[\"jitterBufferTarget\"] ?? null, \"transform\": o[\"transform\"] ?? null, \"transport\": o[\"transport\"] ?? null}))($0)")>]
         static member Create
             (
                 track: MediaStreamTrack,
@@ -69595,7 +69612,8 @@ module Dom =
         /// </summary>
         abstract setStreams: [<ParamArray>] streams: MediaStream[] -> unit
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("(o => ({...o, \"dtmf\": o[\"dtmf\"] ?? null, \"track\": o[\"track\"] ?? null, \"transform\": o[\"transform\"] ?? null, \"transport\": o[\"transport\"] ?? null}))($0)")>]
         static member Create
             (
                 getParameters: (unit -> RTCRtpSendParameters),
@@ -69852,7 +69870,8 @@ module Dom =
         /// </summary>
         abstract transceiver: RTCRtpTransceiver
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 receiver: RTCRtpReceiver,
@@ -70151,7 +70170,8 @@ module Dom =
         /// </summary>
         abstract error: ?e: obj -> unit
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("(o => ({...o, \"byobRequest\": o[\"byobRequest\"] ?? null, \"desiredSize\": o[\"desiredSize\"] ?? null}))($0)")>]
         static member Create
             (
                 close: (unit -> unit),
@@ -70316,7 +70336,7 @@ module Dom =
         /// </summary>
         abstract respondWithNewView: view: Fable.Core.TS.Es.ArrayBufferView<Fable.Core.TS.Es.ArrayBuffer> -> unit
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"view\": o[\"view\"] ?? null}))($0)")>]
         static member Create
             (
                 respond: (float -> unit),
@@ -70361,7 +70381,7 @@ module Dom =
         /// </summary>
         abstract error: ?e: obj -> unit
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"desiredSize\": o[\"desiredSize\"] ?? null}))($0)")>]
         static member Create
             (close: (unit -> unit), enqueue: ('R -> unit), error: (obj option -> unit), ?desiredSize: float)
             : ReadableStreamDefaultController<'R> =
@@ -70651,7 +70671,7 @@ module Dom =
         /// </summary>
         abstract clone: unit -> Request
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"body\": o[\"body\"] ?? null}))($0)")>]
         static member Create
             (
                 cache: RequestCache,
@@ -70859,7 +70879,7 @@ module Dom =
         /// </summary>
         abstract clone: unit -> Response
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"body\": o[\"body\"] ?? null}))($0)")>]
         static member Create
             (
                 headers: Headers,
@@ -76084,7 +76104,8 @@ module Dom =
         /// </summary>
         abstract source: Element option
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("(o => ({...o, \"source\": o[\"source\"] ?? null, \"currentTime\": o[\"currentTime\"] ?? null, \"duration\": o[\"duration\"] ?? null}))($0)")>]
         static member Create
             (axis: ScrollAxis, ?source: Element, ?currentTime: CSSNumberish, ?duration: CSSNumberish)
             : ScrollTimeline =
@@ -76965,7 +76986,7 @@ module Dom =
         /// </summary>
         abstract assignedSlot: HTMLSlotElement option
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"assignedSlot\": o[\"assignedSlot\"] ?? null}))($0)")>]
         static member Create(?assignedSlot: HTMLSlotElement) : Slottable = jsNative
 
     [<Interface>]
@@ -77240,7 +77261,8 @@ module Dom =
         /// </summary>
         abstract message: string
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 error: SpeechRecognitionErrorCode,
@@ -77293,7 +77315,8 @@ module Dom =
         /// </summary>
         abstract results: SpeechRecognitionResultList
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 resultIndex: float,
@@ -77513,7 +77536,8 @@ module Dom =
         /// </summary>
         abstract error: SpeechSynthesisErrorCode
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 error: SpeechSynthesisErrorCode,
@@ -77586,7 +77610,8 @@ module Dom =
         /// </summary>
         abstract utterance: SpeechSynthesisUtterance
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 charIndex: float,
@@ -77949,7 +77974,8 @@ module Dom =
             ?storageArea: Storage ->
                 unit
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"key\": o[\"key\"] ?? null, \"newValue\": o[\"newValue\"] ?? null, \"oldValue\": o[\"oldValue\"] ?? null, \"storageArea\": o[\"storageArea\"] ?? null, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 url: string,
@@ -78169,7 +78195,8 @@ module Dom =
         /// </summary>
         abstract ``type``: string
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("(o => ({...o, \"href\": o[\"href\"] ?? null, \"ownerNode\": o[\"ownerNode\"] ?? null, \"parentStyleSheet\": o[\"parentStyleSheet\"] ?? null, \"title\": o[\"title\"] ?? null}))($0)")>]
         static member Create
             (
                 disabled: bool,
@@ -78228,7 +78255,8 @@ module Dom =
         /// </summary>
         abstract submitter: HTMLElement option
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"submitter\": o[\"submitter\"] ?? null, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 bubbles: bool,
@@ -78593,7 +78621,8 @@ module Dom =
         /// </summary>
         abstract previousPriority: TaskPriority
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 previousPriority: TaskPriority,
@@ -78899,7 +78928,8 @@ module Dom =
         abstract initTextEvent:
             ``type``: string * ?bubbles: bool * ?cancelable: bool * ?view: Window * ?data: string -> unit
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null, \"view\": o[\"view\"] ?? null}))($0)")>]
         static member Create
             (
                 data: string,
@@ -79439,7 +79469,8 @@ module Dom =
         /// </summary>
         abstract source: Element option
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"source\": o[\"source\"] ?? null, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 newState: string,
@@ -79668,7 +79699,8 @@ module Dom =
         /// </summary>
         abstract track: TextTrack option
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"track\": o[\"track\"] ?? null, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 bubbles: bool,
@@ -79761,7 +79793,7 @@ module Dom =
         /// </summary>
         abstract terminate: unit -> unit
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"desiredSize\": o[\"desiredSize\"] ?? null}))($0)")>]
         static member Create
             (enqueue: ('O -> unit), error: (obj option -> unit), terminate: (unit -> unit), ?desiredSize: float)
             : TransformStreamDefaultController<'O> =
@@ -79798,7 +79830,8 @@ module Dom =
         /// </summary>
         abstract pseudoElement: string
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 elapsedTime: float,
@@ -79903,7 +79936,7 @@ module Dom =
         /// </summary>
         abstract previousSibling: unit -> Node option
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"filter\": o[\"filter\"] ?? null}))($0)")>]
         static member Create
             (
                 currentNode: Node,
@@ -79957,7 +79990,8 @@ module Dom =
         abstract initUIEvent:
             typeArg: string * ?bubblesArg: bool * ?cancelableArg: bool * ?viewArg: Window * ?detailArg: float -> unit
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"view\": o[\"view\"] ?? null, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 detail: float,
@@ -80590,7 +80624,8 @@ module Dom =
         /// </summary>
         abstract toJSON: unit -> VideoColorSpaceInit
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("(o => ({...o, \"fullRange\": o[\"fullRange\"] ?? null, \"matrix\": o[\"matrix\"] ?? null, \"primaries\": o[\"primaries\"] ?? null, \"transfer\": o[\"transfer\"] ?? null}))($0)")>]
         static member Create
             (
                 toJSON: (unit -> VideoColorSpaceInit),
@@ -80929,7 +80964,8 @@ module Dom =
         abstract copyTo:
             destination: AllowSharedBufferSource * ?options: VideoFrameCopyToOptions -> JS.Promise<PlaneLayout[]>
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("(o => ({...o, \"codedRect\": o[\"codedRect\"] ?? null, \"duration\": o[\"duration\"] ?? null, \"format\": o[\"format\"] ?? null, \"visibleRect\": o[\"visibleRect\"] ?? null}))($0)")>]
         static member Create
             (
                 codedHeight: float,
@@ -81024,7 +81060,8 @@ module Dom =
         /// </summary>
         abstract subject: Element
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("(o => ({...o, \"currentTime\": o[\"currentTime\"] ?? null, \"duration\": o[\"duration\"] ?? null, \"source\": o[\"source\"] ?? null}))($0)")>]
         static member Create
             (
                 endOffset: CSSNumericValue,
@@ -88570,7 +88607,8 @@ module Dom =
         /// </summary>
         abstract statusMessage: string
 
-        [<ParamObject; Emit("({ NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...$0 })")>]
+        [<ParamObject;
+          Emit("(o => ({NONE: 0, CAPTURING_PHASE: 1, AT_TARGET: 2, BUBBLING_PHASE: 3, ...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
         static member Create
             (
                 statusMessage: string,
@@ -93755,7 +93793,8 @@ module Dom =
         /// </summary>
         abstract writable: WritableStream<obj>
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("(o => ({...o, \"incomingMaxAge\": o[\"incomingMaxAge\"] ?? null, \"outgoingMaxAge\": o[\"outgoingMaxAge\"] ?? null}))($0)")>]
         static member Create
             (
                 incomingHighWaterMark: float,
@@ -93795,7 +93834,7 @@ module Dom =
         abstract streamErrorCode: float option
 
         [<ParamObject;
-          Emit("({ INDEX_SIZE_ERR: 1, DOMSTRING_SIZE_ERR: 2, HIERARCHY_REQUEST_ERR: 3, WRONG_DOCUMENT_ERR: 4, INVALID_CHARACTER_ERR: 5, NO_DATA_ALLOWED_ERR: 6, NO_MODIFICATION_ALLOWED_ERR: 7, NOT_FOUND_ERR: 8, NOT_SUPPORTED_ERR: 9, INUSE_ATTRIBUTE_ERR: 10, INVALID_STATE_ERR: 11, SYNTAX_ERR: 12, INVALID_MODIFICATION_ERR: 13, NAMESPACE_ERR: 14, INVALID_ACCESS_ERR: 15, VALIDATION_ERR: 16, TYPE_MISMATCH_ERR: 17, SECURITY_ERR: 18, NETWORK_ERR: 19, ABORT_ERR: 20, URL_MISMATCH_ERR: 21, QUOTA_EXCEEDED_ERR: 22, TIMEOUT_ERR: 23, INVALID_NODE_TYPE_ERR: 24, DATA_CLONE_ERR: 25, ...$0 })")>]
+          Emit("(o => ({INDEX_SIZE_ERR: 1, DOMSTRING_SIZE_ERR: 2, HIERARCHY_REQUEST_ERR: 3, WRONG_DOCUMENT_ERR: 4, INVALID_CHARACTER_ERR: 5, NO_DATA_ALLOWED_ERR: 6, NO_MODIFICATION_ALLOWED_ERR: 7, NOT_FOUND_ERR: 8, NOT_SUPPORTED_ERR: 9, INUSE_ATTRIBUTE_ERR: 10, INVALID_STATE_ERR: 11, SYNTAX_ERR: 12, INVALID_MODIFICATION_ERR: 13, NAMESPACE_ERR: 14, INVALID_ACCESS_ERR: 15, VALIDATION_ERR: 16, TYPE_MISMATCH_ERR: 17, SECURITY_ERR: 18, NETWORK_ERR: 19, ABORT_ERR: 20, URL_MISMATCH_ERR: 21, QUOTA_EXCEEDED_ERR: 22, TIMEOUT_ERR: 23, INVALID_NODE_TYPE_ERR: 24, DATA_CLONE_ERR: 25, ...o, \"streamErrorCode\": o[\"streamErrorCode\"] ?? null}))($0)")>]
         static member Create
             (
                 source: WebTransportErrorSource,
@@ -94924,7 +94963,7 @@ module Dom =
         /// </summary>
         abstract write: chunk: 'W -> JS.Promise<unit>
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"desiredSize\": o[\"desiredSize\"] ?? null}))($0)")>]
         static member Create
             (
                 closed: JS.Promise<unit>,
@@ -95476,7 +95515,7 @@ module Dom =
         abstract FIRST_ORDERED_NODE_TYPE: float
 
         [<ParamObject;
-          Emit("({ ANY_TYPE: 0, NUMBER_TYPE: 1, STRING_TYPE: 2, BOOLEAN_TYPE: 3, UNORDERED_NODE_ITERATOR_TYPE: 4, ORDERED_NODE_ITERATOR_TYPE: 5, UNORDERED_NODE_SNAPSHOT_TYPE: 6, ORDERED_NODE_SNAPSHOT_TYPE: 7, ANY_UNORDERED_NODE_TYPE: 8, FIRST_ORDERED_NODE_TYPE: 9, ...$0 })")>]
+          Emit("(o => ({ANY_TYPE: 0, NUMBER_TYPE: 1, STRING_TYPE: 2, BOOLEAN_TYPE: 3, UNORDERED_NODE_ITERATOR_TYPE: 4, ORDERED_NODE_ITERATOR_TYPE: 5, UNORDERED_NODE_SNAPSHOT_TYPE: 6, ORDERED_NODE_SNAPSHOT_TYPE: 7, ANY_UNORDERED_NODE_TYPE: 8, FIRST_ORDERED_NODE_TYPE: 9, ...o, \"singleNodeValue\": o[\"singleNodeValue\"] ?? null}))($0)")>]
         static member Create
             (
                 booleanValue: bool,
@@ -98381,10 +98420,6 @@ module Dom =
     type FormDataIterator<'T> =
         inherit Fable.Core.TS.Es.IteratorObject<'T, unit, obj>
 
-        abstract next:
-            [<ParamArray>] __0: obj[] ->
-                U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
-
         /// <summary>
         /// Creates an iterator whose values are the result of applying the callback to the values from this iterator.
         /// </summary>
@@ -98492,10 +98527,6 @@ module Dom =
 
     type HeadersIterator<'T> =
         inherit Fable.Core.TS.Es.IteratorObject<'T, unit, obj>
-
-        abstract next:
-            [<ParamArray>] __0: obj[] ->
-                U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
 
         /// <summary>
         /// Creates an iterator whose values are the result of applying the callback to the values from this iterator.
@@ -98605,10 +98636,6 @@ module Dom =
     type MediaKeyStatusMapIterator<'T> =
         inherit Fable.Core.TS.Es.IteratorObject<'T, unit, obj>
 
-        abstract next:
-            [<ParamArray>] __0: obj[] ->
-                U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
-
         /// <summary>
         /// Creates an iterator whose values are the result of applying the callback to the values from this iterator.
         /// </summary>
@@ -98716,10 +98743,6 @@ module Dom =
 
     type StylePropertyMapReadOnlyIterator<'T> =
         inherit Fable.Core.TS.Es.IteratorObject<'T, unit, obj>
-
-        abstract next:
-            [<ParamArray>] __0: obj[] ->
-                U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
 
         /// <summary>
         /// Creates an iterator whose values are the result of applying the callback to the values from this iterator.
@@ -98829,10 +98852,6 @@ module Dom =
     type URLSearchParamsIterator<'T> =
         inherit Fable.Core.TS.Es.IteratorObject<'T, unit, obj>
 
-        abstract next:
-            [<ParamArray>] __0: obj[] ->
-                U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
-
         /// <summary>
         /// Creates an iterator whose values are the result of applying the callback to the values from this iterator.
         /// </summary>
@@ -98941,10 +98960,6 @@ module Dom =
     type FileSystemDirectoryHandleAsyncIterator<'T> =
         inherit Fable.Core.TS.Es.AsyncIteratorObject<'T, unit, obj>
 
-        abstract next:
-            [<ParamArray>] __0: obj[] ->
-                JS.Promise<U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>>
-
         abstract ``return``:
             (JS.Promise<unit> option
                     -> JS.Promise<
@@ -98956,10 +98971,6 @@ module Dom =
 
     type ReadableStreamAsyncIterator<'T> =
         inherit Fable.Core.TS.Es.AsyncIteratorObject<'T, unit, obj>
-
-        abstract next:
-            [<ParamArray>] __0: obj[] ->
-                JS.Promise<U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>>
 
         abstract ``return``:
             (JS.Promise<unit> option

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "package": "private-member-lab",
+  "module": "PrivateMemberLab",
+  "counts": {
+    "exact": 3,
+    "ergonomic": 4,
+    "widened": 0,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 1,
+      "exact": 1
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 4,
+      "ergonomic": 4
+    }
+  ]
+}

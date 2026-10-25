@@ -1,0 +1,6 @@
+{
+    "name": "required-nullable-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "description": "Hand-authored fixture for D3: a required member typed `T | null` binds an omittable Create parameter, and the Create Emit always writes its key, as null when the argument is absent. Tracked in git, no npm install."
+}

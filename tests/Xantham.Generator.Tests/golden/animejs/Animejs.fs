@@ -26,7 +26,7 @@ type Adapter =
     /// Registers a property resolver scoped to this Adapter. Resolvers are functions invoked at tween creation when no target adapter has claimed the name; the function returns an entry for names it handles or <c>null</c> to defer. Use for runtime-matched patterns (Color / Vector axis detection, name-prefix conventions, etc.).
     /// </summary>
     abstract registerPropertyResolver: resolver: Adapter.RegisterPropertyResolver.Resolver -> unit
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"detect\": o[\"detect\"] ?? null}))($0)")>]
     static member Create (targetAdapters: TargetAdapter[], propertyResolvers: Adapter.PropertyResolvers.Item[], registerTargetAdapter: ((obj -> bool) -> TargetAdapter), registerPropertyResolver: (Adapter.RegisterPropertyResolver.Resolver -> unit), ?detect: (obj -> bool)) : Adapter = jsNative
 
 [<Interface>]
@@ -94,7 +94,7 @@ type Animatable =
     /// <remarks>@type {JSAnimation|null}</remarks>
     abstract callbacks: JSAnimation option with get, set
     abstract revert: unit -> Animatable
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"callbacks\": o[\"callbacks\"] ?? null}))($0)")>]
     static member Create (targets: Target[], animations: JS.Record<string, JSAnimation>, revert: (unit -> Animatable), ?callbacks: JSAnimation) : Animatable = jsNative
 
 [<Interface>]
@@ -244,7 +244,7 @@ type Globals =
     abstract timeScale: float with get, set
     abstract tickThreshold: float with get, set
     abstract editor: Globals.Editor option with get, set
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"editor\": o[\"editor\"] ?? null}))($0)")>]
     static member Create (defaults: DefaultsParams, precision: float, timeScale: float, tickThreshold: float, ?editor: Globals.Editor) : Globals = jsNative
 
 [<Interface>]
@@ -723,7 +723,7 @@ type LayoutSnapshot =
     abstract registerElement: ``$el``: DOMTarget * ?parentNode: LayoutNode -> LayoutNode option
     abstract ensureDetachedNode: ``$el``: DOMTarget * candidates: Fable.Core.TS.Es.Set<DOMTarget> -> LayoutNode option
     abstract record: unit -> LayoutSnapshot
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"rootNode\": o[\"rootNode\"] ?? null}))($0)")>]
     static member Create (layout: AutoLayout, rootNodes: Fable.Core.TS.Es.Set<LayoutNode>, nodes: Fable.Core.TS.Es.Map<string, LayoutNode>, scrollX: float, scrollY: float, revert: (unit -> LayoutSnapshot), getNode: (DOMTarget -> LayoutNode), getComputedValue: Func<DOMTarget, string, TimelinePosition>, forEach: Action<LayoutNode option, LayoutNodeIterator>, forEachRootNode: (LayoutNodeIterator -> unit), forEachNode: (LayoutNodeIterator -> unit), registerElement: Func<DOMTarget, LayoutNode option, LayoutNode option>, ensureDetachedNode: Func<DOMTarget, Fable.Core.TS.Es.Set<DOMTarget>, LayoutNode option>, record: (unit -> LayoutSnapshot), ?rootNode: LayoutNode) : LayoutSnapshot = jsNative
 
 type LayoutChildrenParam = U5<string, DOMTargetSelector[], Fable.Core.TS.Dom.HTMLElement, Fable.Core.TS.Dom.NodeList, Fable.Core.TS.Dom.SVGElement>
@@ -1597,7 +1597,7 @@ type TweenDecomposedValue =
 type TweenPropertySiblings =
     abstract _head: Tween option with get, set
     abstract _tail: Tween option with get, set
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"_head\": o[\"_head\"] ?? null, \"_tail\": o[\"_tail\"] ?? null}))($0)")>]
     static member Create (?_head: Tween, ?_tail: Tween) : TweenPropertySiblings = jsNative
 
 type TweenLookups = JS.Record<string, TweenPropertySiblings>

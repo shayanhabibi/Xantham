@@ -84,6 +84,7 @@ let shapeExports: Pass<ShapeModel> =
                                     && not (isPolymorphicCallableValue model export.Symbol.Flags facts)
                                     ->
                                     facts.CallSignatures
+                                    |> List.collect (restOverloads model)
                                     |> List.mapi (fun ordinal signature ->
                                         let typeParameters, parameters, returns, signatureFindings =
                                             shapeSignature ctx model None findingName signature

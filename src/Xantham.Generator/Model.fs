@@ -1233,6 +1233,9 @@ type ResolvedSignature =
         /// A construct signature of an `abstract class`, which TypeScript refuses `new` on. It
         /// marks the class as one written to be derived from (§4.4).
         IsAbstract: bool
+        /// A construct signature of a `private constructor`, which TypeScript admits `new` on only
+        /// inside the class. The class stays a class; the binding carries no constructor for it.
+        IsPrivate: bool
         ReturnTypeId: int<typeId>
         /// The declaration's source text on one line, and the description of its own JSDoc.
         /// Carried by each signature of a set of two or more.
@@ -1240,6 +1243,9 @@ type ResolvedSignature =
         /// The JSDoc of the signature's own declaration, where the signature is one of several
         /// overloads and the declaration is available.
         OwnDoc: OverloadDoc option
+        /// The names an array binding pattern on the rest parameter writes, by position:
+        /// `...[value]` carries `[ Some "value" ]`, a hole or a nested pattern `None`.
+        RestPatternNames: string option list
     }
 
 /// A conditional type's mapping facts (§4.11).
@@ -1285,7 +1291,12 @@ type TypeFacts =
         /// Flags of the type's own symbol: `Class`, or `Interface` merged with a variable for a
         /// constructable host interface. `None` where the type has no symbol.
         SymbolFlags: SymbolFlags
+        /// Public and protected members. A TypeScript-private member (the `private` modifier or a
+        /// `#name`) is inaccessible outside its class and is absent.
         Members: ResolvedMember list
+        /// The type has a TypeScript-private member. TypeScript then admits only the class's own
+        /// instances, never an object literal.
+        PrivateMembers: bool
         /// Index signatures (§4.10). Kept apart from `Members` because they are not properties:
         /// they have no name, and a type may carry one with no members at all.
         IndexInfos: ResolvedIndex list
@@ -1305,6 +1316,10 @@ type TypeFacts =
         /// of the table: deriving it drags all of `Array.prototype` in again for every distinct
         /// tuple shape, and nothing but these flags is wanted from it.
         TupleElements: ElementFlags list
+        /// The element labels of a tuple a rest parameter is typed by, in element order:
+        /// `[start: number]` carries `Some "start"`, an unlabelled element `None`. Empty for an
+        /// unlabelled tuple and for every other type.
+        TupleLabels: string option list
         /// The arguments the type's *alias* was written with, by id (§4.9). On the declaration
         /// form of a generic alias these are its own parameters - `type Mapper<T> = (t: T) => T`
         /// leaves the function type itself parameterless, so this is the only place `T` appears.
@@ -1342,6 +1357,9 @@ type TypeFacts =
         AliasIdentity: (string<symbolName> * int<typeId>) option
         /// The name an error type's reference was written with, where the checker retains it.
         UnresolvedName: string<symbolName> option
+        /// The global `Symbol` interface type, as the checker's apparent type of a `symbol` or
+        /// `unique symbol`. Populated only on those two primitives.
+        SymbolApparentType: int<typeId> option
     }
 
 module TypeFacts =
@@ -1359,6 +1377,7 @@ module TypeFacts =
             NamespacePath = []
             SymbolFlags = SymbolFlags.None
             Members = []
+            PrivateMembers = false
             IndexInfos = []
             CallSignatures = []
             ConstructSignatures = []
@@ -1367,6 +1386,7 @@ module TypeFacts =
             AmbientClass = None
             TypeArguments = []
             TupleElements = []
+            TupleLabels = []
             AliasTypeArguments = []
             IntersectionMembers = []
             Constraint = None
@@ -1380,6 +1400,7 @@ module TypeFacts =
             NonNullableApplication = None
             AliasIdentity = None
             UnresolvedName = None
+            SymbolApparentType = None
         }
 
 /// The type ids an export resolves to. A symbol can be both a type and a value (a class), so
@@ -1474,6 +1495,9 @@ type FsPropertyMember =
         /// The value of a literal member: a required property typed by one string or
         /// numeric literal. `Type` is the literal's primitive.
         Literal: FsLiteral option
+        /// A required key whose type admits `null` and not `undefined` (D3): a `Create` writes
+        /// the key as `null` when its argument is absent or `undefined`.
+        NullKey: bool
     }
 
 /// A type parameter (§4.9), bound by a declaration or by a generic signature of its own. The
@@ -1644,6 +1668,9 @@ type FsCreateOverload =
         /// Literal members the Emit writes into the object, as JavaScript key and value, in
         /// member order, inherited ones included.
         Literals: (string * FsLiteral) list
+        /// The parameters whose key the Emit writes as `null` when the argument is absent or
+        /// `undefined` (D3), by parameter name.
+        NullKeys: string list
     }
 
 type FsInterfaceDecl =
@@ -1708,6 +1735,9 @@ type FsTaggedField =
         /// The value of a literal field: a required property typed by one string or numeric
         /// literal. `Type` is the literal's primitive.
         Literal: FsLiteral option
+        /// A required key whose type admits `null` and not `undefined` (D3): the case's `Create`
+        /// writes the key as `null` when its argument is absent or `undefined`.
+        NullKey: bool
     }
 
 /// The JavaScript `typeof` class of a value.

@@ -216,11 +216,8 @@ module Browser =
     /// <summary>
     /// Represents an Automation SAFEARRAY
     /// </summary>
-    [<Interface>]
     type SafeArray<'T> =
-        abstract SafeArray_typekey: SafeArray<'T> with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (SafeArray_typekey: SafeArray<'T>) : SafeArray<'T> = jsNative
+        interface end
 
     /// <summary>
     /// Allows enumerating over a COM collection, which may not have indexed item access.
@@ -296,11 +293,8 @@ module Browser =
     /// <summary>
     /// Automation date (VT_DATE)
     /// </summary>
-    [<Interface>]
     type VarDate =
-        abstract VarDate_typekey: VarDate with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (VarDate_typekey: VarDate) : VarDate = jsNative
+        interface end
 
     type DateConstructor =
         [<EmitConstructor>]

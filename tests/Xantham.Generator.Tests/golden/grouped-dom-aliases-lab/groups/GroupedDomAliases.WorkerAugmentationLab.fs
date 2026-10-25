@@ -145,7 +145,7 @@ type Request =
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request/text">MDN Reference</a>
     /// </summary>
     abstract text: unit -> JS.Promise<string>
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"body\": o[\"body\"] ?? null}))($0)")>]
     static member Create (cache: Request.Cache, credentials: Request.Credentials, destination: Request.Destination, headers: Fable.Core.TS.Dom.Headers, integrity: string, keepalive: bool, ``method``: string, mode: Request.Mode, redirect: Request.Redirect, referrer: string, referrerPolicy: Request.ReferrerPolicy, signal: Fable.Core.TS.Dom.AbortSignal, url: string, clone: (unit -> Request), cf: string, bodyUsed: bool, arrayBuffer: (unit -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>), blob: (unit -> JS.Promise<Fable.Core.TS.Dom.Blob>), bytes: (unit -> JS.Promise<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>>), formData: (unit -> JS.Promise<Fable.Core.TS.Dom.FormData>), json: (unit -> JS.Promise<obj>), text: (unit -> JS.Promise<string>), ?body: Fable.Core.TS.Dom.ReadableStream<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>>) : Request = jsNative
 
 module Request =

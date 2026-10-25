@@ -180,7 +180,7 @@ Format per entry: recommended mapping, tier, alternatives, and what the Wire sup
 | `number` | `float` | Exact | `int` only when a JSDoc/config override says so; TS has one number type. |
 | `boolean` | `bool` | Exact | |
 | `bigint` | `bigint` | Exact | Fable compiles to JS BigInt. |
-| `symbol` / `unique symbol` | `JS.Symbol` | Exact / Widened | unique symbols lose uniqueness; consider erased brand per unique symbol (open). |
+| `symbol` / `unique symbol` | the compiler lib's `Symbol` interface (`Fable.Core.TS.Es.Symbol`; the local `Symbol` where the run ships the lib) | Ergonomic / Widened | `TR069`: the interface also admits a boxed `Symbol` object. A `unique symbol` adds `TR042`: its singleton identity is not carried. Resolve reads the interface as the checker's apparent type of the primitive. Where the interface has no name in the run (a `map` group without it), `obj` with `TR041` (and `TR042`). |
 | `object` | `obj` | Widened | |
 | `unknown` | `obj` | Escape-ish | **Decided (D8):** `obj` for now. An erased `Unknown` wrapper forcing explicit narrowing may become a config toggle if it stays cheap to implement. |
 | `any` | `obj` | Ergonomic | `TR008`. Intrinsic name `any`: a written or omitted annotation, a shorthand ambient module, or a diagnosed circular return, accessor or import-alias annotation. A circular type alias is the error type (`TR063`). |
@@ -280,13 +280,32 @@ Policy question with a recommended default:
   signatures), also emit a `[<ParamObject>]` `Create` static or a companion `create`
   function so consumers don't hand-build objects via `createObj`. This is the single biggest
   "easy" win; the old Glutinum `jsOptions` approach is superseded by `ParamObject`.
+  **Required nullable members (D3, ruled 2026-10-24).** A required member whose type admits
+  `null` and admits neither `undefined` nor `void` (`value: string | null`, `value: T | null`)
+  keeps its omittable `?value` parameter, and the `Create` always writes the key:
+  `[<ParamObject; Emit("(o => ({...o, \"value\": o[\"value\"] ?? null}))($0)")>]`, so an
+  omitted argument, a `None` and a `None` held in a variable all reach JavaScript as `null`
+  (`SP006`, Exact). One `Create` per declaration; there are no per-combination overloads. The
+  arrow binds the argument object once: Fable inlines `$0` at each use, so the unbound
+  `({...$0, value: $0.value ?? null})` evaluates every argument twice, and the positional form
+  (`"k": $n`) evaluates each optional argument twice through its `=== undefined` test. Other
+  members keep their `ParamObject` behaviour. A `Create` whose parameter names are rebound
+  against a collision is already positional and writes `"value": ($n) ?? null`. The
+  exclusive-arm fold's overloads and a tagged arm's `Create` write their required nullable keys
+  the same way; the fold keeps its required `option` parameter for a member every arm shares.
+  Out of scope: `?: T | null` and `T | null | undefined` stay omittable keys, and direct
+  construction of a tagged case with fields of its own (not through its `Create`) remains open.
 - **`class`** → the ts2fable/Glutinum two-part pattern, which remains right:
   - instance side: F# interface (as above, plus `inherit` for base classes);
   - static side + constructor: members on an `Exports`-style erased type or a
     `[<Import>]`-bound `IClassNameStatic` interface with `[<EmitConstructor>]`.
-  - `abstract`/`protected`/`private` members: private dropped (they are not API), protected
-    dropped with doc note (open: emit under an attribute-gated interface?), abstract same as
-    concrete on the instance interface.
+  - `abstract`/`protected`/`private` members: a TypeScript-private member (the `private`
+    modifier or a `#name` on every declaration, never a leading underscore) is omitted, an
+    Exact omission with no finding; protected members stay; abstract same as concrete on the
+    instance interface. A `private constructor` binds no `[<EmitConstructor>]`, and the class
+    keeps its statics. A public getter over a private setter reads get-only. A type with a
+    private member is nominal (`TypeFacts.PrivateMembers`): it is declared even with no other
+    member (`interface end`, not `obj`), and it refuses the ParamObject `Create` (SP003).
 - **Callable + properties hybrids** (function with attached props) → interface with an
   `[<Emit "$0($1...)">]` `Invoke` member plus the properties. Ergonomic.
 - **Well-known symbol members** (W4, 2026-10-13) → `[Symbol.iterator]` is `inherit seq<'T>` at
@@ -295,12 +314,15 @@ Policy question with a recommended default:
   (a call adds `()` or `($1...)`, a writable property adds a setter Emit; `MB009`, Ergonomic).
   An interface whose base already iterates keeps the base's `seq` alone, because F# admits one
   `seq` instantiation per interface (FS3360); a narrowed iterator stays an Emit member. A key
-  naming the package's own `unique symbol`, a key declared solely by a package's
-  `SymbolConstructor` augmentation (`Symbol.observable`), an optional member, a member whose
+  naming the package's own `unique symbol`, a key the compiler's complete ECMAScript lib does
+  not declare (a package's `Symbol.observable` augmentation), an optional member, a member whose
   `Symbol<Name>` is already declared by another member, a class static, a member of an
   `[<AbstractClass>]` entrypoint and a narrowed iterator `drop-inherited` removed stay dropped
   (`MB002`, Widened). A declaration with a required symbol member or a `seq` inherit, its own
   or a base's, carries no `Create` (`SP003`): a ParamObject literal cannot write a symbol key.
+  A key a package augments onto `SymbolConstructor` because the program's `lib` omits it
+  (`@types/node`'s `Symbol.dispose` and `Symbol.asyncDispose` under `lib: ["node"]`) is
+  well-known when the compiler's `esnext` lib declares it (W3, 2026-10-24).
 
 *Landed (2026-09-02, phase E).* Bases and intersection operands go through one gate: a base is
 inherited exactly when its reference resolves to a name this run declares as an interface, and
@@ -343,6 +365,22 @@ Order of preference, decided per union after §4.2's categorization:
    lane CA, on a corpus-wide arity histogram of `UnionTooWide` sites: arity 5 - 32, 6 - 15,
    7 - 6, 8 - 6, 9 - 1, above 9 - 9. Raising the cap to 9 recovers 60 of the corpus's 69
    widened sites; the remaining 9 sit at arity 10, 11 or 14 and stay `obj`).
+
+   **An application of a generic erased-union alias is written over its arguments**
+   (`tests/fixtures/union-alias-application-lab`): `type FunctionMaybe<'T> = U2<'T, (unit ->
+   'T)>` reads `FunctionMaybe<Live>` at `FunctionMaybe<Live>`, not `U2<string, (unit -> Live)>`.
+   The application is recognised through its alias symbol and arguments where the declared form
+   carries each of its parameters as an arm and the site corresponds arm for arm: a parameter
+   arm by its argument's constituents, any other arm by type, generic target or symbol. Nullish
+   arms the argument carries stay inside it (`FunctionMaybe<float option>`); optionality the
+   site adds wraps the application (`x?: FunctionMaybe<number>` reads `FunctionMaybe<float>
+   option`, through `NonNullableApplication`). An argument that widens to `obj` keeps the
+   flattened form, so the `U_n`-with-`obj` collapse is unchanged. So does an argument rendering
+   as an erased union, directly or through a named abbreviation (`FunctionMaybe<string |
+   number>` reads `U3<string, float, (unit -> U2<string, float>)>`): the nested `U2<U2<string,
+   float>, _>` admits no single `!^` cast from `string`. An enum or union declaration argument
+   casts as its own type and is applied. A transformed union over
+   another arm set (`NonNullable<FunctionMaybe<"x" | null>>`) is its own union.
 
    **Nine is a ceiling, not a preference.** Generating `U10`-`U100` into `Xantham.Fable.Core`
    under the `Fable.Core` namespace was proposed and rejected in wave thirteen: every `!^` cast
@@ -396,11 +434,11 @@ type NamedTimed =
     static member Create (name: string, at: float, ?stamp: string) : NamedTimed = jsNative
 ```
 
-What still widens, each saying which case it is: an intersection with a type-parameter or
-primitive operand (`T & { id: number }`, `string & { count: number }`) has no members to read,
-and a member-level generic intersection alias instantiates by re-expansion under a suffixed name
-like any generic alias (§4.9's deferred item). `tests/fixtures/intersection-lab` pins the
-positives and the negative.
+What still widens, each saying which case it is: an intersection with a primitive operand
+(`string & { count: number }`) has no members to read, and a member-level generic intersection
+alias instantiates by re-expansion under a suffixed name like any generic alias (§4.9's deferred
+item). A type-parameter operand no longer widens (below). `tests/fixtures/intersection-lab` pins
+the positives and the negative.
 
 *Landed (2026-09-02, phase D) — the branding half.* The declaration becomes the measure and the
 *uses* carry the brand:
@@ -436,8 +474,7 @@ included, and its golden compiles against the support package in the gate.
 
 *Landed (wave four, lane P) — three of the four intersections that used to widen.*
 A reconnaissance (since retired) attributed every `TR018` site to one of four causes; three
-of them now have an answer, and the fourth (a type-parameter operand) is left as the contract it
-always was.
+of them now have an answer; the fourth (a type-parameter operand) is answered below.
 
 - **An operand that declares nothing reduces away** (`TR049`, Exact). `"in" | "out" | (string &
   {})` is TypeScript's autocomplete idiom, and `string` is the type it means — so `type Ease =
@@ -457,6 +494,55 @@ always was.
   widen. One equality test over the operands' declarations answers it: `U`, required, no
   distribution. Optionality is the only difference the test tolerates, and the required
   declaration is the answer.
+
+*Landed (fidelity W5) — the type-parameter operand.* An intersection with at least one
+type-parameter operand keeps the parameters. Two readings, decided per operand:
+
+- **An object operand restating a parameter's bound reduces away** (`TR073`, Exact). An
+  anonymous operand whose every property the bound of a type-parameter operand declares under
+  the same type id, and optional wherever the bound's is, adds nothing: `R & { req: Base }` over
+  `R extends Wide` is `'R`, and `T & {}` (`NonNullable<T>`) is `'T`.
+- **Every other operand is carried** (`TR072`, Ergonomic) in the support package's erased
+  `JS.Intersect<'A, 'B>`, nested to the right for three or more. An anonymous operand is declared
+  as an interface of its own over the parameters it reads, under the intersection's path, or
+  under `<Alias>.Members` where the intersection is an alias's body:
+
+```fsharp
+type Handler<'E, 'T> = (JS.Intersect<'E, Handler.E<'T>> -> unit)
+type WithChildren<'P> = JS.Intersect<'P, WithChildren.Members>
+static member assign<'T, 'U> (target: 'T, source: 'U) : JS.Intersect<'T, 'U> = jsNative
+```
+
+A primitive operand beside a parameter is carried the same way (`T & U` at `Set<string>` is
+`JS.Intersect<string, 'U>`), so an instantiated base agrees with its generic declaration rather
+than redeclaring the member as `obj`.
+
+`Left`/`Right` read either side and erase to the value itself; `Intersect.unsafeCast` reads a
+value as the intersection, and `Intersect.assign` is `Object.assign` onto the first operand, so a
+constructed argument keeps its identity and prototype. The mapping is Ergonomic rather than Exact
+because the intersection does not upcast to its operands: a side is reached through `Left`/`Right`,
+not by inheritance. An intersection without a type-parameter operand (`string & { count: number
+}`, or a conditional such as `InstanceType<Response> & { req: … }`), and one with an operand that
+has no reference of its own (a generic mapped alias's body), still widen under `TR018`.
+`tests/fixtures/open-intersection-lab` pins both readings, the primitive negative, and the two
+restate negatives: an optional bound member, and a bound member of another type.
+
+A nullish operand is absence, not an operand, and is never carried as `JS.Intersect<unit, 'I>`.
+A union arm `undefined & I` beside an arm `I` is a subset of it and is dropped (`(T | I |
+undefined) & I` reads `U2<'I, JS.Intersect<'T, 'I>>`, still required); with no such arm it hoists
+to `option` with the other nullish arms (`(Base | undefined) & T` reads `JS.Intersect<Base, 'T>
+option`).
+
+Open gap — alias identity at a closed application. A callback alias applied to closed arguments
+expands in place (§4.9), and its intersection then has no type-parameter operand and flattens:
+`listen(handler: Handler<Base, Wide>)` reads `(Listen.Handler.E -> unit)`, so a value typed
+`Handler<Base, Wide>` (whose parameter is `JS.Intersect<Base, Handler.E<Wide>>`) is not accepted
+there without a cast. Likewise solid-js `FlowComponent<'P, 'C>` re-expands `FlowProps<P, C>` as
+`JS.Intersect<'P, FlowComponent.Props.Members<'C>>`, nominally apart from
+`FlowProps.Members<'C>`. Closing it means writing an application of an open-intersection alias as
+that application, which is the generic-alias re-expansion item of §4.9.
+
+An empty operand (`T & {}`) reports `TR049`; an operand restating the bound reports `TR073`.
 
 ### 4.7 Enums
 
@@ -825,6 +911,14 @@ Fable F# tuples *are* JS arrays — a happy exact match:
 - Rest elements (`[A, ...B[]]`) → no F# tuple form; erased type + indexer/head accessors, or
   `obj[]` Escape. Recommend the erased carrier with typed accessors.
 - `readonly` tuples → same mapping; readonly-ness doc-noted.
+- A fixed tuple as a rest parameter's type (`...args: [a: A, b: B]`) → the parameters it stands
+  for. A rest parameter over a union of fixed tuples (`...args: [end: number] | [start: number,
+  end: number]`, `next(...[value]: [] | [TNext])`) → one overload per tuple, in ascending arity.
+  Exact: TypeScript's signature help shows the same overload set. Arms differing only by
+  trailing `undefined`/`void` elements compile to one F# call and are written once, at the
+  shortest. Element names come from the rest parameter's array binding pattern, then the tuple's
+  labels, then position. A union with a variadic arm keeps the `[<ParamArray>]` form (TR028/TR029).
+  Callback positions (delegates, ParamObject `Create` parameters) still read the first signature.
 
 ### 4.13 Modules, namespaces, exports, declaration merging
 

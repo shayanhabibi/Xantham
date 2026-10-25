@@ -633,7 +633,12 @@ Phases — each ends with the compile gate green on its fixtures:
     - *A generic union alias.* The union branch of derivation never asked for alias
       type arguments, so `type Ref<T> = T | ((value: T) => void)` reached shaping with no
       scope and rendered `obj`. It asks now, as the object and conditional branches
-      already did.
+      already did. Since 2026-10-24 an application of such an alias is written over its
+      arguments (`erasedAliasApplication`, `union-alias-application-lab`): `FunctionMaybe<Live>`
+      rather than `U2<string, (unit -> Live)>`, the declared form found by alias symbol and the
+      site matched arm for arm; an argument rendering as an erased union keeps the flattened
+      form. `solid-js` widened 327 -> 169 and `TR006` 6,348 -> 1,347;
+      `ResourceSource<'S>` and `GenericValue<'T>` are now written by name.
     - *An anonymous object type hoisted out of a generic scope.* `each<T, U>(props: {
       items: T[]; render: (item: T) => U })` names `EachProps` for the parameter, and
       `EachProps` binds nothing of its own. A new pass (`bind-free-type-params`) walks
@@ -813,6 +818,12 @@ Phases — each ends with the compile gate green on its fixtures:
       `unique symbol` still widen to `obj`, with `TR041` and `TR042` naming the missing
       binding and, for the unique one, the identity there is no F# form for. These are the two
       findings to revisit if a binding ever ships.
+      *Superseded (W1, 2026-10-24):* the binding is the compiler lib's own `Symbol`
+      interface, which Core.TS generates. Resolve follows the checker's apparent type of a
+      `symbol` or `unique symbol` into `TypeFacts.SymbolApparentType`, and `typeRef` writes the
+      name that interface takes in the run (`Fable.Core.TS.Es.Symbol` under `widen`, the local
+      declaration under `ship`) with the ergonomic `TR069`. `TR041` remains the fallback where
+      the interface has no name; `TR042` now reports only the lost identity.
     - *Mapping a flag unblocked the unions it was poisoning.* `number | bigint` was `obj`
       across `workers-types` because one arm was unmapped; it is `U2<float, bigint>` now, and
       `WorkflowSleepDuration` (`` `${number} ${WorkflowDurationLabel}` | number ``) is
@@ -2482,6 +2493,38 @@ regenerated: it compiles against the regenerated Core.TS. Core.TS's three new es
 (`SegmentIterator` and two `[Symbol.replace]` replacer delegates) are newly reached
 declarations whose escape is `TR008`.
 
+### Augmented well-known keys (2026-10-24, W3)
+
+`@types/node` runs under `lib: ["node"]`, which loads no `esnext.disposable`, so its
+`compatibility/disposable.d.ts` augmentation is the program's only declaration of
+`Symbol.dispose` and `Symbol.asyncDispose`, and both read as `MB002`. Resolve keeps the
+program's own lib declaration as the first proof. A key declared only outside the program's lib
+falls back to a second program, one per connection and created on first use: lib `esnext`,
+rooted at the lib file that declares the program's global `Symbol`. The key is well-known when
+that program's `Symbol` has the property declared by a `lib.*.d.ts` file. The fallback applies
+only to a key whose receiver resolves to the program's global `Symbol` and whose symbol is the
+property `getPropertyOfType` returns on the global `SymbolConstructor`; a namespace-local
+`Symbol` keyed `[Symbol.asyncDispose]` stays `MB002`. `Symbol.observable` has no such
+declaration and stays `MB002`. The program needs a root file: with none,
+`resolveName` returns no global `Symbol`.
+
+Lab `disposable-augmentation-lab` (`lib: ["es2020"]`): the global `Disposable` reads
+`SymbolDispose` and `Stream` reads `SymbolAsyncDispose` (`MB009`), `Handle` inherits
+`Disposable` and loses its `Create` (`SP003`), and `MB002` remains on `Keyed.__@own` and
+`Stream.__@observable`, and `Shadowed.Resource.__@asyncDispose` (a namespace-local `Symbol`).
+Node, measured against its regeneration at the W1 generator:
+`MB002` 161 → 92 (`dispose` 12 and `asyncDispose` 57 to 0; `captureRejectionSymbol` 89,
+`kOptions` 2 and `custom` 1 unchanged), `MB009` 30 → 43, `SP003` 290 → 293, `SP001` 1057 → 1054,
+`SP002` 546 → 536, tiers ergonomic/widened 2184/593 → 2192/585, 13 Emit members for the two keys, and no symbol is
+worse. Under lib `esnext` every well-known key has a program lib declaration, so Core.TS
+keeps its `MB002`/`MB008`/`MB009` counts (2/61/75), and every test golden other than the lab
+is unchanged. Emitted ABI changes for a producer whose lib omits a key that a package augments
+onto `SymbolConstructor`: the declaration gains a required Emit member and can lose `Create`
+(`SP003`), so a catalog from an earlier producer of that shape disagrees with the current
+reading. Core.TS, the only shipped catalog, is not such a producer (lib `esnext`).
+`CatalogCompatibility.ApiVersion` 10, raised once for the fidelity stack in W1, rejects such
+producers.
+
 ## Literal overloads as methods (2026-10-13, W5 #136)
 
 An overload keyed by a string literal is a method of its own. The draft pass
@@ -3391,3 +3434,23 @@ cover a 20-deep interface diamond chain, bounded by contract-walk visits per tab
 `resolveTypeTableObserved`; six mutually wrapping interfaces and aliases; six aliases over
 computed literal arguments; a callback below an application shared by two roots, in both root
 orders; and `Mapper<T>`.
+
+### TypeScript-private members (2026-10-24)
+
+Resolve omits a TypeScript-private property: every declaration carries the `private` modifier or
+a `#name` (`PrivateKeyword` in the declaration's modifiers, or a `PrivateIdentifier` name). A
+leading underscore is never read; `protected` members stay. The omission is Exact and records no
+finding. `TypeFacts.PrivateMembers` records that a type had one: such a type admits only its
+class's instances, so it is declared even with no other member (`interface end`, never the TR047
+`obj`), and `synthesize-paramobjects` refuses its `Create` (SP003). A `private constructor` sets
+`ResolvedSignature.IsPrivate`; the construct signature stays, so the class keeps its class
+identity and statics, and shape-classes and constructor objects emit no constructor for it. A
+public getter over a private setter reads get-only. private-member-lab is the lab.
+
+Measured against a base regeneration: private members account for no TR008 in Core.TS, Node or
+the npm goldens (solid-js's private members are in seroval, which it does not emit). Core.TS moves
+RawJSON and RawJSONInstance, whose `#isRawJson` brand read as `unknown` → `obj` (TR009 338 → 336,
+SP001 1,179 → 1,177, SP003 504 → 506); the lib-ship and catalog-library-entry labs move
+lib.scripthost's SafeArray and VarDate. Node loses fourteen `[<EmitConstructor>]` exports of private constructors (`Cipher`,
+`Hash`, `Stats`, `REPLServer` and others). Catalogue identity keys do not move; RawJSON's `api`
+hash in Core.TS's `declarations.json` does.

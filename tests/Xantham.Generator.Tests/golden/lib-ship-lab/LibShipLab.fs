@@ -27,11 +27,6 @@ type Exports =
         with get (): Fable.Core.TS.Browser.WScript = jsNative
         and set (_: Fable.Core.TS.Browser.WScript): unit = jsNative
     /// <summary>
-    /// Represents an Automation SAFEARRAY
-    /// </summary>
-    [<Global("SafeArray"); EmitConstructor>]
-    static member SafeArray<'T> () : Fable.Core.TS.Browser.SafeArray<'T> = jsNative
-    /// <summary>
     /// Allows enumerating over a COM collection, which may not have indexed item access.
     /// </summary>
     static member Enumerator
@@ -43,10 +38,5 @@ type Exports =
     static member VBArray
         with get (): Fable.Core.TS.Browser.VBArrayConstructor = jsNative
         and set (_: Fable.Core.TS.Browser.VBArrayConstructor): unit = jsNative
-    /// <summary>
-    /// Automation date (VT_DATE)
-    /// </summary>
-    [<Global("VarDate"); EmitConstructor>]
-    static member VarDate () : Fable.Core.TS.Browser.VarDate = jsNative
     [<Global("globalThis")>]
     static member globalThis: Fable.Core.TS.Ecma.GlobalThis = jsNative

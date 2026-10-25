@@ -3429,8 +3429,7 @@ type IntRange<'Start, 'End, 'Step> = private IntRange__ of obj
 /// </code>
 /// </example>
 /// <remarks>@category Type</remarks>
-[<Erase>]
-type InvariantOf<'Type> = private InvariantOf__ of obj
+type InvariantOf<'Type> = JS.Intersect<'Type, InvariantOf.Members<'Type>>
 
 /// <summary>
 /// Returns a boolean for whether the given type is <c>any</c>.
@@ -6847,7 +6846,7 @@ type PickIndexSignature<'ObjectType> = private PickIndexSignature__ of obj
 /// Matches any <a href="https://developer.mozilla.org/en-US/docs/Glossary/Primitive">primitive value</a>.
 /// </summary>
 /// <remarks>@category Type</remarks>
-type Primitive = obj option
+type Primitive = U5<string, float, bigint, Fable.Core.TS.Es.Symbol, bool> option
 
 /// <summary>
 /// Create a type that represents either the value or the value wrapped in <c>PromiseLike</c>.
@@ -9211,8 +9210,7 @@ type TaggedUnion<'TagKey, 'UnionMembers> = private TaggedUnion__ of obj
 /// </code>
 /// </example>
 /// <remarks>@category Type</remarks>
-[<Erase>]
-type Tagged<'Type, 'TagName, 'TagMetadata> = private Tagged__ of obj
+type Tagged<'Type, 'TagName, 'TagMetadata> = JS.Intersect<'Type, Tagged.Members<'TagName, 'TagMetadata>>
 
 /// <summary>
 /// Given a type and a tag name, returns the metadata associated with that tag on that type.
@@ -9353,8 +9351,7 @@ type UnwrapTagged<'TaggedType> = private UnwrapTagged__ of obj
 /// </example>
 /// <remarks>@category Type</remarks>
 /// <remarks>@deprecated Use {@link Tagged} instead</remarks>
-[<Erase>]
-type Opaque<'Type, 'Token> = private Opaque__ of obj
+type Opaque<'Type, 'Token> = JS.Intersect<'Type, Opaque.Members<'Token>>
 
 /// <summary>
 /// Note: The <c>UnwrapOpaque</c> type is deprecated in favor of <c>UnwrapTagged</c>.
@@ -9939,7 +9936,7 @@ type UnknownRecord =
     [<EmitIndexer>]
     abstract Item: float -> obj with get, set
     [<EmitIndexer>]
-    abstract Item: obj -> obj with get, set
+    abstract Item: Fable.Core.TS.Es.Symbol -> obj with get, set
 
 /// <summary>
 /// Represents a set with <c>unknown</c> value.
@@ -10398,6 +10395,10 @@ module Globals =
                 [<ParamObject; Emit("$0")>]
                 static member Create (?next: ('ValueType -> unit), ?error: (obj -> unit), ?complete: (unit -> unit)) : Observer<'ValueType> = jsNative
 
+module InvariantOf =
+    type Members<'Type> =
+        interface end
+
 module Jsonifiable2 =
     [<Interface>]
     type Item =
@@ -10410,6 +10411,10 @@ module MergeDeepOptions =
     type ArrayMergeMode =
         | [<CompiledName("replace")>] Replace
         | [<CompiledName("spread")>] Spread
+
+module Opaque =
+    type Members<'Token> =
+        interface end
 
 module PackageJson =
     [<Interface>]
@@ -11018,6 +11023,10 @@ module PackageJson =
         type Access =
             | [<CompiledName("public")>] Public
             | [<CompiledName("restricted")>] Restricted
+
+module Tagged =
+    type Members<'TagName, 'TagMetadata> =
+        interface end
 
 module TsConfigJson =
     type CompilerOptions =

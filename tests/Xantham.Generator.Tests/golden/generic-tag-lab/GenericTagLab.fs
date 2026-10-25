@@ -143,7 +143,7 @@ type Holder<'T> =
     abstract nullable: Marker<float> option
     abstract either: U2<Marker2, Marker3>
     abstract poll: unit -> Job<'T> option
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"nullable\": o[\"nullable\"] ?? null}))($0)")>]
     static member Create (either: U2<Marker2, Marker3>, poll: (unit -> Job<'T> option), ?marker: Marker<string>, ?nullable: Marker<float>) : Holder<'T> = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>

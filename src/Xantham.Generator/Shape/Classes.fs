@@ -165,6 +165,7 @@ let shapeClasses: Pass<ShapeModel> =
                             match asMethod with
                             | Some memberFacts ->
                                 memberFacts.CallSignatures
+                                |> List.collect (restOverloads model)
                                 |> List.map (fun signature ->
                                     let typeParameters, parameters, returns, signatureFindings =
                                         shapeSignature ctx model (Some name) owner signature
@@ -387,7 +388,10 @@ let shapeClasses: Pass<ShapeModel> =
                                         admitEntrypoint export facts.ConstructSignatures bases declaredName
 
                                     facts.ConstructSignatures
-                                    |> List.mapi (fun ordinal signature ->
+                                    |> List.collect (restOverloads model)
+                                    |> List.indexed
+                                    |> List.filter (fun (_, signature) -> not signature.IsPrivate)
+                                    |> List.map (fun (ordinal, signature) ->
                                         let typeParameters, parameters, returns, signatureFindings =
                                             shapeSignature ctx model (Some name) name signature
 

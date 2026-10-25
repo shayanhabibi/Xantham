@@ -14,11 +14,13 @@ let private declaresInterface (model: ShapeModel) (facts: TypeFacts) =
     (flag TypeFlags.Object facts
      // A constructor object is shape even with no properties of its own: `interface F { new
      // (): X }` has no members and one construct signature, and becomes an interface of one
-     // `Create` (§4.4).
+     // `Create` (§4.4). A class whose members are all private is nominal: it admits only its
+     // own instances, which an empty interface keeps apart from `obj`.
      && (not (
              facts.Members.IsEmpty
              && facts.IndexInfos.IsEmpty
              && facts.ConstructSignatures.IsEmpty
+             && not facts.PrivateMembers
          )
          || hasInterfaceCallSignatures model facts)
      // A pure index signature the checker gave no symbol of its own - reached through a
@@ -334,6 +336,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                                         []
                                     else
                                         facts.CallSignatures
+                                        |> List.collect (restOverloads model)
                                         |> List.map (fun signature ->
                                             let typeParameters, parameters, returns, signatureFindings =
                                                 shapeSignature
@@ -430,6 +433,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                                 ReadOnly = m.ReadOnly
                                 Type = optionalRef optional reference
                                 Literal = None
+                                NullKey = not optional && requiresNullKey model m.TypeId
                             },
                         refFindings
 
@@ -461,9 +465,15 @@ let shapeInterfaces: Pass<ShapeModel> =
                                         let required, optional =
                                             (sharedParams @ ownParams) |> List.partition (fun p -> not p.Optional)
 
+                                        let nullKeys =
+                                            shared @ arm.Own
+                                            |> List.filter (fun m -> not m.Optional && requiresNullKey model m.TypeId)
+                                            |> List.map (fun m -> Naming.memberName m.Symbol.Name)
+
                                         {
                                             Parameters = required @ optional
                                             Literals = []
+                                            NullKeys = nullKeys
                                         },
                                         List.concat sharedParamFindings @ List.concat ownParamFindings)
                                     |> List.unzip

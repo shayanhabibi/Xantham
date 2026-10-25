@@ -784,6 +784,26 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                     for interfaceId in facts.ImplementedTypes do
                         walk (into "Implements") order interfaceId
 
+                    // An anonymous operand of an intersection over a type parameter is declared
+                    // under the intersection's path (§4.6), or under `<Alias>.Members` for an
+                    // alias body, whose own name is the alias's. A named operand takes its name
+                    // from its own declaration.
+                    match openOperands model facts with
+                    | Some kept ->
+                        let operandPath =
+                            if facts.Response.AliasSymbolId.IsSome then
+                                nestUnder path "Members"
+                            else
+                                path
+
+                        for operand in kept do
+                            if
+                                flag TypeFlags.Object operand
+                                && operand.SymbolName |> Option.forall isSyntheticName
+                            then
+                                walk operandPath order operand.Response.TypeId
+                    | None -> ()
+
                     if
                         ctx.Config.DeclarationCatalog
                         || not (List.isEmpty ctx.Config.DeclarationReferences)

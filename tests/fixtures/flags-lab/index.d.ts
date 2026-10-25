@@ -78,9 +78,8 @@ export interface Registry {
 export declare function freeze(value: object): object;
 
 // ---------------------------------------------------------------------------
-// `symbol` and `unique symbol`. Nothing shipped binds either: Fable.Core 5.2.0 declares no
-// `JS.Symbol`, checked against the assembly. Both widen, each saying which construct it was
-// and why - a `unique symbol` loses its identity on top of losing its type.
+// `symbol` and `unique symbol`. Both read as the compiler lib's own `Symbol` interface; a
+// `unique symbol` also says it loses its identity. Each finding names its construct.
 // ---------------------------------------------------------------------------
 
 export declare const brandTag: unique symbol;

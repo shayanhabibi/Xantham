@@ -388,7 +388,7 @@ module Recursive =
     [<Fickl.Core.CallableInterface>]
     type GenericThunk<'T> =
         [<Emit("$0($1...)")>]
-        abstract Invoke: unit -> U2<'T, GenericThunk<'T>>
+        abstract Invoke: unit -> GenericValue<'T>
 
     type GenericValue<'T> = U2<'T, GenericThunk<'T>>
 

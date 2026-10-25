@@ -1,0 +1,1 @@
+{"name":"union-alias-application-lab","version":"1.0.0","types":"index.d.ts","description":"Lab: an application of a generic erased-union alias is written over its argument rather than flattened arm by arm."}

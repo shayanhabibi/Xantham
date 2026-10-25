@@ -2025,7 +2025,7 @@ type MessageEvent =
     /// <a href="https://developer.mozilla.org/docs/Web/API/MessageEvent/ports">MDN Reference</a>
     /// </summary>
     abstract ports: MessagePort[]
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"origin\": o[\"origin\"] ?? null, \"source\": o[\"source\"] ?? null}))($0)")>]
     static member Create (data: obj, lastEventId: string, ports: MessagePort[], ``type``: string, eventPhase: float, composed: bool, bubbles: bool, cancelable: bool, defaultPrevented: bool, returnValue: bool, timeStamp: float, isTrusted: bool, cancelBubble: bool, stopImmediatePropagation: (unit -> unit), preventDefault: (unit -> unit), stopPropagation: (unit -> unit), composedPath: (unit -> EventTarget<JS.Record<string, Event>>[]), ?origin: string, ?source: MessagePort, ?currentTarget: EventTarget<JS.Record<string, Event>>, ?target: EventTarget<JS.Record<string, Event>>, ?srcElement: EventTarget<JS.Record<string, Event>>) : MessageEvent = jsNative
     [<Global("MessageEvent.NONE")>]
     static member NONE: float = jsNative
@@ -2188,7 +2188,7 @@ type Doctype =
     abstract name: string option
     abstract publicId: string option
     abstract systemId: string option
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"name\": o[\"name\"] ?? null, \"publicId\": o[\"publicId\"] ?? null, \"systemId\": o[\"systemId\"] ?? null}))($0)")>]
     static member Create (?name: string, ?publicId: string, ?systemId: string) : Doctype = jsNative
 
 [<Interface>]
@@ -2346,7 +2346,7 @@ type Body =
     abstract json<'T>: unit -> JS.Promise<'T>
     abstract formData: unit -> JS.Promise<FormData>
     abstract blob: unit -> JS.Promise<Blob>
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"body\": o[\"body\"] ?? null}))($0)")>]
     static member Create (bodyUsed: bool, arrayBuffer: (unit -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>), bytes: (unit -> JS.Promise<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>), text: (unit -> JS.Promise<string>), json: (unit -> JS.Promise<'T>), formData: (unit -> JS.Promise<FormData>), blob: (unit -> JS.Promise<Blob>), ?body: ReadableStream<obj>) : Body = jsNative
 
 /// <summary>
@@ -2407,7 +2407,7 @@ type Response =
     /// <a href="https://developer.mozilla.org/docs/Web/API/Response/type">MDN Reference</a>
     /// </summary>
     abstract ``type``: Response.Type with get, set
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"webSocket\": o[\"webSocket\"] ?? null, \"body\": o[\"body\"] ?? null}))($0)")>]
     static member Create (clone: (unit -> Response), status: float, statusText: string, headers: Headers, ok: bool, redirected: bool, url: string, cf: obj, ``type``: Response.Type, bodyUsed: bool, arrayBuffer: (unit -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>), bytes: (unit -> JS.Promise<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>), text: (unit -> JS.Promise<string>), json: (unit -> JS.Promise<'T>), formData: (unit -> JS.Promise<FormData>), blob: (unit -> JS.Promise<Blob>), ?webSocket: WebSocket, ?body: ReadableStream<obj>) : Response = jsNative
 
 type ResponseConstructor =
@@ -2494,7 +2494,7 @@ type Request<'CfHostMetadata, 'Cf> =
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request/cache">MDN Reference</a>
     /// </summary>
     abstract cache: RequestInit.Cache option with get, set
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"fetcher\": o[\"fetcher\"] ?? null, \"body\": o[\"body\"] ?? null}))($0)")>]
     static member Create (clone: (unit -> Request<'CfHostMetadata, 'Cf>), ``method``: string, url: string, headers: Headers, redirect: string, signal: AbortSignal, integrity: string, keepalive: bool, bodyUsed: bool, arrayBuffer: (unit -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>), bytes: (unit -> JS.Promise<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>), text: (unit -> JS.Promise<string>), json: (unit -> JS.Promise<'T>), formData: (unit -> JS.Promise<FormData>), blob: (unit -> JS.Promise<Blob>), ?fetcher: Request.Fetcher, ?cf: 'Cf, ?cache: RequestInit.Cache, ?body: ReadableStream<obj>) : Request<'CfHostMetadata, 'Cf> = jsNative
 
 type RequestConstructor =
@@ -2538,7 +2538,7 @@ type KVNamespaceListResult2<'Metadata, 'Key> =
     abstract keys: KVNamespaceListKey<'Metadata, 'Key>[] with get, set
     abstract cursor: string with get, set
     abstract cacheStatus: string option with get, set
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"cacheStatus\": o[\"cacheStatus\"] ?? null}))($0)")>]
     static member Create (list_complete: bool, keys: KVNamespaceListKey<'Metadata, 'Key>[], cursor: string, ?cacheStatus: string) : KVNamespaceListResult2<'Metadata, 'Key> = jsNative
 
 [<Interface>]
@@ -2546,7 +2546,7 @@ type KVNamespaceListResult3<'Metadata, 'Key> =
     abstract list_complete: bool with get, set
     abstract keys: KVNamespaceListKey<'Metadata, 'Key>[] with get, set
     abstract cacheStatus: string option with get, set
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"cacheStatus\": o[\"cacheStatus\"] ?? null}))($0)")>]
     static member Create (list_complete: bool, keys: KVNamespaceListKey<'Metadata, 'Key>[], ?cacheStatus: string) : KVNamespaceListResult3<'Metadata, 'Key> = jsNative
 
 type KVNamespace<'Key> =
@@ -2682,7 +2682,7 @@ type KVNamespaceGetWithMetadataResult<'Value, 'Metadata> =
     abstract value: 'Value option with get, set
     abstract metadata: 'Metadata option with get, set
     abstract cacheStatus: string option with get, set
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"value\": o[\"value\"] ?? null, \"metadata\": o[\"metadata\"] ?? null, \"cacheStatus\": o[\"cacheStatus\"] ?? null}))($0)")>]
     static member Create (?value: 'Value, ?metadata: 'Metadata, ?cacheStatus: string) : KVNamespaceGetWithMetadataResult<'Value, 'Metadata> = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -3279,7 +3279,7 @@ type ReadableStreamBYOBRequest =
     /// </summary>
     abstract respondWithNewView: view: U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> unit
     abstract atLeast: float option
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"view\": o[\"view\"] ?? null, \"atLeast\": o[\"atLeast\"] ?? null}))($0)")>]
     static member Create (respond: (float -> unit), respondWithNewView: (U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> unit), ?view: Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, ?atLeast: float) : ReadableStreamBYOBRequest = jsNative
 
 /// <summary>
@@ -3313,7 +3313,7 @@ type ReadableStreamDefaultController<'R> =
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableStreamDefaultController/error">MDN Reference</a>
     /// </summary>
     abstract error: reason: obj -> unit
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"desiredSize\": o[\"desiredSize\"] ?? null}))($0)")>]
     static member Create (close: (unit -> unit), enqueue: ('R option -> unit), error: (obj -> unit), ?desiredSize: float) : ReadableStreamDefaultController<'R> = jsNative
 
 /// <summary>
@@ -3353,7 +3353,7 @@ type ReadableByteStreamController =
     /// <a href="https://developer.mozilla.org/docs/Web/API/ReadableByteStreamController/error">MDN Reference</a>
     /// </summary>
     abstract error: reason: obj -> unit
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"byobRequest\": o[\"byobRequest\"] ?? null, \"desiredSize\": o[\"desiredSize\"] ?? null}))($0)")>]
     static member Create (close: (unit -> unit), enqueue: (U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> unit), error: (obj -> unit), ?byobRequest: ReadableStreamBYOBRequest, ?desiredSize: float) : ReadableByteStreamController = jsNative
 
 /// <summary>
@@ -3409,7 +3409,7 @@ type TransformStreamDefaultController<'O> =
     /// <a href="https://developer.mozilla.org/docs/Web/API/TransformStreamDefaultController/terminate">MDN Reference</a>
     /// </summary>
     abstract terminate: unit -> unit
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"desiredSize\": o[\"desiredSize\"] ?? null}))($0)")>]
     static member Create (enqueue: ('O option -> unit), error: (obj -> unit), terminate: (unit -> unit), ?desiredSize: float) : TransformStreamDefaultController<'O> = jsNative
 
 [<Interface>]
@@ -3507,7 +3507,7 @@ type WritableStreamDefaultWriter<'W> =
     /// <a href="https://developer.mozilla.org/docs/Web/API/WritableStreamDefaultWriter/releaseLock">MDN Reference</a>
     /// </summary>
     abstract releaseLock: unit -> unit
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"desiredSize\": o[\"desiredSize\"] ?? null}))($0)")>]
     static member Create (closed: JS.Promise<unit>, ready: JS.Promise<unit>, abort: (obj option -> JS.Promise<unit>), close: (unit -> JS.Promise<unit>), write: ('W option -> JS.Promise<unit>), releaseLock: (unit -> unit), ?desiredSize: float) : WritableStreamDefaultWriter<'W> = jsNative
 
 /// <summary>
@@ -3710,7 +3710,7 @@ type TraceItem =
     abstract truncated: bool
     abstract cpuTime: float
     abstract wallTime: float
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"event\": o[\"event\"] ?? null, \"eventTimestamp\": o[\"eventTimestamp\"] ?? null, \"scriptName\": o[\"scriptName\"] ?? null}))($0)")>]
     static member Create (logs: TraceLog[], exceptions: TraceException[], diagnosticsChannelEvents: TraceDiagnosticChannelEvent[], outcome: string, executionModel: string, truncated: bool, cpuTime: float, wallTime: float, ?``event``: obj, ?eventTimestamp: float, ?scriptName: string, ?entrypoint: string, ?scriptVersion: ScriptVersion, ?dispatchNamespace: string, ?scriptTags: string[], ?tailAttributes: JS.Record<string, U3<string, float, bool>>, ?preview: TracePreviewInfo, ?durableObjectId: string) : TraceItem = jsNative
 
 [<Interface>]
@@ -3754,7 +3754,7 @@ type TraceItemTailEventInfo =
 [<Interface>]
 type TraceItemTailEventInfoTailItem =
     abstract scriptName: string option
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"scriptName\": o[\"scriptName\"] ?? null}))($0)")>]
     static member Create (?scriptName: string) : TraceItemTailEventInfoTailItem = jsNative
 
 [<Interface>]
@@ -4282,7 +4282,7 @@ type WebSocket =
     /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent">MDN Reference</a>
     /// </summary>
     abstract dispatchEvent: ``event``: U4<CloseEvent, ErrorEvent, Event, MessageEvent> -> bool
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"url\": o[\"url\"] ?? null, \"protocol\": o[\"protocol\"] ?? null, \"extensions\": o[\"extensions\"] ?? null}))($0)")>]
     static member Create (accept: (WebSocketAcceptOptions option -> unit), send: (U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> unit), close: Action<float option, string option>, serializeAttachment: (obj -> unit), deserializeAttachment: (unit -> obj), readyState: float, binaryType: WebSocket.BinaryType, addEventListener: Action<'Type, U2<(U4<CloseEvent, ErrorEvent, MessageEvent, Event> -> unit), EventListenerObject<Event>>, U2<bool, EventTargetAddEventListenerOptions> option>, removeEventListener: Action<'Type, U2<(U4<CloseEvent, ErrorEvent, MessageEvent, Event> -> unit), EventListenerObject<Event>>, U2<bool, EventTargetEventListenerOptions> option>, dispatchEvent: (U4<CloseEvent, ErrorEvent, Event, MessageEvent> -> bool), ?url: string, ?protocol: string, ?extensions: string) : WebSocket = jsNative
 
 type WebSocketConstructor =
@@ -4490,7 +4490,7 @@ type ExecProcess =
     abstract output: unit -> JS.Promise<ExecOutput>
     abstract kill: ?signal: float -> unit
     abstract resize: cols: float * rows: float -> unit
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"stdin\": o[\"stdin\"] ?? null, \"stdout\": o[\"stdout\"] ?? null, \"stderr\": o[\"stderr\"] ?? null}))($0)")>]
     static member Create (pid: float, isPty: bool, exitCode: JS.Promise<float>, output: (unit -> JS.Promise<ExecOutput>), kill: (float option -> unit), resize: Action<float, float>, ?stdin: WritableStream<obj>, ?stdout: ReadableStream<obj>, ?stderr: ReadableStream<obj>) : ExecProcess = jsNative
 
 [<Interface>]
@@ -5314,7 +5314,7 @@ type AgentMemoryMemory =
     /// Memory last-update time.
     /// </summary>
     abstract updatedAt: Fable.Core.TS.Es.Date with get, set
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"sessionId\": o[\"sessionId\"] ?? null}))($0)")>]
     static member Create (id: string, ``type``: AgentMemoryMemoryType, summary: string, content: string, createdAt: Fable.Core.TS.Es.Date, updatedAt: Fable.Core.TS.Es.Date, ?sessionId: string) : AgentMemoryMemory = jsNative
 
 /// <summary>
@@ -5346,7 +5346,7 @@ type AgentMemoryMemoryListEntry =
     /// Memory last-update time.
     /// </summary>
     abstract updatedAt: Fable.Core.TS.Es.Date with get, set
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"sessionId\": o[\"sessionId\"] ?? null}))($0)")>]
     static member Create (id: string, ``type``: AgentMemoryMemoryType, summary: string, createdAt: Fable.Core.TS.Es.Date, updatedAt: Fable.Core.TS.Es.Date, ?sessionId: string) : AgentMemoryMemoryListEntry = jsNative
 
 /// <summary>
@@ -5370,7 +5370,7 @@ type AgentMemoryScoredCandidate =
     /// Relevance score (higher is better). Comparable only within a single query.
     /// </summary>
     abstract score: float with get, set
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"sessionId\": o[\"sessionId\"] ?? null}))($0)")>]
     static member Create (id: string, summary: string, score: float, ?sessionId: string) : AgentMemoryScoredCandidate = jsNative
 
 /// <summary>
@@ -5624,7 +5624,7 @@ type AiSearchNotFoundError =
 type AiSearchMessage =
     abstract role: AiSearchMessage.Role with get, set
     abstract content: string option with get, set
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"content\": o[\"content\"] ?? null}))($0)")>]
     static member Create (role: AiSearchMessage.Role, ?content: string) : AiSearchMessage = jsNative
 
 /// <summary>
@@ -7515,7 +7515,7 @@ type ChatCompletionTopLogprob =
     abstract token: string with get, set
     abstract logprob: float with get, set
     abstract bytes: float[] option with get, set
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"bytes\": o[\"bytes\"] ?? null}))($0)")>]
     static member Create (token: string, logprob: float, ?bytes: float[]) : ChatCompletionTopLogprob = jsNative
 
 [<Interface>]
@@ -7524,7 +7524,7 @@ type ChatCompletionTokenLogprob =
     abstract logprob: float with get, set
     abstract bytes: float[] option with get, set
     abstract top_logprobs: ChatCompletionTopLogprob[] with get, set
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"bytes\": o[\"bytes\"] ?? null}))($0)")>]
     static member Create (token: string, logprob: float, top_logprobs: ChatCompletionTopLogprob[], ?bytes: float[]) : ChatCompletionTokenLogprob = jsNative
 
 [<Interface>]
@@ -7571,7 +7571,7 @@ type ChatCompletionResponseMessage =
     abstract audio: ChatCompletionAudio option with get, set
     abstract tool_calls: ChatCompletionMessageToolCall[] option with get, set
     abstract function_call: ChatCompletionResponseMessage.FunctionCall option with get, set
-    [<ParamObject; Emit("({ role: 'assistant', ...$0 })")>]
+    [<ParamObject; Emit("(o => ({role: 'assistant', ...o, \"content\": o[\"content\"] ?? null, \"refusal\": o[\"refusal\"] ?? null}))($0)")>]
     static member Create (?content: string, ?refusal: string, ?annotations: ChatCompletionUrlCitation[], ?audio: ChatCompletionAudio, ?tool_calls: ChatCompletionMessageToolCall[], ?function_call: ChatCompletionResponseMessage.FunctionCall) : ChatCompletionResponseMessage = jsNative
 
 module ChatCompletionResponseMessage =
@@ -7590,7 +7590,7 @@ module ChatCompletionResponseMessage =
 type ChatCompletionLogprobs =
     abstract content: ChatCompletionTokenLogprob[] option with get, set
     abstract refusal: ChatCompletionTokenLogprob[] option with get, set
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"content\": o[\"content\"] ?? null}))($0)")>]
     static member Create (?content: ChatCompletionTokenLogprob[], ?refusal: ChatCompletionTokenLogprob[]) : ChatCompletionLogprobs = jsNative
 
 [<Interface>]
@@ -7599,7 +7599,7 @@ type ChatCompletionChoice =
     abstract message: ChatCompletionResponseMessage with get, set
     abstract finish_reason: ChatCompletionChoice.FinishReason with get, set
     abstract logprobs: ChatCompletionLogprobs option with get, set
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"logprobs\": o[\"logprobs\"] ?? null}))($0)")>]
     static member Create (index: float, message: ChatCompletionResponseMessage, finish_reason: ChatCompletionChoice.FinishReason, ?logprobs: ChatCompletionLogprobs) : ChatCompletionChoice = jsNative
 
 type ChatCompletionsMessagesInput =
@@ -7698,7 +7698,7 @@ type ResponsesFunctionTool =
     /// <remarks>TypeScript type: <c>"function"</c></remarks>
     abstract ``type``: string with get, set
     abstract description: string option with get, set
-    [<ParamObject; Emit("({ type: 'function', ...$0 })")>]
+    [<ParamObject; Emit("(o => ({type: 'function', ...o, \"parameters\": o[\"parameters\"] ?? null, \"strict\": o[\"strict\"] ?? null}))($0)")>]
     static member Create (name: string, ?parameters: JS.Record<string, obj>, ?strict: bool, ?description: string) : ResponsesFunctionTool = jsNative
 
 module ResponsesFunctionTool =
@@ -7799,7 +7799,7 @@ type ResponseErrorEvent =
     abstract sequence_number: float with get, set
     /// <remarks>TypeScript type: <c>"error"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("({ type: 'error', ...$0 })")>]
+    [<ParamObject; Emit("(o => ({type: 'error', ...o, \"code\": o[\"code\"] ?? null, \"param\": o[\"param\"] ?? null}))($0)")>]
     static member Create (message: string, sequence_number: float, ?code: string, ?param: string) : ResponseErrorEvent = jsNative
 
 module ResponseErrorEvent =
@@ -12106,7 +12106,7 @@ type ArtifactsRepoInfo =
     /// HTTPS git remote URL.
     /// </summary>
     abstract remote: string with get, set
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"description\": o[\"description\"] ?? null, \"lastPushAt\": o[\"lastPushAt\"] ?? null, \"source\": o[\"source\"] ?? null}))($0)")>]
     static member Create (id: string, name: string, defaultBranch: string, createdAt: string, updatedAt: string, readOnly: bool, remote: string, ?description: string, ?lastPushAt: string, ?source: string) : ArtifactsRepoInfo = jsNative
 
 /// <summary>
@@ -12142,7 +12142,7 @@ type ArtifactsCreateRepoResult =
     /// ISO 8601 token expiry timestamp.
     /// </summary>
     abstract tokenExpiresAt: string with get, set
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"description\": o[\"description\"] ?? null}))($0)")>]
     static member Create (id: string, name: string, defaultBranch: string, remote: string, token: string, tokenExpiresAt: string, ?description: string) : ArtifactsCreateRepoResult = jsNative
 
 /// <summary>
@@ -12268,7 +12268,7 @@ type ArtifactsRepo =
     /// <remarks>@throws {ArtifactsError} with code <c>ALREADY_EXISTS</c> if the target repo already exists.</remarks>
     /// <remarks>@throws {ArtifactsError} with code <c>FORK_IN_PROGRESS</c> if a fork is already running.</remarks>
     abstract fork: name: string * ?opts: ArtifactsRepo.Fork.Opts -> JS.Promise<ArtifactsCreateRepoResult>
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"description\": o[\"description\"] ?? null, \"lastPushAt\": o[\"lastPushAt\"] ?? null, \"source\": o[\"source\"] ?? null}))($0)")>]
     static member Create (createToken: Func<ArtifactsCreateTokenResult.Scope option, float option, JS.Promise<ArtifactsCreateTokenResult>>, listTokens: (unit -> JS.Promise<ArtifactsTokenListResult>), revokeToken: (string -> JS.Promise<bool>), fork: Func<string, ArtifactsRepo.Fork.Opts option, JS.Promise<ArtifactsCreateRepoResult>>, id: string, name: string, defaultBranch: string, createdAt: string, updatedAt: string, readOnly: bool, remote: string, ?description: string, ?lastPushAt: string, ?source: string) : ArtifactsRepo = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -12501,7 +12501,7 @@ type AutoRagSearchResponse =
     abstract data: AutoRagSearchResponse.Data.Item[] with get, set
     abstract has_more: bool with get, set
     abstract next_page: string option with get, set
-    [<ParamObject; Emit("({ object: 'vector_store.search_results.page', ...$0 })")>]
+    [<ParamObject; Emit("(o => ({object: 'vector_store.search_results.page', ...o, \"next_page\": o[\"next_page\"] ?? null}))($0)")>]
     static member Create (search_query: string, data: AutoRagSearchResponse.Data.Item[], has_more: bool, ?next_page: string) : AutoRagSearchResponse = jsNative
 
 module AutoRagSearchResponse =
@@ -12551,7 +12551,7 @@ type AutoRagListResponse = AutoRagListResponse.Item[]
 type AutoRagAiSearchResponse =
     inherit AutoRagSearchResponse
     abstract response: string with get, set
-    [<ParamObject; Emit("({ object: 'vector_store.search_results.page', ...$0 })")>]
+    [<ParamObject; Emit("(o => ({object: 'vector_store.search_results.page', ...o, \"next_page\": o[\"next_page\"] ?? null}))($0)")>]
     static member Create (search_query: string, data: AutoRagSearchResponse.Data.Item[], has_more: bool, response: string, ?next_page: string) : AutoRagAiSearchResponse = jsNative
 
 /// <remarks>
@@ -16984,11 +16984,11 @@ type EventContext<'Env, 'P, 'Data> =
     abstract waitUntil: (JS.Promise<obj> -> unit) with get, set
     abstract passThroughOnException: (unit -> unit) with get, set
     abstract next: EventContext.Next with get, set
-    abstract env: obj with get, set
+    abstract env: JS.Intersect<'Env, EventContext.Env> with get, set
     abstract ``params``: obj with get, set
     abstract data: 'Data with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: EventContext.Next, env: obj, ``params``: obj, data: 'Data) : EventContext<'Env, 'P, 'Data> = jsNative
+    static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: EventContext.Next, env: JS.Intersect<'Env, EventContext.Env>, ``params``: obj, data: 'Data) : EventContext<'Env, 'P, 'Data> = jsNative
 
 type PagesFunction<'Env, 'Params, 'Data> = (PagesFunction.Context<'Env, 'Params, 'Data> -> U2<JS.Promise<Response>, Response>)
 
@@ -16999,12 +16999,12 @@ type EventPluginContext<'Env, 'P, 'Data, 'PluginArgs> =
     abstract waitUntil: (JS.Promise<obj> -> unit) with get, set
     abstract passThroughOnException: (unit -> unit) with get, set
     abstract next: EventPluginContext.Next with get, set
-    abstract env: obj with get, set
+    abstract env: JS.Intersect<'Env, EventPluginContext.Env> with get, set
     abstract ``params``: obj with get, set
     abstract data: 'Data with get, set
     abstract pluginArgs: 'PluginArgs with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: EventPluginContext.Next, env: obj, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : EventPluginContext<'Env, 'P, 'Data, 'PluginArgs> = jsNative
+    static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: EventPluginContext.Next, env: JS.Intersect<'Env, EventPluginContext.Env>, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : EventPluginContext<'Env, 'P, 'Data, 'PluginArgs> = jsNative
 
 type PagesPluginFunction<'Env, 'Params, 'Data, 'PluginArgs> = (PagesPluginFunction.Context<'Env, 'Params, 'Data, 'PluginArgs> -> U2<JS.Promise<Response>, Response>)
 
@@ -17429,7 +17429,7 @@ type StreamPublicDetails =
     /// The public logo URL.
     /// </summary>
     abstract logo: string option with get, set
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"title\": o[\"title\"] ?? null, \"share_link\": o[\"share_link\"] ?? null, \"channel_link\": o[\"channel_link\"] ?? null, \"logo\": o[\"logo\"] ?? null}))($0)")>]
     static member Create (?title: string, ?share_link: string, ?channel_link: string, ?logo: string) : StreamPublicDetails = jsNative
 
 [<Interface>]
@@ -17450,7 +17450,7 @@ type StreamDirectUpload =
     /// The scheduled deletion time, if any.
     /// </summary>
     abstract scheduledDeletion: string option with get, set
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"watermark\": o[\"watermark\"] ?? null, \"scheduledDeletion\": o[\"scheduledDeletion\"] ?? null}))($0)")>]
     static member Create (uploadURL: string, id: string, ?watermark: StreamWatermark, ?scheduledDeletion: string) : StreamDirectUpload = jsNative
 
 [<Interface>]
@@ -17880,7 +17880,7 @@ type StreamWatermark =
     /// <c>padding</c> parameter.
     /// </summary>
     abstract position: StreamWatermarkPosition with get, set
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"downloadedFrom\": o[\"downloadedFrom\"] ?? null}))($0)")>]
     static member Create (id: string, size: float, height: float, width: float, created: string, name: string, opacity: float, padding: float, scale: float, position: StreamWatermarkPosition, ?downloadedFrom: string) : StreamWatermark = jsNative
 
 [<Interface>]
@@ -20065,7 +20065,7 @@ module AiSearchItemLogsResponse =
         abstract per_page: float with get, set
         abstract cursor: string option with get, set
         abstract truncated: bool with get, set
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"cursor\": o[\"cursor\"] ?? null}))($0)")>]
         static member Create (count: float, per_page: float, truncated: bool, ?cursor: string) : ResultInfo = jsNative
 
 module AiSearchItems =
@@ -23735,7 +23735,7 @@ module ArtifactsRepoListResult =
             /// Whether the repository is read-only.
             /// </summary>
             abstract readOnly: bool with get, set
-            [<ParamObject; Emit("$0")>]
+            [<ParamObject; Emit("(o => ({...o, \"description\": o[\"description\"] ?? null, \"lastPushAt\": o[\"lastPushAt\"] ?? null, \"source\": o[\"source\"] ?? null}))($0)")>]
             static member Create (id: string, name: string, defaultBranch: string, createdAt: string, updatedAt: string, readOnly: bool, ?description: string, ?lastPushAt: string, ?source: string) : Item = jsNative
 
 module ArtifactsTokenInfo =
@@ -23881,7 +23881,7 @@ module BrowserRunAccessibilityTreeSuccessResponse =
         /// Root of the accessibility tree, or <c>null</c> when <c>root</c> matched no element.
         /// </summary>
         abstract accessibilityTree: BrowserRunSerializedAXNode option with get, set
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"accessibilityTree\": o[\"accessibilityTree\"] ?? null}))($0)")>]
         static member Create (?accessibilityTree: BrowserRunSerializedAXNode) : Result = jsNative
 
 module BrowserRunBaseOptions =
@@ -25109,14 +25109,40 @@ module EasyInputMessage =
         | [<CompiledName("user")>] User
 
 module EventContext =
+    [<Interface>]
+    type Env =
+        abstract ASSETS: EventContext.Env.ASSETS with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (ASSETS: EventContext.Env.ASSETS) : Env = jsNative
+
     type Next = delegate of input: U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option * init: RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option -> JS.Promise<Response>
+
+    module Env =
+        [<Interface>]
+        type ASSETS =
+            abstract fetch: Func<U3<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, URL>, RequestInit<RequestInitCfProperties> option, JS.Promise<Response>> with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (fetch: Func<U3<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, URL>, RequestInit<RequestInitCfProperties> option, JS.Promise<Response>>) : ASSETS = jsNative
 
 module EventCounts =
     module ForEach =
         type Param1 = delegate of param0: float * param1: string * param2: EventCounts -> unit
 
 module EventPluginContext =
+    [<Interface>]
+    type Env =
+        abstract ASSETS: EventPluginContext.Env.ASSETS with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (ASSETS: EventPluginContext.Env.ASSETS) : Env = jsNative
+
     type Next = delegate of input: U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option * init: RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option -> JS.Promise<Response>
+
+    module Env =
+        [<Interface>]
+        type ASSETS =
+            abstract fetch: Func<U3<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, URL>, RequestInit<RequestInitCfProperties> option, JS.Promise<Response>> with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (fetch: Func<U3<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, URL>, RequestInit<RequestInitCfProperties> option, JS.Promise<Response>>) : ASSETS = jsNative
 
 module FormData =
     module ForEach =
@@ -25527,7 +25553,7 @@ module KVNamespace =
                 abstract keys: KVNamespaceListKey<'Metadata, 'Key>[] with get, set
                 abstract cursor: string with get, set
                 abstract cacheStatus: string option with get, set
-                [<ParamObject; Emit("$0")>]
+                [<ParamObject; Emit("(o => ({...o, \"cacheStatus\": o[\"cacheStatus\"] ?? null}))($0)")>]
                 static member Create (list_complete: bool, keys: KVNamespaceListKey<'Metadata, 'Key>[], cursor: string, ?cacheStatus: string) : Item<'Metadata, 'Key> = jsNative
 
             [<Interface>]
@@ -25535,7 +25561,7 @@ module KVNamespace =
                 abstract list_complete: bool with get, set
                 abstract keys: KVNamespaceListKey<'Metadata, 'Key>[] with get, set
                 abstract cacheStatus: string option with get, set
-                [<ParamObject; Emit("$0")>]
+                [<ParamObject; Emit("(o => ({...o, \"cacheStatus\": o[\"cacheStatus\"] ?? null}))($0)")>]
                 static member Create (list_complete: bool, keys: KVNamespaceListKey<'Metadata, 'Key>[], ?cacheStatus: string) : Item2<'Metadata, 'Key> = jsNative
 
 module MediaTransformationInputOptions =
@@ -25567,11 +25593,11 @@ module PagesFunction =
         abstract waitUntil: (JS.Promise<obj> -> unit) with get, set
         abstract passThroughOnException: (unit -> unit) with get, set
         abstract next: EventContext.Next with get, set
-        abstract env: obj with get, set
+        abstract env: JS.Intersect<'Env, EventContext.Env> with get, set
         abstract ``params``: obj with get, set
         abstract data: 'Data with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: EventContext.Next, env: obj, ``params``: obj, data: 'Data) : Context<'Env, 'Params, 'Data> = jsNative
+        static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: EventContext.Next, env: JS.Intersect<'Env, EventContext.Env>, ``params``: obj, data: 'Data) : Context<'Env, 'Params, 'Data> = jsNative
 
 module PagesPluginFunction =
     [<Interface>]
@@ -25581,12 +25607,12 @@ module PagesPluginFunction =
         abstract waitUntil: (JS.Promise<obj> -> unit) with get, set
         abstract passThroughOnException: (unit -> unit) with get, set
         abstract next: EventPluginContext.Next with get, set
-        abstract env: obj with get, set
+        abstract env: JS.Intersect<'Env, EventPluginContext.Env> with get, set
         abstract ``params``: obj with get, set
         abstract data: 'Data with get, set
         abstract pluginArgs: 'PluginArgs with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: EventPluginContext.Next, env: obj, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : Context<'Env, 'Params, 'Data, 'PluginArgs> = jsNative
+        static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: EventPluginContext.Next, env: JS.Intersect<'Env, EventPluginContext.Env>, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : Context<'Env, 'Params, 'Data, 'PluginArgs> = jsNative
 
 module R2Bucket =
     module Get =

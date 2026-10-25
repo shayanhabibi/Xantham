@@ -55,11 +55,6 @@ module Globals =
             with get (): TypeScript.Lib.Dom.WScript = jsNative
             and set (_: TypeScript.Lib.Dom.WScript): unit = jsNative
         /// <summary>
-        /// Represents an Automation SAFEARRAY
-        /// </summary>
-        [<Global("SafeArray"); EmitConstructor>]
-        static member SafeArray<'T> () : TypeScript.Lib.Dom.SafeArray<'T> = jsNative
-        /// <summary>
         /// Allows enumerating over a COM collection, which may not have indexed item access.
         /// </summary>
         static member Enumerator
@@ -71,10 +66,5 @@ module Globals =
         static member VBArray
             with get (): TypeScript.Lib.Dom.VBArrayConstructor = jsNative
             and set (_: TypeScript.Lib.Dom.VBArrayConstructor): unit = jsNative
-        /// <summary>
-        /// Automation date (VT_DATE)
-        /// </summary>
-        [<Global("VarDate"); EmitConstructor>]
-        static member VarDate () : TypeScript.Lib.Dom.VarDate = jsNative
         [<Global("globalThis")>]
         static member globalThis: GlobalThis = jsNative

@@ -190,7 +190,7 @@ let private bigints () =
     check "what came back is still a BigInt, not a number" (emitJsExpr (ledger.balance) "typeof $0 === \"bigint\"")
 
     // The neighbours, at runtime: a template literal really is a string on the way in and out,
-    // and `symbol` really is a symbol - which is why `obj` is where the binding had to stop.
+    // and a value typed as the lib's `Symbol` interface really is a primitive symbol.
     equal
         "a template literal parameter is a string JavaScript can call string methods on"
         "onsave"
@@ -403,19 +403,23 @@ let private workarounds () =
     equal "though JavaScript still tells the two apart" "null" (FableWorkaroundLab.Exports.describe slots[1])
     equal "as it does the absent one" "absent" (FableWorkaroundLab.Exports.describe slots[2])
 
+    // D3: the Create writes a required `string | null` key, as null when the argument is absent.
     equal
-        "None omits the property rather than writing null"
-        "absent"
+        "an omitted argument writes the required key as null"
+        "null"
         (FableWorkaroundLab.Exports.describe (FableWorkaroundLab.Slot.Create()))
 
-    // The value that is `None` to F# and `null` to JavaScript: the only thing that reaches a
-    // declaration whose type is `string | null` with the null it declares.
-    let asNull: string option = emitJsExpr () "null"
+    let absent: string option = None
 
     equal
-        "a null passed through the option reaches the property as null"
+        "and so does a None held in a variable"
         "null"
-        (FableWorkaroundLab.Exports.describe (FableWorkaroundLab.Slot.Create(?value = asNull)))
+        (FableWorkaroundLab.Exports.describe (FableWorkaroundLab.Slot.Create(?value = absent)))
+
+    equal
+        "a supplied argument is written as given"
+        "string"
+        (FableWorkaroundLab.Exports.describe (FableWorkaroundLab.Slot.Create(value = "a")))
 
     let explicitNull: FableWorkaroundLab.Slot = !! createObj [ "value" ==> (null: obj) ]
 

@@ -619,8 +619,7 @@ let typeRefTests =
             Expect.equal (findings |> List.map _.Key) [ "TR040" ] "reported as the mapping it is, not as an unmapped flag"
             Expect.stringContains (List.head findings).Message "primitives" "obj admits what object excludes"
 
-        testCase "symbol and unique symbol widen, each naming its own construct" <| fun _ ->
-            // Fable.Core 5.2.0 declares no `JS.Symbol`, checked against the shipped assembly.
+        testCase "symbol and unique symbol widen where the Symbol interface has no name" <| fun _ ->
             let model =
                 Build.shapeModel (
                     intrinsic 10 TypeFlags.ESSymbol
@@ -634,12 +633,33 @@ let typeRefTests =
             Expect.equal plain FsObj "symbol"
             Expect.equal unique FsObj "unique symbol"
             Expect.equal (plainFindings |> List.map _.Key) [ "TR041" ] "symbol"
-            Expect.equal (uniqueFindings |> List.map _.Key) [ "TR042" ] "unique symbol"
+            Expect.equal (uniqueFindings |> List.map _.Key) [ "TR041"; "TR042" ] "unique symbol"
 
             Expect.stringContains
-                (List.head uniqueFindings).Message
-                "unique"
+                (List.item 1 uniqueFindings).Message
+                "identity"
                 "a unique symbol loses its identity on top of its type"
+
+        testCase "symbol and unique symbol read as the named Symbol interface" <| fun _ ->
+            let symbolInterface = Build.facts (Build.typeResponse 20 TypeFlags.Object)
+
+            let model =
+                { Build.shapeModel (
+                      { intrinsic 10 TypeFlags.ESSymbol with SymbolApparentType = Some 20<typeId> }
+                      :: { intrinsic 11 TypeFlags.UniqueESSymbol with SymbolApparentType = Some 20<typeId> }
+                      :: symbolInterface
+                      :: Build.primitives
+                  ) with
+                    DeclNames = Map.ofList [ 20<typeId>, "Symbol" ] }
+
+            let plain, plainFindings = Spec.typeRef Build.context model None "x" 10<typeId>
+            let unique, uniqueFindings = Spec.typeRef Build.context model None "x" 11<typeId>
+
+            Expect.equal plain (FsNamed "Symbol") "symbol"
+            Expect.equal unique (FsNamed "Symbol") "unique symbol"
+            Expect.equal (plainFindings |> List.map _.Key) [ "TR069" ] "symbol is ergonomic"
+            Expect.equal (uniqueFindings |> List.map _.Key) [ "TR069"; "TR042" ] "unique symbol keeps its identity loss"
+            Expect.equal (plainFindings |> List.map _.Tier) [ Ergonomic ] "ergonomic"
 
         testCase "a union with undefined hoists to option with an ergonomic finding" <| fun _ ->
             let union =
@@ -811,6 +831,93 @@ let typeRefTests =
 
             Expect.equal reference (FsArray FsString) "widened to its element"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
+
+        testCase "a rest parameter over a union of fixed tuples stands for one overload per tuple" <| fun _ ->
+            // `(...args: [string, number] | [] | [undefined] | [number])`: ascending arity, and
+            // `[undefined]` written once with `[]`, which F# compiles to the same call.
+            let arms =
+                { Build.facts (Build.typeResponse 14 TypeFlags.Union) with
+                    UnionMembers = [ 10<typeId>; 11<typeId>; 12<typeId>; 13<typeId> ] }
+
+            let labelled =
+                { tuple 10 [ 1; 2 ] [ ElementFlags.Required; ElementFlags.Required ] with
+                    TupleLabels = [ Some "key"; None ] }
+
+            let model =
+                Build.shapeModel (
+                    labelled
+                    :: tuple 11 [] []
+                    :: tuple 12 [ 5 ] [ ElementFlags.Required ]
+                    :: tuple 13 [ 2 ] [ ElementFlags.Required ]
+                    :: arms
+                    :: Build.primitives
+                )
+
+            let signature =
+                { Build.signature [ Build.resolvedMember (Build.symbol 30 "args" SymbolFlags.FunctionScopedVariable) 14 ] 4 with
+                    HasRest = true }
+
+            let overloads = Spec.restOverloads model signature
+
+            Expect.equal
+                (overloads |> List.map (fun s -> s.HasRest, s.Parameters |> List.map (fun p -> p.Symbol.Name, int p.TypeId)))
+                [ false, []; false, [ "args", 2 ]; false, [ "key", 1; "args1", 2 ] ]
+                "one overload per distinct call, a label naming its element"
+
+        testCase "arms differing only by optionality are written once, as the optional arm" <| fun _ ->
+            // `(...args: [number] | [number?])`: the optional arm admits both calls.
+            let arms =
+                { Build.facts (Build.typeResponse 14 TypeFlags.Union) with
+                    UnionMembers = [ 10<typeId>; 11<typeId> ] }
+
+            let model =
+                Build.shapeModel (
+                    tuple 10 [ 2 ] [ ElementFlags.Required ]
+                    :: tuple 11 [ 2 ] [ ElementFlags.Optional ]
+                    :: arms
+                    :: Build.primitives
+                )
+
+            let signature =
+                { Build.signature [ Build.resolvedMember (Build.symbol 30 "args" SymbolFlags.FunctionScopedVariable) 14 ] 4 with
+                    HasRest = true }
+
+            Expect.equal
+                (Spec.restOverloads model signature
+                 |> List.map (fun s -> s.Parameters |> List.map (fun p -> p.Symbol.Name, int p.TypeId, p.Optional)))
+                [ [ "args", 2, true ] ]
+                "one overload, its element optional"
+
+        testCase "a union with a variadic tuple arm keeps the rest form" <| fun _ ->
+            let arms =
+                { Build.facts (Build.typeResponse 14 TypeFlags.Union) with
+                    UnionMembers = [ 10<typeId>; 11<typeId> ] }
+
+            let model =
+                Build.shapeModel (
+                    tuple 10 [ 1 ] [ ElementFlags.Required ]
+                    :: tuple 11 [ 1; 2 ] [ ElementFlags.Required; ElementFlags.Rest ]
+                    :: arms
+                    :: Build.primitives
+                )
+
+            let signature =
+                { Build.signature [ Build.resolvedMember (Build.symbol 30 "args" SymbolFlags.FunctionScopedVariable) 14 ] 4 with
+                    HasRest = true }
+
+            Expect.equal (Spec.restOverloads model signature) [ signature ] "unchanged"
+
+        testCase "a binding pattern names a spread tuple's elements" <| fun _ ->
+            let model = Build.shapeModel (tuple 10 [ 1 ] [ ElementFlags.Required ] :: Build.primitives)
+
+            let signature =
+                { Build.signature [ Build.resolvedMember (Build.symbol 30 "__0" SymbolFlags.FunctionScopedVariable) 10 ] 4 with
+                    HasRest = true
+                    RestPatternNames = [ Some "value" ] }
+
+            let expanded = Spec.expandTupleRest model signature
+
+            Expect.equal (expanded.Parameters |> List.map _.Symbol.Name) [ "value" ] "`...[value]: [T]` is `value: T`"
 
         testCase "a type parameter in scope names its variable (§4.9)" <| fun _ ->
             let model =
@@ -2640,6 +2747,47 @@ let shapePassTests =
                 [ "TR018" ]
                 "under the case that describes it"
 
+        testCase "an operand restating a type parameter's bound reduces to the parameter (§4.6)" <| fun _ ->
+            // `R & { label: string }` over `R extends { label: string }` is `R`.
+            let label = Build.resolvedMember (Build.symbol 840 "label" SymbolFlags.Property) 1
+            let bound = { Build.facts (Build.typeResponse 84 TypeFlags.Object) with Members = [ label ] }
+            let parameter = { typeParam 20 "R" with Constraint = Some 84<typeId> }
+            let literal = { Build.facts (Build.typeResponse 85 TypeFlags.Object) with Members = [ label ] }
+
+            let intersection =
+                { Build.facts (Build.typeResponse 86 TypeFlags.Intersection) with IntersectionMembers = [ 20<typeId>; 85<typeId> ] }
+
+            let model =
+                { Build.shapeModel (bound :: parameter :: literal :: intersection :: Build.primitives) with
+                    TypeVars = Map.ofList [ 20<typeId>, "R" ] }
+
+            let reference, findings = Spec.typeRef Build.context model None "res" 86<typeId>
+            Expect.equal reference (FsTypeVar "R") "the parameter is the whole intersection"
+            Expect.equal (findings |> List.map _.Key) [ "TR073" ] "an exact restating reduction"
+
+        testCase "an operand adding members over a type parameter is carried beside it (§4.6)" <| fun _ ->
+            // `P & { count: number }`: `JS.Intersect` keeps the parameter and the declared operand.
+            let counted =
+                { Build.facts (Build.typeResponse 87 TypeFlags.Object) with
+                    Members = [ Build.resolvedMember (Build.symbol 870 "count" SymbolFlags.Property) 2 ] }
+
+            let intersection =
+                { Build.facts (Build.typeResponse 88 TypeFlags.Intersection) with IntersectionMembers = [ 20<typeId>; 87<typeId> ] }
+
+            let model =
+                { Build.shapeModel (typeParam 20 "P" :: counted :: intersection :: Build.primitives) with
+                    TypeVars = Map.ofList [ 20<typeId>, "P" ]
+                    DeclNames = Map.ofList [ 87<typeId>, "Counted.Members" ] }
+
+            let reference, findings = Spec.typeRef Build.context model None "Counted" 88<typeId>
+
+            Expect.equal
+                reference
+                (FsApp("JS.Intersect", [ FsTypeVar "P"; FsNamed "Counted.Members" ]))
+                "both operands stay typed"
+
+            Expect.equal (findings |> List.map _.Key) [ "TR072" ] "an ergonomic carrier"
+
         testCase "an intersection of callable operands renders from its call signatures" <| fun _ ->
             // `typeof round & Chained`: both operands carry signatures and no properties, so
             // the checker hands the intersection both, and D5 writes the first as a delegate.
@@ -3448,7 +3596,7 @@ let shapePassTests =
                                 Tags = []
                                 ReadOnly = false
                                 Type = FsFloat
-                                Literal = None } ]
+                                Literal = None; NullKey = false } ]
                       Entrypoint = None
                       CreateOverloads = []
                       Statics = [] }
@@ -3676,7 +3824,7 @@ let shapePassTests =
                                     Tags = []
                                     ReadOnly = true
                                     Type = FsString
-                                    Literal = None } ]
+                                    Literal = None; NullKey = false } ]
                           Entrypoint = None
                           CreateOverloads = []
                           Statics = [] }
@@ -3766,7 +3914,7 @@ let shapePassTests =
                                     Tags = []
                                     ReadOnly = true
                                     Type = FsFloat
-                                    Literal = None } ]
+                                    Literal = None; NullKey = false } ]
                           Entrypoint = None
                           CreateOverloads = []
                           Statics = [] }
@@ -3939,14 +4087,14 @@ let shapePassTests =
                                 Tags = []
                                 ReadOnly = false
                                 Type = FsOption FsFloat
-                                Literal = None }
+                                Literal = None; NullKey = false }
                           FsProperty
                               { Name = "target"
                                 Docs = ""
                                 Tags = []
                                 ReadOnly = false
                                 Type = FsString
-                                Literal = None } ]
+                                Literal = None; NullKey = false } ]
                       Entrypoint = None
                       CreateOverloads = []
                       Statics = [] }
@@ -3987,7 +4135,7 @@ let shapePassTests =
                   Tags = []
                   ReadOnly = false
                   Type = reference
-                  Literal = None }
+                  Literal = None; NullKey = false }
 
         let paramObjectMethod name parameters returns =
             FsMethod
@@ -4118,7 +4266,7 @@ let shapePassTests =
                     match literal with
                     | LitString _ -> FsString
                     | _ -> FsFloat
-                  Literal = Some literal }
+                  Literal = Some literal; NullKey = false }
 
         testCase "a literal member is written by Create, not bound as a parameter" <| fun _ ->
             let decl =
@@ -4161,7 +4309,7 @@ let shapePassTests =
                 Expect.equal
                     decl.CreateOverloads
                     [ { Parameters = []
-                        Literals = [ "NONE", LitNumber 0.0; "DONE", LitNumber 1.0 ] } ]
+                        Literals = [ "NONE", LitNumber 0.0; "DONE", LitNumber 1.0 ]; NullKeys = [] } ]
                     "every member is written"
             | decls -> failtest $"expected the interface back, got %A{decls}"
 
@@ -4842,7 +4990,7 @@ let shapePassTests =
 
         testCase "repair-arity widens a bare or mis-applied reference to a generic tagged union" <| fun _ ->
             let property name reference =
-                FsProperty { Name = name; Docs = ""; Tags = []; ReadOnly = true; Type = reference; Literal = None }
+                FsProperty { Name = name; Docs = ""; Tags = []; ReadOnly = true; Type = reference; Literal = None; NullKey = false }
 
             let model =
                 { Build.shapeModel [] with
@@ -4854,7 +5002,7 @@ let shapePassTests =
                                 Order = None
                                 TypeParameters = [ { Name = "T"; Constraint = None } ]
                                 Tag = "kind"
-                                Cases = [ { Name = "Once"; CompiledName = Some "once"; CaseTest = None; Inlines = false; Fields = [ { Name = "payload"; Docs = ""; Tags = []; Type = FsTypeVar "T"; Literal = None } ]; Create = None } ] }
+                                Cases = [ { Name = "Once"; CompiledName = Some "once"; CaseTest = None; Inlines = false; Fields = [ { Name = "payload"; Docs = ""; Tags = []; Type = FsTypeVar "T"; Literal = None; NullKey = false } ]; Create = None } ] }
                           FsInterface
                               { Callable = false; Name = "Holder"
                                 Docs = ""
@@ -5426,7 +5574,7 @@ let shapePassTests =
                                             Tags = []
                                             ReadOnly = true
                                             Type = FsApp("Params", [ FsString ])
-                                            Literal = None } ]
+                                            Literal = None; NullKey = false } ]
                                 Entrypoint = None
                                 CreateOverloads = []
                                 Statics = [] } ] }
@@ -5479,7 +5627,7 @@ let shapePassTests =
                                             Tags = []
                                             ReadOnly = true
                                             Type = FsApp("ExcludeStrict", [ FsString; FsFloat ])
-                                            Literal = None } ]
+                                            Literal = None; NullKey = false } ]
                                 Entrypoint = None
                                 CreateOverloads = []
                                 Statics = [] } ] }
@@ -5649,7 +5797,7 @@ let shapePassTests =
                                             Tags = []
                                             ReadOnly = false
                                             Type = FsUnit
-                                            Literal = None } ]
+                                            Literal = None; NullKey = false } ]
                                 Entrypoint = None
                                 CreateOverloads = []
                                 Statics = [] } ] }

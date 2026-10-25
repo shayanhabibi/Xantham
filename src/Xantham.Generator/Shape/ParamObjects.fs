@@ -32,6 +32,10 @@ module private Reason =
     let Callable = "the declaration is callable, which no object literal is"
 
     [<Literal>]
+    let PrivateMembers =
+        "the declaration has a private member, so TypeScript admits only its class's instances"
+
+    [<Literal>]
     let SymbolKeyed =
         "a required well-known symbol member has no key a ParamObject literal can write"
 
@@ -71,7 +75,7 @@ let private isLiteralMember (m: FsMember) = (literalMember m).IsSome
 /// Why the declaration carries no `Create`, or `None` where one is synthesized. `members` is the
 /// property/method set the `Create` binds - a hybrid's `Invoke` reads its own call signatures
 /// and carries no `Create` parameter of its own.
-let private refusal (callable: bool) (decl: FsInterfaceDecl) (members: FsMember list) =
+let private refusal (callable: bool) (nominal: bool) (decl: FsInterfaceDecl) (members: FsMember list) =
     let methodNames =
         members
         |> List.choose (function
@@ -82,6 +86,8 @@ let private refusal (callable: bool) (decl: FsInterfaceDecl) (members: FsMember 
         Some Reason.EntrypointClass
     elif callable || decl.Members |> List.exists isInvoke then
         Some Reason.Callable
+    elif nominal then
+        Some Reason.PrivateMembers
     elif
         decl.Members |> List.exists isSymbolKeyed'
         || decl.Inherits |> List.exists (sequenceElement >> Option.isSome)
@@ -134,6 +140,14 @@ let private parameterFor (owner: string) (m: FsMember) : FsParam * Finding list 
     | FsSymbolKeyed _
     | FsLiteralKeyed _ -> failwith "unreachable: refused above, or excluded from the members Create binds"
 
+let private nullKeysWritten (owner: string) (keys: string list) =
+    if keys.IsEmpty then
+        []
+    else
+        [
+            Finding.make owner (SynthesizeParamObjects.NullKeysWrittenByCreate(String.concat ", " keys))
+        ]
+
 /// Construction ergonomics (D3, §4.4): an interface gains a `[<ParamObject; Emit("$0")>]`
 /// Create overload mirroring its members, required members first, so consumers never hand-build
 /// objects. A method member reads as a delegate-typed parameter (§3 of the Fable 5 workarounds
@@ -158,6 +172,17 @@ let synthesizeParamObjects: Pass<ShapeModel> =
                             | _ -> None)
                         |> Set.ofList
 
+                    // A declaration whose type has a private member admits only its class's
+                    // instances, never an object literal.
+                    let nominal =
+                        model.DeclNames
+                        |> Map.toList
+                        |> List.choose (fun (typeId, name) ->
+                            match Map.tryFind typeId model.Types with
+                            | Some facts when facts.PrivateMembers -> Some name
+                            | _ -> None)
+                        |> Set.ofList
+
                     let decls =
                         model.Decls
                         |> List.map (function
@@ -174,7 +199,13 @@ let synthesizeParamObjects: Pass<ShapeModel> =
                                 // binds only the properties and methods beside it.
                                 let members = decl.Members |> List.filter (isInvoke >> not)
 
-                                match refusal (Set.contains decl.Name callable) decl members with
+                                match
+                                    refusal
+                                        (Set.contains decl.Name callable)
+                                        (Set.contains decl.Name nominal)
+                                        decl
+                                        members
+                                with
                                 | Some reason ->
                                     findings <-
                                         findings
@@ -226,10 +257,17 @@ let synthesizeParamObjects: Pass<ShapeModel> =
                                                     ))
                                             ]
 
+                                    let nullKeys =
+                                        bound
+                                        |> List.choose (function
+                                            | FsProperty p when p.NullKey -> Some p.Name
+                                            | _ -> None)
+
                                     findings <-
                                         findings
                                         @ [ Finding.make decl.Name SynthesizeParamObjects.ParamObjectSynthesized ]
                                         @ written
+                                        @ nullKeysWritten decl.Name nullKeys
                                         @ carried
                                         @ List.concat callbacks
 
@@ -240,9 +278,19 @@ let synthesizeParamObjects: Pass<ShapeModel> =
                                                     {
                                                         Parameters = required @ optional
                                                         Literals = literals
+                                                        NullKeys = nullKeys
                                                     }
                                                 ]
                                         }
+                            // The exclusive-arm fold's overloads write their null keys too.
+                            | FsInterface decl as kept ->
+                                findings <-
+                                    findings
+                                    @ nullKeysWritten
+                                        decl.Name
+                                        (decl.CreateOverloads |> List.collect _.NullKeys |> List.distinct)
+
+                                kept
                             | decl -> decl)
 
                     let model = { model with Decls = decls }

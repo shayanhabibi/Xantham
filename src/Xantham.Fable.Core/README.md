@@ -40,6 +40,7 @@ namespace. Their runtime regression is also available as a small
 - [`typekeyof<'T, 'ReturnType>`](#typekeyoft-returntype) — TypeScript `keyof T` with value-type retention
 - [`proptypekey<'T, 'ReturnType>` and `proptypelock<'T>`](#proptypekeyt-returntype--proptypelockt) — TypeScript `T[keyof T]` (union of all property value types)
 - [`PropertyRecord<'T, 'K>`](#propertyrecordt-k) — index-signature objects
+- [`Intersect<'A, 'B>`](#intersecta-b) — an intersection over a type parameter
 - [Active patterns: `KeyIs` / `TypeKeyIs`](#active-patterns-keyis--typekeyis)
 - [Helper modules: `KeyOf` / `TypeKeyOf`](#helper-modules-keyof--typekeyof)
 
@@ -262,6 +263,42 @@ store[keyof<Config> _.Port] <- "8080"
 
 ---
 
+## `Intersect<'A, 'B>`
+
+### TypeScript idiom
+
+```typescript
+type WithChildren<P> = P & { children?: string };
+type Handler<E, T> = (e: E & { currentTarget: T }) => void;
+```
+
+An intersection whose operand is a type parameter has no members to flatten and no F# interface
+to inherit.
+
+### F# representation
+
+`Intersect<'A, 'B>` is erased: the runtime value is the one object both operands describe. The
+generator writes the literal operand as an interface of its own, and nests three or more operands
+to the right (`Intersect<'P, Intersect<'Q, Members>>`).
+
+```fsharp
+type WithChildren<'P> = JS.Intersect<'P, WithChildren.Members>
+
+// Reading: either side, typed, with no copy or conversion.
+let onEvent (e: JS.Intersect<Base, Handler.E<string>>) =
+    e.Left.id, e.Right.currentTarget            // e.id, e.currentTarget
+
+// Writing: an unchecked cast, or the members assigned onto the value in place.
+Exports.wrap (Intersect.unsafeCast props)        // wrap(props)
+Exports.wrap (Intersect.assign props (WithChildren.Members.Create(children = "text")))
+                                                 // wrap(Object.assign(props, { children: "text" }))
+```
+
+`Intersect.assign` mutates and returns its first argument, so the value keeps its identity and
+prototype. `Intersect.left` and `Intersect.right` are the pipeline forms of `Left` and `Right`.
+
+---
+
 ## Active patterns: `KeyIs` / `TypeKeyIs`
 
 Pattern match on a `keyof` or `typekeyof` value against a string literal.
@@ -317,3 +354,4 @@ Functional-style helpers for working with key values without using extension met
 | `K extends keyof T` + `T[K]` (name + value type) | `typekeyof<'T, 'ReturnType>` |
 | `T[keyof T]` (heterogeneous value union) | `proptypelock<'T>` + `proptypekey<'T, 'ReturnType>` |
 | `{ [key: keyof T]: V }` (index-signature object) | `PropertyRecord<'T, 'V>` |
+| `P & { extra: X }` over a type parameter `P` | `Intersect<'P, Members>` |

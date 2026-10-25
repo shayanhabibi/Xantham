@@ -19,7 +19,7 @@ type Data =
 [<Interface>]
 type Value =
     abstract ``event``: obj option with get, set
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"event\": o[\"event\"] ?? null}))($0)")>]
     static member Create (?``event``: obj) : Value = jsNative
 
 [<Interface>]

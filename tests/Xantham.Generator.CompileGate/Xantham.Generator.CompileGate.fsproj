@@ -67,6 +67,7 @@
         <Compile Include="UnionArmOverloadConsumer.fs" />
         <Compile Include="CustomizationConsumer.fs" />
         <Compile Include="NamespaceAliasConsumer.fs" />
+        <Compile Include="UnionAliasApplicationConsumer.fs" />
     </ItemGroup>
 
     <ItemGroup>

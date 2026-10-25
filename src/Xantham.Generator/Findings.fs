@@ -149,6 +149,9 @@ module FindingCodes =
             "TR.ValueOfAsPropTypeLock", "TR066"
             "TR.MappedAsPropertyRecord", "TR067"
             "TR.ConditionalResolvedToConstraint", "TR068"
+            "TR.SymbolAsLibInterface", "TR069"
+            "TR.OpenIntersectionCarried", "TR072"
+            "TR.RestatingIntersectionOperandReduced", "TR073"
             "TP.UnnamedTypeParameter", "TP001"
             "TP.ConstraintDropped", "TP002"
             "TP.GenericFunctionHoisted", "TP003"
@@ -232,6 +235,7 @@ module FindingCodes =
             "SP.CreateNotSynthesized", "SP003"
             "SP.MethodTypeParametersBoundAtCreate", "SP004"
             "SP.LiteralMembersWrittenByCreate", "SP005"
+            "SP.NullKeysWrittenByCreate", "SP006"
             "DO.OverloadDropped", "DO001"
             "DO.OverloadsDistinguishedByLiteral", "DO002"
             "DO.OverloadsDistinguishedByLiteralUnion", "DO003"
@@ -547,6 +551,17 @@ type TypeReference =
     /// instantiated at that bound (`InstanceType<Request>` as `IncomingMessage`).
     /// `resolveConditionalConstraints` selects it.
     | [<Widened>] ConditionalResolvedToConstraint of conditional: string
+    /// W1. `symbol` written as the compiler lib's own `Symbol` interface, under the name its
+    /// owner gives it (`Fable.Core.TS.Es.Symbol`). The interface also admits a boxed `Symbol`
+    /// object, which `symbol` excludes.
+    | [<Ergonomic>] SymbolAsLibInterface of name: string
+    /// An intersection over a type parameter whose other operands add members to the
+    /// parameter's bound, written as the support package's `JS.Intersect` over its operands. Each
+    /// operand stays typed and is read through `Left`/`Right` rather than by inheritance.
+    | [<Ergonomic>] OpenIntersectionCarried of operands: int
+    /// An object operand restating a type parameter's bound reduces away, and the parameter is
+    /// the type: `R & { req: Base }` over `R extends Wide` is `'R`.
+    | [<Exact>] RestatingIntersectionOperandReduced
 
     interface IFindingKind with
         member this.Message =
@@ -626,9 +641,9 @@ type TypeReference =
             | BigIntLiteralToBigInt -> "bigint literal type widened to bigint (doc-noted, §4.2)"
             | ObjectTypeToObj ->
                 "TypeScript's object maps to obj, which also admits the primitives object excludes (§4.1)"
-            | SymbolNoBinding -> "symbol has no binding in Fable.Core 5.2.0; widened to obj (§4.1)"
-            | UniqueSymbolNoBinding ->
-                "unique symbol has no binding in Fable.Core 5.2.0 and no F# form for its identity; widened to obj"
+            | SymbolNoBinding ->
+                "symbol has no binding: the compiler lib's Symbol interface has no name in this run; widened to obj (§4.1)"
+            | UniqueSymbolNoBinding -> "unique symbol has no F# form for its identity; the singleton is not carried"
             | ConstructorObjectNotDeclared constructs ->
                 $"typeof {constructs} is a constructor object this run does not declare; widened to obj (§4.4)"
             | ArgumentNotASubtypeOfConstraint(argument, name, bound) ->
@@ -674,6 +689,12 @@ type TypeReference =
                 $"{{ [P in keyof T]: V }} reads as PropertyRecord<'{operand}, V> (§4.10)"
             | ConditionalResolvedToConstraint conditional ->
                 $"{conditional} written as its value at the check type's bound; the parameter it is applied to is not carried (§4.11)"
+            | SymbolAsLibInterface name ->
+                $"symbol written as the compiler lib's Symbol interface {name}, which also admits a boxed Symbol object"
+            | OpenIntersectionCarried operands ->
+                $"intersection over a type parameter written as JS.Intersect over its {operands} operands; each is read through Left/Right, not by inheritance (§4.6)"
+            | RestatingIntersectionOperandReduced ->
+                "intersection operand restating the type parameter's bound reduced away; the parameter is the type (§4.6)"
 
 /// Type parameter binding: `Shape.typeParamsOf`, `aliasTypeParams`, key variables and erasure.
 [<Prefix "TP">]
@@ -1131,6 +1152,9 @@ type SynthesizeParamObjects =
     | [<Widened>] MethodTypeParametersBoundAtCreate of parameters: string
     /// W6. Literal members the `Create` Emit writes into the object in place of parameters.
     | [<Exact>] LiteralMembersWrittenByCreate of members: string
+    /// D3. Required members typed `T | null`, bound as omittable `Create` parameters: the Emit
+    /// writes each key, as `null` where the argument is absent or `undefined`.
+    | [<Exact>] NullKeysWrittenByCreate of members: string
 
     interface IFindingKind with
         member this.Message =
@@ -1143,6 +1167,8 @@ type SynthesizeParamObjects =
                 $"generic method's {parameters} bound once per Create call; the object holds one instantiation"
             | LiteralMembersWrittenByCreate members ->
                 $"Create writes the literal members {members} in its Emit; they are not parameters"
+            | NullKeysWrittenByCreate members ->
+                $"Create always writes the required nullable members {members}, as null when the argument is absent"
 
 /// `dedupe-overloads`.
 [<Prefix("DO", "dedupe-overloads")>]

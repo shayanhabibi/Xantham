@@ -123,7 +123,7 @@ let renderTests =
                   ModuleSpecifiers = Map.empty
                   Decls =
                     [ interface' "EsName"
-                        [ FsProperty { Name = "dom"; Docs = ""; Tags = []; ReadOnly = true; Type = FsNamed "DomName"; Literal = None } ] ] }
+                        [ FsProperty { Name = "dom"; Docs = ""; Tags = []; ReadOnly = true; Type = FsNamed "DomName"; Literal = None; NullKey = false } ] ] }
 
             let dom: Render.GroupModule =
                 { Group = "typescript/lib" * uom<npmDependency>
@@ -135,7 +135,7 @@ let renderTests =
                   ModuleSpecifiers = Map.empty
                   Decls =
                     [ interface' "DomName"
-                        [ FsProperty { Name = "es"; Docs = ""; Tags = []; ReadOnly = true; Type = FsNamed "EsName"; Literal = None } ] ] }
+                        [ FsProperty { Name = "es"; Docs = ""; Tags = []; ReadOnly = true; Type = FsNamed "EsName"; Literal = None; NullKey = false } ] ] }
 
             let files = renderGroups ctx [ es; dom ] baseModel
             Expect.equal (files |> Map.keys |> Seq.toList) [ "groups/Fable.Core.TS.fs" ] "one combined source file"
@@ -202,7 +202,7 @@ let renderTests =
                       Statics = [] }
 
             let property name reference =
-                FsProperty { Name = name; Docs = ""; Tags = []; ReadOnly = true; Type = reference; Literal = None }
+                FsProperty { Name = name; Docs = ""; Tags = []; ReadOnly = true; Type = reference; Literal = None; NullKey = false }
 
             let model =
                 { baseModel with
@@ -263,7 +263,7 @@ let renderTests =
                               Cases =
                                 [ { Name = "Circle"
                                     CompiledName = Some "circle"; CaseTest = None; Inlines = false
-                                    Fields = [ { Name = "radius"; Docs = ""; Tags = []; Type = FsFloat; Literal = None } ]
+                                    Fields = [ { Name = "radius"; Docs = ""; Tags = []; Type = FsFloat; Literal = None; NullKey = false } ]
                                     Create = None }
                                   { Name = "Blank"; CompiledName = None; CaseTest = None; Inlines = false; Fields = []; Create = None } ] } ] }
 
@@ -295,7 +295,7 @@ let renderTests =
                       Cases =
                         [ { Name = "Circle"
                             CompiledName = Some "circle"; CaseTest = None; Inlines = false
-                            Fields = [ { Name = "radius"; Docs = ""; Tags = []; Type = FsTypeVar "T"; Literal = None } ]
+                            Fields = [ { Name = "radius"; Docs = ""; Tags = []; Type = FsTypeVar "T"; Literal = None; NullKey = false } ]
                             Create = None } ] }
 
             let model =
@@ -312,7 +312,7 @@ let renderTests =
 
         testCase "a tagged case documents every field once any field carries text" <| fun _ ->
             let field name docs literal : FsTaggedField =
-                { Name = name; Docs = docs; Tags = []; Type = FsString; Literal = literal }
+                { Name = name; Docs = docs; Tags = []; Type = FsString; Literal = literal; NullKey = false }
 
             let model =
                 { baseModel with
@@ -353,7 +353,7 @@ let renderTests =
 
         testCase "a tagged case with an optional or literal field has a Create" <| fun _ ->
             let field name ty literal : FsTaggedField =
-                { Name = name; Docs = ""; Tags = []; Type = ty; Literal = literal }
+                { Name = name; Docs = ""; Tags = []; Type = ty; Literal = literal; NullKey = false }
 
             let model =
                 { baseModel with
@@ -421,7 +421,7 @@ let renderTests =
                                         Tags = []
                                         ReadOnly = false
                                         Type = FsTypeVar "T"
-                                        Literal = None } ]
+                                        Literal = None; NullKey = false } ]
                                 Entrypoint = None
                                 CreateOverloads =
                                   [ { Parameters =
@@ -429,7 +429,7 @@ let renderTests =
                                             Type = FsTypeVar "T"
                                             Optional = false
                                             Rest = false } ]
-                                      Literals = [] } ]
+                                      Literals = []; NullKeys = [] } ]
                                 Statics = [] }
                           FsAbbrev
                               { Value = None; Name = "Mapper"
@@ -543,14 +543,14 @@ let renderTests =
                                           Tags = []
                                           ReadOnly = true
                                           Type = FsBool
-                                          Literal = None }
+                                          Literal = None; NullKey = false }
                                     FsProperty
                                         { Name = "count"
                                           Docs = ""
                                           Tags = []
                                           ReadOnly = false
                                           Type = FsOption FsFloat
-                                          Literal = None }
+                                          Literal = None; NullKey = false }
                                     FsMethod
                                         { Name = "reset"
                                           Docs = ""
@@ -573,7 +573,7 @@ let renderTests =
                                             Optional = true
                                             Rest = false
                                             Type = FsOption FsFloat } ]
-                                      Literals = [] } ]
+                                      Literals = []; NullKeys = [] } ]
                                 Statics = [] }
                           FsStringEnum
                               { Name = "TimeUnit"
@@ -1037,7 +1037,7 @@ let symbolKeyedRenderTests =
         )
 
     let property symbol name readOnly reference =
-        FsSymbolKeyed(symbol, FsProperty { Name = name; Docs = ""; Tags = []; ReadOnly = readOnly; Type = reference; Literal = None })
+        FsSymbolKeyed(symbol, FsProperty { Name = name; Docs = ""; Tags = []; ReadOnly = readOnly; Type = reference; Literal = None; NullKey = false })
 
     testList "render symbol-keyed members" [
         testCase "an inherited seq renders as an inherit line" <| fun _ ->
@@ -1177,7 +1177,7 @@ let literalMemberRenderTests =
                 match value with
                 | LitString _ -> FsString
                 | _ -> FsFloat
-              Literal = Some value }
+              Literal = Some value; NullKey = false }
 
     let property name reference =
         FsProperty
@@ -1186,7 +1186,7 @@ let literalMemberRenderTests =
               Tags = []
               ReadOnly = true
               Type = reference
-              Literal = None }
+              Literal = None; NullKey = false }
 
     let parameter name reference =
         { Name = name
@@ -1205,7 +1205,7 @@ let literalMemberRenderTests =
                           "Event"
                           [ property "eventPhase" FsFloat; literal "AT_TARGET" (LitNumber 2.0) ]
                           [ { Parameters = [ parameter "eventPhase" FsFloat ]
-                              Literals = [ "AT_TARGET", LitNumber 2.0 ] } ] ]
+                              Literals = [ "AT_TARGET", LitNumber 2.0 ]; NullKeys = [] } ] ]
 
             Expect.stringContains
                 source
@@ -1228,7 +1228,7 @@ let literalMemberRenderTests =
                     [ interface'
                           "Phases"
                           [ literal "NONE" (LitNumber 0.0) ]
-                          [ { Parameters = []; Literals = [ "NONE", LitNumber 0.0 ] } ] ]
+                          [ { Parameters = []; Literals = [ "NONE", LitNumber 0.0 ]; NullKeys = [] } ] ]
 
             Expect.stringContains
                 source
@@ -1279,7 +1279,7 @@ let literalMemberRenderTests =
                               "Signal"
                               [ literal "kind" (LitString "method"); property "None" FsString ]
                               [ { Parameters = [ parameter "None" FsString ]
-                                  Literals = [ "kind", LitString "method" ] } ] ] }
+                                  Literals = [ "kind", LitString "method" ]; NullKeys = [] } ] ] }
 
             let rendered, _ = Async.RunSynchronously(Pipeline.runTier Build.context Render.passes model)
             let source = rendered.Files |> Map.ofList |> Map.find "TestPkg.fs"
@@ -1289,6 +1289,24 @@ let literalMemberRenderTests =
                 source
                 "    [<Emit(\"({kind: 'method', \\\"None\\\": $0})\")>]"
                 "the literal precedes the renamed field"
+
+        testCase "a renamed parameter writes its null key positionally" <| fun _ ->
+            let model =
+                { baseModel with
+                    Decls =
+                        [ interface'
+                              "Signal"
+                              [ literal "kind" (LitString "method"); property "None" FsString; property "count" FsFloat ]
+                              [ { Parameters = [ parameter "None" FsString; parameter "count" FsFloat ]
+                                  Literals = [ "kind", LitString "method" ]; NullKeys = [ "None" ] } ] ] }
+
+            let rendered, _ = Async.RunSynchronously(Pipeline.runTier Build.context Render.passes model)
+            let source = rendered.Files |> Map.ofList |> Map.find "TestPkg.fs"
+
+            Expect.stringContains
+                source
+                "    [<Emit(\"({kind: 'method', \\\"None\\\": ($0) ?? null, \\\"count\\\": $1})\")>]"
+                "the null key falls back to null by position, the other field is written as is"
 
         testCase "a JavaScript string escapes quotes, line breaks and Emit holes" <| fun _ ->
             Expect.equal

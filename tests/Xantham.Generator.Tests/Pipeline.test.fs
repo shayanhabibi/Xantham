@@ -1089,16 +1089,19 @@ let pipelineTests =
                     Expect.stringContains source "type Cancelable =" "a callable operand keeps its properties"
                     Expect.stringContains source "abstract cancel: unit -> unit" "and loses its call signature loudly"
 
-                  testCase "an intersection over a type-parameter operand still widens, and says so" <| fun _ ->
+                  testCase "an intersection over a type-parameter operand keeps the parameter (§4.6)" <| fun _ ->
                     let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
                     let source = rendered.Files |> List.head |> snd
 
-                    Expect.stringContains source "static member merge<'T> (``base``: obj) : 'T" "T & { id: number } has no members to flatten"
+                    Expect.stringContains
+                        source
+                        "static member merge<'T> (``base``: JS.Intersect<'T, Merge.Base>) : 'T"
+                        "T & { id: number } carries T beside the literal"
 
                     Expect.contains
-                        (rendered.Findings |> List.map (fun finding -> finding.Tier, finding.Message))
-                        (Widened, "intersection over a non-object operand has no members to flatten; widened to obj (§4.6)")
-                        "the widening is owned"
+                        (rendered.Findings |> List.map _.Key)
+                        "TR072"
+                        "the carrier is owned"
 
                     Expect.isEmpty
                         (rendered.Findings
@@ -1674,6 +1677,57 @@ let pipelineTests =
                             (dropped,
                              "static member dropped: its name is an instance member's, which F# admits only between two methods")
                             $"{dropped} says why" ])
+
+        yield!
+            fixtureTests "private-member-lab" (handFixture "private-member-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "private members: a TypeScript-private member is omitted, a protected or underscore one stays" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    // `private secret;` and `#private;` reach the .d.ts with no type: they bound
+                    // as `obj` (TR008) before.
+                    for omitted in [ "secret"; "rotate"; "registry"; "__#" ] do
+                        Expect.isFalse (source.Contains omitted) $"{omitted} is omitted"
+
+                    Expect.isFalse
+                        (rendered.Findings |> List.exists (fun finding -> finding.Key = "TR008"))
+                        "no private member reads as obj"
+
+                    Expect.stringContains source "abstract _legacy: float with get, set" "a public _name is public API"
+                    Expect.stringContains source "abstract balance: float with get, set" "a protected property stays"
+                    Expect.stringContains source "abstract audit: note: string -> unit" "a protected method stays"
+                    Expect.stringContains source "static member DEFAULT_OWNER: string = jsNative" "a public static stays"
+
+                  testCase "private members: a public getter over a private setter reads get-only" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.stringContains source "    abstract limit: float\n" "the setter is private"
+
+                  testCase "private members: a private constructor binds no constructor; the class keeps its statics" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    Expect.isFalse (source.Contains "static member Token () : Token") "no EmitConstructor"
+                    Expect.stringContains source "[<Import(\"Token.issue\", \"private-member-lab\")>]" "the factory stays"
+                    Expect.isFalse (source.Contains "Token2") "the class side is not a constructor object"
+
+                  testCase "private members: a class with private members is nominal" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    // Only the class's own instances satisfy it, so it is neither `obj` nor
+                    // constructed from an object literal.
+                    Expect.stringContains source "type Opaque =\n    interface end" "an empty interface, not obj"
+                    Expect.isFalse (source.Contains "static member Create (handle") "no Create"
+
+                    for name in [ "Account"; "AccountView"; "Opaque" ] do
+                        Expect.contains
+                            (rendered.Findings |> List.map (fun finding -> finding.Symbol, finding.Key))
+                            (name, "SP003")
+                            $"{name} refuses Create"
+
+                    Expect.stringContains source "static member Create (value: string) : Token" "a private constructor alone stays structural" ])
 
         yield!
             fixtureTests "ctor-lab" (handFixture "ctor-lab") GeneratorConfig.Default (fun package ->
@@ -2462,12 +2516,17 @@ let pipelineTests =
                       Expect.stringContains source "type Two = bigint" "a bigint literal keeps its own widening"
                       Expect.isTrue (says "TR039" "bigint literal") "reported as the literal it was"
 
-                      // `object`, `symbol` and `unique symbol` still widen - nothing shipped
-                      // binds a symbol - but each names its construct instead of a flag.
+                      // `object` still widens. `symbol` and `unique symbol` read as the lib's
+                      // `Symbol` interface, and each names its construct instead of a flag.
                       Expect.stringContains source "abstract holder: obj" "object is obj"
-                      Expect.stringContains source "static member describe (key: obj) : string" "so is symbol"
+
+                      Expect.stringContains
+                          source
+                          "static member describe (key: Fable.Core.TS.Es.Symbol) : string"
+                          "symbol is the lib's Symbol interface"
+
                       Expect.isTrue (says "TR040" "admits the primitives object excludes") "object's widening"
-                      Expect.isTrue (says "TR041" "no binding in Fable.Core") "symbol's"
+                      Expect.isTrue (says "TR069" "Symbol interface") "symbol's"
                       Expect.isTrue (says "TR042" "no F# form for its identity") "and unique symbol's"
 
                       // The point of the work: no site in this fixture answers with a flag name.
@@ -2897,8 +2956,8 @@ let pipelineTests =
                       Expect.stringContains source "abstract optional: unit -> unit" "no parameter at all"
                       Expect.stringContains
                           source
-                          "abstract setter<'U>: args: U2<'U, (string -> 'U)> -> 'U"
-                          "and one for a one-element tuple"
+                          "abstract setter<'U>: value: U2<'U, (string -> 'U)> -> 'U"
+                          "and one for a one-element tuple, named by its label"
 
                       Expect.isEmpty
                           (rendered.Findings |> List.filter (fun f -> f.Key = "TR029"))
@@ -3432,7 +3491,7 @@ let pipelineTests =
                           Expect.isFalse (body.Contains "type Thunk = (unit ->") "the source interface is not reduced to a cyclic function alias"
 
                           let generic = declarationBodyOf body "GenericThunk<'T>"
-                          Expect.stringContains generic "U2<'T, GenericThunk<'T>>" "recursive references retain the declaration's type argument"
+                          Expect.stringContains generic "abstract Invoke: unit -> GenericValue<'T>" "recursive references apply the alias over the declaration's type argument"
                           Expect.stringContains generic "abstract Invoke:" "generic recursive callbacks remain nominal"
                           Expect.stringContains body "type Reader = (unit -> Record)" "recursion through an object member already has a nominal boundary"
                           Expect.stringContains body "type Plain = (unit -> string)" "nonrecursive callbacks retain function ergonomics"
@@ -4203,6 +4262,46 @@ let pipelineTests =
                       Expect.isEmpty
                           (rendered.Findings |> List.filter (fun f -> f.Key = "SE002"))
                           "a configured runtime was not derived, so there is nothing to report" ])
+        // D3: a required `T | null` member keeps an omittable Create parameter, and the Emit
+        // writes its key, as `null` where the argument is absent or `undefined`.
+        yield!
+            fixtureTests "required-nullable-lab" (handFixture "required-nullable-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a required nullable key is written by every Create, as null when absent" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains
+                          source
+                          "    [<ParamObject; Emit(\"(o => ({...o, \\\"label\\\": o[\\\"label\\\"] ?? null, \\\"score\\\": o[\\\"score\\\"] ?? null}))($0)\")>]\n    static member Create (id: string, ?label: string, ?score: float, ?note: string) : Record2 = jsNative"
+                          "each required nullable key falls back to null; the optional key stays omitted"
+
+                      Expect.stringContains
+                          source
+                          "    [<ParamObject; Emit(\"(o => ({...o, \\\"value\\\": o[\\\"value\\\"] ?? null}))($0)\")>]\n    static member Create (?value: 'T) : Box<'T> = jsNative"
+                          "a type parameter admitting null"
+
+                      Expect.stringContains
+                          source
+                          "    [<ParamObject; Emit(\"$0\")>]\n    static member Create (?maybe: string, ?either: string) : Loose = jsNative"
+                          "an optional nullable key, and one admitting undefined, stay omittable"
+
+                      Expect.stringContains
+                          source
+                          "    [<ParamObject; Emit(\"(o => ({...o, \\\"owner\\\": o[\\\"owner\\\"] ?? null}))($0)\")>]\n    static member Create (owner: string option, left: string) : Side = jsNative"
+                          "the exclusive-arm fold writes the shared nullable key"
+
+                      Expect.stringContains
+                          source
+                          "    [<ParamObject; Emit(\"(o => ({kind: 'opened', ...o, \\\"by\\\": o[\\\"by\\\"] ?? null}))($0)\")>]\n    static member Create (?by: string) : Opened = jsNative"
+                          "a tagged arm's Create writes its nullable key beside the tag"
+
+                      let written =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Key = "SP006")
+                          |> List.map (fun f -> f.Symbol)
+                          |> List.sort
+
+                      Expect.equal written [ "Box"; "LeftArm"; "Opened"; "Record2"; "RightArm"; "Side" ] "SP006 per declaration, Loose excluded" ])
         // The fixture behind docs/.ai/fable5-workarounds.md. Each declaration is one documented
         // Fable 5 loss; the assertions pin the emitted shape the document quotes, and the run
         // gate proves the workaround against tests/fixtures/fable-workaround-lab/index.js.
@@ -6061,6 +6160,103 @@ let pipelineTests =
                            |> List.forall (fun f -> f.Tier = Ergonomic))
                           "both mappings are ergonomic" ])
 
+        // W1: `symbol` and `unique symbol` read as the compiler lib's own `Symbol` interface,
+        // written through the Core.TS producer's name.
+        let symbolPrimitiveLab = handFixture "symbol-primitive-lab"
+        let symbolPrimitiveConfig = handConfig symbolPrimitiveLab
+
+        yield!
+            fixtureTests "symbol-primitive-lab" symbolPrimitiveLab symbolPrimitiveConfig (fun package ->
+                [ testCase "symbol-primitive-lab: symbol reads as the lib's Symbol interface" <| fun _ ->
+                      let rendered = Async.RunSynchronously(Pipeline.generate symbolPrimitiveConfig package)
+                      let source = rendered.Files |> List.head |> snd
+
+                      Expect.stringContains
+                          source
+                          "eventName: U2<string, Fable.Core.TS.Es.Symbol>"
+                          "a string | symbol parameter keeps both arms"
+
+                      Expect.stringContains source "abstract key: Fable.Core.TS.Es.Symbol" "a symbol member"
+                      Expect.stringContains source "static member tag: Fable.Core.TS.Es.Symbol" "a unique symbol export"
+
+                      Expect.stringContains
+                          source
+                          "static member keyOf (e: Emitter) : U2<string, Fable.Core.TS.Es.Symbol>"
+                          "a string | symbol return"
+
+                      Expect.stringContains
+                          source
+                          "static member make (?description: string) : Fable.Core.TS.Es.Symbol"
+                          "a symbol return"
+
+                      // The negative: an arm that is obj in its own right still collapses the union.
+                      Expect.stringContains source "static member loose (value: obj) : unit" "symbol | object"
+
+                      let keysOf symbol =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Symbol = symbol)
+                          |> List.map _.Key
+                          |> List.distinct
+                          |> List.sort
+
+                      Expect.equal (keysOf "Exports.make()") [ "TR069" ] "symbol is ergonomic"
+
+                      Expect.equal
+                          (keysOf "Exports.tag")
+                          [ "TR042"; "TR069" ]
+                          "unique symbol keeps its identity loss"
+
+                      Expect.isEmpty
+                          (rendered.Findings |> List.filter (fun f -> f.Key = "TR041"))
+                          "nothing here widens symbol to obj"
+
+                      Expect.isTrue
+                          (rendered.Findings
+                           |> List.filter (fun f -> f.Key = "TR069")
+                           |> List.forall (fun f -> f.Tier = Ergonomic))
+                          "TR069 is ergonomic" ])
+
+        // W3: a package's `SymbolConstructor` augmentation of a key the compiler's lib declares
+        // reads as that well-known key even when the program's lib omits it.
+        let disposableAugmentationLab = handFixture "disposable-augmentation-lab"
+        let disposableAugmentationConfig = handConfig disposableAugmentationLab
+
+        yield!
+            fixtureTests "disposable-augmentation-lab" disposableAugmentationLab disposableAugmentationConfig (fun package ->
+                let generate () =
+                    Async.RunSynchronously(Pipeline.generate disposableAugmentationConfig package)
+
+                let sourceOf (rendered: RenderModel) = rendered.Files |> List.head |> snd
+
+                [ testCase "disposable-augmentation-lab: augmented lib keys are Emit members" <| fun _ ->
+                      let source = generate () |> sourceOf
+
+                      Expect.stringContains source "[<Emit(\"$0[Symbol.asyncDispose]()\")>]" "the call reaches the symbol key"
+                      Expect.stringContains source "abstract SymbolAsyncDispose: unit -> JS.Promise<unit>" "Stream keeps its own key"
+                      Expect.stringContains source "[<Emit(\"$0[Symbol.dispose]()\")>]" "the augmented global reaches its key"
+                      Expect.isFalse (source.Contains "type Disposable =\n    interface end") "Disposable is not empty"
+                      Expect.isFalse (source.Contains "Symbol.observable") "Symbol.observable is undefined without a polyfill"
+
+                  testCase "disposable-augmentation-lab: findings name each mapping and each drop" <| fun _ ->
+                      let rendered = generate ()
+
+                      let symbolsOf key =
+                          rendered.Findings
+                          |> List.filter (fun f -> f.Key = key)
+                          |> List.map _.Symbol
+                          |> List.distinct
+                          |> List.sort
+
+                      Expect.equal
+                          (symbolsOf "MB002")
+                          [ "Keyed.__@own"; "Shadowed.Resource.__@asyncDispose"; "Stream.__@observable" ]
+                          "a package-owned unique symbol, a key through a namespace-local Symbol, and an augmented key the compiler's lib lacks stay dropped"
+
+                      Expect.equal
+                          (symbolsOf "MB009")
+                          [ "Disposable.[Symbol.dispose]"; "Stream.[Symbol.asyncDispose]" ]
+                          "one Emit member per augmented lib key" ])
+
         // W5 (#136): an overload keyed by a string literal reads as a method of its own under
         // `[<Emit>]`, and the generic overload stays.
         let literalMethodLab = handFixture "literal-method-lab"
@@ -7383,5 +7579,97 @@ let genericCallableInterfaceFixtureTests =
                 Expect.stringContains code "[<Fickl.Core.CallableInterface>]\ntype Child =\n    inherit InvokeOwner.Identity" "catalogue ownership preserves base assignability"
                 Expect.stringContains code "[<Fickl.Core.CallableInterface>]\ntype PairChild =\n    inherit InvokeOwner.PairWith<string>" "base applications retain their outer argument"
                 Expect.isFalse (code.Contains "type Identity =") "the base remains owned by the producer"
+        ])
+    ]
+
+[<Tests>]
+let unionAliasApplicationFixtureTests =
+    testList "union alias applications" [
+        yield! fixtureTests "union-alias-application-lab" (handFixture "union-alias-application-lab") GeneratorConfig.Default (fun package -> [
+            testCase "an erased-union alias application is written over its argument" <| fun _ ->
+                let rendered = Pipeline.generate GeneratorConfig.Default package |> Async.RunSynchronously
+                let source = rendered.Files |> List.head |> snd
+                Expect.stringContains source "type FunctionMaybe<'T> = U2<'T, (unit -> 'T)>" "the alias binds its parameter"
+                Expect.stringContains source "abstract mode: FunctionMaybe<Live> with get, set" "a named argument is applied"
+                Expect.stringContains source "abstract label: FunctionMaybe<string> with get, set" "a primitive argument is applied"
+                Expect.stringContains source "abstract count: FunctionMaybe<float option> option with get, set" "a nullable argument keeps its own option"
+                Expect.stringContains source "abstract size: FunctionMaybe<float> option with get, set" "optionality outside the argument stays outside the application"
+                Expect.stringContains source "abstract ``aria-live``: FunctionMaybe<Live option> option with get, set" "an anonymous literal argument is applied through its named twin"
+                Expect.stringContains source "abstract hint: FunctionMaybe<string> with get, set" "a literal absorbed by string applies string"
+                Expect.stringContains source "abstract flag: FunctionMaybe<Attrs.Flag.Result> with get, set" "a boolean-literal argument applies the enum its accessor returns"
+                Expect.stringContains source "type Plain = U2<string, (unit -> Plain.Result option)>" "a transformed union with another arm set is not an application"
+                Expect.stringContains source "abstract text: U3<string, float, (unit -> U2<string, float>)> with get, set" "a union argument stays flattened"
+                Expect.stringContains source "abstract value: U4<string, float, string[], (unit -> U3<string, float, string[]> option)> option with get, set" "a nullable union argument stays flattened"
+                Expect.stringContains source "abstract pair: U3<string, bool, (unit -> Pair)> with get, set" "a named erased-union argument stays flattened"
+                Expect.isFalse (source.Contains "FunctionMaybe<U") "no application nests an erased union"
+                Expect.isFalse (source.Contains "U2<string, (unit -> Live") "no literal arm widens to string beside its accessor"
+                Expect.isEmpty (rendered.Findings |> List.filter (fun finding -> finding.Key = "TR006" && finding.Symbol.StartsWith "Attrs")) "no literal arm of an application widens"
+        ])
+    ]
+
+[<Tests>]
+let restTupleUnionFixtureTests =
+    testList "rest tuple unions" [
+        yield! fixtureTests "rest-tuple-union-lab" (handFixture "rest-tuple-union-lab") GeneratorConfig.Default (fun package -> [
+            testCase "a rest parameter over a union of fixed tuples is one overload per tuple" <| fun _ ->
+                let rendered = Pipeline.generate GeneratorConfig.Default package |> Async.RunSynchronously
+                let source = rendered.Files |> List.head |> snd
+                Expect.stringContains source "abstract next: unit -> 'T\n" "the empty tuple is a call of no arguments"
+                Expect.stringContains source "abstract next: value: 'TNext -> 'T\n" "a one-element tuple keeps the binding pattern's name"
+                Expect.stringContains source "static member range (``end``: float) : float[]" "the one-element arm, named by its label"
+                Expect.stringContains source "static member range (start: float, ``end``: float) : float[]" "the two-element arm"
+                Expect.stringContains source "static member range (start: float, ``end``: float, step: float) : float[]" "the three-element arm"
+                Expect.stringContains source "abstract move: offset: float -> unit" "a class method expands too"
+                Expect.stringContains source "abstract move: line: float * column: float -> unit" "each of its arms"
+                Expect.isFalse (source.Contains "__0") "no binding-pattern placeholder reaches a parameter name"
+                Expect.stringContains source "[<ParamArray>] args: " "a variadic arm keeps the rest form"
+                let restTuple =
+                    rendered.Findings
+                    |> List.filter (fun finding -> finding.Key = "TR029")
+                    |> List.map _.Symbol
+                Expect.isFalse (restTuple |> List.exists (fun symbol -> symbol.StartsWith "Step" || symbol.StartsWith "range" || symbol.StartsWith "Cursor")) "an expanded rest widens nothing"
+            testCase "an instantiation collapsing two arms onto one F# signature writes it once" <| fun _ ->
+                let rendered = Pipeline.generate GeneratorConfig.Default package |> Async.RunSynchronously
+                let source = rendered.Files |> List.head |> snd
+                // `[]` and `[undefined]` collapse onto one call, so `next` is one function and
+                // `Create` can take it as a lambda.
+                Expect.stringContains
+                    source
+                    "static member Create (next: (unit -> string)) : VoidStep"
+                    "`x.next()` resolves to one overload"
+        ])
+    ]
+
+[<Tests>]
+let openIntersectionFixtureTests =
+    testList "open intersections" [
+        yield! fixtureTests "open-intersection-lab" (handFixture "open-intersection-lab") GeneratorConfig.Default (fun package -> [
+            testCase "an intersection over a type parameter keeps the parameter (§4.6)" <| fun _ ->
+                let rendered = Pipeline.generate GeneratorConfig.Default package |> Async.RunSynchronously
+                let source = rendered.Files |> List.head |> snd
+                Expect.stringContains source "type Listener<'R when 'R :> Wide> = ('R -> unit)" "a literal restating the bound is the parameter"
+                Expect.stringContains source "type Defined<'T> = 'T" "an empty literal restates nothing"
+                Expect.stringContains source "type Handler<'E, 'T> = (JS.Intersect<'E, Handler.E<'T>> -> unit)" "the literal is declared over the parameter it reads"
+                Expect.stringContains source "type WithChildren<'P> = JS.Intersect<'P, WithChildren.Members>" "an alias body's literal nests under Members"
+                Expect.stringContains source "type Counted<'P, 'Q> = JS.Intersect<'P, JS.Intersect<'Q, Counted.Members>>" "three operands nest to the right"
+                Expect.stringContains source "static member assign<'T, 'U> (target: 'T, source: 'U) : JS.Intersect<'T, 'U>" "two parameters are both kept"
+                Expect.stringContains source "type Tally = obj" "a primitive operand still widens"
+                Expect.stringContains source "abstract narrow<'U>: other: 'U -> Pool<JS.Intersect<'T, 'U>>" "a primitive beside a parameter keeps the parameter"
+                Expect.isFalse (source.Contains "Pool<obj>") "an instantiated base agrees with its declaration and redeclares nothing"
+                Expect.isFalse (source.Contains "module Listener") "a restating literal is not declared"
+                Expect.stringContains source "type Optional<'R> = (JS.Intersect<'R, Optional.Res> -> unit)" "a required member over an optional bound member is added"
+                Expect.stringContains source "type Retyped<'R when 'R :> Wide> = (JS.Intersect<'R, Retyped.Res> -> unit)" "a member retyped from the bound's is added"
+                Expect.stringContains source "abstract value: U2<'I, JS.Intersect<'T, 'I>> with get, set" "an undefined & I arm beside I is dropped"
+                Expect.stringContains source "abstract padding: JS.Intersect<Base, 'T> option with get, set" "an undefined & T arm with no T arm hoists to option"
+                Expect.isFalse (source.Contains "JS.Intersect<unit") "a nullish operand is never carried"
+                // A closed application of a callback alias expands in place (§4.6 records the gap):
+                // `Handler<Base, Wide>` is not written as an application of `Handler`.
+                Expect.stringContains source "static member listen (handler: (Listen.Handler.E -> unit)) : unit" "a closed application flattens its intersection"
+
+                let keyed key = rendered.Findings |> List.filter (fun finding -> finding.Key = key) |> List.map _.Symbol
+                Expect.stringContains source "type Exclusive<'T, 'U> = private Exclusive__ of obj" "a mapped operand is not read as restating the bound"
+                Expect.equal (keyed "TR018") [ "Exclusive"; "Tally" ] "an operand with no reference of its own, and a primitive operand, widen"
+                Expect.equal (keyed "TR073") [ "Listener(res)" ] "the restating reduction is exact"
+                Expect.equal (keyed "TR049") [ "Defined" ] "the empty reduction is exact"
         ])
     ]

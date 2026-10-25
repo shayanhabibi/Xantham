@@ -121,6 +121,10 @@ route, which wave three verified exists but did not take.
 `inherit seq<'T>`, every other key as a `Symbol<Name>` member under `[<Emit>]`. A key naming a
 package's own `unique symbol` remains `MB002`.
 
+*2026-10-24 (W1).* The type half is closed with the generated binding: `symbol` and
+`unique symbol` are written as the compiler lib's `Symbol` interface (`Fable.Core.TS.Es.Symbol`),
+`TR069`. A `unique symbol` still reports `TR042` for its identity.
+
 [//]: # (ANSWER)
 Same as before; we'll generate or hand roll our own bindings for this.
 [//]: # (ANSWER END)
