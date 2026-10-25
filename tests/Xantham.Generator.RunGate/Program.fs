@@ -2519,6 +2519,15 @@ let main _ =
         "html:<p>test</p>"
         (ExclusiveSignatureLab.Exports.render (U2.Case1(ExclusiveSignatureLab.HtmlPage.Create "<p>test</p>")))
 
+    let ambientRoot = CensusAmbientExportValueLab.CensusRoot.Direct.Exports.state
+    let forwardedRoot = CensusAmbientExportValueLab.CensusRoot.Alias.Exports.state
+    check "ambient export-equals aliases preserve object identity" (obj.ReferenceEquals(ambientRoot, forwardedRoot))
+    equal "ambient export-equals reads its root member" "root-value" ambientRoot.marker
+    ambientRoot.value <- "written"
+    equal "ambient export-equals aliases share property writes" "written" forwardedRoot.value
+    equal "ambient export-equals method keeps its receiver" "root-value:called" (forwardedRoot.update "called")
+    equal "ambient export-equals method updates the original object" "called" ambientRoot.value
+
     GenericCallableInterfaces.run check
     RecursiveCallbacks.run check
     Projections.run check

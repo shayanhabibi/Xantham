@@ -106,6 +106,13 @@ Wire-driven inventory, no mapping decisions at all.
   `typeof` aliases retain the value-type facts, while class constructors/statics and function
   imports require a value-export path. Barrel cycles do not cache a provisional absence.
 
+- **Ambient export-equals variable roots retain their module value.** When the checker's
+  flattened module export list is empty, Harvest follows its direct `export=` assignment
+  to a declaration-backed value and records a `default` import under that ambient origin.
+  Namespace/class export tables retain their existing named imports. Typed declaration
+  ancestry distinguishes a module-local target from a genuine global or `declare global`
+  member; only wholly local targets are excluded from global exports.
+
 - **An ambient declaration in a `.d.ts` module is exported without the keyword**, and the
   harvest is right to take it. `declare const secret: number` beside an `export declare
   function` looks local and is not: `getExportsOfModule` returns it, and `import { secret }`

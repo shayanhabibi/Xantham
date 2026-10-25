@@ -85,6 +85,16 @@ generator (abbdae07), `generate --only compiler-lib` places the ten constructor 
 `Dom.WebAssembly` on some runs and in `Dom.GlobalThis.WebAssembly` on others. Regenerate more
 than once before attributing that hunk to a change.
 
+**An empty module export list can hide an `export =` variable root.**
+`getExportsOfModule` lists namespace exports, while the direct export table retains the
+`export=` assignment. Follow that assignment to its declaring value and bind the root through
+the existing default-import policy. Symbol parents are absent for variable roots, so determine
+locality from every typed declaration's ancestors. A `declare global` block keeps a value
+global even inside an ambient module; one genuine global declaration preserves the global
+binding. A scope query at file position zero can select the first ambient module's inner
+scope and expose its local variable as a global candidate. The source-file node itself has
+the global scope for a script. The ambient-root lab begins with its module to retain this trap.
+
 ## Declaration catalogs
 
 **TypeScript library ownership is logical, not a platform distribution.** Installed

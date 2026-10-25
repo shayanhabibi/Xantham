@@ -7737,3 +7737,40 @@ let censusSourceOverloadsFixtureTests =
                     Expect.contains unioned symbol "distinct literals, generic signatures, receivers and rest signatures retain collision handling"
         ])
     ]
+
+[<Tests>]
+let censusAmbientExportValueFixtureTests =
+    testList "census ambient export value" [
+        yield! fixtureTests "census-ambient-export-value-lab" (handFixture "census-ambient-export-value-lab") GeneratorConfig.Default (fun package -> [
+            testCase "harvest follows export-equals variable declarations across aliases" <| fun _ ->
+                let harvest = async {
+                    let! mailbox, ctx = Bootstrap.start GeneratorConfig.Default package
+                    use _ = mailbox :> System.IDisposable
+                    let! model, findings = Pipeline.runTier ctx Harvest.passes HarvestModel.Empty
+                    return model, findings
+                }
+                let model, _ = Async.RunSynchronously harvest
+                let roots = model.Exports |> List.filter (fun export -> export.ExportName = "default" && export.Symbol.Name = "state")
+                Expect.equal roots.Length 2 "both public ambient origins retain a module value"
+                Expect.equal (roots |> List.map _.Symbol.SymbolId |> List.distinct |> List.length) 1 "forwarding keeps compiler target identity"
+                Expect.isTrue (roots |> List.forall _.HasValueExport) "both paths carry value provenance"
+                Expect.isTrue (roots |> List.forall (fun export -> export.Symbol.Name = "state")) "the exported alias retains its declaration spelling"
+
+            testCase "ambient export-equals variable roots retain default import identity" <| fun _ ->
+                let rendered = Pipeline.generate GeneratorConfig.Default package |> Async.RunSynchronously
+                let source = rendered.Files |> List.head |> snd
+                Expect.stringContains source "[<Import(\"default\", \"census-root:direct\")>]" "the direct root imports its module value"
+                Expect.stringContains source "[<Import(\"default\", \"census-root:alias\")>]" "the forwarding module imports the same value"
+                Expect.stringContains source "abstract update: value: string -> string" "the root retains callable members"
+                Expect.stringContains source "abstract value: string with get, set" "the root retains writable properties"
+                Expect.stringContains source "[<Import(\"version\", \"census-root:namespace\")>]" "namespace export-equals keeps its existing named imports"
+                Expect.stringContains source "[<Import(\"LegacyClass\", \"census-root:class\"); EmitConstructor>]" "class namespace exports keep their constructor"
+                let empty = rendered.Findings |> List.filter (fun finding -> finding.Key = "HG001")
+                Expect.equal (empty |> List.map _.Symbol) [ "\"census-root:empty\"" ] "only a genuinely empty module is dropped"
+                Expect.isFalse (source.Contains "Global(\"state\")") "the module-local root is not a global"
+                Expect.stringContains source "[<Global(\"censusGlobalMarker\")>]" "an unrelated global remains reachable"
+                Expect.stringContains source "[<Global(\"sharedRoot\")>]" "export-equals preserves a genuinely global target"
+                Expect.stringContains source "[<Global(\"augmentedRoot\")>]" "a declare-global target in an external file remains global"
+                Expect.stringContains source "[<Import(\"default\", \"census-root:shared-global\")>]" "the same global is also importable through its module"
+        ])
+    ]
