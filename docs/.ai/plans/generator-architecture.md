@@ -3484,3 +3484,21 @@ hash in Core.TS's `declarations.json` does.
 Ambient export-equals value recovery adds imported value members, and source-identical overload selection preserves the first applicable return instead of unioning unreachable alternatives. Schema 2 advances API version 11 to 12 and inference version 4 to 5 so prior producers are rejected before reuse. Identity version 7, customization version 1 and contract version 1 remain unchanged: declaration identities, source authentication and selector semantics retain their existing rules. The Core.TS producer is regenerated with the new contract alongside the affected Node bindings.
 
 Batch measurements: Node HG001 4 to 0 and DO008 30 to 26; non-lab widened/escape finding occurrences 6708 to 6698. The new process import adds one existing SE003 read-only-import finding while its writable global stays intact. Both tier audits report zero regressions and zero unexplained removals. All 154 golden write tests, 1634 generator tests, 105 Wire tests, 664 runtime checks and the Partas source/DLL consumer gate passed (one ignored test in each Expecto suite).
+
+## Authenticated compiler NoInfer declarations (2026-10-25)
+
+`resolve-alias-parameters` records the complete symbol identities of the selected compiler's
+top-level `NoInfer<T> = intrinsic` declaration. Authentication requires default-library metadata,
+the declaration handle's top-level AST node, the written name, an intrinsic body and one binder.
+The identity set travels through Resolve into pure Shape; the shared intrinsic type id carries
+no authentication. `shape-aliases` emits each authenticated public occurrence, including
+`GlobalThis.NoInfer`, as `type NoInfer<'T> = JS.NoInfer<'T>` or `= 'T` under `resolveNoInfer`.
+This precedes first-claimant intrinsic fallback and arity repair. Other intrinsic declarations
+and user aliases retain their current mapping and findings. The support abbreviation remains
+an identity type; this adds no F# inference barrier. Compiler substitution references still
+widen through their existing path; indexed-access NoInfer references retain their toggle policy.
+
+The census-noinfer-declaration lab checks actual compiler declaration ownership in both claimant
+orders, both resolve settings, secondary public occurrences, sibling Uppercase fallback and
+namespaced user aliases. Pure pass tests check distinct symbol identities sharing one intrinsic
+type id. No finding code is introduced; the batch coordinator owns the API compatibility bump.

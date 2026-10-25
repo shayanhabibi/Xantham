@@ -111,6 +111,24 @@ let shapeAliases: Pass<ShapeModel> =
 
                     let exportPath = ExportLayout.declPath (ExportLayout.modulePaths model) model
 
+                    let noInferAlias (export: HarvestedExport) name =
+                        if Set.contains export.Symbol.SymbolId model.CompilerNoInferSymbols then
+                            Map.tryFind export.Symbol.SymbolId model.ExportTypes
+                            |> Option.bind _.AliasParameters
+                            |> Option.map (fun ids ->
+                                let parameters, _, parameterFindings = typeParamsOf ctx model name ids
+                                let operand = FsTypeVar parameters.Head.Name
+
+                                let target =
+                                    if ctx.Config.ResolveNoInfer then
+                                        operand
+                                    else
+                                        FsApp("JS.NoInfer", [ operand ])
+
+                                parameters, target, parameterFindings)
+                        else
+                            None
+
                     let aliasDecls remainingDecls =
                         // Canonical abbreviations and phantoms emitted below own parameters too.
                         // Reexports must apply them instead of inventing a bare generic reference.
@@ -145,9 +163,25 @@ let shapeAliases: Pass<ShapeModel> =
                                             defining.Symbol.SymbolId <> export.Symbol.SymbolId))
 
                                 match
-                                    Map.tryFind export.Symbol.SymbolId model.ExportTypes |> Option.bind _.Declared
+                                    noInferAlias export name,
+                                    (Map.tryFind export.Symbol.SymbolId model.ExportTypes |> Option.bind _.Declared)
                                 with
-                                | Some typeId ->
+                                | Some(parameters, target, parameterFindings), _ ->
+                                    findings <- findings @ parameterFindings
+
+                                    Some(
+                                        FsAbbrev
+                                            {
+                                                Value = None
+                                                Name = name
+                                                Docs = export.Docs
+                                                Tags = export.Tags
+                                                Order = export.Order
+                                                TypeParameters = parameters
+                                                Target = target
+                                            }
+                                    )
+                                | None, Some typeId ->
                                     match Map.tryFind typeId model.DeclNames with
                                     | Some _ when definingOwner typeId <> Some owner && not (declaresOwnAlias typeId) ->
                                         None
@@ -213,7 +247,7 @@ let shapeAliases: Pass<ShapeModel> =
                                                 }
                                         )
                                     | None -> None
-                                | None -> None)
+                                | None, None -> None)
 
                     let remainingDecls =
                         model.DeclNames
@@ -223,6 +257,9 @@ let shapeAliases: Pass<ShapeModel> =
                             if
                                 Set.contains name declaredNames
                                 || Map.containsKey typeId model.AliasApplications
+                                || (Map.tryFind typeId definingExports
+                                    |> Option.exists (fun export ->
+                                        Set.contains export.Symbol.SymbolId model.CompilerNoInferSymbols))
                             then
                                 None
                             else

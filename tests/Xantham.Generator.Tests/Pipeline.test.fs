@@ -7791,3 +7791,61 @@ let censusAmbientExportValueFixtureTests =
                 Expect.stringContains source "[<Import(\"default\", \"census-root:shared-global\")>]" "the same global is also importable through its module"
         ])
     ]
+
+[<Tests>]
+let censusNoInferDeclarationFixtureTests =
+    let package = handFixture "census-noinfer-declaration-lab"
+    testList "census NoInfer declarations" [
+        yield! fixtureTests "census-noinfer-declaration-lab" package GeneratorConfig.Default (fun package -> [
+            for resolve in [ false; true ] do
+                testCase $"references preserve their existing policy resolveNoInfer={resolve}" <| fun _ ->
+                    let rendered = Pipeline.generate { GeneratorConfig.Default with ResolveNoInfer = resolve } package |> Async.RunSynchronously
+                    let source = rendered.Files |> List.head |> snd
+                    let expected = if resolve then "abstract guard: 'T" else "abstract guard: JS.NoInfer<'T>"
+                    Expect.stringContains source expected "the indexed-access reference follows the selected policy"
+                    let aliasTarget = if resolve then "'T" else "JS.NoInfer<'T>"
+                    Expect.stringContains source $"type CompilerNoInfer<'T> = {aliasTarget}" "a re-export retains the authenticated compiler declaration"
+                    Expect.stringContains source "static member choose<'T> (value: 'T, other: obj)" "compiler substitution references retain their existing fallback"
+                    Expect.stringContains source "abstract value: 'T" "the namespaced user alias retains its object shape"
+                    Expect.isFalse (source.Contains "type User.NoInfer<'T> = JS.NoInfer") "a user alias does not acquire compiler semantics"
+            for resolve in [ false; true ] do
+              for primaryFirst in [ false; true ] do
+                testCase $"authenticated intrinsic declarations retain their binder resolveNoInfer={resolve} primaryFirst={primaryFirst}" <| fun _ ->
+                    let declarations, findings =
+                        async {
+                            let config =
+                                { GeneratorConfig.Default with
+                                    ResolveNoInfer = resolve
+                                    Lib = Some [ "es5" ]
+                                    Types = Some []
+                                    Groups = Map.ofList [ "typescript/lib" * uom<npmDependency>, Ship ] }
+                            let! mailbox, ctx = Bootstrap.start config package
+                            use _ = mailbox :> IDisposable
+                            let! harvest, _ = Pipeline.runTier ctx Harvest.passes HarvestModel.Empty
+                            let selected =
+                                harvest.Exports
+                                |> List.filter (fun export ->
+                                    (export.Symbol.Name = "NoInfer" || export.Symbol.Name = "Uppercase")
+                                    && Grouping.classify ctx.PackageDir (ValueSome export.Symbol) = CompilerLib
+                                    && export.Origin = FromGlobal
+                                    && export.NamespacePath.IsNone)
+                                |> List.sortBy (fun export -> (export.Symbol.Name = "NoInfer") <> primaryFirst)
+                            Expect.equal selected.Length 2 "the selected compiler supplies both intrinsic declarations"
+                            let noInfer = selected |> List.find (fun export -> export.Symbol.Name = "NoInfer")
+                            let duplicate = { noInfer with NamespacePath = Some "GlobalThis" }
+                            let! resolved, _ = Pipeline.runTier ctx Resolve.passes (Pipeline.toResolve { harvest with Exports = selected @ [ duplicate ] })
+                            let! shaped, findings = Pipeline.runTier ctx Shape.Passes.passes (Pipeline.toShape (GeneratorConfig.runtimePackage config ctx.PackageName) resolved)
+                            return shaped.Decls, findings
+                        }
+                        |> Async.RunSynchronously
+                    let aliases = declarations |> List.choose (function FsAbbrev alias -> Some alias | _ -> None)
+                    let matches = aliases |> List.filter (fun alias -> alias.Name.EndsWith "NoInfer")
+                    Expect.equal matches.Length 2 "both public occurrences retain an abbreviation"
+                    for alias in matches do
+                        Expect.equal (alias.TypeParameters |> List.map _.Name) [ "T" ] "the declaration binds its own T"
+                        let expected = if resolve then FsTypeVar "T" else FsApp("JS.NoInfer", [ FsTypeVar "T" ])
+                        Expect.equal alias.Target expected "authenticated declaration semantics precede the shared intrinsic claimant"
+                        Expect.isEmpty (findings |> List.filter (fun finding -> finding.Symbol = alias.Name && (finding.Key = "RA006" || finding.Key = "TR064"))) "the alias is represented without intrinsic widening"
+                    Expect.isNonEmpty (findings |> List.filter (fun finding -> finding.Key = "TR064")) "Uppercase retains the intrinsic fallback"
+        ])
+    ]

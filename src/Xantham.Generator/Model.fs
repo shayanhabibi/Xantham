@@ -1418,6 +1418,8 @@ type ExportTypeIds =
 type ResolveModel =
     {
         Harvest: HarvestModel
+        /// <summary>Complete identities of intrinsic NoInfer declarations in the selected compiler's default library.</summary>
+        CompilerNoInferSymbols: Set<SymbolKey>
         /// Export symbol id -> the type ids the checker gave for it.
         ExportTypes: Map<SymbolKey, ExportTypeIds>
         /// The type table. Closed: every id referenced by a `TypeFacts` is a key here or in
@@ -1939,6 +1941,8 @@ type KeyBinding =
 type ShapeModel =
     {
         Harvest: HarvestModel
+        /// <summary>Complete identities of intrinsic NoInfer declarations in the selected compiler's default library.</summary>
+        CompilerNoInferSymbols: Set<SymbolKey>
         ExportTypes: Map<SymbolKey, ExportTypeIds>
         Types: Map<int<typeId>, TypeFacts>
         NotFollowed: Map<int<typeId>, string>

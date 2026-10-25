@@ -3204,6 +3204,46 @@ let resolveDeclarationIdentities: Pass<ResolveModel> =
                 }
     }
 
+let private compilerNoInferDeclaration (ctx: Context) (symbol: SymbolResponse) =
+    async {
+        if symbol.Name <> "NoInfer" then
+            return false
+        else
+            match symbol.Declarations |> ValueOption.defaultValue [||] |> Array.distinct with
+            | [| declaration |] ->
+                match NodeHandle.parse declaration with
+                | ValueNone -> return false
+                | ValueSome handle ->
+                    let! metadata =
+                        ctx.Session.getSourceFileMetadata (DocumentIdentifier.FileName handle.Path)
+
+                    if not (metadata |> ValueOption.exists _.IsDefaultLibrary) then
+                        return false
+                    else
+                        let! source = sourceFile ctx handle.Path
+
+                        return
+                            source
+                            |> ValueOption.exists (fun source ->
+                                SourceFile.statements (Node.root source)
+                                |> Seq.exists (fun node ->
+                                    if
+                                        Node.index node <> handle.Index
+                                        || node.Kind <> SyntaxKind.TypeAliasDeclaration
+                                    then
+                                        false
+                                    else
+                                        let alias = Node.retag<Statement, TypeAliasDeclaration> node
+
+                                        (TypeAliasDeclaration.name alias |> ValueOption.bind Identifier.text) =
+                                            ValueSome "NoInfer"
+                                        && (TypeAliasDeclaration.typeParameters alias |> Seq.length) = 1
+                                        && (TypeAliasDeclaration.``type`` alias
+                                            |> ValueOption.exists (fun body ->
+                                                body.Kind = SyntaxKind.IntrinsicKeyword))))
+            | _ -> return false
+    }
+
 /// Retains alias binders on the exported declaration rather than its possibly shared body type.
 let private resolveAliasParameters: Pass<ResolveModel> =
     {
@@ -3214,6 +3254,7 @@ let private resolveAliasParameters: Pass<ResolveModel> =
                     let mutable exports = model.ExportTypes
                     let mutable types = model.Types
                     let mutable findings = []
+                    let mutable compilerNoInferSymbols = model.CompilerNoInferSymbols
 
                     for export in model.Harvest.Exports do
                         if export.Symbol.Flags.HasFlag SymbolFlags.TypeAlias then
@@ -3293,6 +3334,12 @@ let private resolveAliasParameters: Pass<ResolveModel> =
                                             (ResolveExportTypes.FacetNotResolved("alias parameters", reason))
                                     ]
                             | Ok parameters ->
+                                if not (Set.contains export.Symbol.SymbolId compilerNoInferSymbols) then
+                                    let! authenticated = attempt (compilerNoInferDeclaration ctx export.Symbol)
+
+                                    if authenticated = Ok true then
+                                        compilerNoInferSymbols <- Set.add export.Symbol.SymbolId compilerNoInferSymbols
+
                                 exports <-
                                     exports
                                     |> Map.change
@@ -3314,6 +3361,7 @@ let private resolveAliasParameters: Pass<ResolveModel> =
                         { model with
                             ExportTypes = exports
                             Types = types
+                            CompilerNoInferSymbols = compilerNoInferSymbols
                         }
 
                     return

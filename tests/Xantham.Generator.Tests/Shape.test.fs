@@ -45,6 +45,36 @@ let emptyOwnedObjectReferenceTests =
     ]
 
 [<Tests>]
+let compilerNoInferAliasTests =
+    testList "compiler NoInfer alias shaping" [
+        for resolve in [ false; true ] do
+            testCase $"authentication belongs to the symbol rather than its shared intrinsic type resolveNoInfer={resolve}" <| fun _ ->
+                let intrinsic = Build.facts { Build.typeResponse 10 TypeFlags.Any with IntrinsicName = ValueSome "intrinsic" }
+                let parameter = { Build.facts (Build.typeResponse 20 TypeFlags.TypeParameter) with SymbolName = Some("T" * uom<symbolName>) }
+                let uppercase = Build.export "Uppercase" (Build.symbol 100 "Uppercase" SymbolFlags.TypeAlias)
+                let authenticated = Build.export "NoInfer" (Build.symbol 101 "NoInfer" SymbolFlags.TypeAlias)
+                let impostor = { Build.export "NoInfer" (Build.symbol 102 "NoInfer" SymbolFlags.TypeAlias) with NamespacePath = Some "Impostor" }
+                let model =
+                    { Build.shapeModel [ intrinsic; parameter ] with
+                        Harvest = { HarvestModel.Empty with Exports = [ uppercase; authenticated; impostor ] }
+                        CompilerNoInferSymbols = Set.singleton authenticated.Symbol.SymbolId
+                        ExportTypes =
+                            [ uppercase; authenticated; impostor ]
+                            |> List.map (fun export -> export.Symbol.SymbolId, { Declared = Some 10<typeId>; Value = None; AliasParameters = Some [ 20<typeId> ] })
+                            |> Map.ofList
+                        DeclNames = Map.ofList [ 10<typeId>, "Uppercase" ] }
+                let context = { Build.context with Config = { GeneratorConfig.Default with ResolveNoInfer = resolve } }
+                let shaped, findings = Pipeline.runTier context [ Aliases.shapeAliases ] model |> Async.RunSynchronously
+                let aliases = shaped.Decls |> List.choose (function FsAbbrev alias -> Some alias | _ -> None)
+                let actual = aliases |> List.find (fun alias -> alias.Name = "NoInfer")
+                let fake = aliases |> List.find (fun alias -> alias.Name = "Impostor.NoInfer")
+                Expect.equal (actual.TypeParameters |> List.map _.Name) [ "T" ] "the source binder is preserved"
+                Expect.equal actual.Target (if resolve then FsTypeVar "T" else FsApp("JS.NoInfer", [ FsTypeVar "T" ])) "only the authenticated symbol specializes"
+                Expect.equal fake.Target FsObj "the same name and type ID do not authenticate another symbol"
+                Expect.isNonEmpty (findings |> List.filter (fun finding -> finding.Key = "TR064" && finding.Symbol = "Impostor.NoInfer")) "the impostor retains its fallback finding"
+    ]
+
+[<Tests>]
 let inheritedCallableTests =
     let invoke variable result =
         FsInvoke { Docs = ""; Tags = []; TypeParameters = [ { Name = variable; Constraint = None } ]
