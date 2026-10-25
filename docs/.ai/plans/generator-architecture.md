@@ -2507,18 +2507,18 @@ Lab `disposable-augmentation-lab` (`lib: ["es2020"]`): the global `Disposable` r
 `SymbolDispose` and `Stream` reads `SymbolAsyncDispose` (`MB009`), `Handle` inherits
 `Disposable` and loses its `Create` (`SP003`), and `MB002` remains on `Keyed.__@own` and
 `Stream.__@observable`, and `Shadowed.Resource.__@asyncDispose` (a namespace-local `Symbol`).
-Node, measured against its regeneration at the base generator:
-`MB002` 161 → 92 (`dispose` 12 and `asyncDispose` 57 to 0, `captureRejectionSymbol` 89
-unchanged), `MB009` 30 → 43, `SP003` 290 → 293, `SP001` 1057 → 1054, `SP002` 546 → 536, tiers
-ergonomic/widened 2179/598 → 2187/590, 13 Emit members for the two keys, and no symbol is
+Node, measured against its regeneration at the W1 generator:
+`MB002` 161 → 92 (`dispose` 12 and `asyncDispose` 57 to 0; `captureRejectionSymbol` 89,
+`kOptions` 2 and `custom` 1 unchanged), `MB009` 30 → 43, `SP003` 290 → 293, `SP001` 1057 → 1054,
+`SP002` 546 → 536, tiers ergonomic/widened 2184/593 → 2192/585, 13 Emit members for the two keys, and no symbol is
 worse. Under lib `esnext` every well-known key has a program lib declaration, so Core.TS
 keeps its `MB002`/`MB008`/`MB009` counts (2/61/75), and every test golden other than the lab
 is unchanged. Emitted ABI changes for a producer whose lib omits a key that a package augments
 onto `SymbolConstructor`: the declaration gains a required Emit member and can lose `Create`
 (`SP003`), so a catalog from an earlier producer of that shape disagrees with the current
-reading. Core.TS, the only shipped catalog, is not such a producer (lib `esnext`). The
-`CatalogCompatibility.ApiVersion` bump to 10 that rejects such producers is left to the
-integrated batch.
+reading. Core.TS, the only shipped catalog, is not such a producer (lib `esnext`).
+`CatalogCompatibility.ApiVersion` 10, raised once for the fidelity stack in W1, rejects such
+producers.
 
 ## Literal overloads as methods (2026-10-13, W5 #136)
 
