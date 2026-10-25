@@ -7931,3 +7931,9 @@ let namespaceUtilityIdentityFixtureTests =
     testList "namespace utility identity fixture" [
         yield! fixtureTests "zod-namespace-utility-lab" (handFixture "zod-namespace-utility-lab") GeneratorConfig.Default (fun _ -> [])
     ]
+
+[<Tests>]
+let compositeHandleIdentityFixtureTests =
+    testList "composite handle identity fixture" [
+        yield! fixtureTests "composite-handle-identity-lab" (handFixture "composite-handle-identity-lab") GeneratorConfig.Default (fun _ -> [])
+    ]

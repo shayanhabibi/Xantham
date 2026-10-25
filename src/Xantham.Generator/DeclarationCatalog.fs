@@ -1490,6 +1490,11 @@ let internal applyWithProducer
                         |> Map.iter (fun _ producer ->
                             if
                                 producer.Role = identity.Role
+                                // Composite keys include every constituent contract. Different
+                                // compositions may share an operand without merging declarations;
+                                // only the complete key above can grant producer ownership.
+                                && identity.Role <> "source-intersection"
+                                && identity.Role <> "source-union"
                                 && Set.ofArray producer.Handles <> Set.ofList identity.Handles
                                 && producer.Handles
                                    |> Array.exists (fun handle -> List.contains handle identity.Handles)

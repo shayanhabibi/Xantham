@@ -3648,3 +3648,19 @@ Declaration order and source declaration handles remain required; no synthetic p
 rendered target supplies identity. Same-shaped aliases in separate namespaces retain distinct
 identities, while multiple public occurrences of one source alias reuse the same identity.
 The namespace utility lab reproduces the original catalogue guard before the fix.
+
+### Catalogue: overlapping source compositions (2026-10-26)
+
+Source-intersection and source-union identities already contain the complete authenticated
+handle set plus every constituent contract key. Two distinct compositions can share an operand
+without representing inconsistent declarations of one nominal source type. On a complete-key
+miss, the overlapping-handle merge guard therefore applies to ordinary declaration roles,
+not pairs of source-composition identities of the same role. Only complete-key equality grants
+producer reuse; handles, source authentication and subsequent API/arity/constraint checks are
+unchanged. A composite/nominal role mismatch retains its existing treatment.
+
+The composite handle lab reproduces two unrelated Omit intersections sharing the library's
+mapped declaration, and also covers overlapping nominal unions. Their complete identities
+and owners remain distinct. Nominal augmentation inside either composition must still fail.
+This fixes conflict classification without changing stored identities, hashing or valid-match
+semantics; identity8 and the unpublished API14 contract retain their meanings.

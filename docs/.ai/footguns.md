@@ -702,3 +702,13 @@ with exportNamespacePath as well as ExportLayout.declPath, matching Shape.Aliase
 the namespace loses V3.Util.Omit and eventually fails on a nonexistent V3 parent role. Recover
 the real source occurrence; do not derive identity from a rendered name, mapped result or
 invented namespace parent. Independent same-named namespace aliases must stay distinct.
+
+## Shared composite operands are not merged declarations (2026-10-26)
+
+An anonymous Omit intersection in Zod and one in Workers share the mapped-type declaration
+inside lib.es5.d.ts. Their source-intersection contracts still differ by their other handles
+and complete constituent keys. Treating any partial handle overlap as an incomplete merged
+declaration incorrectly rejects them. Source-union A|B and A|C have the same issue. Preserve
+the full authenticated identities and require complete key equality for ownership reuse;
+apply nominal declaration-set drift checks to nominal roles. Nominal augmentation inside a
+composition must still reject through the declaration/API guards.
