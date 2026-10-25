@@ -35,7 +35,7 @@ type DivergentBound<'T> =
 /// Reference positions, including the empty-tuple rest <c>Setter&lt;string | undefined&gt;</c> reaches.
 /// </summary>
 type Holder =
-    abstract setter<'U>: args: U2<'U, (string -> 'U)> -> 'U
+    abstract setter<'U>: value: U2<'U, (string -> 'U)> -> 'U
     abstract setter<'U>: value: (string -> 'U) -> 'U
     abstract setter<'U>: value: 'U -> 'U
     abstract optional: unit -> unit

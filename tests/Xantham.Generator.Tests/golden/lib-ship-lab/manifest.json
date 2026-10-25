@@ -3,7 +3,7 @@
   "package": "lib-ship-lab",
   "module": "LibShipLab",
   "counts": {
-    "exact": 22,
+    "exact": 20,
     "ergonomic": 16,
     "widened": 1,
     "escape": 0

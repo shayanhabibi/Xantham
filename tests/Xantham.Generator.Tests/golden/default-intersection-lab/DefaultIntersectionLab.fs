@@ -30,7 +30,7 @@ type Connection<'T> =
     inherit Socket
     abstract state: obj option with get, set
     abstract setState: value: U2<'T, (obj option -> 'T)> -> obj option
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"state\": o[\"state\"] ?? null}))($0)")>]
     static member Create (send: (string -> unit), setState: (U2<'T, (obj option -> 'T)> -> obj option), ?state: obj) : Connection<'T> = jsNative
 
 [<Interface>]

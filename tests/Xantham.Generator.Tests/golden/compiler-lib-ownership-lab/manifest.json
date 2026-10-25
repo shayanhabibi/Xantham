@@ -3,9 +3,9 @@
   "package": "compiler-lib-ownership-lab",
   "module": "CompilerLibOwnershipLab",
   "counts": {
-    "exact": 206,
+    "exact": 207,
     "ergonomic": 226,
-    "widened": 56,
+    "widened": 55,
     "escape": 10
   },
   "passes": [
@@ -36,9 +36,10 @@
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 65,
+      "total": 64,
+      "exact": 1,
       "ergonomic": 18,
-      "widened": 29,
+      "widened": 27,
       "escape": 18
     },
     {

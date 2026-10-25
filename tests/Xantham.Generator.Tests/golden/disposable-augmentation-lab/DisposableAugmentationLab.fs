@@ -44,7 +44,7 @@ type Shadowed =
 [<Erase>]
 type Exports =
     [<Import("own", "disposable-augmentation-lab")>]
-    static member own: obj = jsNative
+    static member own: Fable.Core.TS.Es.Symbol = jsNative
     [<Import("handle", "disposable-augmentation-lab")>]
     static member handle: Handle = jsNative
     [<Import("stream", "disposable-augmentation-lab")>]
@@ -58,9 +58,9 @@ type Exports =
 module Shadowed =
     [<Interface>]
     type Symbol =
-        abstract asyncDispose: obj
+        abstract asyncDispose: Fable.Core.TS.Es.Symbol
         [<ParamObject; Emit("$0")>]
-        static member Create (asyncDispose: obj) : Symbol = jsNative
+        static member Create (asyncDispose: Fable.Core.TS.Es.Symbol) : Symbol = jsNative
 
     type Resource =
         interface end

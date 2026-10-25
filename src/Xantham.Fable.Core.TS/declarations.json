@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "compiler": "498f59d207e22c40f1ecc218dfa67d1db25629a231bd0948c3db92df7457afc7",
-  "generator": "fb9edb53869e6635d457066af5c54e2d64ceb338c4476d4bc2e5bf2f63751c94",
+  "generator": "e438c6a94396312b8a9a8ddb351f68aa9c289444519b4e1d5d32c4c94d8fc752",
   "inferenceProfile": "d2f99097bf8701703dbad824988206bf0800602c089c9094d2b66092c161b32f",
   "owner": "FableCoreTsInput",
   "inputs": [
@@ -120715,7 +120715,7 @@
       "constraints": [
         "none"
       ],
-      "api": "c6f1c1c387540f1343c10650202cb49f1404c37c55dd86bc43d21337761c1e44",
+      "api": "96a9e7c4ca869c603c844c9b959726ed9ffa01a94f681ed8395f995c5a1d15cb",
       "owner": "FableCoreTsInput"
     },
     {
@@ -127962,7 +127962,7 @@
       "constraints": [
         "none"
       ],
-      "api": "184972460d13014777143de3a5029c55081c326632baaa019da15a5934bf1398",
+      "api": "f6d8b8151cefda0fd78e3c5d55d9f3b7b8f0f06454d8d75276502af8e3bfa5d2",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1274951,7 +1274951,7 @@
       "constraints": [
         "none"
       ],
-      "api": "184972460d13014777143de3a5029c55081c326632baaa019da15a5934bf1398",
+      "api": "f6d8b8151cefda0fd78e3c5d55d9f3b7b8f0f06454d8d75276502af8e3bfa5d2",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1311305,7 +1311305,7 @@
       "constraints": [
         "none"
       ],
-      "api": "184972460d13014777143de3a5029c55081c326632baaa019da15a5934bf1398",
+      "api": "f6d8b8151cefda0fd78e3c5d55d9f3b7b8f0f06454d8d75276502af8e3bfa5d2",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1385375,7 +1385375,7 @@
       "constraints": [
         "none"
       ],
-      "api": "6f9c1da2c9d186c91fe37041cec01bb78569723a1bbf227466a6b96c130d5022",
+      "api": "75f7b35e9632bbaca9b9bbacb83c80ef58c62c4f04815af1ed6523550d757060",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1499996,7 +1499996,7 @@
       "constraints": [
         "none"
       ],
-      "api": "184972460d13014777143de3a5029c55081c326632baaa019da15a5934bf1398",
+      "api": "f6d8b8151cefda0fd78e3c5d55d9f3b7b8f0f06454d8d75276502af8e3bfa5d2",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1521287,7 +1521287,7 @@
       "constraints": [
         "none"
       ],
-      "api": "184972460d13014777143de3a5029c55081c326632baaa019da15a5934bf1398",
+      "api": "f6d8b8151cefda0fd78e3c5d55d9f3b7b8f0f06454d8d75276502af8e3bfa5d2",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1562685,7 +1562685,7 @@
       "constraints": [
         "none"
       ],
-      "api": "184972460d13014777143de3a5029c55081c326632baaa019da15a5934bf1398",
+      "api": "f6d8b8151cefda0fd78e3c5d55d9f3b7b8f0f06454d8d75276502af8e3bfa5d2",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1564054,7 +1564054,7 @@
         "none",
         "none"
       ],
-      "api": "b5b3fc28fbc74ace003b9820942076ba94df8d4992cdbc8556680d9ba32b7fda",
+      "api": "aa54500169e2f1f956df4f19b2f459042b01ddc71cbdbc474bf03a4380273707",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1569427,7 +1569427,7 @@
         "none",
         "none"
       ],
-      "api": "8d605e0a7d70c4e3bb202b945350f745bba385bcf8505c91a7261da3604889b1",
+      "api": "5ae475b4fe33f86519b0ba8180173c380e093f3c5e0f5eb0806c688bb95fedef",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1569693,7 +1569693,7 @@
         "none",
         "none"
       ],
-      "api": "cefb0dacd2389ce98b0d4c4a9b138ba8e8688d01c0c82908937fce17e15fc17b",
+      "api": "ad3afcaf7179c83267ef72f45a05087e18b91c6249bee53d16d564a69ede9b28",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1569748,7 +1569748,7 @@
         "none",
         "none"
       ],
-      "api": "338b0cf301f079f24535333ec0228c952a7748da1d111ed7162fc4224f9ebc58",
+      "api": "cce10f10f07753df172f95423f3ba6910422767525ef03648209bf00ac4b37d4",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1569831,7 +1569831,7 @@
         "none",
         "none"
       ],
-      "api": "f15f76d987c727608a526fc1627cf2dd57ea4ee441bd571cf96b5e7a8a78054a",
+      "api": "43f9ac1cb96be6c2736b2dc849e45f90b38be132fe8c196977ab8b1da8aa71f5",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1569886,7 +1569886,7 @@
         "none",
         "none"
       ],
-      "api": "96925e6e631f4a76b180d4e54aa13604f0a40b2ac4bb5f5b2460be756c4580cc",
+      "api": "fb9f1bd9ec6cb2b39d01edee6ad22024372006a8bbf338325e8910c1f17809d7",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1571267,7 +1571267,7 @@
       "fSharpName": "Fable.Core.TS.Es.DecoratorMetadataObject.Base",
       "arity": 0,
       "constraints": [],
-      "api": "06fd1e19a9a0525c72e8d93fb067ca71430af392cf6a785846d2c7950d87adc0",
+      "api": "e327b57713ad290d91ec133db57836fb83a20fb279df63442b78842f5ebd1176",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1571297,7 +1571297,7 @@
       "constraints": [
         "none"
       ],
-      "api": "ce5e864297beaace857586dd88570bbb5a55df26e13d8ad5fd3a430fe1b3925c",
+      "api": "f1541963a9ab59084f32abe6ab7900fbf1b69bd689a5b6c3dbac0e27dbac47de",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1571320,7 +1571320,7 @@
       "constraints": [
         "none"
       ],
-      "api": "45f6118878f1fb54bdbd79c824d8b96ca9a9fff7f44f4b0715cde0c69861c94d",
+      "api": "3b4bc888b4acdfaf80cd49255cec19f7bc6546501a65f643cdc5202435644922",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1579861,7 +1579861,7 @@
       "constraints": [
         "none"
       ],
-      "api": "a0f4ac8d3094d80f065c605a48a8a8d3087b7465c750594f38bb581c28fb6183",
+      "api": "6f1895d8deb1e27b67ac4301beaca29622e29549decb5bb9a86787ffa0e9f0d7",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1579891,7 +1579891,7 @@
       "constraints": [
         "none"
       ],
-      "api": "36ffbdc17fc4b3cab125b536bd955e212250ca6c926c0887071a693b178d8087",
+      "api": "31c7c7c9a8cee399b436486cfcb92c3e017e69148ad77db0eb063f93d162f642",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1686943,7 +1686943,7 @@
       "constraints": [
         "none"
       ],
-      "api": "255810dbcd5d697431ea4b9510175204f48695113a7d5f73b383678e799ec6c9",
+      "api": "0000c9ec903b6adf2531e4d2d018bf0657fc7b849c7523ca28a4ded67281366d",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1699153,7 +1699153,7 @@
       "fSharpName": "Fable.Core.TS.Es.GlobalThis.PropertyKey",
       "arity": 0,
       "constraints": [],
-      "api": "351ef95be1ebb5682b4d2501241c18bb057beebd840441192ef8589eb9464d4e",
+      "api": "1dbef3cc4d2d772637207ee4c8525451507d23a1d52e864751a192f1ece0df20",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1764059,7 +1764059,7 @@
       "constraints": [
         "none"
       ],
-      "api": "45f6118878f1fb54bdbd79c824d8b96ca9a9fff7f44f4b0715cde0c69861c94d",
+      "api": "3b4bc888b4acdfaf80cd49255cec19f7bc6546501a65f643cdc5202435644922",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1775835,7 +1775835,7 @@
       "constraints": [
         "none"
       ],
-      "api": "184972460d13014777143de3a5029c55081c326632baaa019da15a5934bf1398",
+      "api": "f6d8b8151cefda0fd78e3c5d55d9f3b7b8f0f06454d8d75276502af8e3bfa5d2",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1776981,7 +1776981,7 @@
         "none",
         "none"
       ],
-      "api": "fcfccc44ef1267ceee9d5940bda3717b5b15393fd000af20d9afc2d28091859d",
+      "api": "27d50dc89973394912b884df937b91ecefe066ad2893aa6ba789ccbb48c78763",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1777401,7 +1777401,7 @@
       "constraints": [
         "none"
       ],
-      "api": "49e77846e6472f9e53eb4a2057f093c1e5422102fe8c4ebad64edb51b814868a",
+      "api": "612b43979f7097107f8da54b2a515f80531296de190ebe58de3facf2609352cc",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1777577,7 +1777577,7 @@
       "constraints": [
         "none"
       ],
-      "api": "49e77846e6472f9e53eb4a2057f093c1e5422102fe8c4ebad64edb51b814868a",
+      "api": "612b43979f7097107f8da54b2a515f80531296de190ebe58de3facf2609352cc",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1778552,7 +1778552,7 @@
       "constraints": [
         "none"
       ],
-      "api": "184972460d13014777143de3a5029c55081c326632baaa019da15a5934bf1398",
+      "api": "f6d8b8151cefda0fd78e3c5d55d9f3b7b8f0f06454d8d75276502af8e3bfa5d2",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1778816,7 +1778816,7 @@
       "fSharpName": "Fable.Core.TS.Es.MethodDecorator",
       "arity": 0,
       "constraints": [],
-      "api": "f2e3d12c806fec307944f71e3582829664520e8ed6132d5eb2e6bd77ce3b1691",
+      "api": "a2e19e76c674f9e2e8234fe9d38e095e90d4ca760ea40a3fc1459bcc9d3d0b12",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1779012,7 +1779012,7 @@
       "constraints": [
         "none"
       ],
-      "api": "870fac6fe5fb3d2f17f01cce6419614104cc9d20a1234db8f62814f5bb7d8399",
+      "api": "0000c9ec903b6adf2531e4d2d018bf0657fc7b849c7523ca28a4ded67281366d",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1779395,7 +1779395,7 @@
       "fSharpName": "Fable.Core.TS.Es.Object",
       "arity": 0,
       "constraints": [],
-      "api": "a44ef30c7b2222979fc547d5f7e87ccad35a74df83c7ec61cd354b490c2ac776",
+      "api": "5cdf7a01c739660d42d64abfde68ee87a6df2b2c93fc7c9142a4fd9c26656b03",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1779554,7 +1779554,7 @@
       "fSharpName": "Fable.Core.TS.Es.ObjectConstructor",
       "arity": 0,
       "constraints": [],
-      "api": "c8ee05035778569c2dc39f86bff537fe077538bdf5a06de266224e87370fea45",
+      "api": "7b3803dd60a5df489427d6027c784fdebf6cf7ca9abd0003889a55c5026c3937",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1779858,7 +1779858,7 @@
       "fSharpName": "Fable.Core.TS.Es.ParameterDecorator",
       "arity": 0,
       "constraints": [],
-      "api": "bd8294c7f822963cb2ec9e88ac08afc8488cc476e4bcb12fe56441ec9ac2700c",
+      "api": "4bd6086bdaeca6a0e60d69eb002f1c0eb8f253126e410b577c42623b41129894",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1780597,7 +1780597,7 @@
       "fSharpName": "Fable.Core.TS.Es.PropertyDecorator",
       "arity": 0,
       "constraints": [],
-      "api": "2ef5774fba7445e3e693d08ca0792cc26b374c7a6ebe888287279780601061f8",
+      "api": "2d68ca526711d6b1895b98f05bbea3b6f60ca928def9126ba82fbdab82648d50",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1780639,7 +1780639,7 @@
       "fSharpName": "Fable.Core.TS.Es.PropertyDescriptorMap",
       "arity": 0,
       "constraints": [],
-      "api": "407520bdd370bf2d2666a144190d13e955ef69bf2d0fec7dada24b9e345c62c7",
+      "api": "140d8f330f88fe6113d65ed149da2b12dc1d56ad859ceaf6d29c48c2c19b81f9",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1780660,7 +1780660,7 @@
       "fSharpName": "Fable.Core.TS.Es.PropertyKey",
       "arity": 0,
       "constraints": [],
-      "api": "351ef95be1ebb5682b4d2501241c18bb057beebd840441192ef8589eb9464d4e",
+      "api": "1dbef3cc4d2d772637207ee4c8525451507d23a1d52e864751a192f1ece0df20",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1780951,7 +1780951,7 @@
       "constraints": [
         "none"
       ],
-      "api": "73ff3581965e8db39d316354f216611fc32dd321bb3836a5ddcd423d9ef3c8ee",
+      "api": "37430b498a9f18dbf1fc8bb9b27a3610b0d47314f5359f8bcd2f94a663fc2bc1",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1781058,7 +1781058,7 @@
       "fSharpName": "Fable.Core.TS.Es.RawJSONInstance",
       "arity": 0,
       "constraints": [],
-      "api": "f1c8885ae82423d09845a85e56d5aace58244b70b592b8896162e887bc511815",
+      "api": "0612019c59398e0a8dba735790d072100a6d6921f1a6e1218c46c6862a0e91be",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1781577,7 +1781577,7 @@
       "constraints": [
         "none"
       ],
-      "api": "2a2e7b031cf49e323a58db6ee0067d26b1e25636ae64ba87752a6314d6bb69e8",
+      "api": "22ad270358009b17a0d54154802654d0d7fcfde7572d65d8bf7604116b4645cc",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1782048,7 +1782048,7 @@
       "fSharpName": "Fable.Core.TS.Es.Reflect",
       "arity": 0,
       "constraints": [],
-      "api": "51d565757c6a522add17a43842f57be89b9c74f1523281683b20437f22ddb205",
+      "api": "c44afbaf7ae523824916858ef7771aa4fb8393f8a766d3f1ef7fe4d69cf0ed2f",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1782998,7 +1782998,7 @@
       "constraints": [
         "none"
       ],
-      "api": "184972460d13014777143de3a5029c55081c326632baaa019da15a5934bf1398",
+      "api": "f6d8b8151cefda0fd78e3c5d55d9f3b7b8f0f06454d8d75276502af8e3bfa5d2",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1783176,7 +1783176,7 @@
       "constraints": [
         "none"
       ],
-      "api": "253bbc82722b2321fcd3c13f8f4fdc385b41358532086adaae735addc80d6f23",
+      "api": "97e394fb9dfc70c3f63a2e3c890a3a4ddf58ac2dd73a5600c844eefcd9e5bcc2",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1783327,7 +1783327,7 @@
       "constraints": [
         "none"
       ],
-      "api": "18b73bdb8bdefe4c335499ff5a72b0ea035cd3566266a1c4b6d242629e7ef6ef",
+      "api": "575d305794477546213ca6a38f0d9e0431fe021d97e81beb3cef314f01fe8ab0",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1783569,7 +1783569,7 @@
       "constraints": [
         "none"
       ],
-      "api": "184972460d13014777143de3a5029c55081c326632baaa019da15a5934bf1398",
+      "api": "f6d8b8151cefda0fd78e3c5d55d9f3b7b8f0f06454d8d75276502af8e3bfa5d2",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1785146,7 +1785146,7 @@
       "constraints": [
         "none"
       ],
-      "api": "184972460d13014777143de3a5029c55081c326632baaa019da15a5934bf1398",
+      "api": "f6d8b8151cefda0fd78e3c5d55d9f3b7b8f0f06454d8d75276502af8e3bfa5d2",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1785262,7 +1785262,7 @@
       "fSharpName": "Fable.Core.TS.Es.Symbol",
       "arity": 0,
       "constraints": [],
-      "api": "75753d3bc8f4485d5fc5120c1050812be39012aa78cba359105b1cf57812437d",
+      "api": "ff640b1ecad01f31fb4ae8e0c79493c383a665007accd641ce1d5ef5f3cb9e88",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1785345,7 +1785345,7 @@
       "fSharpName": "Fable.Core.TS.Es.SymbolConstructor",
       "arity": 0,
       "constraints": [],
-      "api": "235f6177b0e3d10b87d88a8aa8cd03b6eca849fc9eec75a0e0190bf92b361f5a",
+      "api": "c6f3ba266cad98816eac6cca42ecd4653fd520d7007cf68378880021f4cef08c",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1800913,7 +1800913,7 @@
       "fSharpName": "Fable.Core.TS.Es.WeakKeyTypes",
       "arity": 0,
       "constraints": [],
-      "api": "d6a2b09fb16ae93e8d9ce6e6745f2f64e72bd83a2338e18a4aa1ea6099725f1f",
+      "api": "61cd2c280c1baf197b52be77edd05abebc33a6f2c929afcbed9f0962d8da6108",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1801306,7 +1801306,7 @@
     }
   ],
   "compatibility": {
-    "apiVersion": 9,
+    "apiVersion": 10,
     "contractVersion": 1,
     "customizationVersion": 1,
     "identityVersion": 7,

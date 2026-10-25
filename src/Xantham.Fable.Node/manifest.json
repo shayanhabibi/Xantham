@@ -3,9 +3,9 @@
   "package": "@types/node",
   "module": "Node",
   "counts": {
-    "exact": 1023,
-    "ergonomic": 2179,
-    "widened": 598,
+    "exact": 1010,
+    "ergonomic": 2196,
+    "widened": 590,
     "escape": 4
   },
   "passes": [
@@ -17,8 +17,8 @@
     },
     {
       "pass": "SY - synthesize-anonymous",
-      "total": 2136,
-      "exact": 2136
+      "total": 2146,
+      "exact": 2146
     },
     {
       "pass": "LU - classify-literal-unions",
@@ -32,48 +32,48 @@
     },
     {
       "pass": "shape-callbacks",
-      "total": 2370,
-      "ergonomic": 2229,
-      "widened": 141
+      "total": 2369,
+      "ergonomic": 2230,
+      "widened": 139
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 27359,
+      "total": 26291,
       "exact": 384,
-      "ergonomic": 23096,
-      "widened": 3879
+      "ergonomic": 24187,
+      "widened": 1720
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 60,
-      "ergonomic": 25,
-      "widened": 35
+      "total": 59,
+      "ergonomic": 26,
+      "widened": 33
     },
     {
       "pass": "SC - shape-classes",
-      "total": 2899,
+      "total": 2791,
       "exact": 535,
-      "ergonomic": 1430,
-      "widened": 934
+      "ergonomic": 1748,
+      "widened": 508
     },
     {
       "pass": "SE - shape-exports",
-      "total": 1353,
+      "total": 1350,
       "exact": 8,
-      "ergonomic": 949,
-      "widened": 396
+      "ergonomic": 963,
+      "widened": 379
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 2147,
-      "exact": 69,
+      "total": 2181,
+      "exact": 103,
       "ergonomic": 2054,
       "widened": 24
     },
     {
       "pass": "settle-symbol-members",
-      "total": 48,
-      "ergonomic": 46,
+      "total": 61,
+      "ergonomic": 59,
       "widened": 2
     },
     {

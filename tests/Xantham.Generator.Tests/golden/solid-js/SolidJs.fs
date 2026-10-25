@@ -36,7 +36,7 @@ type Computation<'Init, 'Next> =
     abstract ``pure``: bool with get, set
     abstract user: bool option with get, set
     abstract suspense: Computation.Suspense option with get, set
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"sources\": o[\"sources\"] ?? null, \"sourceSlots\": o[\"sourceSlots\"] ?? null, \"updatedAt\": o[\"updatedAt\"] ?? null, \"owned\": o[\"owned\"] ?? null, \"cleanups\": o[\"cleanups\"] ?? null, \"owner\": o[\"owner\"] ?? null}))($0)")>]
     static member Create (fn: ('Init -> 'Next), state: Computation.State, ``pure``: bool, context: obj, ?tState: Computation.State, ?sources: SignalState<'Next>[], ?sourceSlots: float[], ?value: 'Init, ?updatedAt: float, ?user: bool, ?suspense: Computation.Suspense, ?owned: Computation<obj, obj>[], ?cleanups: (unit -> unit)[], ?owner: Owner, ?sourceMap: SourceMapValue[], ?name: string) : Computation<'Init, 'Next> = jsNative
 
 [<Interface>]
@@ -53,7 +53,7 @@ type Memo<'Prev, 'Next> =
     inherit Computation<'Next, 'Next>
     abstract tOwned: Computation<U2<'Next, 'Prev>, 'Next>[] option with get, set
     abstract comparator: Memo.Comparator<'Next> option with get, set
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"observers\": o[\"observers\"] ?? null, \"observerSlots\": o[\"observerSlots\"] ?? null, \"owned\": o[\"owned\"] ?? null, \"cleanups\": o[\"cleanups\"] ?? null, \"owner\": o[\"owner\"] ?? null, \"sources\": o[\"sources\"] ?? null, \"sourceSlots\": o[\"sourceSlots\"] ?? null, \"updatedAt\": o[\"updatedAt\"] ?? null}))($0)")>]
     static member Create (value: 'Next, context: obj, fn: ('Next -> 'Next), state: Computation.State, ``pure``: bool, ?tOwned: Computation<U2<'Next, 'Prev>, 'Next>[], ?name: string, ?graph: Owner, ?observers: Computation<obj, obj>[], ?observerSlots: float[], ?tValue: 'Next, ?comparator: Memo.Comparator<'Next>, ?``internal``: bool, ?owned: Computation<obj, obj>[], ?cleanups: (unit -> unit)[], ?owner: Owner, ?sourceMap: SourceMapValue[], ?tState: Computation.State, ?sources: SignalState<'Next>[], ?sourceSlots: float[], ?updatedAt: float, ?user: bool, ?suspense: Computation.Suspense) : Memo<'Prev, 'Next> = jsNative
 
 [<Interface>]
@@ -65,7 +65,7 @@ type SignalState<'T> =
     abstract tValue: 'T option with get, set
     abstract comparator: SignalState.Comparator<'T> option with get, set
     abstract ``internal``: bool option with get, set
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"observers\": o[\"observers\"] ?? null, \"observerSlots\": o[\"observerSlots\"] ?? null}))($0)")>]
     static member Create (value: 'T, ?observers: Computation<obj, obj>[], ?observerSlots: float[], ?tValue: 'T, ?comparator: SignalState.Comparator<'T>, ?``internal``: bool, ?name: string, ?graph: Owner) : SignalState<'T> = jsNative
 
 [<Interface>]
@@ -106,7 +106,7 @@ type Task =
     abstract fn: (bool -> unit) option with get, set
     abstract startTime: float with get, set
     abstract expirationTime: float with get, set
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"fn\": o[\"fn\"] ?? null}))($0)")>]
     static member Create (id: float, startTime: float, expirationTime: float, ?fn: (bool -> unit)) : Task = jsNative
 
 [<Fickl.Core.CallableInterface>]
@@ -122,7 +122,7 @@ type Owner =
     abstract context: obj with get, set
     abstract sourceMap: SourceMapValue[] option with get, set
     abstract name: string option with get, set
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"owned\": o[\"owned\"] ?? null, \"cleanups\": o[\"cleanups\"] ?? null, \"owner\": o[\"owner\"] ?? null}))($0)")>]
     static member Create (context: obj, ?owned: Computation<obj, obj>[], ?cleanups: (unit -> unit)[], ?owner: Owner, ?sourceMap: SourceMapValue[], ?name: string) : Owner = jsNative
 
 type Transition = (unit -> bool) * ((unit -> unit) -> JS.Promise<unit>)
@@ -1220,14 +1220,14 @@ module CreateResource =
 
     [<Interface>]
     type Options<'I, 'T> =
-        abstract initialValue: U3<'I, JS.Intersect<unit, 'I>, JS.Intersect<'T, 'I>> with get, set
+        abstract initialValue: U2<'I, JS.Intersect<'T, 'I>> with get, set
         abstract name: string option with get, set
         abstract deferStream: bool option with get, set
         abstract ssrLoadFrom: ResourceOptions.SsrLoadFrom option with get, set
         abstract storage: (U2<'I, 'T> option -> ((unit -> U2<'I, 'T> option) * (obj[] -> unit))) option with get, set
         abstract onHydrated: CreateResource.Options.OnHydrated<'I, 'T> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (initialValue: U3<'I, JS.Intersect<unit, 'I>, JS.Intersect<'T, 'I>>, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptions.SsrLoadFrom, ?storage: (U2<'I, 'T> option -> ((unit -> U2<'I, 'T> option) * (obj[] -> unit))), ?onHydrated: CreateResource.Options.OnHydrated<'I, 'T>) : Options<'I, 'T> = jsNative
+        static member Create (initialValue: U2<'I, JS.Intersect<'T, 'I>>, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptions.SsrLoadFrom, ?storage: (U2<'I, 'T> option -> ((unit -> U2<'I, 'T> option) * (obj[] -> unit))), ?onHydrated: CreateResource.Options.OnHydrated<'I, 'T>) : Options<'I, 'T> = jsNative
 
     [<Interface>]
     type Options2<'T> =
@@ -1242,14 +1242,14 @@ module CreateResource =
 
     [<Interface>]
     type Options3<'I, 'T, 'S> =
-        abstract initialValue: U3<'I, JS.Intersect<unit, 'I>, JS.Intersect<'T, 'I>> with get, set
+        abstract initialValue: U2<'I, JS.Intersect<'T, 'I>> with get, set
         abstract name: string option with get, set
         abstract deferStream: bool option with get, set
         abstract ssrLoadFrom: ResourceOptions.SsrLoadFrom option with get, set
         abstract storage: (U2<'I, 'T> option -> ((unit -> U2<'I, 'T> option) * (obj[] -> unit))) option with get, set
         abstract onHydrated: CreateResource.Options3.OnHydrated<'S, 'I, 'T> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (initialValue: U3<'I, JS.Intersect<unit, 'I>, JS.Intersect<'T, 'I>>, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptions.SsrLoadFrom, ?storage: (U2<'I, 'T> option -> ((unit -> U2<'I, 'T> option) * (obj[] -> unit))), ?onHydrated: CreateResource.Options3.OnHydrated<'S, 'I, 'T>) : Options3<'I, 'T, 'S> = jsNative
+        static member Create (initialValue: U2<'I, JS.Intersect<'T, 'I>>, ?name: string, ?deferStream: bool, ?ssrLoadFrom: ResourceOptions.SsrLoadFrom, ?storage: (U2<'I, 'T> option -> ((unit -> U2<'I, 'T> option) * (obj[] -> unit))), ?onHydrated: CreateResource.Options3.OnHydrated<'S, 'I, 'T>) : Options3<'I, 'T, 'S> = jsNative
 
     [<Interface>]
     type Options4<'S, 'T> =
@@ -1368,7 +1368,7 @@ module DEV =
         abstract afterCreateOwner: (Owner -> unit) option with get, set
         abstract afterCreateSignal: (SignalState<obj> -> unit) option with get, set
         abstract afterRegisterGraph: (SourceMapValue -> unit) option with get, set
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"afterUpdate\": o[\"afterUpdate\"] ?? null, \"afterCreateOwner\": o[\"afterCreateOwner\"] ?? null, \"afterCreateSignal\": o[\"afterCreateSignal\"] ?? null, \"afterRegisterGraph\": o[\"afterRegisterGraph\"] ?? null}))($0)")>]
         static member Create (?afterUpdate: (unit -> unit), ?afterCreateOwner: (Owner -> unit), ?afterCreateSignal: (SignalState<obj> -> unit), ?afterRegisterGraph: (SourceMapValue -> unit)) : Hooks = jsNative
 
 module DeferredOptions =
@@ -32474,7 +32474,7 @@ module Store =
         [<Interface>]
         type Hooks =
             abstract onStoreNodeUpdate: Store.DEV.Hooks.OnStoreNodeUpdate option with get, set
-            [<ParamObject; Emit("$0")>]
+            [<ParamObject; Emit("(o => ({...o, \"onStoreNodeUpdate\": o[\"onStoreNodeUpdate\"] ?? null}))($0)")>]
             static member Create (?onStoreNodeUpdate: Store.DEV.Hooks.OnStoreNodeUpdate) : Hooks = jsNative
 
         module Hooks =

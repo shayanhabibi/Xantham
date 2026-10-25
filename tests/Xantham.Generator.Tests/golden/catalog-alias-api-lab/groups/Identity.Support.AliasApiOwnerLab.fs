@@ -21,5 +21,5 @@ module Part =
     type Output =
         | [<CompiledName("text")>] Text of value: string
         | [<CompiledName("json")>] Json of value: U2<string, float> option
-        [<ParamObject; Emit("({ type: 'json', ...$0 })")>]
+        [<ParamObject; Emit("(o => ({type: 'json', ...o, \"value\": o[\"value\"] ?? null}))($0)")>]
         static member CreateJson (?value: U2<string, float>) : Output = jsNative

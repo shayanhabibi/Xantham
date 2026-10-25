@@ -51,7 +51,7 @@ type Absence =
     /// <c>x: void | null</c>. <c>void</c> in a union, with nothing remaining.
     /// </summary>
     abstract onlyVoidNull: unit
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"onlyNull\": o[\"onlyNull\"] ?? null, \"unionNull\": o[\"unionNull\"] ?? null}))($0)")>]
     static member Create (returnsVoid: (unit -> unit), onlyNull: obj, ?optionalOnly: string, ?unionUndefined: string, ?unionNull: string, ?optionalNull: string, ?unionBoth: string) : Absence = jsNative
 
 [<Interface>]

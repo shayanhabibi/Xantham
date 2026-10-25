@@ -3690,10 +3690,10 @@ type Int8Array<'TArrayBuffer> =
 
 type IteratorObject<'T, 'TReturn, 'TNext> =
     inherit seq<'T>
+    abstract next: unit -> U2<Fable.Core.TS.Es.IteratorReturnResult<'TReturn>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
 
     abstract next:
-        [<ParamArray>] __0: U2<obj[], 'TNext[]> ->
-            U2<Fable.Core.TS.Es.IteratorReturnResult<'TReturn>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
+        value: 'TNext -> U2<Fable.Core.TS.Es.IteratorReturnResult<'TReturn>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
 
     abstract ``return``:
         ('TReturn option
@@ -7488,7 +7488,7 @@ type AbortSignal2 =
     abstract reason: obj
     abstract throwIfAborted: unit -> unit
 
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"onabort\": o[\"onabort\"] ?? null}))($0)")>]
     static member Create
         (
             aborted: bool,
@@ -7516,7 +7516,11 @@ type AddEventListenerOptions =
 
 type AsyncIteratorObject<'T, 'TReturn, 'TNext> =
     abstract next:
-        [<ParamArray>] __0: U2<obj[], 'TNext[]> ->
+        unit ->
+            JS.Promise<U2<Fable.Core.TS.Es.IteratorReturnResult<'TReturn>, Fable.Core.TS.Es.IteratorYieldResult<'T>>>
+
+    abstract next:
+        value: 'TNext ->
             JS.Promise<U2<Fable.Core.TS.Es.IteratorReturnResult<'TReturn>, Fable.Core.TS.Es.IteratorYieldResult<'T>>>
 
     abstract ``return``:
@@ -7555,7 +7559,8 @@ type Event2 =
     abstract stopImmediatePropagation: unit -> unit
     abstract stopPropagation: unit -> unit
 
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject;
+      Emit("(o => ({...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
     static member Create
         (
             bubbles: bool,
@@ -7923,7 +7928,10 @@ type EventEmitterConstructor =
     /// </summary>
     /// <remarks>@since v11.13.0, v10.16.0</remarks>
     abstract once:
-        emitter: NodeJS.EventEmitter<unit[]> * eventName: obj * ?options: StaticEventEmitterOptions -> JS.Promise<obj[]>
+        emitter: NodeJS.EventEmitter<unit[]> *
+        eventName: U2<string, Fable.Core.TS.Es.Symbol> *
+        ?options: StaticEventEmitterOptions ->
+            JS.Promise<obj[]>
 
     /// <summary>
     /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -8082,7 +8090,9 @@ type EventEmitterConstructor =
     /// <remarks>@since v13.6.0, v12.16.0</remarks>
     /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
     abstract on:
-        emitter: NodeJS.EventEmitter<unit[]> * eventName: obj * ?options: StaticEventEmitterIteratorOptions ->
+        emitter: NodeJS.EventEmitter<unit[]> *
+        eventName: U2<string, Fable.Core.TS.Es.Symbol> *
+        ?options: StaticEventEmitterIteratorOptions ->
             NodeJS.AsyncIterator<obj[], obj, obj>
 
     /// <summary>
@@ -8183,7 +8193,8 @@ type EventEmitterConstructor =
     /// <remarks>@deprecated Since v3.2.0 - Use <c>listenerCount</c> instead.</remarks>
     /// <param name="emitter">The emitter to query</param>
     /// <param name="eventName">The event name</param>
-    abstract listenerCount: emitter: NodeJS.EventEmitter<unit[]> * eventName: obj -> float
+    abstract listenerCount:
+        emitter: NodeJS.EventEmitter<unit[]> * eventName: U2<string, Fable.Core.TS.Es.Symbol> -> float
 
     /// <summary>
     /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -8212,7 +8223,8 @@ type EventEmitterConstructor =
     /// </summary>
     /// <remarks>@since v15.2.0, v14.17.0</remarks>
     abstract getEventListeners:
-        emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget> * name: obj -> Fable.Core.TS.Es.Function[]
+        emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget> * name: U2<string, Fable.Core.TS.Es.Symbol> ->
+            Fable.Core.TS.Es.Function[]
 
     /// <summary>
     /// Returns the currently set max amount of listeners.
@@ -8302,14 +8314,14 @@ type EventEmitterConstructor =
     /// regular <c>'error'</c> listener is installed.
     /// </summary>
     /// <remarks>@since v13.6.0, v12.17.0</remarks>
-    abstract errorMonitor: obj
+    abstract errorMonitor: Fable.Core.TS.Es.Symbol
     /// <summary>
     /// Value: <c>Symbol.for('nodejs.rejection')</c>
     /// <br /><br />
     /// See how to write a custom <c>rejection handler</c>.
     /// </summary>
     /// <remarks>@since v13.4.0, v12.16.0</remarks>
-    abstract captureRejectionSymbol: obj
+    abstract captureRejectionSymbol: Fable.Core.TS.Es.Symbol
     /// <summary>
     /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
     /// <br /><br />
@@ -9889,7 +9901,10 @@ type StreamConstructor =
     /// </summary>
     /// <remarks>@since v11.13.0, v10.16.0</remarks>
     abstract once:
-        emitter: NodeJS.EventEmitter<unit[]> * eventName: obj * ?options: StaticEventEmitterOptions -> JS.Promise<obj[]>
+        emitter: NodeJS.EventEmitter<unit[]> *
+        eventName: U2<string, Fable.Core.TS.Es.Symbol> *
+        ?options: StaticEventEmitterOptions ->
+            JS.Promise<obj[]>
 
     /// <summary>
     /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -10048,7 +10063,9 @@ type StreamConstructor =
     /// <remarks>@since v13.6.0, v12.16.0</remarks>
     /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
     abstract on:
-        emitter: NodeJS.EventEmitter<unit[]> * eventName: obj * ?options: StaticEventEmitterIteratorOptions ->
+        emitter: NodeJS.EventEmitter<unit[]> *
+        eventName: U2<string, Fable.Core.TS.Es.Symbol> *
+        ?options: StaticEventEmitterIteratorOptions ->
             NodeJS.AsyncIterator<obj[], obj, obj>
 
     /// <summary>
@@ -10149,7 +10166,8 @@ type StreamConstructor =
     /// <remarks>@deprecated Since v3.2.0 - Use <c>listenerCount</c> instead.</remarks>
     /// <param name="emitter">The emitter to query</param>
     /// <param name="eventName">The event name</param>
-    abstract listenerCount: emitter: NodeJS.EventEmitter<unit[]> * eventName: obj -> float
+    abstract listenerCount:
+        emitter: NodeJS.EventEmitter<unit[]> * eventName: U2<string, Fable.Core.TS.Es.Symbol> -> float
 
     /// <summary>
     /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -10178,7 +10196,8 @@ type StreamConstructor =
     /// </summary>
     /// <remarks>@since v15.2.0, v14.17.0</remarks>
     abstract getEventListeners:
-        emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget> * name: obj -> Fable.Core.TS.Es.Function[]
+        emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget> * name: U2<string, Fable.Core.TS.Es.Symbol> ->
+            Fable.Core.TS.Es.Function[]
 
     /// <summary>
     /// Returns the currently set max amount of listeners.
@@ -10268,14 +10287,14 @@ type StreamConstructor =
     /// regular <c>'error'</c> listener is installed.
     /// </summary>
     /// <remarks>@since v13.6.0, v12.17.0</remarks>
-    abstract errorMonitor: obj
+    abstract errorMonitor: Fable.Core.TS.Es.Symbol
     /// <summary>
     /// Value: <c>Symbol.for('nodejs.rejection')</c>
     /// <br /><br />
     /// See how to write a custom <c>rejection handler</c>.
     /// </summary>
     /// <remarks>@since v13.4.0, v12.16.0</remarks>
-    abstract captureRejectionSymbol: obj
+    abstract captureRejectionSymbol: Fable.Core.TS.Es.Symbol
     /// <summary>
     /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
     /// <br /><br />
@@ -18413,7 +18432,10 @@ type Http2ServerRequestConstructor =
     /// </summary>
     /// <remarks>@since v11.13.0, v10.16.0</remarks>
     abstract once:
-        emitter: NodeJS.EventEmitter<unit[]> * eventName: obj * ?options: StaticEventEmitterOptions -> JS.Promise<obj[]>
+        emitter: NodeJS.EventEmitter<unit[]> *
+        eventName: U2<string, Fable.Core.TS.Es.Symbol> *
+        ?options: StaticEventEmitterOptions ->
+            JS.Promise<obj[]>
 
     /// <summary>
     /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -18572,7 +18594,9 @@ type Http2ServerRequestConstructor =
     /// <remarks>@since v13.6.0, v12.16.0</remarks>
     /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
     abstract on:
-        emitter: NodeJS.EventEmitter<unit[]> * eventName: obj * ?options: StaticEventEmitterIteratorOptions ->
+        emitter: NodeJS.EventEmitter<unit[]> *
+        eventName: U2<string, Fable.Core.TS.Es.Symbol> *
+        ?options: StaticEventEmitterIteratorOptions ->
             NodeJS.AsyncIterator<obj[], obj, obj>
 
     /// <summary>
@@ -18673,7 +18697,8 @@ type Http2ServerRequestConstructor =
     /// <remarks>@deprecated Since v3.2.0 - Use <c>listenerCount</c> instead.</remarks>
     /// <param name="emitter">The emitter to query</param>
     /// <param name="eventName">The event name</param>
-    abstract listenerCount: emitter: NodeJS.EventEmitter<unit[]> * eventName: obj -> float
+    abstract listenerCount:
+        emitter: NodeJS.EventEmitter<unit[]> * eventName: U2<string, Fable.Core.TS.Es.Symbol> -> float
 
     /// <summary>
     /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -18702,7 +18727,8 @@ type Http2ServerRequestConstructor =
     /// </summary>
     /// <remarks>@since v15.2.0, v14.17.0</remarks>
     abstract getEventListeners:
-        emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget> * name: obj -> Fable.Core.TS.Es.Function[]
+        emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget> * name: U2<string, Fable.Core.TS.Es.Symbol> ->
+            Fable.Core.TS.Es.Function[]
 
     /// <summary>
     /// Returns the currently set max amount of listeners.
@@ -18792,14 +18818,14 @@ type Http2ServerRequestConstructor =
     /// regular <c>'error'</c> listener is installed.
     /// </summary>
     /// <remarks>@since v13.6.0, v12.17.0</remarks>
-    abstract errorMonitor: obj
+    abstract errorMonitor: Fable.Core.TS.Es.Symbol
     /// <summary>
     /// Value: <c>Symbol.for('nodejs.rejection')</c>
     /// <br /><br />
     /// See how to write a custom <c>rejection handler</c>.
     /// </summary>
     /// <remarks>@since v13.4.0, v12.16.0</remarks>
-    abstract captureRejectionSymbol: obj
+    abstract captureRejectionSymbol: Fable.Core.TS.Es.Symbol
     /// <summary>
     /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
     /// <br /><br />
@@ -19262,7 +19288,10 @@ type Http2ServerResponseConstructor =
     /// </summary>
     /// <remarks>@since v11.13.0, v10.16.0</remarks>
     abstract once:
-        emitter: NodeJS.EventEmitter<unit[]> * eventName: obj * ?options: StaticEventEmitterOptions -> JS.Promise<obj[]>
+        emitter: NodeJS.EventEmitter<unit[]> *
+        eventName: U2<string, Fable.Core.TS.Es.Symbol> *
+        ?options: StaticEventEmitterOptions ->
+            JS.Promise<obj[]>
 
     /// <summary>
     /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -19421,7 +19450,9 @@ type Http2ServerResponseConstructor =
     /// <remarks>@since v13.6.0, v12.16.0</remarks>
     /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
     abstract on:
-        emitter: NodeJS.EventEmitter<unit[]> * eventName: obj * ?options: StaticEventEmitterIteratorOptions ->
+        emitter: NodeJS.EventEmitter<unit[]> *
+        eventName: U2<string, Fable.Core.TS.Es.Symbol> *
+        ?options: StaticEventEmitterIteratorOptions ->
             NodeJS.AsyncIterator<obj[], obj, obj>
 
     /// <summary>
@@ -19522,7 +19553,8 @@ type Http2ServerResponseConstructor =
     /// <remarks>@deprecated Since v3.2.0 - Use <c>listenerCount</c> instead.</remarks>
     /// <param name="emitter">The emitter to query</param>
     /// <param name="eventName">The event name</param>
-    abstract listenerCount: emitter: NodeJS.EventEmitter<unit[]> * eventName: obj -> float
+    abstract listenerCount:
+        emitter: NodeJS.EventEmitter<unit[]> * eventName: U2<string, Fable.Core.TS.Es.Symbol> -> float
 
     /// <summary>
     /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -19551,7 +19583,8 @@ type Http2ServerResponseConstructor =
     /// </summary>
     /// <remarks>@since v15.2.0, v14.17.0</remarks>
     abstract getEventListeners:
-        emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget> * name: obj -> Fable.Core.TS.Es.Function[]
+        emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget> * name: U2<string, Fable.Core.TS.Es.Symbol> ->
+            Fable.Core.TS.Es.Function[]
 
     /// <summary>
     /// Returns the currently set max amount of listeners.
@@ -19641,14 +19674,14 @@ type Http2ServerResponseConstructor =
     /// regular <c>'error'</c> listener is installed.
     /// </summary>
     /// <remarks>@since v13.6.0, v12.17.0</remarks>
-    abstract errorMonitor: obj
+    abstract errorMonitor: Fable.Core.TS.Es.Symbol
     /// <summary>
     /// Value: <c>Symbol.for('nodejs.rejection')</c>
     /// <br /><br />
     /// See how to write a custom <c>rejection handler</c>.
     /// </summary>
     /// <remarks>@since v13.4.0, v12.16.0</remarks>
-    abstract captureRejectionSymbol: obj
+    abstract captureRejectionSymbol: Fable.Core.TS.Es.Symbol
     /// <summary>
     /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
     /// <br /><br />
@@ -20101,7 +20134,10 @@ type IncomingMessageConstructor =
     /// </summary>
     /// <remarks>@since v11.13.0, v10.16.0</remarks>
     abstract once:
-        emitter: NodeJS.EventEmitter<unit[]> * eventName: obj * ?options: StaticEventEmitterOptions -> JS.Promise<obj[]>
+        emitter: NodeJS.EventEmitter<unit[]> *
+        eventName: U2<string, Fable.Core.TS.Es.Symbol> *
+        ?options: StaticEventEmitterOptions ->
+            JS.Promise<obj[]>
 
     /// <summary>
     /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -20260,7 +20296,9 @@ type IncomingMessageConstructor =
     /// <remarks>@since v13.6.0, v12.16.0</remarks>
     /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
     abstract on:
-        emitter: NodeJS.EventEmitter<unit[]> * eventName: obj * ?options: StaticEventEmitterIteratorOptions ->
+        emitter: NodeJS.EventEmitter<unit[]> *
+        eventName: U2<string, Fable.Core.TS.Es.Symbol> *
+        ?options: StaticEventEmitterIteratorOptions ->
             NodeJS.AsyncIterator<obj[], obj, obj>
 
     /// <summary>
@@ -20361,7 +20399,8 @@ type IncomingMessageConstructor =
     /// <remarks>@deprecated Since v3.2.0 - Use <c>listenerCount</c> instead.</remarks>
     /// <param name="emitter">The emitter to query</param>
     /// <param name="eventName">The event name</param>
-    abstract listenerCount: emitter: NodeJS.EventEmitter<unit[]> * eventName: obj -> float
+    abstract listenerCount:
+        emitter: NodeJS.EventEmitter<unit[]> * eventName: U2<string, Fable.Core.TS.Es.Symbol> -> float
 
     /// <summary>
     /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -20390,7 +20429,8 @@ type IncomingMessageConstructor =
     /// </summary>
     /// <remarks>@since v15.2.0, v14.17.0</remarks>
     abstract getEventListeners:
-        emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget> * name: obj -> Fable.Core.TS.Es.Function[]
+        emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget> * name: U2<string, Fable.Core.TS.Es.Symbol> ->
+            Fable.Core.TS.Es.Function[]
 
     /// <summary>
     /// Returns the currently set max amount of listeners.
@@ -20480,14 +20520,14 @@ type IncomingMessageConstructor =
     /// regular <c>'error'</c> listener is installed.
     /// </summary>
     /// <remarks>@since v13.6.0, v12.17.0</remarks>
-    abstract errorMonitor: obj
+    abstract errorMonitor: Fable.Core.TS.Es.Symbol
     /// <summary>
     /// Value: <c>Symbol.for('nodejs.rejection')</c>
     /// <br /><br />
     /// See how to write a custom <c>rejection handler</c>.
     /// </summary>
     /// <remarks>@since v13.4.0, v12.16.0</remarks>
-    abstract captureRejectionSymbol: obj
+    abstract captureRejectionSymbol: Fable.Core.TS.Es.Symbol
     /// <summary>
     /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
     /// <br /><br />
@@ -20972,7 +21012,10 @@ type ServerResponseConstructor =
     /// </summary>
     /// <remarks>@since v11.13.0, v10.16.0</remarks>
     abstract once:
-        emitter: NodeJS.EventEmitter<unit[]> * eventName: obj * ?options: StaticEventEmitterOptions -> JS.Promise<obj[]>
+        emitter: NodeJS.EventEmitter<unit[]> *
+        eventName: U2<string, Fable.Core.TS.Es.Symbol> *
+        ?options: StaticEventEmitterOptions ->
+            JS.Promise<obj[]>
 
     /// <summary>
     /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -21131,7 +21174,9 @@ type ServerResponseConstructor =
     /// <remarks>@since v13.6.0, v12.16.0</remarks>
     /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
     abstract on:
-        emitter: NodeJS.EventEmitter<unit[]> * eventName: obj * ?options: StaticEventEmitterIteratorOptions ->
+        emitter: NodeJS.EventEmitter<unit[]> *
+        eventName: U2<string, Fable.Core.TS.Es.Symbol> *
+        ?options: StaticEventEmitterIteratorOptions ->
             NodeJS.AsyncIterator<obj[], obj, obj>
 
     /// <summary>
@@ -21232,7 +21277,8 @@ type ServerResponseConstructor =
     /// <remarks>@deprecated Since v3.2.0 - Use <c>listenerCount</c> instead.</remarks>
     /// <param name="emitter">The emitter to query</param>
     /// <param name="eventName">The event name</param>
-    abstract listenerCount: emitter: NodeJS.EventEmitter<unit[]> * eventName: obj -> float
+    abstract listenerCount:
+        emitter: NodeJS.EventEmitter<unit[]> * eventName: U2<string, Fable.Core.TS.Es.Symbol> -> float
 
     /// <summary>
     /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -21261,7 +21307,8 @@ type ServerResponseConstructor =
     /// </summary>
     /// <remarks>@since v15.2.0, v14.17.0</remarks>
     abstract getEventListeners:
-        emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget> * name: obj -> Fable.Core.TS.Es.Function[]
+        emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget> * name: U2<string, Fable.Core.TS.Es.Symbol> ->
+            Fable.Core.TS.Es.Function[]
 
     /// <summary>
     /// Returns the currently set max amount of listeners.
@@ -21351,14 +21398,14 @@ type ServerResponseConstructor =
     /// regular <c>'error'</c> listener is installed.
     /// </summary>
     /// <remarks>@since v13.6.0, v12.17.0</remarks>
-    abstract errorMonitor: obj
+    abstract errorMonitor: Fable.Core.TS.Es.Symbol
     /// <summary>
     /// Value: <c>Symbol.for('nodejs.rejection')</c>
     /// <br /><br />
     /// See how to write a custom <c>rejection handler</c>.
     /// </summary>
     /// <remarks>@since v13.4.0, v12.16.0</remarks>
-    abstract captureRejectionSymbol: obj
+    abstract captureRejectionSymbol: Fable.Core.TS.Es.Symbol
     /// <summary>
     /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
     /// <br /><br />
@@ -22304,7 +22351,10 @@ type InterfaceConstructor =
     /// </summary>
     /// <remarks>@since v11.13.0, v10.16.0</remarks>
     abstract once:
-        emitter: NodeJS.EventEmitter<unit[]> * eventName: obj * ?options: StaticEventEmitterOptions -> JS.Promise<obj[]>
+        emitter: NodeJS.EventEmitter<unit[]> *
+        eventName: U2<string, Fable.Core.TS.Es.Symbol> *
+        ?options: StaticEventEmitterOptions ->
+            JS.Promise<obj[]>
 
     /// <summary>
     /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -22463,7 +22513,9 @@ type InterfaceConstructor =
     /// <remarks>@since v13.6.0, v12.16.0</remarks>
     /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
     abstract on:
-        emitter: NodeJS.EventEmitter<unit[]> * eventName: obj * ?options: StaticEventEmitterIteratorOptions ->
+        emitter: NodeJS.EventEmitter<unit[]> *
+        eventName: U2<string, Fable.Core.TS.Es.Symbol> *
+        ?options: StaticEventEmitterIteratorOptions ->
             NodeJS.AsyncIterator<obj[], obj, obj>
 
     /// <summary>
@@ -22564,7 +22616,8 @@ type InterfaceConstructor =
     /// <remarks>@deprecated Since v3.2.0 - Use <c>listenerCount</c> instead.</remarks>
     /// <param name="emitter">The emitter to query</param>
     /// <param name="eventName">The event name</param>
-    abstract listenerCount: emitter: NodeJS.EventEmitter<unit[]> * eventName: obj -> float
+    abstract listenerCount:
+        emitter: NodeJS.EventEmitter<unit[]> * eventName: U2<string, Fable.Core.TS.Es.Symbol> -> float
 
     /// <summary>
     /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -22593,7 +22646,8 @@ type InterfaceConstructor =
     /// </summary>
     /// <remarks>@since v15.2.0, v14.17.0</remarks>
     abstract getEventListeners:
-        emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget> * name: obj -> Fable.Core.TS.Es.Function[]
+        emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget> * name: U2<string, Fable.Core.TS.Es.Symbol> ->
+            Fable.Core.TS.Es.Function[]
 
     /// <summary>
     /// Returns the currently set max amount of listeners.
@@ -22683,14 +22737,14 @@ type InterfaceConstructor =
     /// regular <c>'error'</c> listener is installed.
     /// </summary>
     /// <remarks>@since v13.6.0, v12.17.0</remarks>
-    abstract errorMonitor: obj
+    abstract errorMonitor: Fable.Core.TS.Es.Symbol
     /// <summary>
     /// Value: <c>Symbol.for('nodejs.rejection')</c>
     /// <br /><br />
     /// See how to write a custom <c>rejection handler</c>.
     /// </summary>
     /// <remarks>@since v13.4.0, v12.16.0</remarks>
-    abstract captureRejectionSymbol: obj
+    abstract captureRejectionSymbol: Fable.Core.TS.Es.Symbol
     /// <summary>
     /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
     /// <br /><br />
@@ -22901,7 +22955,8 @@ type _ReadableByteStreamController =
 
     abstract error: ?error: obj -> unit
 
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject;
+      Emit("(o => ({...o, \"byobRequest\": o[\"byobRequest\"] ?? null, \"desiredSize\": o[\"desiredSize\"] ?? null}))($0)")>]
     static member Create
         (
             close: (unit -> unit),
@@ -22976,7 +23031,7 @@ type _ReadableStreamBYOBRequest =
         view: Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> ->
             unit
 
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"view\": o[\"view\"] ?? null}))($0)")>]
     static member Create
         (
             respond: (float -> unit),
@@ -23188,7 +23243,8 @@ type QueuingStrategy<'T> =
 type ReadableByteStreamController =
     inherit _ReadableByteStreamController
 
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject;
+      Emit("(o => ({...o, \"byobRequest\": o[\"byobRequest\"] ?? null, \"desiredSize\": o[\"desiredSize\"] ?? null}))($0)")>]
     static member Create
         (
             close: (unit -> unit),
@@ -23246,7 +23302,7 @@ type ReadableStreamBYOBReader =
 type ReadableStreamBYOBRequest =
     inherit _ReadableStreamBYOBRequest
 
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"view\": o[\"view\"] ?? null}))($0)")>]
     static member Create
         (
             respond: (float -> unit),
@@ -23267,7 +23323,7 @@ type ReadableStreamBYOBRequest =
 type ReadableStreamDefaultController<'R> =
     inherit Stream.Web.ReadableStreamDefaultController<'R>
 
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"desiredSize\": o[\"desiredSize\"] ?? null}))($0)")>]
     static member Create
         (close: (unit -> unit), enqueue: ('R -> unit), error: (obj option -> unit), ?desiredSize: float)
         : ReadableStreamDefaultController<'R> =
@@ -23346,7 +23402,7 @@ type TransformStream<'I, 'O> =
 type TransformStreamDefaultController<'O> =
     inherit Stream.Web.TransformStreamDefaultController<'O>
 
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"desiredSize\": o[\"desiredSize\"] ?? null}))($0)")>]
     static member Create
         (enqueue: ('O -> unit), error: (obj option -> unit), terminate: (unit -> unit), ?desiredSize: float)
         : TransformStreamDefaultController<'O> =
@@ -23392,7 +23448,7 @@ type WritableStreamDefaultController =
 type WritableStreamDefaultWriter<'W> =
     inherit Stream.Web.WritableStreamDefaultWriter<'W>
 
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"desiredSize\": o[\"desiredSize\"] ?? null}))($0)")>]
     static member Create
         (
             closed: JS.Promise<unit>,
@@ -23775,7 +23831,7 @@ type SpecReporter =
     /// Alias for <c>emitter.removeListener()</c>.
     /// </summary>
     /// <remarks>@since v10.0.0</remarks>
-    abstract off: eventName: obj * listener: (obj[] -> unit) -> SpecReporter
+    abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> SpecReporter
     /// <summary>
     /// Removes all listeners, or those of the specified <c>eventName</c>.
     /// <br /><br />
@@ -23786,7 +23842,7 @@ type SpecReporter =
     /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
     /// </summary>
     /// <remarks>@since v0.1.26</remarks>
-    abstract removeAllListeners: ?eventName: obj -> SpecReporter
+    abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> SpecReporter
     /// <summary>
     /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
     /// added for a particular event. This is a useful default that helps finding
@@ -24157,7 +24213,7 @@ type SpecReporter =
     /// 10. resume
     /// 11. unpipe
     /// </summary>
-    abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> SpecReporter
+    abstract addListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> SpecReporter
 
     /// <summary>
     /// <code lang="ts">
@@ -24273,7 +24329,7 @@ type SpecReporter =
     /// //   a
     /// </code>
     /// </summary>
-    abstract on: ``event``: obj * listener: (obj[] -> unit) -> SpecReporter
+    abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> SpecReporter
 
     /// <summary>
     /// <code lang="ts">
@@ -24387,7 +24443,7 @@ type SpecReporter =
     /// //   a
     /// </code>
     /// </summary>
-    abstract once: ``event``: obj * listener: (obj[] -> unit) -> SpecReporter
+    abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> SpecReporter
 
     /// <summary>
     /// <code lang="ts">
@@ -24490,7 +24546,7 @@ type SpecReporter =
     /// <br /><br />
     /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
     /// </summary>
-    abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> SpecReporter
+    abstract prependListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> SpecReporter
 
     /// <summary>
     /// <code lang="ts">
@@ -24591,7 +24647,8 @@ type SpecReporter =
     /// <br /><br />
     /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
     /// </summary>
-    abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> SpecReporter
+    abstract prependOnceListener:
+        ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> SpecReporter
 
     /// <summary>
     /// <code lang="ts">
@@ -24759,7 +24816,7 @@ type SpecReporter =
     /// <br /><br />
     /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
     /// </summary>
-    abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> SpecReporter
+    abstract removeListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> SpecReporter
 
 type SpecReporterConstructor =
     /// <summary>
@@ -24839,7 +24896,10 @@ type SpecReporterConstructor =
     /// </summary>
     /// <remarks>@since v11.13.0, v10.16.0</remarks>
     abstract once:
-        emitter: NodeJS.EventEmitter<unit[]> * eventName: obj * ?options: StaticEventEmitterOptions -> JS.Promise<obj[]>
+        emitter: NodeJS.EventEmitter<unit[]> *
+        eventName: U2<string, Fable.Core.TS.Es.Symbol> *
+        ?options: StaticEventEmitterOptions ->
+            JS.Promise<obj[]>
 
     /// <summary>
     /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -24998,7 +25058,9 @@ type SpecReporterConstructor =
     /// <remarks>@since v13.6.0, v12.16.0</remarks>
     /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
     abstract on:
-        emitter: NodeJS.EventEmitter<unit[]> * eventName: obj * ?options: StaticEventEmitterIteratorOptions ->
+        emitter: NodeJS.EventEmitter<unit[]> *
+        eventName: U2<string, Fable.Core.TS.Es.Symbol> *
+        ?options: StaticEventEmitterIteratorOptions ->
             NodeJS.AsyncIterator<obj[], obj, obj>
 
     /// <summary>
@@ -25099,7 +25161,8 @@ type SpecReporterConstructor =
     /// <remarks>@deprecated Since v3.2.0 - Use <c>listenerCount</c> instead.</remarks>
     /// <param name="emitter">The emitter to query</param>
     /// <param name="eventName">The event name</param>
-    abstract listenerCount: emitter: NodeJS.EventEmitter<unit[]> * eventName: obj -> float
+    abstract listenerCount:
+        emitter: NodeJS.EventEmitter<unit[]> * eventName: U2<string, Fable.Core.TS.Es.Symbol> -> float
 
     /// <summary>
     /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -25128,7 +25191,8 @@ type SpecReporterConstructor =
     /// </summary>
     /// <remarks>@since v15.2.0, v14.17.0</remarks>
     abstract getEventListeners:
-        emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget> * name: obj -> Fable.Core.TS.Es.Function[]
+        emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget> * name: U2<string, Fable.Core.TS.Es.Symbol> ->
+            Fable.Core.TS.Es.Function[]
 
     /// <summary>
     /// Returns the currently set max amount of listeners.
@@ -25218,14 +25282,14 @@ type SpecReporterConstructor =
     /// regular <c>'error'</c> listener is installed.
     /// </summary>
     /// <remarks>@since v13.6.0, v12.17.0</remarks>
-    abstract errorMonitor: obj
+    abstract errorMonitor: Fable.Core.TS.Es.Symbol
     /// <summary>
     /// Value: <c>Symbol.for('nodejs.rejection')</c>
     /// <br /><br />
     /// See how to write a custom <c>rejection handler</c>.
     /// </summary>
     /// <remarks>@since v13.4.0, v12.16.0</remarks>
-    abstract captureRejectionSymbol: obj
+    abstract captureRejectionSymbol: Fable.Core.TS.Es.Symbol
     /// <summary>
     /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
     /// <br /><br />
@@ -25642,7 +25706,7 @@ type LcovReporter =
     /// Alias for <c>emitter.removeListener()</c>.
     /// </summary>
     /// <remarks>@since v10.0.0</remarks>
-    abstract off: eventName: obj * listener: (obj[] -> unit) -> LcovReporter
+    abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> LcovReporter
     /// <summary>
     /// Removes all listeners, or those of the specified <c>eventName</c>.
     /// <br /><br />
@@ -25653,7 +25717,7 @@ type LcovReporter =
     /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
     /// </summary>
     /// <remarks>@since v0.1.26</remarks>
-    abstract removeAllListeners: ?eventName: obj -> LcovReporter
+    abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> LcovReporter
     /// <summary>
     /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
     /// added for a particular event. This is a useful default that helps finding
@@ -26024,7 +26088,7 @@ type LcovReporter =
     /// 10. resume
     /// 11. unpipe
     /// </summary>
-    abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> LcovReporter
+    abstract addListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> LcovReporter
 
     /// <summary>
     /// <code lang="ts">
@@ -26140,7 +26204,7 @@ type LcovReporter =
     /// //   a
     /// </code>
     /// </summary>
-    abstract on: ``event``: obj * listener: (obj[] -> unit) -> LcovReporter
+    abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> LcovReporter
 
     /// <summary>
     /// <code lang="ts">
@@ -26254,7 +26318,7 @@ type LcovReporter =
     /// //   a
     /// </code>
     /// </summary>
-    abstract once: ``event``: obj * listener: (obj[] -> unit) -> LcovReporter
+    abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> LcovReporter
 
     /// <summary>
     /// <code lang="ts">
@@ -26357,7 +26421,7 @@ type LcovReporter =
     /// <br /><br />
     /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
     /// </summary>
-    abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> LcovReporter
+    abstract prependListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> LcovReporter
 
     /// <summary>
     /// <code lang="ts">
@@ -26458,7 +26522,8 @@ type LcovReporter =
     /// <br /><br />
     /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
     /// </summary>
-    abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> LcovReporter
+    abstract prependOnceListener:
+        ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> LcovReporter
 
     /// <summary>
     /// <code lang="ts">
@@ -26626,7 +26691,7 @@ type LcovReporter =
     /// <br /><br />
     /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
     /// </summary>
-    abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> LcovReporter
+    abstract removeListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> LcovReporter
 
 type SetImmediate =
     abstract __promisify__<'T> : ?value: 'T * ?options: Timers.TimerOptions -> JS.Promise<'T>
@@ -26910,7 +26975,7 @@ type Inspect =
     /// <summary>
     /// That can be used to declare custom inspect functions.
     /// </summary>
-    abstract custom: obj
+    abstract custom: Fable.Core.TS.Es.Symbol
 
     /// <summary>
     /// The <c>util.inspect()</c> method returns a string representation of <c>object</c> that is
@@ -27258,7 +27323,7 @@ type Promisify =
     /// <summary>
     /// That can be used to declare custom promisified variants of functions.
     /// </summary>
-    abstract custom: obj
+    abstract custom: Fable.Core.TS.Es.Symbol
 
     /// <summary>
     /// Takes a function following the common error-first callback style, i.e. taking
@@ -28449,7 +28514,7 @@ type AbortControllerConstructor =
 type AbortSignal =
     inherit AbortSignal2
 
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"onabort\": o[\"onabort\"] ?? null}))($0)")>]
     static member Create
         (
             aborted: bool,
@@ -28805,7 +28870,8 @@ module DOMExceptionConstructor =
 type CustomEvent<'T> =
     inherit CustomEvent2<'T>
 
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject;
+      Emit("(o => ({...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
     static member Create
         (
             detail: 'T,
@@ -28835,7 +28901,8 @@ type CustomEvent2<'T> =
     inherit Event2
     abstract detail: 'T
 
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject;
+      Emit("(o => ({...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
     static member Create
         (
             detail: 'T,
@@ -28886,7 +28953,8 @@ type EventInit =
 type Event =
     inherit Event2
 
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject;
+      Emit("(o => ({...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null}))($0)")>]
     static member Create
         (
             bubbles: bool,
@@ -29133,7 +29201,8 @@ type MessageEvent =
         ?ports: MessagePortConstructor[] ->
             unit
 
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject;
+      Emit("(o => ({...o, \"currentTarget\": o[\"currentTarget\"] ?? null, \"srcElement\": o[\"srcElement\"] ?? null, \"target\": o[\"target\"] ?? null, \"source\": o[\"source\"] ?? null}))($0)")>]
     static member Create
         (
             bubbles: bool,
@@ -29245,7 +29314,7 @@ type Request =
     abstract duplex: string
     abstract clone: (unit -> obj)
 
-    [<ParamObject; Emit("({ duplex: 'half', ...$0 })")>]
+    [<ParamObject; Emit("(o => ({duplex: 'half', ...o, \"body\": o[\"body\"] ?? null}))($0)")>]
     static member Create
         (
             bodyUsed: bool,
@@ -29414,7 +29483,7 @@ type Response =
     abstract redirected: bool
     abstract clone: (unit -> obj)
 
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"body\": o[\"body\"] ?? null}))($0)")>]
     static member Create
         (
             bodyUsed: bool,
@@ -36512,7 +36581,7 @@ module ChildProcess =
         /// // event with parameters 1, 2, 3, 4, 5 in third listener
         /// </code>
         /// </summary>
-        abstract emit: ``event``: obj * [<ParamArray>] args: obj[] -> bool
+        abstract emit: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * [<ParamArray>] args: obj[] -> bool
 
         /// <summary>
         /// <code lang="ts">
@@ -36918,12 +36987,14 @@ module ChildProcess =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeListener: eventName: obj * listener: (obj[] -> unit) -> ChildProcess
+        abstract removeListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ChildProcess
+
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> ChildProcess
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ChildProcess
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -36934,7 +37005,7 @@ module ChildProcess =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> ChildProcess
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> ChildProcess
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -36956,7 +37027,7 @@ module ChildProcess =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract listeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -36986,7 +37057,8 @@ module ChildProcess =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract rawListeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
+
         /// <summary>
         /// Returns the number of listeners listening for the event named <c>eventName</c>.
         /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -36995,7 +37067,28 @@ module ChildProcess =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
+        abstract listenerCount:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * ?listener: Fable.Core.TS.Es.Function -> float
+
+        /// <summary>
+        /// Returns an array listing the events for which the emitter has registered
+        /// listeners. The values in the array are strings or <c>Symbol</c>s.
+        /// <code lang="js">
+        /// import { EventEmitter } from 'node:events';
+        ///
+        /// const myEE = new EventEmitter();
+        /// myEE.on('foo', () =&gt; {});
+        /// myEE.on('bar', () =&gt; {});
+        ///
+        /// const sym = Symbol('symbol');
+        /// myEE.on(sym, () =&gt; {});
+        ///
+        /// console.log(myEE.eventNames());
+        /// // Prints: [ 'foo', 'bar', Symbol(symbol) ]
+        /// </code>
+        /// </summary>
+        /// <remarks>@since v6.0.0</remarks>
+        abstract eventNames: unit -> U2<string, Fable.Core.TS.Es.Symbol>[]
 
         /// <summary>
         /// Calls ChildProcess.kill with <c>'SIGTERM'</c>.
@@ -37082,8 +37175,11 @@ module ChildProcess =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("ChildProcess.once", "node:child_process")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -37248,8 +37344,11 @@ module ChildProcess =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("ChildProcess.on", "node:child_process")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -37353,7 +37452,10 @@ module ChildProcess =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("ChildProcess.listenerCount", "node:child_process")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -37383,7 +37485,7 @@ module ChildProcess =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("ChildProcess.getEventListeners", "node:child_process")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -37482,7 +37584,7 @@ module ChildProcess =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("ChildProcess.errorMonitor", "node:child_process")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -37491,7 +37593,7 @@ module ChildProcess =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("ChildProcess.captureRejectionSymbol", "node:child_process")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -38103,12 +38205,16 @@ module ChildProcess =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeListener: eventName: obj * listener: (obj[] -> unit) -> ChildProcessWithoutNullStreams
+        abstract removeListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ChildProcessWithoutNullStreams
+
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> ChildProcessWithoutNullStreams
+        abstract off:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ChildProcessWithoutNullStreams
+
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -38119,7 +38225,7 @@ module ChildProcess =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> ChildProcessWithoutNullStreams
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> ChildProcessWithoutNullStreams
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -38641,12 +38747,18 @@ module ChildProcess =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeListener: eventName: obj * listener: (obj[] -> unit) -> ChildProcessByStdio<'I, 'O, 'E>
+        abstract removeListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) ->
+                ChildProcessByStdio<'I, 'O, 'E>
+
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> ChildProcessByStdio<'I, 'O, 'E>
+        abstract off:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) ->
+                ChildProcessByStdio<'I, 'O, 'E>
+
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -38657,7 +38769,7 @@ module ChildProcess =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> ChildProcessByStdio<'I, 'O, 'E>
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> ChildProcessByStdio<'I, 'O, 'E>
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -38678,7 +38790,7 @@ module ChildProcess =
         /// Alias for <c>emitter.on(eventName, listener)</c>.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract addListener: eventName: obj * listener: (obj[] -> unit) -> Control
+        abstract addListener: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Control
         /// <summary>
         /// Adds the <c>listener</c> function to the end of the listeners array for the event
         /// named <c>eventName</c>. No checks are made to see if the <c>listener</c> has already
@@ -38708,7 +38820,7 @@ module ChildProcess =
         /// <remarks>@since v0.1.101</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract on: eventName: obj * listener: (obj[] -> unit) -> Control
+        abstract on: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Control
         /// <summary>
         /// Adds a <b>one-time</b> <c>listener</c> function for the event named <c>eventName</c>. The
         /// next time <c>eventName</c> is triggered, this listener is removed and then invoked.
@@ -38736,7 +38848,7 @@ module ChildProcess =
         /// <remarks>@since v0.3.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract once: eventName: obj * listener: (obj[] -> unit) -> Control
+        abstract once: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Control
         /// <summary>
         /// Removes the specified <c>listener</c> from the listener array for the event named <c>eventName</c>.
         /// <code lang="js">
@@ -38816,12 +38928,12 @@ module ChildProcess =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeListener: eventName: obj * listener: (obj[] -> unit) -> Control
+        abstract removeListener: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Control
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Control
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Control
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -38832,7 +38944,7 @@ module ChildProcess =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Control
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Control
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -38854,7 +38966,7 @@ module ChildProcess =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract listeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -38884,7 +38996,7 @@ module ChildProcess =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract rawListeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Synchronously calls each of the listeners registered for the event named <c>eventName</c>, in the order they were registered, passing the supplied arguments
         /// to each.
@@ -38924,7 +39036,8 @@ module ChildProcess =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract emit: eventName: obj * [<ParamArray>] args: obj[] -> bool
+        abstract emit: eventName: U2<string, Fable.Core.TS.Es.Symbol> * [<ParamArray>] args: obj[] -> bool
+
         /// <summary>
         /// Returns the number of listeners listening for the event named <c>eventName</c>.
         /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -38933,7 +39046,9 @@ module ChildProcess =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
+        abstract listenerCount:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * ?listener: Fable.Core.TS.Es.Function -> float
+
         /// <summary>
         /// Adds the <c>listener</c> function to the _beginning_ of the listeners array for the
         /// event named <c>eventName</c>. No checks are made to see if the <c>listener</c> has
@@ -38950,7 +39065,8 @@ module ChildProcess =
         /// <remarks>@since v6.0.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract prependListener: eventName: obj * listener: (obj[] -> unit) -> Control
+        abstract prependListener: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Control
+
         /// <summary>
         /// Adds a <b>one-time</b><c>listener</c> function for the event named <c>eventName</c> to the _beginning_ of the listeners array. The next time <c>eventName</c> is triggered, this
         /// listener is removed, and then invoked.
@@ -38965,28 +39081,49 @@ module ChildProcess =
         /// <remarks>@since v6.0.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract prependOnceListener: eventName: obj * listener: (obj[] -> unit) -> Control
+        abstract prependOnceListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Control
+
+        /// <summary>
+        /// Returns an array listing the events for which the emitter has registered
+        /// listeners. The values in the array are strings or <c>Symbol</c>s.
+        /// <code lang="js">
+        /// import { EventEmitter } from 'node:events';
+        ///
+        /// const myEE = new EventEmitter();
+        /// myEE.on('foo', () =&gt; {});
+        /// myEE.on('bar', () =&gt; {});
+        ///
+        /// const sym = Symbol('symbol');
+        /// myEE.on(sym, () =&gt; {});
+        ///
+        /// console.log(myEE.eventNames());
+        /// // Prints: [ 'foo', 'bar', Symbol(symbol) ]
+        /// </code>
+        /// </summary>
+        /// <remarks>@since v6.0.0</remarks>
+        abstract eventNames: unit -> U2<string, Fable.Core.TS.Es.Symbol>[]
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
                 ref: (unit -> unit),
                 unref: (unit -> unit),
-                addListener: Func<obj, (obj[] -> unit), Control>,
-                on: Func<obj, (obj[] -> unit), Control>,
-                once: Func<obj, (obj[] -> unit), Control>,
-                removeListener: Func<obj, (obj[] -> unit), Control>,
-                off: Func<obj, (obj[] -> unit), Control>,
-                removeAllListeners: (obj option -> Control),
+                addListener: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), Control>,
+                on: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), Control>,
+                once: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), Control>,
+                removeListener: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), Control>,
+                off: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), Control>,
+                removeAllListeners: (U2<string, Fable.Core.TS.Es.Symbol> option -> Control),
                 setMaxListeners: (float -> Control),
                 getMaxListeners: (unit -> float),
-                listeners: (obj -> Fable.Core.TS.Es.Function[]),
-                rawListeners: (obj -> Fable.Core.TS.Es.Function[]),
-                emit: Func<obj, obj[], bool>,
-                listenerCount: Func<obj, Fable.Core.TS.Es.Function option, float>,
-                prependListener: Func<obj, (obj[] -> unit), Control>,
-                prependOnceListener: Func<obj, (obj[] -> unit), Control>,
-                eventNames: (unit -> obj[])
+                listeners: (U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]),
+                rawListeners: (U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]),
+                emit: Func<U2<string, Fable.Core.TS.Es.Symbol>, obj[], bool>,
+                listenerCount: Func<U2<string, Fable.Core.TS.Es.Symbol>, Fable.Core.TS.Es.Function option, float>,
+                prependListener: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), Control>,
+                prependOnceListener: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), Control>,
+                eventNames: (unit -> U2<string, Fable.Core.TS.Es.Symbol>[])
             ) : Control =
             jsNative
 
@@ -39257,8 +39394,9 @@ module ChildProcess =
     [<Interface>]
     type ExecOptionsWithBufferEncoding =
         inherit ExecOptions
+        abstract encoding: string option with get, set
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"encoding\": o[\"encoding\"] ?? null}))($0)")>]
         static member Create
             (
                 ?encoding: string,
@@ -39389,8 +39527,9 @@ module ChildProcess =
     [<Interface>]
     type ExecFileOptionsWithBufferEncoding =
         inherit ExecFileOptions
+        abstract encoding: string option with get, set
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"encoding\": o[\"encoding\"] ?? null}))($0)")>]
         static member Create
             (
                 ?encoding: string,
@@ -39597,7 +39736,7 @@ module ChildProcess =
         abstract signal: NodeJS.Signals option with get, set
         abstract error: exn option with get, set
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"status\": o[\"status\"] ?? null, \"signal\": o[\"signal\"] ?? null}))($0)")>]
         static member Create
             (
                 pid: float,
@@ -43395,7 +43534,7 @@ module Cluster =
         /// // event with parameters 1, 2, 3, 4, 5 in third listener
         /// </code>
         /// </summary>
-        abstract emit: ``event``: obj * [<ParamArray>] args: obj[] -> bool
+        abstract emit: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * [<ParamArray>] args: obj[] -> bool
 
         /// <summary>
         /// <code lang="ts">
@@ -43798,12 +43937,12 @@ module Cluster =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeListener: eventName: obj * listener: (obj[] -> unit) -> Worker
+        abstract removeListener: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Worker
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Worker
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Worker
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -43814,7 +43953,7 @@ module Cluster =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Worker
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Worker
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -43836,7 +43975,7 @@ module Cluster =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract listeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -43866,7 +44005,8 @@ module Cluster =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract rawListeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
+
         /// <summary>
         /// Returns the number of listeners listening for the event named <c>eventName</c>.
         /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -43875,7 +44015,28 @@ module Cluster =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
+        abstract listenerCount:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * ?listener: Fable.Core.TS.Es.Function -> float
+
+        /// <summary>
+        /// Returns an array listing the events for which the emitter has registered
+        /// listeners. The values in the array are strings or <c>Symbol</c>s.
+        /// <code lang="js">
+        /// import { EventEmitter } from 'node:events';
+        ///
+        /// const myEE = new EventEmitter();
+        /// myEE.on('foo', () =&gt; {});
+        /// myEE.on('bar', () =&gt; {});
+        ///
+        /// const sym = Symbol('symbol');
+        /// myEE.on(sym, () =&gt; {});
+        ///
+        /// console.log(myEE.eventNames());
+        /// // Prints: [ 'foo', 'bar', Symbol(symbol) ]
+        /// </code>
+        /// </summary>
+        /// <remarks>@since v6.0.0</remarks>
+        abstract eventNames: unit -> U2<string, Fable.Core.TS.Es.Symbol>[]
 
         /// <summary>
         /// <code lang="js">
@@ -43957,8 +44118,11 @@ module Cluster =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("Worker.on", "node:cluster")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -44062,7 +44226,10 @@ module Cluster =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("Worker.listenerCount", "node:cluster")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -44092,7 +44259,7 @@ module Cluster =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Worker.getEventListeners", "node:cluster")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -44191,7 +44358,7 @@ module Cluster =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("Worker.errorMonitor", "node:cluster")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -44200,7 +44367,7 @@ module Cluster =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("Worker.captureRejectionSymbol", "node:cluster")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -44290,8 +44457,11 @@ module Cluster =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("Worker.once", "node:cluster")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -44679,7 +44849,7 @@ module Cluster =
         /// // event with parameters 1, 2, 3, 4, 5 in third listener
         /// </code>
         /// </summary>
-        abstract emit: ``event``: obj * [<ParamArray>] args: obj[] -> bool
+        abstract emit: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * [<ParamArray>] args: obj[] -> bool
 
         /// <summary>
         /// <code lang="ts">
@@ -45122,12 +45292,12 @@ module Cluster =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeListener: eventName: obj * listener: (obj[] -> unit) -> Cluster
+        abstract removeListener: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Cluster
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Cluster
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Cluster
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -45138,7 +45308,7 @@ module Cluster =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Cluster
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Cluster
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -45160,7 +45330,7 @@ module Cluster =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract listeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -45190,7 +45360,8 @@ module Cluster =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract rawListeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
+
         /// <summary>
         /// Returns the number of listeners listening for the event named <c>eventName</c>.
         /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -45199,7 +45370,28 @@ module Cluster =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
+        abstract listenerCount:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * ?listener: Fable.Core.TS.Es.Function -> float
+
+        /// <summary>
+        /// Returns an array listing the events for which the emitter has registered
+        /// listeners. The values in the array are strings or <c>Symbol</c>s.
+        /// <code lang="js">
+        /// import { EventEmitter } from 'node:events';
+        ///
+        /// const myEE = new EventEmitter();
+        /// myEE.on('foo', () =&gt; {});
+        /// myEE.on('bar', () =&gt; {});
+        ///
+        /// const sym = Symbol('symbol');
+        /// myEE.on(sym, () =&gt; {});
+        ///
+        /// console.log(myEE.eventNames());
+        /// // Prints: [ 'foo', 'bar', Symbol(symbol) ]
+        /// </code>
+        /// </summary>
+        /// <remarks>@since v6.0.0</remarks>
+        abstract eventNames: unit -> U2<string, Fable.Core.TS.Es.Symbol>[]
 
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
@@ -45940,7 +46132,7 @@ module Crypto =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Hash
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Hash
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -45951,7 +46143,7 @@ module Crypto =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Hash
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Hash
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -46283,7 +46475,7 @@ module Crypto =
         /// 10. resume
         /// 11. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> Hash
+        abstract addListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Hash
 
         /// <summary>
         /// <code lang="ts">
@@ -46399,7 +46591,7 @@ module Crypto =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> Hash
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Hash
 
         /// <summary>
         /// <code lang="ts">
@@ -46513,7 +46705,7 @@ module Crypto =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> Hash
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Hash
 
         /// <summary>
         /// <code lang="ts">
@@ -46616,7 +46808,7 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> Hash
+        abstract prependListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Hash
 
         /// <summary>
         /// <code lang="ts">
@@ -46717,7 +46909,7 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> Hash
+        abstract prependOnceListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Hash
 
         /// <summary>
         /// <code lang="ts">
@@ -46885,7 +47077,7 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> Hash
+        abstract removeListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Hash
 
         /// <summary>
         /// <code lang="js">
@@ -46952,7 +47144,7 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("Hash.errorMonitor", "node:crypto")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -46961,7 +47153,7 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("Hash.captureRejectionSymbol", "node:crypto")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -47051,8 +47243,11 @@ module Crypto =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("Hash.once", "node:crypto")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -47217,8 +47412,11 @@ module Crypto =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("Hash.on", "node:crypto")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -47322,7 +47520,10 @@ module Crypto =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("Hash.listenerCount", "node:crypto")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -47352,7 +47553,7 @@ module Crypto =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Hash.getEventListeners", "node:crypto")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -47958,7 +48159,7 @@ module Crypto =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Hmac
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Hmac
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -47969,7 +48170,7 @@ module Crypto =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Hmac
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Hmac
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -48345,7 +48546,7 @@ module Crypto =
         /// 10. resume
         /// 11. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> Hmac
+        abstract addListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Hmac
 
         /// <summary>
         /// <code lang="ts">
@@ -48461,7 +48662,7 @@ module Crypto =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> Hmac
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Hmac
 
         /// <summary>
         /// <code lang="ts">
@@ -48575,7 +48776,7 @@ module Crypto =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> Hmac
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Hmac
 
         /// <summary>
         /// <code lang="ts">
@@ -48678,7 +48879,7 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> Hmac
+        abstract prependListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Hmac
 
         /// <summary>
         /// <code lang="ts">
@@ -48779,7 +48980,7 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> Hmac
+        abstract prependOnceListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Hmac
 
         /// <summary>
         /// <code lang="ts">
@@ -48947,7 +49148,7 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> Hmac
+        abstract removeListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Hmac
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -49027,8 +49228,11 @@ module Crypto =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("Hmac.once", "node:crypto")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -49193,8 +49397,11 @@ module Crypto =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("Hmac.on", "node:crypto")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -49298,7 +49505,10 @@ module Crypto =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("Hmac.listenerCount", "node:crypto")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -49328,7 +49538,7 @@ module Crypto =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Hmac.getEventListeners", "node:crypto")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -49427,7 +49637,7 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("Hmac.errorMonitor", "node:crypto")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -49436,7 +49646,7 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("Hmac.captureRejectionSymbol", "node:crypto")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -50628,7 +50838,7 @@ module Crypto =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Cipher
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Cipher
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -50639,7 +50849,7 @@ module Crypto =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Cipher
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Cipher
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -51017,7 +51227,7 @@ module Crypto =
         /// 10. resume
         /// 11. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> Cipher
+        abstract addListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Cipher
 
         /// <summary>
         /// <code lang="ts">
@@ -51133,7 +51343,7 @@ module Crypto =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> Cipher
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Cipher
 
         /// <summary>
         /// <code lang="ts">
@@ -51247,7 +51457,7 @@ module Crypto =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> Cipher
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Cipher
 
         /// <summary>
         /// <code lang="ts">
@@ -51350,7 +51560,7 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> Cipher
+        abstract prependListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Cipher
 
         /// <summary>
         /// <code lang="ts">
@@ -51451,7 +51661,8 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> Cipher
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Cipher
 
         /// <summary>
         /// <code lang="ts">
@@ -51619,7 +51830,7 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> Cipher
+        abstract removeListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Cipher
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -51699,8 +51910,11 @@ module Crypto =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("Cipher.once", "node:crypto")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -51865,8 +52079,11 @@ module Crypto =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("Cipher.on", "node:crypto")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -51970,7 +52187,10 @@ module Crypto =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("Cipher.listenerCount", "node:crypto")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -52000,7 +52220,7 @@ module Crypto =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Cipher.getEventListeners", "node:crypto")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -52099,7 +52319,7 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("Cipher.errorMonitor", "node:crypto")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -52108,7 +52328,7 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("Cipher.captureRejectionSymbol", "node:crypto")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -52618,7 +52838,7 @@ module Crypto =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> CipherCCM
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> CipherCCM
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -52629,7 +52849,7 @@ module Crypto =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> CipherCCM
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> CipherCCM
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -53007,7 +53227,7 @@ module Crypto =
         /// 10. resume
         /// 11. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> CipherCCM
+        abstract addListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> CipherCCM
 
         /// <summary>
         /// <code lang="ts">
@@ -53123,7 +53343,7 @@ module Crypto =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> CipherCCM
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> CipherCCM
 
         /// <summary>
         /// <code lang="ts">
@@ -53237,7 +53457,7 @@ module Crypto =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> CipherCCM
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> CipherCCM
 
         /// <summary>
         /// <code lang="ts">
@@ -53340,7 +53560,8 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> CipherCCM
+        abstract prependListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> CipherCCM
 
         /// <summary>
         /// <code lang="ts">
@@ -53441,7 +53662,8 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> CipherCCM
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> CipherCCM
 
         /// <summary>
         /// <code lang="ts">
@@ -53609,7 +53831,7 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> CipherCCM
+        abstract removeListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> CipherCCM
 
     type CipherGCM =
         inherit Cipher
@@ -53653,7 +53875,7 @@ module Crypto =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> CipherGCM
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> CipherGCM
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -53664,7 +53886,7 @@ module Crypto =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> CipherGCM
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> CipherGCM
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -54042,7 +54264,7 @@ module Crypto =
         /// 10. resume
         /// 11. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> CipherGCM
+        abstract addListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> CipherGCM
 
         /// <summary>
         /// <code lang="ts">
@@ -54158,7 +54380,7 @@ module Crypto =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> CipherGCM
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> CipherGCM
 
         /// <summary>
         /// <code lang="ts">
@@ -54272,7 +54494,7 @@ module Crypto =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> CipherGCM
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> CipherGCM
 
         /// <summary>
         /// <code lang="ts">
@@ -54375,7 +54597,8 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> CipherGCM
+        abstract prependListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> CipherGCM
 
         /// <summary>
         /// <code lang="ts">
@@ -54476,7 +54699,8 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> CipherGCM
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> CipherGCM
 
         /// <summary>
         /// <code lang="ts">
@@ -54644,7 +54868,7 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> CipherGCM
+        abstract removeListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> CipherGCM
 
     type CipherOCB =
         inherit Cipher
@@ -54688,7 +54912,7 @@ module Crypto =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> CipherOCB
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> CipherOCB
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -54699,7 +54923,7 @@ module Crypto =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> CipherOCB
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> CipherOCB
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -55077,7 +55301,7 @@ module Crypto =
         /// 10. resume
         /// 11. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> CipherOCB
+        abstract addListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> CipherOCB
 
         /// <summary>
         /// <code lang="ts">
@@ -55193,7 +55417,7 @@ module Crypto =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> CipherOCB
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> CipherOCB
 
         /// <summary>
         /// <code lang="ts">
@@ -55307,7 +55531,7 @@ module Crypto =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> CipherOCB
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> CipherOCB
 
         /// <summary>
         /// <code lang="ts">
@@ -55410,7 +55634,8 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> CipherOCB
+        abstract prependListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> CipherOCB
 
         /// <summary>
         /// <code lang="ts">
@@ -55511,7 +55736,8 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> CipherOCB
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> CipherOCB
 
         /// <summary>
         /// <code lang="ts">
@@ -55679,7 +55905,7 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> CipherOCB
+        abstract removeListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> CipherOCB
 
     type CipherChaCha20Poly1305 =
         inherit Cipher
@@ -55719,11 +55945,14 @@ module Crypto =
         /// <remarks>@since v0.7.1</remarks>
         /// <returns>for method chaining.</returns>
         abstract setAutoPadding: ?autoPadding: bool -> CipherChaCha20Poly1305
+
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> CipherChaCha20Poly1305
+        abstract off:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> CipherChaCha20Poly1305
+
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -55734,7 +55963,7 @@ module Crypto =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> CipherChaCha20Poly1305
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> CipherChaCha20Poly1305
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -56112,7 +56341,8 @@ module Crypto =
         /// 10. resume
         /// 11. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> CipherChaCha20Poly1305
+        abstract addListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> CipherChaCha20Poly1305
 
         /// <summary>
         /// <code lang="ts">
@@ -56228,7 +56458,8 @@ module Crypto =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> CipherChaCha20Poly1305
+        abstract on:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> CipherChaCha20Poly1305
 
         /// <summary>
         /// <code lang="ts">
@@ -56342,7 +56573,8 @@ module Crypto =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> CipherChaCha20Poly1305
+        abstract once:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> CipherChaCha20Poly1305
 
         /// <summary>
         /// <code lang="ts">
@@ -56445,7 +56677,8 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> CipherChaCha20Poly1305
+        abstract prependListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> CipherChaCha20Poly1305
 
         /// <summary>
         /// <code lang="ts">
@@ -56546,7 +56779,8 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> CipherChaCha20Poly1305
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> CipherChaCha20Poly1305
 
         /// <summary>
         /// <code lang="ts">
@@ -56714,7 +56948,8 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> CipherChaCha20Poly1305
+        abstract removeListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> CipherChaCha20Poly1305
 
     /// <summary>
     /// Instances of the <c>Decipher</c> class are used to decrypt data. The class can be
@@ -57066,7 +57301,7 @@ module Crypto =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Decipher
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Decipher
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -57077,7 +57312,7 @@ module Crypto =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Decipher
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Decipher
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -57346,7 +57581,7 @@ module Crypto =
         /// 10. resume
         /// 11. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> Decipher
+        abstract addListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Decipher
 
         /// <summary>
         /// <code lang="ts">
@@ -57462,7 +57697,7 @@ module Crypto =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> Decipher
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Decipher
 
         /// <summary>
         /// <code lang="ts">
@@ -57576,7 +57811,7 @@ module Crypto =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> Decipher
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Decipher
 
         /// <summary>
         /// <code lang="ts">
@@ -57679,7 +57914,7 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> Decipher
+        abstract prependListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Decipher
 
         /// <summary>
         /// <code lang="ts">
@@ -57780,7 +58015,8 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> Decipher
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Decipher
 
         /// <summary>
         /// <code lang="ts">
@@ -57948,7 +58184,7 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> Decipher
+        abstract removeListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Decipher
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -58028,8 +58264,11 @@ module Crypto =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("Decipher.once", "node:crypto")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -58194,8 +58433,11 @@ module Crypto =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("Decipher.on", "node:crypto")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -58299,7 +58541,10 @@ module Crypto =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("Decipher.listenerCount", "node:crypto")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -58329,7 +58574,7 @@ module Crypto =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Decipher.getEventListeners", "node:crypto")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -58428,7 +58673,7 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("Decipher.errorMonitor", "node:crypto")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -58437,7 +58682,7 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("Decipher.captureRejectionSymbol", "node:crypto")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -58961,7 +59206,7 @@ module Crypto =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> DecipherCCM
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DecipherCCM
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -58972,7 +59217,7 @@ module Crypto =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> DecipherCCM
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> DecipherCCM
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -59350,7 +59595,7 @@ module Crypto =
         /// 10. resume
         /// 11. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> DecipherCCM
+        abstract addListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DecipherCCM
 
         /// <summary>
         /// <code lang="ts">
@@ -59466,7 +59711,7 @@ module Crypto =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> DecipherCCM
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DecipherCCM
 
         /// <summary>
         /// <code lang="ts">
@@ -59580,7 +59825,7 @@ module Crypto =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> DecipherCCM
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DecipherCCM
 
         /// <summary>
         /// <code lang="ts">
@@ -59683,7 +59928,8 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> DecipherCCM
+        abstract prependListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DecipherCCM
 
         /// <summary>
         /// <code lang="ts">
@@ -59784,7 +60030,8 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> DecipherCCM
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DecipherCCM
 
         /// <summary>
         /// <code lang="ts">
@@ -59952,7 +60199,8 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> DecipherCCM
+        abstract removeListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DecipherCCM
 
     type DecipherGCM =
         inherit Decipher
@@ -60010,7 +60258,7 @@ module Crypto =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> DecipherGCM
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DecipherGCM
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -60021,7 +60269,7 @@ module Crypto =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> DecipherGCM
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> DecipherGCM
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -60399,7 +60647,7 @@ module Crypto =
         /// 10. resume
         /// 11. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> DecipherGCM
+        abstract addListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DecipherGCM
 
         /// <summary>
         /// <code lang="ts">
@@ -60515,7 +60763,7 @@ module Crypto =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> DecipherGCM
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DecipherGCM
 
         /// <summary>
         /// <code lang="ts">
@@ -60629,7 +60877,7 @@ module Crypto =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> DecipherGCM
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DecipherGCM
 
         /// <summary>
         /// <code lang="ts">
@@ -60732,7 +60980,8 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> DecipherGCM
+        abstract prependListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DecipherGCM
 
         /// <summary>
         /// <code lang="ts">
@@ -60833,7 +61082,8 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> DecipherGCM
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DecipherGCM
 
         /// <summary>
         /// <code lang="ts">
@@ -61001,7 +61251,8 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> DecipherGCM
+        abstract removeListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DecipherGCM
 
     type DecipherOCB =
         inherit Decipher
@@ -61059,7 +61310,7 @@ module Crypto =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> DecipherOCB
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DecipherOCB
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -61070,7 +61321,7 @@ module Crypto =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> DecipherOCB
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> DecipherOCB
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -61448,7 +61699,7 @@ module Crypto =
         /// 10. resume
         /// 11. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> DecipherOCB
+        abstract addListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DecipherOCB
 
         /// <summary>
         /// <code lang="ts">
@@ -61564,7 +61815,7 @@ module Crypto =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> DecipherOCB
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DecipherOCB
 
         /// <summary>
         /// <code lang="ts">
@@ -61678,7 +61929,7 @@ module Crypto =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> DecipherOCB
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DecipherOCB
 
         /// <summary>
         /// <code lang="ts">
@@ -61781,7 +62032,8 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> DecipherOCB
+        abstract prependListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DecipherOCB
 
         /// <summary>
         /// <code lang="ts">
@@ -61882,7 +62134,8 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> DecipherOCB
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DecipherOCB
 
         /// <summary>
         /// <code lang="ts">
@@ -62050,7 +62303,8 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> DecipherOCB
+        abstract removeListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DecipherOCB
 
     type DecipherChaCha20Poly1305 =
         inherit Decipher
@@ -62104,11 +62358,14 @@ module Crypto =
         /// <remarks>@since v0.7.1</remarks>
         /// <returns>for method chaining.</returns>
         abstract setAutoPadding: ?auto_padding: bool -> DecipherChaCha20Poly1305
+
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> DecipherChaCha20Poly1305
+        abstract off:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DecipherChaCha20Poly1305
+
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -62119,7 +62376,7 @@ module Crypto =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> DecipherChaCha20Poly1305
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> DecipherChaCha20Poly1305
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -62497,7 +62754,8 @@ module Crypto =
         /// 10. resume
         /// 11. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> DecipherChaCha20Poly1305
+        abstract addListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DecipherChaCha20Poly1305
 
         /// <summary>
         /// <code lang="ts">
@@ -62613,7 +62871,8 @@ module Crypto =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> DecipherChaCha20Poly1305
+        abstract on:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DecipherChaCha20Poly1305
 
         /// <summary>
         /// <code lang="ts">
@@ -62727,7 +62986,8 @@ module Crypto =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> DecipherChaCha20Poly1305
+        abstract once:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DecipherChaCha20Poly1305
 
         /// <summary>
         /// <code lang="ts">
@@ -62830,7 +63090,8 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> DecipherChaCha20Poly1305
+        abstract prependListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DecipherChaCha20Poly1305
 
         /// <summary>
         /// <code lang="ts">
@@ -62931,7 +63192,8 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> DecipherChaCha20Poly1305
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DecipherChaCha20Poly1305
 
         /// <summary>
         /// <code lang="ts">
@@ -63099,7 +63361,8 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> DecipherChaCha20Poly1305
+        abstract removeListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DecipherChaCha20Poly1305
 
     [<Interface>]
     type PrivateKeyInput =
@@ -63393,7 +63656,7 @@ module Crypto =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Sign
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Sign
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -63404,7 +63667,7 @@ module Crypto =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Sign
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Sign
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -63621,7 +63884,7 @@ module Crypto =
         /// 5. pipe
         /// 6. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> Sign
+        abstract addListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Sign
 
         /// <summary>
         /// <code lang="ts">
@@ -63697,7 +63960,7 @@ module Crypto =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> Sign
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Sign
 
         /// <summary>
         /// <code lang="ts">
@@ -63771,7 +64034,7 @@ module Crypto =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> Sign
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Sign
 
         /// <summary>
         /// <code lang="ts">
@@ -63834,7 +64097,7 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> Sign
+        abstract prependListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Sign
 
         /// <summary>
         /// <code lang="ts">
@@ -63895,7 +64158,7 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> Sign
+        abstract prependOnceListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Sign
 
         /// <summary>
         /// <code lang="ts">
@@ -64023,7 +64286,7 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> Sign
+        abstract removeListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Sign
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -64103,8 +64366,11 @@ module Crypto =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("Sign.once", "node:crypto")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -64269,8 +64535,11 @@ module Crypto =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("Sign.on", "node:crypto")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -64374,7 +64643,10 @@ module Crypto =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("Sign.listenerCount", "node:crypto")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -64404,7 +64676,7 @@ module Crypto =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Sign.getEventListeners", "node:crypto")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -64503,7 +64775,7 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("Sign.errorMonitor", "node:crypto")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -64512,7 +64784,7 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("Sign.captureRejectionSymbol", "node:crypto")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -65066,7 +65338,7 @@ module Crypto =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Verify
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Verify
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -65077,7 +65349,7 @@ module Crypto =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Verify
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Verify
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -65296,7 +65568,7 @@ module Crypto =
         /// 5. pipe
         /// 6. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> Verify
+        abstract addListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Verify
 
         /// <summary>
         /// <code lang="ts">
@@ -65372,7 +65644,7 @@ module Crypto =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> Verify
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Verify
 
         /// <summary>
         /// <code lang="ts">
@@ -65446,7 +65718,7 @@ module Crypto =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> Verify
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Verify
 
         /// <summary>
         /// <code lang="ts">
@@ -65509,7 +65781,7 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> Verify
+        abstract prependListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Verify
 
         /// <summary>
         /// <code lang="ts">
@@ -65570,7 +65842,8 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> Verify
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Verify
 
         /// <summary>
         /// <code lang="ts">
@@ -65698,7 +65971,7 @@ module Crypto =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> Verify
+        abstract removeListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Verify
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -65778,8 +66051,11 @@ module Crypto =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("Verify.once", "node:crypto")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -65944,8 +66220,11 @@ module Crypto =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("Verify.on", "node:crypto")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -66049,7 +66328,10 @@ module Crypto =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("Verify.listenerCount", "node:crypto")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -66079,7 +66361,7 @@ module Crypto =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Verify.getEventListeners", "node:crypto")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -66178,7 +66460,7 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("Verify.errorMonitor", "node:crypto")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -66187,7 +66469,7 @@ module Crypto =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("Verify.captureRejectionSymbol", "node:crypto")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -68391,153 +68673,6 @@ module Crypto =
             jsNative
 
         /// <summary>
-        /// The <c>Hash</c> class is a utility for creating hash digests of data. It can be
-        /// used in one of two ways:
-        /// <br /><br />
-        /// * As a <c>stream</c> that is both readable and writable, where data is written
-        /// to produce a computed hash digest on the readable side, or
-        /// * Using the <c>hash.update()</c> and <c>hash.digest()</c> methods to produce the
-        /// computed hash.
-        /// <br /><br />
-        /// The createHash method is used to create <c>Hash</c> instances. <c>Hash</c>objects are not to be created directly using the <c>new</c> keyword.
-        /// <br /><br />
-        /// Example: Using <c>Hash</c> objects as streams:
-        /// <code lang="js">
-        /// const {
-        ///   createHash,
-        /// } = await import('node:crypto');
-        ///
-        /// const hash = createHash('sha256');
-        ///
-        /// hash.on('readable', () =&gt; {
-        ///   // Only one element is going to be produced by the
-        ///   // hash stream.
-        ///   const data = hash.read();
-        ///   if (data) {
-        ///     console.log(data.toString('hex'));
-        ///     // Prints:
-        ///     //   6a2da20943931e9834fc12cfe5bb47bbd9ae43489a30726962b576f4e3993e50
-        ///   }
-        /// });
-        ///
-        /// hash.write('some data to hash');
-        /// hash.end();
-        /// </code>
-        /// <br /><br />
-        /// Example: Using <c>Hash</c> and piped streams:
-        /// <code lang="js">
-        /// import { createReadStream } from 'node:fs';
-        /// import { stdout } from 'node:process';
-        /// const { createHash } = await import('node:crypto');
-        ///
-        /// const hash = createHash('sha256');
-        ///
-        /// const input = createReadStream('test.js');
-        /// input.pipe(hash).setEncoding('hex').pipe(stdout);
-        /// </code>
-        /// <br /><br />
-        /// Example: Using the <c>hash.update()</c> and <c>hash.digest()</c> methods:
-        /// <code lang="js">
-        /// const {
-        ///   createHash,
-        /// } = await import('node:crypto');
-        ///
-        /// const hash = createHash('sha256');
-        ///
-        /// hash.update('some data to hash');
-        /// console.log(hash.digest('hex'));
-        /// // Prints:
-        /// //   6a2da20943931e9834fc12cfe5bb47bbd9ae43489a30726962b576f4e3993e50
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v0.1.92</remarks>
-        [<Import("Hash", "node:crypto"); EmitConstructor>]
-        static member Hash() : Hash = jsNative
-
-        /// <summary>
-        /// The <c>Hmac</c> class is a utility for creating cryptographic HMAC digests. It can
-        /// be used in one of two ways:
-        /// <br /><br />
-        /// * As a <c>stream</c> that is both readable and writable, where data is written
-        /// to produce a computed HMAC digest on the readable side, or
-        /// * Using the <c>hmac.update()</c> and <c>hmac.digest()</c> methods to produce the
-        /// computed HMAC digest.
-        /// <br /><br />
-        /// The createHmac method is used to create <c>Hmac</c> instances. <c>Hmac</c>objects are not to be created directly using the <c>new</c> keyword.
-        /// <br /><br />
-        /// Example: Using <c>Hmac</c> objects as streams:
-        /// <code lang="js">
-        /// const {
-        ///   createHmac,
-        /// } = await import('node:crypto');
-        ///
-        /// const hmac = createHmac('sha256', 'a secret');
-        ///
-        /// hmac.on('readable', () =&gt; {
-        ///   // Only one element is going to be produced by the
-        ///   // hash stream.
-        ///   const data = hmac.read();
-        ///   if (data) {
-        ///     console.log(data.toString('hex'));
-        ///     // Prints:
-        ///     //   7fd04df92f636fd450bc841c9418e5825c17f33ad9c87c518115a45971f7f77e
-        ///   }
-        /// });
-        ///
-        /// hmac.write('some data to hash');
-        /// hmac.end();
-        /// </code>
-        /// <br /><br />
-        /// Example: Using <c>Hmac</c> and piped streams:
-        /// <code lang="js">
-        /// import { createReadStream } from 'node:fs';
-        /// import { stdout } from 'node:process';
-        /// const {
-        ///   createHmac,
-        /// } = await import('node:crypto');
-        ///
-        /// const hmac = createHmac('sha256', 'a secret');
-        ///
-        /// const input = createReadStream('test.js');
-        /// input.pipe(hmac).pipe(stdout);
-        /// </code>
-        /// <br /><br />
-        /// Example: Using the <c>hmac.update()</c> and <c>hmac.digest()</c> methods:
-        /// <code lang="js">
-        /// const {
-        ///   createHmac,
-        /// } = await import('node:crypto');
-        ///
-        /// const hmac = createHmac('sha256', 'a secret');
-        ///
-        /// hmac.update('some data to hash');
-        /// console.log(hmac.digest('hex'));
-        /// // Prints:
-        /// //   7fd04df92f636fd450bc841c9418e5825c17f33ad9c87c518115a45971f7f77e
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v0.1.94</remarks>
-        /// <remarks>@deprecated Since v20.13.0 Calling <c>Hmac</c> class directly with <c>Hmac()</c> or <c>new Hmac()</c> is deprecated due to being internals, not intended for public use. Please use the {@link createHmac} method to create Hmac instances.</remarks>
-        [<Import("Hmac", "node:crypto"); EmitConstructor>]
-        static member Hmac() : Hmac = jsNative
-
-        /// <summary>
-        /// Node.js uses a <c>KeyObject</c> class to represent a symmetric or asymmetric key,
-        /// and each kind of key exposes different functions. The createSecretKey, createPublicKey and createPrivateKey methods are used to create <c>KeyObject</c>instances. <c>KeyObject</c>
-        /// objects are not to be created directly using the <c>new</c>keyword.
-        /// <br /><br />
-        /// Most applications should consider using the new <c>KeyObject</c> API instead of
-        /// passing keys as strings or <c>Buffer</c>s due to improved security features.
-        /// <br /><br />
-        /// <c>KeyObject</c> instances can be passed to other threads via <c>postMessage()</c>.
-        /// The receiver obtains a cloned <c>KeyObject</c>, and the <c>KeyObject</c> does not need to
-        /// be listed in the <c>transferList</c> argument.
-        /// </summary>
-        /// <remarks>@since v11.6.0</remarks>
-        [<Import("KeyObject", "node:crypto"); EmitConstructor>]
-        static member KeyObject() : KeyObject = jsNative
-
-        /// <summary>
         /// Creates and returns a <c>Cipher</c> object, with the given <c>algorithm</c>, <c>key</c> and
         /// initialization vector (<c>iv</c>).
         /// <br /><br />
@@ -68718,125 +68853,6 @@ module Crypto =
             jsNative
 
         /// <summary>
-        /// Instances of the <c>Cipher</c> class are used to encrypt data. The class can be
-        /// used in one of two ways:
-        /// <br /><br />
-        /// * As a <c>stream</c> that is both readable and writable, where plain unencrypted
-        /// data is written to produce encrypted data on the readable side, or
-        /// * Using the <c>cipher.update()</c> and <c>cipher.final()</c> methods to produce
-        /// the encrypted data.
-        /// <br /><br />
-        /// The createCipheriv method is
-        /// used to create <c>Cipher</c> instances. <c>Cipher</c> objects are not to be created
-        /// directly using the <c>new</c> keyword.
-        /// <br /><br />
-        /// Example: Using <c>Cipher</c> objects as streams:
-        /// <code lang="js">
-        /// const {
-        ///   scrypt,
-        ///   randomFill,
-        ///   createCipheriv,
-        /// } = await import('node:crypto');
-        ///
-        /// const algorithm = 'aes-192-cbc';
-        /// const password = 'Password used to generate key';
-        ///
-        /// // First, we'll generate the key. The key length is dependent on the algorithm.
-        /// // In this case for aes192, it is 24 bytes (192 bits).
-        /// scrypt(password, 'salt', 24, (err, key) =&gt; {
-        ///   if (err) throw err;
-        ///   // Then, we'll generate a random initialization vector
-        ///   randomFill(new Uint8Array(16), (err, iv) =&gt; {
-        ///     if (err) throw err;
-        ///
-        ///     // Once we have the key and iv, we can create and use the cipher...
-        ///     const cipher = createCipheriv(algorithm, key, iv);
-        ///
-        ///     let encrypted = '';
-        ///     cipher.setEncoding('hex');
-        ///
-        ///     cipher.on('data', (chunk) =&gt; encrypted += chunk);
-        ///     cipher.on('end', () =&gt; console.log(encrypted));
-        ///
-        ///     cipher.write('some clear text data');
-        ///     cipher.end();
-        ///   });
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// Example: Using <c>Cipher</c> and piped streams:
-        /// <code lang="js">
-        /// import {
-        ///   createReadStream,
-        ///   createWriteStream,
-        /// } from 'node:fs';
-        ///
-        /// import {
-        ///   pipeline,
-        /// } from 'node:stream';
-        ///
-        /// const {
-        ///   scrypt,
-        ///   randomFill,
-        ///   createCipheriv,
-        /// } = await import('node:crypto');
-        ///
-        /// const algorithm = 'aes-192-cbc';
-        /// const password = 'Password used to generate key';
-        ///
-        /// // First, we'll generate the key. The key length is dependent on the algorithm.
-        /// // In this case for aes192, it is 24 bytes (192 bits).
-        /// scrypt(password, 'salt', 24, (err, key) =&gt; {
-        ///   if (err) throw err;
-        ///   // Then, we'll generate a random initialization vector
-        ///   randomFill(new Uint8Array(16), (err, iv) =&gt; {
-        ///     if (err) throw err;
-        ///
-        ///     const cipher = createCipheriv(algorithm, key, iv);
-        ///
-        ///     const input = createReadStream('test.js');
-        ///     const output = createWriteStream('test.enc');
-        ///
-        ///     pipeline(input, cipher, output, (err) =&gt; {
-        ///       if (err) throw err;
-        ///     });
-        ///   });
-        /// });
-        /// </code>
-        /// <br /><br />
-        /// Example: Using the <c>cipher.update()</c> and <c>cipher.final()</c> methods:
-        /// <code lang="js">
-        /// const {
-        ///   scrypt,
-        ///   randomFill,
-        ///   createCipheriv,
-        /// } = await import('node:crypto');
-        ///
-        /// const algorithm = 'aes-192-cbc';
-        /// const password = 'Password used to generate key';
-        ///
-        /// // First, we'll generate the key. The key length is dependent on the algorithm.
-        /// // In this case for aes192, it is 24 bytes (192 bits).
-        /// scrypt(password, 'salt', 24, (err, key) =&gt; {
-        ///   if (err) throw err;
-        ///   // Then, we'll generate a random initialization vector
-        ///   randomFill(new Uint8Array(16), (err, iv) =&gt; {
-        ///     if (err) throw err;
-        ///
-        ///     const cipher = createCipheriv(algorithm, key, iv);
-        ///
-        ///     let encrypted = cipher.update('some clear text data', 'utf8', 'hex');
-        ///     encrypted += cipher.final('hex');
-        ///     console.log(encrypted);
-        ///   });
-        /// });
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v0.1.94</remarks>
-        [<Import("Cipher", "node:crypto"); EmitConstructor>]
-        static member Cipher() : Cipher = jsNative
-
-        /// <summary>
         /// Creates and returns a <c>Decipher</c> object that uses the given <c>algorithm</c>, <c>key</c> and initialization vector (<c>iv</c>).
         /// <br /><br />
         /// The <c>options</c> argument controls stream behavior and is optional except when a
@@ -69012,114 +69028,6 @@ module Crypto =
             jsNative
 
         /// <summary>
-        /// Instances of the <c>Decipher</c> class are used to decrypt data. The class can be
-        /// used in one of two ways:
-        /// <br /><br />
-        /// * As a <c>stream</c> that is both readable and writable, where plain encrypted
-        /// data is written to produce unencrypted data on the readable side, or
-        /// * Using the <c>decipher.update()</c> and <c>decipher.final()</c> methods to
-        /// produce the unencrypted data.
-        /// <br /><br />
-        /// The createDecipheriv method is
-        /// used to create <c>Decipher</c> instances. <c>Decipher</c> objects are not to be created
-        /// directly using the <c>new</c> keyword.
-        /// <br /><br />
-        /// Example: Using <c>Decipher</c> objects as streams:
-        /// <code lang="js">
-        /// import { Buffer } from 'node:buffer';
-        /// const {
-        ///   scryptSync,
-        ///   createDecipheriv,
-        /// } = await import('node:crypto');
-        ///
-        /// const algorithm = 'aes-192-cbc';
-        /// const password = 'Password used to generate key';
-        /// // Key length is dependent on the algorithm. In this case for aes192, it is
-        /// // 24 bytes (192 bits).
-        /// // Use the async `crypto.scrypt()` instead.
-        /// const key = scryptSync(password, 'salt', 24);
-        /// // The IV is usually passed along with the ciphertext.
-        /// const iv = Buffer.alloc(16, 0); // Initialization vector.
-        ///
-        /// const decipher = createDecipheriv(algorithm, key, iv);
-        ///
-        /// let decrypted = '';
-        /// decipher.on('readable', () =&gt; {
-        ///   let chunk;
-        ///   while (null !== (chunk = decipher.read())) {
-        ///     decrypted += chunk.toString('utf8');
-        ///   }
-        /// });
-        /// decipher.on('end', () =&gt; {
-        ///   console.log(decrypted);
-        ///   // Prints: some clear text data
-        /// });
-        ///
-        /// // Encrypted with same algorithm, key and iv.
-        /// const encrypted =
-        ///   'e5f79c5915c02171eec6b212d5520d44480993d7d622a7c4c2da32f6efda0ffa';
-        /// decipher.write(encrypted, 'hex');
-        /// decipher.end();
-        /// </code>
-        /// <br /><br />
-        /// Example: Using <c>Decipher</c> and piped streams:
-        /// <code lang="js">
-        /// import {
-        ///   createReadStream,
-        ///   createWriteStream,
-        /// } from 'node:fs';
-        /// import { Buffer } from 'node:buffer';
-        /// const {
-        ///   scryptSync,
-        ///   createDecipheriv,
-        /// } = await import('node:crypto');
-        ///
-        /// const algorithm = 'aes-192-cbc';
-        /// const password = 'Password used to generate key';
-        /// // Use the async `crypto.scrypt()` instead.
-        /// const key = scryptSync(password, 'salt', 24);
-        /// // The IV is usually passed along with the ciphertext.
-        /// const iv = Buffer.alloc(16, 0); // Initialization vector.
-        ///
-        /// const decipher = createDecipheriv(algorithm, key, iv);
-        ///
-        /// const input = createReadStream('test.enc');
-        /// const output = createWriteStream('test.js');
-        ///
-        /// input.pipe(decipher).pipe(output);
-        /// </code>
-        /// <br /><br />
-        /// Example: Using the <c>decipher.update()</c> and <c>decipher.final()</c> methods:
-        /// <code lang="js">
-        /// import { Buffer } from 'node:buffer';
-        /// const {
-        ///   scryptSync,
-        ///   createDecipheriv,
-        /// } = await import('node:crypto');
-        ///
-        /// const algorithm = 'aes-192-cbc';
-        /// const password = 'Password used to generate key';
-        /// // Use the async `crypto.scrypt()` instead.
-        /// const key = scryptSync(password, 'salt', 24);
-        /// // The IV is usually passed along with the ciphertext.
-        /// const iv = Buffer.alloc(16, 0); // Initialization vector.
-        ///
-        /// const decipher = createDecipheriv(algorithm, key, iv);
-        ///
-        /// // Encrypted using same algorithm, key and iv.
-        /// const encrypted =
-        ///   'e5f79c5915c02171eec6b212d5520d44480993d7d622a7c4c2da32f6efda0ffa';
-        /// let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-        /// decrypted += decipher.final('utf8');
-        /// console.log(decrypted);
-        /// // Prints: some clear text data
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v0.1.94</remarks>
-        [<Import("Decipher", "node:crypto"); EmitConstructor>]
-        static member Decipher() : Decipher = jsNative
-
-        /// <summary>
         /// Asynchronously generates a new random secret key of the given <c>length</c>. The <c>type</c> will determine which validations will be performed on the <c>length</c>.
         /// <code lang="js">
         /// const {
@@ -69266,70 +69174,6 @@ module Crypto =
         static member createSign(algorithm: string, ?options: Stream.WritableOptions<Stream.Writable>) : Sign = jsNative
 
         /// <summary>
-        /// The <c>Sign</c> class is a utility for generating signatures. It can be used in one
-        /// of two ways:
-        /// <br /><br />
-        /// * As a writable <c>stream</c>, where data to be signed is written and the <c>sign.sign()</c> method is used to generate and return the signature, or
-        /// * Using the <c>sign.update()</c> and <c>sign.sign()</c> methods to produce the
-        /// signature.
-        /// <br /><br />
-        /// The createSign method is used to create <c>Sign</c> instances. The
-        /// argument is the string name of the hash function to use. <c>Sign</c> objects are not
-        /// to be created directly using the <c>new</c> keyword.
-        /// <br /><br />
-        /// Example: Using <c>Sign</c> and <c>Verify</c> objects as streams:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPairSync,
-        ///   createSign,
-        ///   createVerify,
-        /// } = await import('node:crypto');
-        ///
-        /// const { privateKey, publicKey } = generateKeyPairSync('ec', {
-        ///   namedCurve: 'sect239k1',
-        /// });
-        ///
-        /// const sign = createSign('SHA256');
-        /// sign.write('some data to sign');
-        /// sign.end();
-        /// const signature = sign.sign(privateKey, 'hex');
-        ///
-        /// const verify = createVerify('SHA256');
-        /// verify.write('some data to sign');
-        /// verify.end();
-        /// console.log(verify.verify(publicKey, signature, 'hex'));
-        /// // Prints: true
-        /// </code>
-        /// <br /><br />
-        /// Example: Using the <c>sign.update()</c> and <c>verify.update()</c> methods:
-        /// <code lang="js">
-        /// const {
-        ///   generateKeyPairSync,
-        ///   createSign,
-        ///   createVerify,
-        /// } = await import('node:crypto');
-        ///
-        /// const { privateKey, publicKey } = generateKeyPairSync('rsa', {
-        ///   modulusLength: 2048,
-        /// });
-        ///
-        /// const sign = createSign('SHA256');
-        /// sign.update('some data to sign');
-        /// sign.end();
-        /// const signature = sign.sign(privateKey);
-        ///
-        /// const verify = createVerify('SHA256');
-        /// verify.update('some data to sign');
-        /// verify.end();
-        /// console.log(verify.verify(publicKey, signature));
-        /// // Prints: true
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v0.1.92</remarks>
-        [<Import("Sign", "node:crypto"); EmitConstructor>]
-        static member Sign() : Sign = jsNative
-
-        /// <summary>
         /// Creates and returns a <c>Verify</c> object that uses the given algorithm.
         /// Use getHashes to obtain an array of names of the available
         /// signing algorithms. Optional <c>options</c> argument controls the <c>stream.Writable</c> behavior.
@@ -69345,23 +69189,6 @@ module Crypto =
         [<Import("createVerify", "node:crypto")>]
         static member createVerify(algorithm: string, ?options: Stream.WritableOptions<Stream.Writable>) : Verify =
             jsNative
-
-        /// <summary>
-        /// The <c>Verify</c> class is a utility for verifying signatures. It can be used in one
-        /// of two ways:
-        /// <br /><br />
-        /// * As a writable <c>stream</c> where written data is used to validate against the
-        /// supplied signature, or
-        /// * Using the <c>verify.update()</c> and <c>verify.verify()</c> methods to verify
-        /// the signature.
-        /// <br /><br />
-        /// The createVerify method is used to create <c>Verify</c> instances. <c>Verify</c> objects are not to be created directly using the <c>new</c> keyword.
-        /// <br /><br />
-        /// See <c>Sign</c> for examples.
-        /// </summary>
-        /// <remarks>@since v0.1.92</remarks>
-        [<Import("Verify", "node:crypto"); EmitConstructor>]
-        static member Verify() : Verify = jsNative
 
         /// <summary>
         /// Creates a <c>DiffieHellman</c> key exchange object using the supplied <c>prime</c> and an
@@ -69538,38 +69365,6 @@ module Crypto =
                 generatorEncoding: BinaryToTextEncoding
             ) : DiffieHellman =
             jsNative
-
-        /// <summary>
-        /// The <c>DiffieHellman</c> class is a utility for creating Diffie-Hellman key
-        /// exchanges.
-        /// <br /><br />
-        /// Instances of the <c>DiffieHellman</c> class can be created using the createDiffieHellman function.
-        /// <code lang="js">
-        /// import assert from 'node:assert';
-        ///
-        /// const {
-        ///   createDiffieHellman,
-        /// } = await import('node:crypto');
-        ///
-        /// // Generate Alice's keys...
-        /// const alice = createDiffieHellman(2048);
-        /// const aliceKey = alice.generateKeys();
-        ///
-        /// // Generate Bob's keys...
-        /// const bob = createDiffieHellman(alice.getPrime(), alice.getGenerator());
-        /// const bobKey = bob.generateKeys();
-        ///
-        /// // Exchange and generate the secret...
-        /// const aliceSecret = alice.computeSecret(bobKey);
-        /// const bobSecret = bob.computeSecret(aliceKey);
-        ///
-        /// // OK
-        /// assert.strictEqual(aliceSecret.toString('hex'), bobSecret.toString('hex'));
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v0.5.0</remarks>
-        [<Import("DiffieHellman", "node:crypto"); EmitConstructor>]
-        static member DiffieHellman() : DiffieHellman = jsNative
 
         /// <summary>
         /// The <c>DiffieHellmanGroup</c> class takes a well-known modp group as its argument.
@@ -70546,38 +70341,6 @@ module Crypto =
         /// <returns>An array of the names of the supported hash algorithms, such as <c>'RSA-SHA256'</c>. Hash algorithms are also called "digest" algorithms.</returns>
         [<Import("getHashes", "node:crypto")>]
         static member getHashes() : string[] = jsNative
-
-        /// <summary>
-        /// The <c>ECDH</c> class is a utility for creating Elliptic Curve Diffie-Hellman (ECDH)
-        /// key exchanges.
-        /// <br /><br />
-        /// Instances of the <c>ECDH</c> class can be created using the createECDH function.
-        /// <code lang="js">
-        /// import assert from 'node:assert';
-        ///
-        /// const {
-        ///   createECDH,
-        /// } = await import('node:crypto');
-        ///
-        /// // Generate Alice's keys...
-        /// const alice = createECDH('secp521r1');
-        /// const aliceKey = alice.generateKeys();
-        ///
-        /// // Generate Bob's keys...
-        /// const bob = createECDH('secp521r1');
-        /// const bobKey = bob.generateKeys();
-        ///
-        /// // Exchange and generate the secret...
-        /// const aliceSecret = alice.computeSecret(bobKey);
-        /// const bobSecret = bob.computeSecret(aliceKey);
-        ///
-        /// assert.strictEqual(aliceSecret.toString('hex'), bobSecret.toString('hex'));
-        /// // OK
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v0.11.14</remarks>
-        [<Import("ECDH", "node:crypto"); EmitConstructor>]
-        static member ECDH() : ECDH = jsNative
 
         /// <summary>
         /// Creates an Elliptic Curve Diffie-Hellman (<c>ECDH</c>) key exchange object using a
@@ -72867,10 +72630,10 @@ module Crypto =
     module Webcrypto =
         [<Interface>]
         type CryptoKeyConstructor2 =
-            abstract ``_``: obj
+            abstract ``_``: Fable.Core.TS.Es.Symbol
 
             [<ParamObject; Emit("$0")>]
-            static member Create(``_``: obj) : CryptoKeyConstructor2 = jsNative
+            static member Create(``_``: Fable.Core.TS.Es.Symbol) : CryptoKeyConstructor2 = jsNative
 
         type BufferSource =
             U2<
@@ -75062,7 +74825,7 @@ module Dgram =
         /// // event with parameters 1, 2, 3, 4, 5 in third listener
         /// </code>
         /// </summary>
-        abstract emit: ``event``: obj * [<ParamArray>] args: obj[] -> bool
+        abstract emit: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * [<ParamArray>] args: obj[] -> bool
 
         /// <summary>
         /// <code lang="ts">
@@ -75425,12 +75188,12 @@ module Dgram =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeListener: eventName: obj * listener: (obj[] -> unit) -> Socket
+        abstract removeListener: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Socket
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Socket
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Socket
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -75441,7 +75204,7 @@ module Dgram =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Socket
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Socket
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -75463,7 +75226,7 @@ module Dgram =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract listeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -75493,7 +75256,8 @@ module Dgram =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract rawListeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
+
         /// <summary>
         /// Returns the number of listeners listening for the event named <c>eventName</c>.
         /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -75502,7 +75266,28 @@ module Dgram =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
+        abstract listenerCount:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * ?listener: Fable.Core.TS.Es.Function -> float
+
+        /// <summary>
+        /// Returns an array listing the events for which the emitter has registered
+        /// listeners. The values in the array are strings or <c>Symbol</c>s.
+        /// <code lang="js">
+        /// import { EventEmitter } from 'node:events';
+        ///
+        /// const myEE = new EventEmitter();
+        /// myEE.on('foo', () =&gt; {});
+        /// myEE.on('bar', () =&gt; {});
+        ///
+        /// const sym = Symbol('symbol');
+        /// myEE.on(sym, () =&gt; {});
+        ///
+        /// console.log(myEE.eventNames());
+        /// // Prints: [ 'foo', 'bar', Symbol(symbol) ]
+        /// </code>
+        /// </summary>
+        /// <remarks>@since v6.0.0</remarks>
+        abstract eventNames: unit -> U2<string, Fable.Core.TS.Es.Symbol>[]
 
         /// <summary>
         /// Calls <c>socket.close()</c> and returns a promise that fulfills when the socket has closed.
@@ -75589,8 +75374,11 @@ module Dgram =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("Socket.once", "node:dgram")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -75755,8 +75543,11 @@ module Dgram =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("Socket.on", "node:dgram")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -75860,7 +75651,10 @@ module Dgram =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("Socket.listenerCount", "node:dgram")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -75890,7 +75684,7 @@ module Dgram =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Socket.getEventListeners", "node:dgram")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -75989,7 +75783,7 @@ module Dgram =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("Socket.errorMonitor", "node:dgram")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -75998,7 +75792,7 @@ module Dgram =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("Socket.captureRejectionSymbol", "node:dgram")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -76209,7 +76003,7 @@ module Dgram =
 
 /// <summary>node:diagnostics_channel</summary>
 module DiagnosticsChannel =
-    type ChannelListener = delegate of message: obj * name: obj -> unit
+    type ChannelListener = delegate of message: obj * name: U2<string, Fable.Core.TS.Es.Symbol> -> unit
 
     /// <summary>
     /// The class <c>Channel</c> represents an individual named channel within the data
@@ -76222,7 +76016,7 @@ module DiagnosticsChannel =
     /// <remarks>@since v15.1.0, v14.17.0</remarks>
     [<Interface>]
     type Channel<'StoreType, 'ContextType> =
-        abstract name: obj
+        abstract name: U2<string, Fable.Core.TS.Es.Symbol>
         /// <summary>
         /// Check if there are active subscribers to this channel. This is helpful if
         /// the message you want to send might be expensive to prepare.
@@ -76384,7 +76178,7 @@ module DiagnosticsChannel =
         [<ParamObject; Emit("$0")>]
         static member Create
             (
-                name: obj,
+                name: U2<string, Fable.Core.TS.Es.Symbol>,
                 hasSubscribers: bool,
                 publish: (obj -> unit),
                 subscribe: (ChannelListener -> unit),
@@ -76398,19 +76192,26 @@ module DiagnosticsChannel =
     [<Interface>]
     type TracingChannelSubscribers<'ContextType> =
         abstract start: ('ContextType -> unit) with get, set
-        abstract ``end``: (obj -> unit) with get, set
-        abstract asyncStart: (obj -> unit) with get, set
-        abstract asyncEnd: (obj -> unit) with get, set
-        abstract error: (obj -> unit) with get, set
+        abstract ``end``: (JS.Intersect<'ContextType, DiagnosticsChannel.TracingChannelSubscribers.End.Message> -> unit) with get, set
+
+        abstract asyncStart:
+            (JS.Intersect<'ContextType, DiagnosticsChannel.TracingChannelSubscribers.AsyncStart.Message> -> unit) with get, set
+
+        abstract asyncEnd:
+            (JS.Intersect<'ContextType, DiagnosticsChannel.TracingChannelSubscribers.AsyncEnd.Message> -> unit) with get, set
+
+        abstract error: (JS.Intersect<'ContextType, DiagnosticsChannel.TracingChannelSubscribers.Error.Message> -> unit) with get, set
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
                 start: ('ContextType -> unit),
-                ``end``: (obj -> unit),
-                asyncStart: (obj -> unit),
-                asyncEnd: (obj -> unit),
-                error: (obj -> unit)
+                ``end``: (JS.Intersect<'ContextType, DiagnosticsChannel.TracingChannelSubscribers.End.Message> -> unit),
+                asyncStart:
+                    (JS.Intersect<'ContextType, DiagnosticsChannel.TracingChannelSubscribers.AsyncStart.Message> -> unit),
+                asyncEnd:
+                    (JS.Intersect<'ContextType, DiagnosticsChannel.TracingChannelSubscribers.AsyncEnd.Message> -> unit),
+                error: (JS.Intersect<'ContextType, DiagnosticsChannel.TracingChannelSubscribers.Error.Message> -> unit)
             ) : TracingChannelSubscribers<'ContextType> =
             jsNative
 
@@ -76713,7 +76514,7 @@ module DiagnosticsChannel =
         /// <param name="name">The channel name</param>
         /// <returns>If there are active subscribers</returns>
         [<Import("hasSubscribers", "node:diagnostics_channel")>]
-        static member hasSubscribers(name: obj) : bool = jsNative
+        static member hasSubscribers(name: U2<string, Fable.Core.TS.Es.Symbol>) : bool = jsNative
 
         /// <summary>
         /// This is the primary entry-point for anyone wanting to publish to a named
@@ -76729,7 +76530,7 @@ module DiagnosticsChannel =
         /// <param name="name">The channel name</param>
         /// <returns>The named channel object</returns>
         [<Import("channel", "node:diagnostics_channel")>]
-        static member channel(name: obj) : Channel<obj, obj> = jsNative
+        static member channel(name: U2<string, Fable.Core.TS.Es.Symbol>) : Channel<obj, obj> = jsNative
 
         /// <summary>
         /// Register a message handler to subscribe to this channel. This message handler
@@ -76747,7 +76548,7 @@ module DiagnosticsChannel =
         /// <param name="name">The channel name</param>
         /// <param name="onMessage">The handler to receive channel messages</param>
         [<Import("subscribe", "node:diagnostics_channel")>]
-        static member subscribe(name: obj, onMessage: ChannelListener) : unit = jsNative
+        static member subscribe(name: U2<string, Fable.Core.TS.Es.Symbol>, onMessage: ChannelListener) : unit = jsNative
 
         /// <summary>
         /// Remove a message handler previously registered to this channel with subscribe.
@@ -76768,7 +76569,8 @@ module DiagnosticsChannel =
         /// <param name="onMessage">The previous subscribed handler to remove</param>
         /// <returns><c>true</c> if the handler was found, <c>false</c> otherwise.</returns>
         [<Import("unsubscribe", "node:diagnostics_channel")>]
-        static member unsubscribe(name: obj, onMessage: ChannelListener) : bool = jsNative
+        static member unsubscribe(name: U2<string, Fable.Core.TS.Es.Symbol>, onMessage: ChannelListener) : bool =
+            jsNative
 
         /// <summary>
         /// Creates a <c>TracingChannel</c> wrapper for the given <c>TracingChannel Channels</c>. If a name is given, the corresponding tracing
@@ -76800,18 +76602,6 @@ module DiagnosticsChannel =
             jsNative
 
         /// <summary>
-        /// The class <c>Channel</c> represents an individual named channel within the data
-        /// pipeline. It is used to track subscribers and to publish messages when there
-        /// are subscribers present. It exists as a separate object to avoid channel
-        /// lookups at publish time, enabling very fast publish speeds and allowing
-        /// for heavy use while incurring very minimal cost. Channels are created with channel, constructing a channel directly
-        /// with <c>new Channel(name)</c> is not supported.
-        /// </summary>
-        /// <remarks>@since v15.1.0, v14.17.0</remarks>
-        [<Import("Channel", "node:diagnostics_channel"); EmitConstructor>]
-        static member Channel<'StoreType, 'ContextType>(name: obj) : Channel<'StoreType, 'ContextType> = jsNative
-
-        /// <summary>
         /// The class <c>TracingChannel</c> is a collection of <c>TracingChannel Channels</c> which
         /// together express a single traceable action. It is used to formalize and
         /// simplify the process of producing events for tracing application flow. tracingChannel is used to construct a <c>TracingChannel</c>. As with <c>Channel</c> it is recommended to create and reuse a
@@ -76822,6 +76612,42 @@ module DiagnosticsChannel =
         /// <remarks>@experimental</remarks>
         [<Import("TracingChannel", "node:diagnostics_channel"); EmitConstructor>]
         static member TracingChannel<'StoreType, 'ContextType>() : TracingChannel<'StoreType, 'ContextType> = jsNative
+
+    module TracingChannelSubscribers =
+        module AsyncEnd =
+            [<Interface>]
+            type Message =
+                abstract error: obj option with get, set
+                abstract result: obj option with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create(?error: obj, ?result: obj) : Message = jsNative
+
+        module AsyncStart =
+            [<Interface>]
+            type Message =
+                abstract error: obj option with get, set
+                abstract result: obj option with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create(?error: obj, ?result: obj) : Message = jsNative
+
+        module End =
+            [<Interface>]
+            type Message =
+                abstract error: obj option with get, set
+                abstract result: obj option with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create(?error: obj, ?result: obj) : Message = jsNative
+
+        module Error =
+            [<Interface>]
+            type Message =
+                abstract error: obj with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create(error: obj) : Message = jsNative
 
 /// <summary>node:dns</summary>
 module Dns =
@@ -80006,7 +79832,7 @@ module Domain =
         /// Alias for <c>emitter.on(eventName, listener)</c>.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract addListener: eventName: obj * listener: (obj[] -> unit) -> Domain
+        abstract addListener: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Domain
         /// <summary>
         /// Adds the <c>listener</c> function to the end of the listeners array for the event
         /// named <c>eventName</c>. No checks are made to see if the <c>listener</c> has already
@@ -80036,7 +79862,7 @@ module Domain =
         /// <remarks>@since v0.1.101</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract on: eventName: obj * listener: (obj[] -> unit) -> Domain
+        abstract on: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Domain
         /// <summary>
         /// Adds a <b>one-time</b> <c>listener</c> function for the event named <c>eventName</c>. The
         /// next time <c>eventName</c> is triggered, this listener is removed and then invoked.
@@ -80064,7 +79890,7 @@ module Domain =
         /// <remarks>@since v0.3.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract once: eventName: obj * listener: (obj[] -> unit) -> Domain
+        abstract once: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Domain
         /// <summary>
         /// Removes the specified <c>listener</c> from the listener array for the event named <c>eventName</c>.
         /// <code lang="js">
@@ -80144,12 +79970,12 @@ module Domain =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeListener: eventName: obj * listener: (obj[] -> unit) -> Domain
+        abstract removeListener: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Domain
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Domain
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Domain
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -80160,7 +79986,7 @@ module Domain =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Domain
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Domain
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -80182,7 +80008,7 @@ module Domain =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract listeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -80212,7 +80038,7 @@ module Domain =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract rawListeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Synchronously calls each of the listeners registered for the event named <c>eventName</c>, in the order they were registered, passing the supplied arguments
         /// to each.
@@ -80252,7 +80078,8 @@ module Domain =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract emit: eventName: obj * [<ParamArray>] args: obj[] -> bool
+        abstract emit: eventName: U2<string, Fable.Core.TS.Es.Symbol> * [<ParamArray>] args: obj[] -> bool
+
         /// <summary>
         /// Returns the number of listeners listening for the event named <c>eventName</c>.
         /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -80261,7 +80088,9 @@ module Domain =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
+        abstract listenerCount:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * ?listener: Fable.Core.TS.Es.Function -> float
+
         /// <summary>
         /// Adds the <c>listener</c> function to the _beginning_ of the listeners array for the
         /// event named <c>eventName</c>. No checks are made to see if the <c>listener</c> has
@@ -80278,7 +80107,8 @@ module Domain =
         /// <remarks>@since v6.0.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract prependListener: eventName: obj * listener: (obj[] -> unit) -> Domain
+        abstract prependListener: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Domain
+
         /// <summary>
         /// Adds a <b>one-time</b><c>listener</c> function for the event named <c>eventName</c> to the _beginning_ of the listeners array. The next time <c>eventName</c> is triggered, this
         /// listener is removed, and then invoked.
@@ -80293,7 +80123,28 @@ module Domain =
         /// <remarks>@since v6.0.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract prependOnceListener: eventName: obj * listener: (obj[] -> unit) -> Domain
+        abstract prependOnceListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Domain
+
+        /// <summary>
+        /// Returns an array listing the events for which the emitter has registered
+        /// listeners. The values in the array are strings or <c>Symbol</c>s.
+        /// <code lang="js">
+        /// import { EventEmitter } from 'node:events';
+        ///
+        /// const myEE = new EventEmitter();
+        /// myEE.on('foo', () =&gt; {});
+        /// myEE.on('bar', () =&gt; {});
+        ///
+        /// const sym = Symbol('symbol');
+        /// myEE.on(sym, () =&gt; {});
+        ///
+        /// console.log(myEE.eventNames());
+        /// // Prints: [ 'foo', 'bar', Symbol(symbol) ]
+        /// </code>
+        /// </summary>
+        /// <remarks>@since v6.0.0</remarks>
+        abstract eventNames: unit -> U2<string, Fable.Core.TS.Es.Symbol>[]
 
         [<ParamObject; Emit("$0")>]
         static member Create
@@ -80306,21 +80157,21 @@ module Domain =
                 remove: (U2<Events.EventEmitter<unit[]>, NodeJS.Timer> -> unit),
                 bind: ('T -> 'T),
                 intercept: ('T -> 'T),
-                addListener: Func<obj, (obj[] -> unit), Domain>,
-                on: Func<obj, (obj[] -> unit), Domain>,
-                once: Func<obj, (obj[] -> unit), Domain>,
-                removeListener: Func<obj, (obj[] -> unit), Domain>,
-                off: Func<obj, (obj[] -> unit), Domain>,
-                removeAllListeners: (obj option -> Domain),
+                addListener: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), Domain>,
+                on: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), Domain>,
+                once: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), Domain>,
+                removeListener: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), Domain>,
+                off: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), Domain>,
+                removeAllListeners: (U2<string, Fable.Core.TS.Es.Symbol> option -> Domain),
                 setMaxListeners: (float -> Domain),
                 getMaxListeners: (unit -> float),
-                listeners: (obj -> Fable.Core.TS.Es.Function[]),
-                rawListeners: (obj -> Fable.Core.TS.Es.Function[]),
-                emit: Func<obj, obj[], bool>,
-                listenerCount: Func<obj, Fable.Core.TS.Es.Function option, float>,
-                prependListener: Func<obj, (obj[] -> unit), Domain>,
-                prependOnceListener: Func<obj, (obj[] -> unit), Domain>,
-                eventNames: (unit -> obj[])
+                listeners: (U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]),
+                rawListeners: (U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]),
+                emit: Func<U2<string, Fable.Core.TS.Es.Symbol>, obj[], bool>,
+                listenerCount: Func<U2<string, Fable.Core.TS.Es.Symbol>, Fable.Core.TS.Es.Function option, float>,
+                prependListener: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), Domain>,
+                prependOnceListener: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), Domain>,
+                eventNames: (unit -> U2<string, Fable.Core.TS.Es.Symbol>[])
             ) : Domain =
             jsNative
 
@@ -80402,8 +80253,11 @@ module Domain =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("Domain.once", "node:domain")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -80568,8 +80422,11 @@ module Domain =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("Domain.on", "node:domain")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -80673,7 +80530,10 @@ module Domain =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("Domain.listenerCount", "node:domain")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -80703,7 +80563,7 @@ module Domain =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Domain.getEventListeners", "node:domain")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -80802,7 +80662,7 @@ module Domain =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("Domain.errorMonitor", "node:domain")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -80811,7 +80671,7 @@ module Domain =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("Domain.captureRejectionSymbol", "node:domain")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -81047,7 +80907,9 @@ module EventEmitter =
         /// </summary>
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         abstract once:
-            emitter: NodeJS.EventEmitter<unit[]> * eventName: obj * ?options: StaticEventEmitterOptions ->
+            emitter: NodeJS.EventEmitter<unit[]> *
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> *
+            ?options: StaticEventEmitterOptions ->
                 JS.Promise<obj[]>
 
         /// <summary>
@@ -81208,7 +81070,9 @@ module EventEmitter =
         /// <remarks>@since v13.6.0, v12.16.0</remarks>
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         abstract on:
-            emitter: NodeJS.EventEmitter<unit[]> * eventName: obj * ?options: StaticEventEmitterIteratorOptions ->
+            emitter: NodeJS.EventEmitter<unit[]> *
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> *
+            ?options: StaticEventEmitterIteratorOptions ->
                 NodeJS.AsyncIterator<obj[], obj, obj>
 
         /// <summary>
@@ -81309,7 +81173,8 @@ module EventEmitter =
         /// <remarks>@deprecated Since v3.2.0 - Use <c>listenerCount</c> instead.</remarks>
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
-        abstract listenerCount: emitter: NodeJS.EventEmitter<unit[]> * eventName: obj -> float
+        abstract listenerCount:
+            emitter: NodeJS.EventEmitter<unit[]> * eventName: U2<string, Fable.Core.TS.Es.Symbol> -> float
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -81338,7 +81203,8 @@ module EventEmitter =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         abstract getEventListeners:
-            emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget> * name: obj -> Fable.Core.TS.Es.Function[]
+            emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget> * name: U2<string, Fable.Core.TS.Es.Symbol> ->
+                Fable.Core.TS.Es.Function[]
 
         /// <summary>
         /// Returns the currently set max amount of listeners.
@@ -81428,14 +81294,14 @@ module EventEmitter =
         /// regular <c>'error'</c> listener is installed.
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
-        abstract errorMonitor: obj
+        abstract errorMonitor: Fable.Core.TS.Es.Symbol
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
         /// <br /><br />
         /// See how to write a custom <c>rejection handler</c>.
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
-        abstract captureRejectionSymbol: obj
+        abstract captureRejectionSymbol: Fable.Core.TS.Es.Symbol
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
         /// <br /><br />
@@ -81805,8 +81671,11 @@ module Events =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("EventEmitter.once", "node:events")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -81971,8 +81840,11 @@ module Events =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("EventEmitter.on", "node:events")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -82076,7 +81948,10 @@ module Events =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("EventEmitter.listenerCount", "node:events")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -82106,7 +81981,7 @@ module Events =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("EventEmitter.getEventListeners", "node:events")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -82205,7 +82080,7 @@ module Events =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("EventEmitter.errorMonitor", "node:events")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -82214,7 +82089,7 @@ module Events =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("EventEmitter.captureRejectionSymbol", "node:events")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -82425,11 +82300,14 @@ module Events =
         /// that provides a reference to this <c>EventEmitterAsyncResource</c>.
         /// </summary>
         abstract asyncResource: EventEmitterReferencingAsyncResource
+
         /// <summary>
         /// Alias for <c>emitter.on(eventName, listener)</c>.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract addListener: eventName: obj * listener: (obj[] -> unit) -> EventEmitterAsyncResource
+        abstract addListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> EventEmitterAsyncResource
+
         /// <summary>
         /// Adds the <c>listener</c> function to the end of the listeners array for the event
         /// named <c>eventName</c>. No checks are made to see if the <c>listener</c> has already
@@ -82459,7 +82337,9 @@ module Events =
         /// <remarks>@since v0.1.101</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract on: eventName: obj * listener: (obj[] -> unit) -> EventEmitterAsyncResource
+        abstract on:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> EventEmitterAsyncResource
+
         /// <summary>
         /// Adds a <b>one-time</b> <c>listener</c> function for the event named <c>eventName</c>. The
         /// next time <c>eventName</c> is triggered, this listener is removed and then invoked.
@@ -82487,7 +82367,9 @@ module Events =
         /// <remarks>@since v0.3.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract once: eventName: obj * listener: (obj[] -> unit) -> EventEmitterAsyncResource
+        abstract once:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> EventEmitterAsyncResource
+
         /// <summary>
         /// Removes the specified <c>listener</c> from the listener array for the event named <c>eventName</c>.
         /// <code lang="js">
@@ -82567,12 +82449,16 @@ module Events =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeListener: eventName: obj * listener: (obj[] -> unit) -> EventEmitterAsyncResource
+        abstract removeListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> EventEmitterAsyncResource
+
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> EventEmitterAsyncResource
+        abstract off:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> EventEmitterAsyncResource
+
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -82583,7 +82469,7 @@ module Events =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> EventEmitterAsyncResource
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> EventEmitterAsyncResource
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -82605,7 +82491,7 @@ module Events =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract listeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -82635,7 +82521,7 @@ module Events =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract rawListeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Synchronously calls each of the listeners registered for the event named <c>eventName</c>, in the order they were registered, passing the supplied arguments
         /// to each.
@@ -82675,7 +82561,8 @@ module Events =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract emit: eventName: obj * [<ParamArray>] args: obj[] -> bool
+        abstract emit: eventName: U2<string, Fable.Core.TS.Es.Symbol> * [<ParamArray>] args: obj[] -> bool
+
         /// <summary>
         /// Returns the number of listeners listening for the event named <c>eventName</c>.
         /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -82684,7 +82571,9 @@ module Events =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
+        abstract listenerCount:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * ?listener: Fable.Core.TS.Es.Function -> float
+
         /// <summary>
         /// Adds the <c>listener</c> function to the _beginning_ of the listeners array for the
         /// event named <c>eventName</c>. No checks are made to see if the <c>listener</c> has
@@ -82701,7 +82590,9 @@ module Events =
         /// <remarks>@since v6.0.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract prependListener: eventName: obj * listener: (obj[] -> unit) -> EventEmitterAsyncResource
+        abstract prependListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> EventEmitterAsyncResource
+
         /// <summary>
         /// Adds a <b>one-time</b><c>listener</c> function for the event named <c>eventName</c> to the _beginning_ of the listeners array. The next time <c>eventName</c> is triggered, this
         /// listener is removed, and then invoked.
@@ -82716,7 +82607,28 @@ module Events =
         /// <remarks>@since v6.0.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract prependOnceListener: eventName: obj * listener: (obj[] -> unit) -> EventEmitterAsyncResource
+        abstract prependOnceListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> EventEmitterAsyncResource
+
+        /// <summary>
+        /// Returns an array listing the events for which the emitter has registered
+        /// listeners. The values in the array are strings or <c>Symbol</c>s.
+        /// <code lang="js">
+        /// import { EventEmitter } from 'node:events';
+        ///
+        /// const myEE = new EventEmitter();
+        /// myEE.on('foo', () =&gt; {});
+        /// myEE.on('bar', () =&gt; {});
+        ///
+        /// const sym = Symbol('symbol');
+        /// myEE.on(sym, () =&gt; {});
+        ///
+        /// console.log(myEE.eventNames());
+        /// // Prints: [ 'foo', 'bar', Symbol(symbol) ]
+        /// </code>
+        /// </summary>
+        /// <remarks>@since v6.0.0</remarks>
+        abstract eventNames: unit -> U2<string, Fable.Core.TS.Es.Symbol>[]
 
         [<ParamObject; Emit("$0")>]
         static member Create
@@ -82725,21 +82637,22 @@ module Events =
                 asyncId: float,
                 triggerAsyncId: float,
                 asyncResource: EventEmitterReferencingAsyncResource,
-                addListener: Func<obj, (obj[] -> unit), EventEmitterAsyncResource>,
-                on: Func<obj, (obj[] -> unit), EventEmitterAsyncResource>,
-                once: Func<obj, (obj[] -> unit), EventEmitterAsyncResource>,
-                removeListener: Func<obj, (obj[] -> unit), EventEmitterAsyncResource>,
-                off: Func<obj, (obj[] -> unit), EventEmitterAsyncResource>,
-                removeAllListeners: (obj option -> EventEmitterAsyncResource),
+                addListener: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), EventEmitterAsyncResource>,
+                on: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), EventEmitterAsyncResource>,
+                once: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), EventEmitterAsyncResource>,
+                removeListener: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), EventEmitterAsyncResource>,
+                off: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), EventEmitterAsyncResource>,
+                removeAllListeners: (U2<string, Fable.Core.TS.Es.Symbol> option -> EventEmitterAsyncResource),
                 setMaxListeners: (float -> EventEmitterAsyncResource),
                 getMaxListeners: (unit -> float),
-                listeners: (obj -> Fable.Core.TS.Es.Function[]),
-                rawListeners: (obj -> Fable.Core.TS.Es.Function[]),
-                emit: Func<obj, obj[], bool>,
-                listenerCount: Func<obj, Fable.Core.TS.Es.Function option, float>,
-                prependListener: Func<obj, (obj[] -> unit), EventEmitterAsyncResource>,
-                prependOnceListener: Func<obj, (obj[] -> unit), EventEmitterAsyncResource>,
-                eventNames: (unit -> obj[])
+                listeners: (U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]),
+                rawListeners: (U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]),
+                emit: Func<U2<string, Fable.Core.TS.Es.Symbol>, obj[], bool>,
+                listenerCount: Func<U2<string, Fable.Core.TS.Es.Symbol>, Fable.Core.TS.Es.Function option, float>,
+                prependListener: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), EventEmitterAsyncResource>,
+                prependOnceListener:
+                    Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), EventEmitterAsyncResource>,
+                eventNames: (unit -> U2<string, Fable.Core.TS.Es.Symbol>[])
             ) : EventEmitterAsyncResource =
             jsNative
 
@@ -82862,8 +82775,11 @@ module Events =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("EventEmitterAsyncResource.once", "node:events")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -83028,8 +82944,11 @@ module Events =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("EventEmitterAsyncResource.on", "node:events")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -83133,7 +83052,10 @@ module Events =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("EventEmitterAsyncResource.listenerCount", "node:events")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -83163,7 +83085,7 @@ module Events =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("EventEmitterAsyncResource.getEventListeners", "node:events")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -83262,7 +83184,7 @@ module Events =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("EventEmitterAsyncResource.errorMonitor", "node:events")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -83271,7 +83193,7 @@ module Events =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("EventEmitterAsyncResource.captureRejectionSymbol", "node:events")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -83531,8 +83453,11 @@ module Events =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("once", "node:events")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -83697,8 +83622,11 @@ module Events =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("on", "node:events")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -83802,7 +83730,10 @@ module Events =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("listenerCount", "node:events")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -83832,7 +83763,7 @@ module Events =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("getEventListeners", "node:events")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -83931,7 +83862,7 @@ module Events =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("errorMonitor", "node:events")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -83940,7 +83871,7 @@ module Events =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("captureRejectionSymbol", "node:events")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -84847,7 +84778,7 @@ module Fs =
         /// Alias for <c>emitter.on(eventName, listener)</c>.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract addListener: eventName: obj * listener: (obj[] -> unit) -> StatWatcher
+        abstract addListener: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> StatWatcher
         /// <summary>
         /// Adds the <c>listener</c> function to the end of the listeners array for the event
         /// named <c>eventName</c>. No checks are made to see if the <c>listener</c> has already
@@ -84877,7 +84808,7 @@ module Fs =
         /// <remarks>@since v0.1.101</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract on: eventName: obj * listener: (obj[] -> unit) -> StatWatcher
+        abstract on: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> StatWatcher
         /// <summary>
         /// Adds a <b>one-time</b> <c>listener</c> function for the event named <c>eventName</c>. The
         /// next time <c>eventName</c> is triggered, this listener is removed and then invoked.
@@ -84905,7 +84836,8 @@ module Fs =
         /// <remarks>@since v0.3.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract once: eventName: obj * listener: (obj[] -> unit) -> StatWatcher
+        abstract once: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> StatWatcher
+
         /// <summary>
         /// Removes the specified <c>listener</c> from the listener array for the event named <c>eventName</c>.
         /// <code lang="js">
@@ -84985,12 +84917,14 @@ module Fs =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeListener: eventName: obj * listener: (obj[] -> unit) -> StatWatcher
+        abstract removeListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> StatWatcher
+
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> StatWatcher
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> StatWatcher
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -85001,7 +84935,7 @@ module Fs =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> StatWatcher
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> StatWatcher
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -85023,7 +84957,7 @@ module Fs =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract listeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -85053,7 +84987,7 @@ module Fs =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract rawListeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Synchronously calls each of the listeners registered for the event named <c>eventName</c>, in the order they were registered, passing the supplied arguments
         /// to each.
@@ -85093,7 +85027,8 @@ module Fs =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract emit: eventName: obj * [<ParamArray>] args: obj[] -> bool
+        abstract emit: eventName: U2<string, Fable.Core.TS.Es.Symbol> * [<ParamArray>] args: obj[] -> bool
+
         /// <summary>
         /// Returns the number of listeners listening for the event named <c>eventName</c>.
         /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -85102,7 +85037,9 @@ module Fs =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
+        abstract listenerCount:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * ?listener: Fable.Core.TS.Es.Function -> float
+
         /// <summary>
         /// Adds the <c>listener</c> function to the _beginning_ of the listeners array for the
         /// event named <c>eventName</c>. No checks are made to see if the <c>listener</c> has
@@ -85119,7 +85056,9 @@ module Fs =
         /// <remarks>@since v6.0.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract prependListener: eventName: obj * listener: (obj[] -> unit) -> StatWatcher
+        abstract prependListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> StatWatcher
+
         /// <summary>
         /// Adds a <b>one-time</b><c>listener</c> function for the event named <c>eventName</c> to the _beginning_ of the listeners array. The next time <c>eventName</c> is triggered, this
         /// listener is removed, and then invoked.
@@ -85134,28 +85073,49 @@ module Fs =
         /// <remarks>@since v6.0.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract prependOnceListener: eventName: obj * listener: (obj[] -> unit) -> StatWatcher
+        abstract prependOnceListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> StatWatcher
+
+        /// <summary>
+        /// Returns an array listing the events for which the emitter has registered
+        /// listeners. The values in the array are strings or <c>Symbol</c>s.
+        /// <code lang="js">
+        /// import { EventEmitter } from 'node:events';
+        ///
+        /// const myEE = new EventEmitter();
+        /// myEE.on('foo', () =&gt; {});
+        /// myEE.on('bar', () =&gt; {});
+        ///
+        /// const sym = Symbol('symbol');
+        /// myEE.on(sym, () =&gt; {});
+        ///
+        /// console.log(myEE.eventNames());
+        /// // Prints: [ 'foo', 'bar', Symbol(symbol) ]
+        /// </code>
+        /// </summary>
+        /// <remarks>@since v6.0.0</remarks>
+        abstract eventNames: unit -> U2<string, Fable.Core.TS.Es.Symbol>[]
 
         [<ParamObject; Emit("$0")>]
         static member Create
             (
                 ref: (unit -> StatWatcher),
                 unref: (unit -> StatWatcher),
-                addListener: Func<obj, (obj[] -> unit), StatWatcher>,
-                on: Func<obj, (obj[] -> unit), StatWatcher>,
-                once: Func<obj, (obj[] -> unit), StatWatcher>,
-                removeListener: Func<obj, (obj[] -> unit), StatWatcher>,
-                off: Func<obj, (obj[] -> unit), StatWatcher>,
-                removeAllListeners: (obj option -> StatWatcher),
+                addListener: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), StatWatcher>,
+                on: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), StatWatcher>,
+                once: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), StatWatcher>,
+                removeListener: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), StatWatcher>,
+                off: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), StatWatcher>,
+                removeAllListeners: (U2<string, Fable.Core.TS.Es.Symbol> option -> StatWatcher),
                 setMaxListeners: (float -> StatWatcher),
                 getMaxListeners: (unit -> float),
-                listeners: (obj -> Fable.Core.TS.Es.Function[]),
-                rawListeners: (obj -> Fable.Core.TS.Es.Function[]),
-                emit: Func<obj, obj[], bool>,
-                listenerCount: Func<obj, Fable.Core.TS.Es.Function option, float>,
-                prependListener: Func<obj, (obj[] -> unit), StatWatcher>,
-                prependOnceListener: Func<obj, (obj[] -> unit), StatWatcher>,
-                eventNames: (unit -> obj[])
+                listeners: (U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]),
+                rawListeners: (U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]),
+                emit: Func<U2<string, Fable.Core.TS.Es.Symbol>, obj[], bool>,
+                listenerCount: Func<U2<string, Fable.Core.TS.Es.Symbol>, Fable.Core.TS.Es.Function option, float>,
+                prependListener: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), StatWatcher>,
+                prependOnceListener: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), StatWatcher>,
+                eventNames: (unit -> U2<string, Fable.Core.TS.Es.Symbol>[])
             ) : StatWatcher =
             jsNative
 
@@ -85474,12 +85434,12 @@ module Fs =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeListener: eventName: obj * listener: (obj[] -> unit) -> FSWatcher
+        abstract removeListener: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> FSWatcher
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> FSWatcher
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> FSWatcher
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -85490,7 +85450,7 @@ module Fs =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> FSWatcher
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> FSWatcher
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -85512,7 +85472,7 @@ module Fs =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract listeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -85542,7 +85502,7 @@ module Fs =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract rawListeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Synchronously calls each of the listeners registered for the event named <c>eventName</c>, in the order they were registered, passing the supplied arguments
         /// to each.
@@ -85582,7 +85542,8 @@ module Fs =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract emit: eventName: obj * [<ParamArray>] args: obj[] -> bool
+        abstract emit: eventName: U2<string, Fable.Core.TS.Es.Symbol> * [<ParamArray>] args: obj[] -> bool
+
         /// <summary>
         /// Returns the number of listeners listening for the event named <c>eventName</c>.
         /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -85591,7 +85552,28 @@ module Fs =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
+        abstract listenerCount:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * ?listener: Fable.Core.TS.Es.Function -> float
+
+        /// <summary>
+        /// Returns an array listing the events for which the emitter has registered
+        /// listeners. The values in the array are strings or <c>Symbol</c>s.
+        /// <code lang="js">
+        /// import { EventEmitter } from 'node:events';
+        ///
+        /// const myEE = new EventEmitter();
+        /// myEE.on('foo', () =&gt; {});
+        /// myEE.on('bar', () =&gt; {});
+        ///
+        /// const sym = Symbol('symbol');
+        /// myEE.on(sym, () =&gt; {});
+        ///
+        /// console.log(myEE.eventNames());
+        /// // Prints: [ 'foo', 'bar', Symbol(symbol) ]
+        /// </code>
+        /// </summary>
+        /// <remarks>@since v6.0.0</remarks>
+        abstract eventNames: unit -> U2<string, Fable.Core.TS.Es.Symbol>[]
 
     /// <summary>
     /// Instances of <c>fs.ReadStream</c> are created and returned using the createReadStream function.
@@ -85709,7 +85691,7 @@ module Fs =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> ReadStream
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ReadStream
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -85720,7 +85702,7 @@ module Fs =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> ReadStream
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> ReadStream
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -86007,7 +85989,8 @@ module Fs =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> ReadStream
+        abstract removeListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ReadStream
 
         /// <summary>
         /// This symbol shall be used to install a listener for only monitoring <c>'error'</c> events. Listeners installed using this symbol are called before the regular <c>'error'</c> listeners are called.
@@ -86017,7 +86000,7 @@ module Fs =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("ReadStream.errorMonitor", "node:fs")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -86026,7 +86009,7 @@ module Fs =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("ReadStream.captureRejectionSymbol", "node:fs")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -86116,8 +86099,11 @@ module Fs =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("ReadStream.once", "node:fs")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -86282,8 +86268,11 @@ module Fs =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("ReadStream.on", "node:fs")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -86387,7 +86376,10 @@ module Fs =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("ReadStream.listenerCount", "node:fs")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -86417,7 +86409,7 @@ module Fs =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("ReadStream.getEventListeners", "node:fs")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -87072,7 +87064,7 @@ module Fs =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> WriteStream
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> WriteStream
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -87083,7 +87075,7 @@ module Fs =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> WriteStream
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> WriteStream
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -87362,7 +87354,8 @@ module Fs =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> WriteStream
+        abstract removeListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> WriteStream
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -87442,8 +87435,11 @@ module Fs =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("WriteStream.once", "node:fs")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -87608,8 +87604,11 @@ module Fs =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("WriteStream.on", "node:fs")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -87713,7 +87712,10 @@ module Fs =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("WriteStream.listenerCount", "node:fs")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -87743,7 +87745,7 @@ module Fs =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("WriteStream.getEventListeners", "node:fs")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -87842,7 +87844,7 @@ module Fs =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("WriteStream.errorMonitor", "node:fs")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -87851,7 +87853,7 @@ module Fs =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("WriteStream.captureRejectionSymbol", "node:fs")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -89968,67 +89970,6 @@ module Fs =
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
     type Exports =
-        /// <summary>
-        /// A <c>fs.Stats</c> object provides information about a file.
-        /// <br /><br />
-        /// Objects returned from stat, lstat, fstat, and
-        /// their synchronous counterparts are of this type.
-        /// If <c>bigint</c> in the <c>options</c> passed to those methods is true, the numeric values
-        /// will be <c>bigint</c> instead of <c>number</c>, and the object will contain additional
-        /// nanosecond-precision properties suffixed with <c>Ns</c>. <c>Stat</c> objects are not to be created directly using the <c>new</c> keyword.
-        /// <code lang="console">
-        /// Stats {
-        ///   dev: 2114,
-        ///   ino: 48064969,
-        ///   mode: 33188,
-        ///   nlink: 1,
-        ///   uid: 85,
-        ///   gid: 100,
-        ///   rdev: 0,
-        ///   size: 527,
-        ///   blksize: 4096,
-        ///   blocks: 8,
-        ///   atimeMs: 1318289051000.1,
-        ///   mtimeMs: 1318289051000.1,
-        ///   ctimeMs: 1318289051000.1,
-        ///   birthtimeMs: 1318289051000.1,
-        ///   atime: Mon, 10 Oct 2011 23:24:11 GMT,
-        ///   mtime: Mon, 10 Oct 2011 23:24:11 GMT,
-        ///   ctime: Mon, 10 Oct 2011 23:24:11 GMT,
-        ///   birthtime: Mon, 10 Oct 2011 23:24:11 GMT }
-        /// </code>
-        /// <br /><br />
-        /// <c>bigint</c> version:
-        /// <code lang="console">
-        /// BigIntStats {
-        ///   dev: 2114n,
-        ///   ino: 48064969n,
-        ///   mode: 33188n,
-        ///   nlink: 1n,
-        ///   uid: 85n,
-        ///   gid: 100n,
-        ///   rdev: 0n,
-        ///   size: 527n,
-        ///   blksize: 4096n,
-        ///   blocks: 8n,
-        ///   atimeMs: 1318289051000n,
-        ///   mtimeMs: 1318289051000n,
-        ///   ctimeMs: 1318289051000n,
-        ///   birthtimeMs: 1318289051000n,
-        ///   atimeNs: 1318289051000000000n,
-        ///   mtimeNs: 1318289051000000000n,
-        ///   ctimeNs: 1318289051000000000n,
-        ///   birthtimeNs: 1318289051000000000n,
-        ///   atime: Mon, 10 Oct 2011 23:24:11 GMT,
-        ///   mtime: Mon, 10 Oct 2011 23:24:11 GMT,
-        ///   ctime: Mon, 10 Oct 2011 23:24:11 GMT,
-        ///   birthtime: Mon, 10 Oct 2011 23:24:11 GMT }
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v0.1.21</remarks>
-        [<Import("Stats", "node:fs"); EmitConstructor>]
-        static member Stats() : Stats = jsNative
-
         /// <summary>
         /// Provides information about a mounted file system.
         /// <br /><br />
@@ -93078,7 +93019,7 @@ module Fs =
             abstract eventType: Fs.WatchEventType with get, set
             abstract filename: 'T option with get, set
 
-            [<ParamObject; Emit("$0")>]
+            [<ParamObject; Emit("(o => ({...o, \"filename\": o[\"filename\"] ?? null}))($0)")>]
             static member Create(eventType: Fs.WatchEventType, ?filename: 'T) : FileChangeInfo<'T> = jsNative
 
         [<Interface>]
@@ -95369,7 +95310,7 @@ module Fs =
             abstract withFileTypes: bool option with get, set
             abstract recursive: bool option with get, set
 
-            [<ParamObject; Emit("$0")>]
+            [<ParamObject; Emit("(o => ({...o, \"encoding\": o[\"encoding\"] ?? null}))($0)")>]
             static member Create(?encoding: BufferEncoding, ?withFileTypes: bool, ?recursive: bool) : Options = jsNative
 
         [<Interface>]
@@ -97088,12 +97029,16 @@ module Http =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeListener: eventName: obj * listener: (obj[] -> unit) -> Server<'Request, 'Response>
+        abstract removeListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Server<'Request, 'Response>
+
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Server<'Request, 'Response>
+        abstract off:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Server<'Request, 'Response>
+
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -97104,7 +97049,7 @@ module Http =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Server<'Request, 'Response>
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Server<'Request, 'Response>
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -97538,7 +97483,7 @@ module Http =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("Server.errorMonitor", "node:http")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -97547,7 +97492,7 @@ module Http =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("Server.captureRejectionSymbol", "node:http")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -97719,8 +97664,11 @@ module Http =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("Server.once", "node:http")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -97885,8 +97833,11 @@ module Http =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("Server.on", "node:http")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -97990,7 +97941,10 @@ module Http =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("Server.listenerCount", "node:http")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -98020,7 +97974,7 @@ module Http =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Server.getEventListeners", "node:http")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -98124,11 +98078,14 @@ module Http =
     [<Import("OutgoingMessage", "node:http")>]
     type OutgoingMessage<'Request when 'Request :> IncomingMessage> =
         inherit Stream.Writable
+
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> OutgoingMessage<'Request>
+        abstract off:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> OutgoingMessage<'Request>
+
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -98139,7 +98096,7 @@ module Http =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> OutgoingMessage<'Request>
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> OutgoingMessage<'Request>
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -98536,7 +98493,8 @@ module Http =
         /// 5. pipe
         /// 6. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> OutgoingMessage<'Request>
+        abstract addListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> OutgoingMessage<'Request>
 
         /// <summary>
         /// <code lang="ts">
@@ -98612,7 +98570,8 @@ module Http =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> OutgoingMessage<'Request>
+        abstract on:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> OutgoingMessage<'Request>
 
         /// <summary>
         /// <code lang="ts">
@@ -98686,7 +98645,8 @@ module Http =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> OutgoingMessage<'Request>
+        abstract once:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> OutgoingMessage<'Request>
 
         /// <summary>
         /// <code lang="ts">
@@ -98749,7 +98709,8 @@ module Http =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> OutgoingMessage<'Request>
+        abstract prependListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> OutgoingMessage<'Request>
 
         /// <summary>
         /// <code lang="ts">
@@ -98810,7 +98771,8 @@ module Http =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> OutgoingMessage<'Request>
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> OutgoingMessage<'Request>
 
         /// <summary>
         /// <code lang="ts">
@@ -98938,7 +98900,8 @@ module Http =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> OutgoingMessage<'Request>
+        abstract removeListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> OutgoingMessage<'Request>
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -99018,8 +98981,11 @@ module Http =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("OutgoingMessage.once", "node:http")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -99184,8 +99150,11 @@ module Http =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("OutgoingMessage.on", "node:http")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -99289,7 +99258,10 @@ module Http =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("OutgoingMessage.listenerCount", "node:http")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -99319,7 +99291,7 @@ module Http =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("OutgoingMessage.getEventListeners", "node:http")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -99418,7 +99390,7 @@ module Http =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("OutgoingMessage.errorMonitor", "node:http")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -99427,7 +99399,7 @@ module Http =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("OutgoingMessage.captureRejectionSymbol", "node:http")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -100018,11 +99990,14 @@ module Http =
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
         abstract writeProcessing: ?callback: (unit -> unit) -> unit
+
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> ServerResponse<'Request>
+        abstract off:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ServerResponse<'Request>
+
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -100033,7 +100008,7 @@ module Http =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> ServerResponse<'Request>
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> ServerResponse<'Request>
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -100318,7 +100293,8 @@ module Http =
         /// 5. pipe
         /// 6. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> ServerResponse<'Request>
+        abstract addListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ServerResponse<'Request>
 
         /// <summary>
         /// <code lang="ts">
@@ -100394,7 +100370,8 @@ module Http =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> ServerResponse<'Request>
+        abstract on:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ServerResponse<'Request>
 
         /// <summary>
         /// <code lang="ts">
@@ -100468,7 +100445,8 @@ module Http =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> ServerResponse<'Request>
+        abstract once:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ServerResponse<'Request>
 
         /// <summary>
         /// <code lang="ts">
@@ -100531,7 +100509,8 @@ module Http =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> ServerResponse<'Request>
+        abstract prependListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ServerResponse<'Request>
 
         /// <summary>
         /// <code lang="ts">
@@ -100592,7 +100571,8 @@ module Http =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> ServerResponse<'Request>
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ServerResponse<'Request>
 
         /// <summary>
         /// <code lang="ts">
@@ -100720,7 +100700,8 @@ module Http =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> ServerResponse<'Request>
+        abstract removeListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ServerResponse<'Request>
 
         /// <summary>
         /// A utility method for creating a <c>Writable</c> from a web <c>WritableStream</c>.
@@ -100819,8 +100800,11 @@ module Http =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("ServerResponse.once", "node:http")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -100985,8 +100969,11 @@ module Http =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("ServerResponse.on", "node:http")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -101090,7 +101077,10 @@ module Http =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("ServerResponse.listenerCount", "node:http")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -101120,7 +101110,7 @@ module Http =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("ServerResponse.getEventListeners", "node:http")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -101219,7 +101209,7 @@ module Http =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("ServerResponse.errorMonitor", "node:http")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -101228,7 +101218,7 @@ module Http =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("ServerResponse.captureRejectionSymbol", "node:http")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -101882,7 +101872,8 @@ module Http =
         [<Emit("$0.addListener('unpipe', $1)")>]
         abstract addListenerUnpipe: listener: (Stream.Readable -> unit) -> ClientRequest
 
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> ClientRequest
+        abstract addListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ClientRequest
 
         /// <summary>
         /// <code lang="ts">
@@ -101997,7 +101988,7 @@ module Http =
         [<Emit("$0.on('unpipe', $1)")>]
         abstract onUnpipe: listener: (Stream.Readable -> unit) -> ClientRequest
 
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> ClientRequest
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ClientRequest
 
         /// <summary>
         /// <code lang="ts">
@@ -102112,7 +102103,7 @@ module Http =
         [<Emit("$0.once('unpipe', $1)")>]
         abstract onceUnpipe: listener: (Stream.Readable -> unit) -> ClientRequest
 
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> ClientRequest
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ClientRequest
 
         /// <summary>
         /// <code lang="ts">
@@ -102227,7 +102218,8 @@ module Http =
         [<Emit("$0.prependListener('unpipe', $1)")>]
         abstract prependListenerUnpipe: listener: (Stream.Readable -> unit) -> ClientRequest
 
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> ClientRequest
+        abstract prependListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ClientRequest
 
         /// <summary>
         /// <code lang="ts">
@@ -102342,7 +102334,9 @@ module Http =
         [<Emit("$0.prependOnceListener('unpipe', $1)")>]
         abstract prependOnceListenerUnpipe: listener: (Stream.Readable -> unit) -> ClientRequest
 
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> ClientRequest
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ClientRequest
+
         /// <summary>
         /// The <c>writable.setDefaultEncoding()</c> method sets the default <c>encoding</c> for a <c>Writable</c> stream.
         /// </summary>
@@ -102596,12 +102590,14 @@ module Http =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> ClientRequest
+        abstract removeListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ClientRequest
+
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> ClientRequest
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ClientRequest
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -102612,7 +102608,7 @@ module Http =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> ClientRequest
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> ClientRequest
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -102776,8 +102772,11 @@ module Http =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("ClientRequest.once", "node:http")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -102942,8 +102941,11 @@ module Http =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("ClientRequest.on", "node:http")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -103047,7 +103049,10 @@ module Http =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("ClientRequest.listenerCount", "node:http")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -103077,7 +103082,7 @@ module Http =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("ClientRequest.getEventListeners", "node:http")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -103176,7 +103181,7 @@ module Http =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("ClientRequest.errorMonitor", "node:http")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -103185,7 +103190,7 @@ module Http =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("ClientRequest.captureRejectionSymbol", "node:http")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -103800,7 +103805,7 @@ module Http =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> IncomingMessage
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> IncomingMessage
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -103811,7 +103816,7 @@ module Http =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> IncomingMessage
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> IncomingMessage
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -104028,7 +104033,8 @@ module Http =
         /// 6. readable
         /// 7. resume
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> IncomingMessage
+        abstract addListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> IncomingMessage
 
         /// <summary>
         /// <code lang="ts">
@@ -104112,7 +104118,7 @@ module Http =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> IncomingMessage
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> IncomingMessage
 
         /// <summary>
         /// <code lang="ts">
@@ -104194,7 +104200,7 @@ module Http =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> IncomingMessage
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> IncomingMessage
 
         /// <summary>
         /// <code lang="ts">
@@ -104265,7 +104271,8 @@ module Http =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> IncomingMessage
+        abstract prependListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> IncomingMessage
 
         /// <summary>
         /// <code lang="ts">
@@ -104334,7 +104341,8 @@ module Http =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> IncomingMessage
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> IncomingMessage
 
         /// <summary>
         /// <code lang="ts">
@@ -104470,7 +104478,8 @@ module Http =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> IncomingMessage
+        abstract removeListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> IncomingMessage
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -104550,8 +104559,11 @@ module Http =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("IncomingMessage.once", "node:http")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -104716,8 +104728,11 @@ module Http =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("IncomingMessage.on", "node:http")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -104821,7 +104836,10 @@ module Http =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("IncomingMessage.listenerCount", "node:http")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -104851,7 +104869,7 @@ module Http =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("IncomingMessage.getEventListeners", "node:http")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -104950,7 +104968,7 @@ module Http =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("IncomingMessage.errorMonitor", "node:http")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -104959,7 +104977,7 @@ module Http =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("IncomingMessage.captureRejectionSymbol", "node:http")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -105657,7 +105675,7 @@ module Http =
         /// Alias for <c>emitter.on(eventName, listener)</c>.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract addListener: eventName: obj * listener: (obj[] -> unit) -> Agent
+        abstract addListener: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Agent
         /// <summary>
         /// Adds the <c>listener</c> function to the end of the listeners array for the event
         /// named <c>eventName</c>. No checks are made to see if the <c>listener</c> has already
@@ -105687,7 +105705,7 @@ module Http =
         /// <remarks>@since v0.1.101</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract on: eventName: obj * listener: (obj[] -> unit) -> Agent
+        abstract on: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Agent
         /// <summary>
         /// Adds a <b>one-time</b> <c>listener</c> function for the event named <c>eventName</c>. The
         /// next time <c>eventName</c> is triggered, this listener is removed and then invoked.
@@ -105715,7 +105733,7 @@ module Http =
         /// <remarks>@since v0.3.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract once: eventName: obj * listener: (obj[] -> unit) -> Agent
+        abstract once: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Agent
         /// <summary>
         /// Removes the specified <c>listener</c> from the listener array for the event named <c>eventName</c>.
         /// <code lang="js">
@@ -105795,12 +105813,12 @@ module Http =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeListener: eventName: obj * listener: (obj[] -> unit) -> Agent
+        abstract removeListener: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Agent
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Agent
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Agent
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -105811,7 +105829,7 @@ module Http =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Agent
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Agent
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -105833,7 +105851,7 @@ module Http =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract listeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -105863,7 +105881,7 @@ module Http =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract rawListeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Synchronously calls each of the listeners registered for the event named <c>eventName</c>, in the order they were registered, passing the supplied arguments
         /// to each.
@@ -105903,7 +105921,8 @@ module Http =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract emit: eventName: obj * [<ParamArray>] args: obj[] -> bool
+        abstract emit: eventName: U2<string, Fable.Core.TS.Es.Symbol> * [<ParamArray>] args: obj[] -> bool
+
         /// <summary>
         /// Returns the number of listeners listening for the event named <c>eventName</c>.
         /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -105912,7 +105931,9 @@ module Http =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
+        abstract listenerCount:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * ?listener: Fable.Core.TS.Es.Function -> float
+
         /// <summary>
         /// Adds the <c>listener</c> function to the _beginning_ of the listeners array for the
         /// event named <c>eventName</c>. No checks are made to see if the <c>listener</c> has
@@ -105929,7 +105950,8 @@ module Http =
         /// <remarks>@since v6.0.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract prependListener: eventName: obj * listener: (obj[] -> unit) -> Agent
+        abstract prependListener: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Agent
+
         /// <summary>
         /// Adds a <b>one-time</b><c>listener</c> function for the event named <c>eventName</c> to the _beginning_ of the listeners array. The next time <c>eventName</c> is triggered, this
         /// listener is removed, and then invoked.
@@ -105944,7 +105966,28 @@ module Http =
         /// <remarks>@since v6.0.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract prependOnceListener: eventName: obj * listener: (obj[] -> unit) -> Agent
+        abstract prependOnceListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Agent
+
+        /// <summary>
+        /// Returns an array listing the events for which the emitter has registered
+        /// listeners. The values in the array are strings or <c>Symbol</c>s.
+        /// <code lang="js">
+        /// import { EventEmitter } from 'node:events';
+        ///
+        /// const myEE = new EventEmitter();
+        /// myEE.on('foo', () =&gt; {});
+        /// myEE.on('bar', () =&gt; {});
+        ///
+        /// const sym = Symbol('symbol');
+        /// myEE.on(sym, () =&gt; {});
+        ///
+        /// console.log(myEE.eventNames());
+        /// // Prints: [ 'foo', 'bar', Symbol(symbol) ]
+        /// </code>
+        /// </summary>
+        /// <remarks>@since v6.0.0</remarks>
+        abstract eventNames: unit -> U2<string, Fable.Core.TS.Es.Symbol>[]
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -106024,8 +106067,11 @@ module Http =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("Agent.once", "node:http")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -106190,8 +106236,11 @@ module Http =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("Agent.on", "node:http")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -106295,7 +106344,10 @@ module Http =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("Agent.listenerCount", "node:http")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -106325,7 +106377,7 @@ module Http =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Agent.getEventListeners", "node:http")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -106424,7 +106476,7 @@ module Http =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("Agent.errorMonitor", "node:http")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -106433,7 +106485,7 @@ module Http =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("Agent.captureRejectionSymbol", "node:http")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -107982,7 +108034,7 @@ module Http2 =
         /// 10. resume
         /// 11. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> Http2Stream
+        abstract addListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Http2Stream
 
         /// <summary>
         /// <code lang="ts">
@@ -108178,7 +108230,7 @@ module Http2 =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> Http2Stream
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Http2Stream
 
         /// <summary>
         /// <code lang="ts">
@@ -108316,7 +108368,7 @@ module Http2 =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> Http2Stream
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Http2Stream
 
         /// <summary>
         /// <code lang="ts">
@@ -108443,7 +108495,8 @@ module Http2 =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> Http2Stream
+        abstract prependListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Http2Stream
 
         /// <summary>
         /// <code lang="ts">
@@ -108568,7 +108621,9 @@ module Http2 =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> Http2Stream
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Http2Stream
+
         /// <summary>
         /// The <c>readable.setEncoding()</c> method sets the character encoding for
         /// data read from the <c>Readable</c> stream.
@@ -108636,7 +108691,7 @@ module Http2 =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Http2Stream
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Http2Stream
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -108647,7 +108702,7 @@ module Http2 =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Http2Stream
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Http2Stream
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -109012,7 +109067,8 @@ module Http2 =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> Http2Stream
+        abstract removeListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Http2Stream
 
     type ClientHttp2Stream =
         inherit Http2Stream
@@ -109064,7 +109120,8 @@ module Http2 =
         /// 10. resume
         /// 11. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> ClientHttp2Stream
+        abstract addListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ClientHttp2Stream
 
         /// <summary>
         /// <code lang="ts">
@@ -109158,7 +109215,7 @@ module Http2 =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> ClientHttp2Stream
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ClientHttp2Stream
 
         /// <summary>
         /// <code lang="ts">
@@ -109216,7 +109273,7 @@ module Http2 =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> ClientHttp2Stream
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ClientHttp2Stream
 
         /// <summary>
         /// <code lang="ts">
@@ -109264,7 +109321,8 @@ module Http2 =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> ClientHttp2Stream
+        abstract prependListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ClientHttp2Stream
 
         /// <summary>
         /// <code lang="ts">
@@ -109312,7 +109370,9 @@ module Http2 =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> ClientHttp2Stream
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ClientHttp2Stream
+
         /// <summary>
         /// The <c>readable.unpipe()</c> method detaches a <c>Writable</c> stream previously attached
         /// using the pipe method.
@@ -109343,7 +109403,7 @@ module Http2 =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> ClientHttp2Stream
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ClientHttp2Stream
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -109354,7 +109414,7 @@ module Http2 =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> ClientHttp2Stream
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> ClientHttp2Stream
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -109756,7 +109816,8 @@ module Http2 =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> ClientHttp2Stream
+        abstract removeListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ClientHttp2Stream
 
     type ServerHttp2Stream =
         inherit Http2Stream
@@ -110076,7 +110137,7 @@ module Http2 =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> ServerHttp2Stream
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ServerHttp2Stream
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -110087,7 +110148,7 @@ module Http2 =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> ServerHttp2Stream
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> ServerHttp2Stream
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -110226,7 +110287,8 @@ module Http2 =
         /// 10. resume
         /// 11. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> ServerHttp2Stream
+        abstract addListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ServerHttp2Stream
 
         /// <summary>
         /// <code lang="ts">
@@ -110366,7 +110428,7 @@ module Http2 =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> ServerHttp2Stream
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ServerHttp2Stream
 
         /// <summary>
         /// <code lang="ts">
@@ -110504,7 +110566,7 @@ module Http2 =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> ServerHttp2Stream
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ServerHttp2Stream
 
         /// <summary>
         /// <code lang="ts">
@@ -110631,7 +110693,8 @@ module Http2 =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> ServerHttp2Stream
+        abstract prependListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ServerHttp2Stream
 
         /// <summary>
         /// <code lang="ts">
@@ -110758,7 +110821,8 @@ module Http2 =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> ServerHttp2Stream
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ServerHttp2Stream
 
         abstract pipe<'T when 'T :> NodeJS.WritableStream> :
             destination: 'T * ?options: Http2.ServerHttp2Stream.Pipe.Options -> 'T
@@ -111151,7 +111215,8 @@ module Http2 =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> ServerHttp2Stream
+        abstract removeListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ServerHttp2Stream
 
     [<Interface>]
     type Settings =
@@ -111232,7 +111297,7 @@ module Http2 =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Http2Session
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Http2Session
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -111243,7 +111308,7 @@ module Http2 =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Http2Session
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Http2Session
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -111265,7 +111330,7 @@ module Http2 =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract listeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -111295,7 +111360,8 @@ module Http2 =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract rawListeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
+
         /// <summary>
         /// Returns the number of listeners listening for the event named <c>eventName</c>.
         /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -111304,7 +111370,28 @@ module Http2 =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
+        abstract listenerCount:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * ?listener: Fable.Core.TS.Es.Function -> float
+
+        /// <summary>
+        /// Returns an array listing the events for which the emitter has registered
+        /// listeners. The values in the array are strings or <c>Symbol</c>s.
+        /// <code lang="js">
+        /// import { EventEmitter } from 'node:events';
+        ///
+        /// const myEE = new EventEmitter();
+        /// myEE.on('foo', () =&gt; {});
+        /// myEE.on('bar', () =&gt; {});
+        ///
+        /// const sym = Symbol('symbol');
+        /// myEE.on(sym, () =&gt; {});
+        ///
+        /// console.log(myEE.eventNames());
+        /// // Prints: [ 'foo', 'bar', Symbol(symbol) ]
+        /// </code>
+        /// </summary>
+        /// <remarks>@since v6.0.0</remarks>
+        abstract eventNames: unit -> U2<string, Fable.Core.TS.Es.Symbol>[]
         /// <summary>
         /// Value will be <c>undefined</c> if the <c>Http2Session</c> is not yet connected to a
         /// socket, <c>h2c</c> if the <c>Http2Session</c> is not connected to a <c>TLSSocket</c>, or
@@ -111632,7 +111719,7 @@ module Http2 =
         /// <summary>
         /// Alias for <c>emitter.on(eventName, listener)</c>.
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> Http2Session
+        abstract addListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Http2Session
 
         /// <summary>
         /// <code lang="ts">
@@ -111736,7 +111823,7 @@ module Http2 =
         /// // event with parameters 1, 2, 3, 4, 5 in third listener
         /// </code>
         /// </summary>
-        abstract emit: ``event``: obj * [<ParamArray>] args: obj[] -> bool
+        abstract emit: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * [<ParamArray>] args: obj[] -> bool
 
         /// <summary>
         /// <code lang="ts">
@@ -111828,7 +111915,7 @@ module Http2 =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> Http2Session
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Http2Session
 
         /// <summary>
         /// <code lang="ts">
@@ -111918,7 +112005,7 @@ module Http2 =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> Http2Session
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Http2Session
 
         /// <summary>
         /// <code lang="ts">
@@ -111997,7 +112084,8 @@ module Http2 =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> Http2Session
+        abstract prependListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Http2Session
 
         /// <summary>
         /// <code lang="ts">
@@ -112075,7 +112163,9 @@ module Http2 =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> Http2Session
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Http2Session
+
         /// <summary>
         /// Removes the specified <c>listener</c> from the listener array for the event named <c>eventName</c>.
         /// <code lang="js">
@@ -112155,7 +112245,8 @@ module Http2 =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeListener: eventName: obj * listener: (obj[] -> unit) -> Http2Session
+        abstract removeListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Http2Session
 
     type ClientHttp2Session =
         inherit Http2Session
@@ -112243,7 +112334,8 @@ module Http2 =
         /// <summary>
         /// Alias for <c>emitter.on(eventName, listener)</c>.
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> ClientHttp2Session
+        abstract addListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ClientHttp2Session
 
         /// <summary>
         /// <code lang="ts">
@@ -112340,7 +112432,7 @@ module Http2 =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> ClientHttp2Session
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ClientHttp2Session
 
         /// <summary>
         /// <code lang="ts">
@@ -112398,7 +112490,7 @@ module Http2 =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> ClientHttp2Session
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ClientHttp2Session
 
         /// <summary>
         /// <code lang="ts">
@@ -112448,7 +112540,8 @@ module Http2 =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> ClientHttp2Session
+        abstract prependListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ClientHttp2Session
 
         /// <summary>
         /// <code lang="ts">
@@ -112496,7 +112589,9 @@ module Http2 =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> ClientHttp2Session
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ClientHttp2Session
+
         /// <summary>
         /// Removes the specified <c>listener</c> from the listener array for the event named <c>eventName</c>.
         /// <code lang="js">
@@ -112576,12 +112671,14 @@ module Http2 =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeListener: eventName: obj * listener: (obj[] -> unit) -> ClientHttp2Session
+        abstract removeListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ClientHttp2Session
+
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> ClientHttp2Session
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ClientHttp2Session
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -112592,7 +112689,7 @@ module Http2 =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> ClientHttp2Session
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> ClientHttp2Session
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -112737,7 +112834,7 @@ module Http2 =
         /// Alias for <c>emitter.on(eventName, listener)</c>.
         /// </summary>
         abstract addListener:
-            ``event``: obj * listener: (obj[] -> unit) ->
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) ->
                 ServerHttp2Session<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
 
         /// <summary>
@@ -112807,7 +112904,7 @@ module Http2 =
         /// </code>
         /// </summary>
         abstract on:
-            ``event``: obj * listener: (obj[] -> unit) ->
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) ->
                 ServerHttp2Session<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
 
         /// <summary>
@@ -112856,7 +112953,7 @@ module Http2 =
         /// </code>
         /// </summary>
         abstract once:
-            ``event``: obj * listener: (obj[] -> unit) ->
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) ->
                 ServerHttp2Session<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
 
         /// <summary>
@@ -112899,7 +112996,7 @@ module Http2 =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         abstract prependListener:
-            ``event``: obj * listener: (obj[] -> unit) ->
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) ->
                 ServerHttp2Session<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
 
         /// <summary>
@@ -112940,7 +113037,7 @@ module Http2 =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         abstract prependOnceListener:
-            ``event``: obj * listener: (obj[] -> unit) ->
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) ->
                 ServerHttp2Session<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
 
         /// <summary>
@@ -113023,7 +113120,7 @@ module Http2 =
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
         abstract removeListener:
-            eventName: obj * listener: (obj[] -> unit) ->
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) ->
                 ServerHttp2Session<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
 
         /// <summary>
@@ -113031,7 +113128,7 @@ module Http2 =
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
         abstract off:
-            eventName: obj * listener: (obj[] -> unit) ->
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) ->
                 ServerHttp2Session<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
 
         /// <summary>
@@ -113045,7 +113142,8 @@ module Http2 =
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
         abstract removeAllListeners:
-            ?eventName: obj -> ServerHttp2Session<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
+            ?eventName: U2<string, Fable.Core.TS.Es.Symbol> ->
+                ServerHttp2Session<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
 
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
@@ -113360,7 +113458,7 @@ module Http2 =
         ///   5. drop
         /// </summary>
         abstract addListener:
-            ``event``: obj * listener: (obj[] -> unit) ->
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) ->
                 Http2Server<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
 
         /// <summary>
@@ -113501,7 +113599,7 @@ module Http2 =
         /// </code>
         /// </summary>
         abstract on:
-            ``event``: obj * listener: (obj[] -> unit) ->
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) ->
                 Http2Server<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
 
         /// <summary>
@@ -113588,7 +113686,7 @@ module Http2 =
         /// </code>
         /// </summary>
         abstract once:
-            ``event``: obj * listener: (obj[] -> unit) ->
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) ->
                 Http2Server<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
 
         /// <summary>
@@ -113665,7 +113763,7 @@ module Http2 =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         abstract prependListener:
-            ``event``: obj * listener: (obj[] -> unit) ->
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) ->
                 Http2Server<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
 
         /// <summary>
@@ -113745,7 +113843,7 @@ module Http2 =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         abstract prependOnceListener:
-            ``event``: obj * listener: (obj[] -> unit) ->
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) ->
                 Http2Server<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
 
         /// <summary>
@@ -113828,7 +113926,7 @@ module Http2 =
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
         abstract removeListener:
-            eventName: obj * listener: (obj[] -> unit) ->
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) ->
                 Http2Server<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
 
         /// <summary>
@@ -113836,7 +113934,7 @@ module Http2 =
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
         abstract off:
-            eventName: obj * listener: (obj[] -> unit) ->
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) ->
                 Http2Server<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
 
         /// <summary>
@@ -113850,7 +113948,8 @@ module Http2 =
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
         abstract removeAllListeners:
-            ?eventName: obj -> Http2Server<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
+            ?eventName: U2<string, Fable.Core.TS.Es.Symbol> ->
+                Http2Server<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
 
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
@@ -114390,7 +114489,7 @@ module Http2 =
         /// 6. keylog
         /// </summary>
         abstract addListener:
-            ``event``: obj * listener: (obj[] -> unit) ->
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) ->
                 Http2SecureServer<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
 
         /// <summary>
@@ -114548,7 +114647,7 @@ module Http2 =
         /// </code>
         /// </summary>
         abstract on:
-            ``event``: obj * listener: (obj[] -> unit) ->
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) ->
                 Http2SecureServer<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
 
         /// <summary>
@@ -114646,7 +114745,7 @@ module Http2 =
         /// </code>
         /// </summary>
         abstract once:
-            ``event``: obj * listener: (obj[] -> unit) ->
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) ->
                 Http2SecureServer<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
 
         /// <summary>
@@ -114738,7 +114837,7 @@ module Http2 =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         abstract prependListener:
-            ``event``: obj * listener: (obj[] -> unit) ->
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) ->
                 Http2SecureServer<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
 
         /// <summary>
@@ -114828,7 +114927,7 @@ module Http2 =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         abstract prependOnceListener:
-            ``event``: obj * listener: (obj[] -> unit) ->
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) ->
                 Http2SecureServer<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
 
         /// <summary>
@@ -114911,7 +115010,7 @@ module Http2 =
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
         abstract removeListener:
-            eventName: obj * listener: (obj[] -> unit) ->
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) ->
                 Http2SecureServer<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
 
         /// <summary>
@@ -114919,7 +115018,7 @@ module Http2 =
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
         abstract off:
-            eventName: obj * listener: (obj[] -> unit) ->
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) ->
                 Http2SecureServer<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
 
         /// <summary>
@@ -114933,7 +115032,8 @@ module Http2 =
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
         abstract removeAllListeners:
-            ?eventName: obj -> Http2SecureServer<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
+            ?eventName: U2<string, Fable.Core.TS.Es.Symbol> ->
+                Http2SecureServer<'Http1Request, 'Http1Response, 'Http2Request, 'Http2Response>
 
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
@@ -115707,7 +115807,8 @@ module Http2 =
         /// 6. readable
         /// 7. resume
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> Http2ServerRequest
+        abstract addListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Http2ServerRequest
 
         /// <summary>
         /// <code lang="ts">
@@ -115799,7 +115900,7 @@ module Http2 =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> Http2ServerRequest
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Http2ServerRequest
 
         /// <summary>
         /// <code lang="ts">
@@ -115873,7 +115974,7 @@ module Http2 =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> Http2ServerRequest
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Http2ServerRequest
 
         /// <summary>
         /// <code lang="ts">
@@ -115937,7 +116038,8 @@ module Http2 =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> Http2ServerRequest
+        abstract prependListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Http2ServerRequest
 
         /// <summary>
         /// <code lang="ts">
@@ -115999,12 +116101,14 @@ module Http2 =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> Http2ServerRequest
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Http2ServerRequest
+
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Http2ServerRequest
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Http2ServerRequest
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -116015,7 +116119,7 @@ module Http2 =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Http2ServerRequest
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Http2ServerRequest
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -116302,7 +116406,8 @@ module Http2 =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> Http2ServerRequest
+        abstract removeListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Http2ServerRequest
 
         /// <summary>
         /// Returns whether the stream is readable.
@@ -116398,8 +116503,11 @@ module Http2 =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("Http2ServerRequest.once", "node:http2")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -116564,8 +116672,11 @@ module Http2 =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("Http2ServerRequest.on", "node:http2")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -116669,7 +116780,10 @@ module Http2 =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("Http2ServerRequest.listenerCount", "node:http2")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -116699,7 +116813,7 @@ module Http2 =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Http2ServerRequest.getEventListeners", "node:http2")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -116798,7 +116912,7 @@ module Http2 =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("Http2ServerRequest.errorMonitor", "node:http2")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -116807,7 +116921,7 @@ module Http2 =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("Http2ServerRequest.captureRejectionSymbol", "node:http2")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -117781,7 +117895,8 @@ module Http2 =
         /// 5. pipe
         /// 6. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> Http2ServerResponse<'Request>
+        abstract addListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Http2ServerResponse<'Request>
 
         /// <summary>
         /// <code lang="ts">
@@ -117865,7 +117980,8 @@ module Http2 =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> Http2ServerResponse<'Request>
+        abstract on:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Http2ServerResponse<'Request>
 
         /// <summary>
         /// <code lang="ts">
@@ -117939,7 +118055,8 @@ module Http2 =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> Http2ServerResponse<'Request>
+        abstract once:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Http2ServerResponse<'Request>
 
         /// <summary>
         /// <code lang="ts">
@@ -118002,7 +118119,8 @@ module Http2 =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> Http2ServerResponse<'Request>
+        abstract prependListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Http2ServerResponse<'Request>
 
         /// <summary>
         /// <code lang="ts">
@@ -118063,12 +118181,16 @@ module Http2 =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> Http2ServerResponse<'Request>
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Http2ServerResponse<'Request>
+
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Http2ServerResponse<'Request>
+        abstract off:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Http2ServerResponse<'Request>
+
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -118079,7 +118201,7 @@ module Http2 =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Http2ServerResponse<'Request>
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Http2ServerResponse<'Request>
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -118255,7 +118377,8 @@ module Http2 =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> Http2ServerResponse<'Request>
+        abstract removeListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Http2ServerResponse<'Request>
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -118335,8 +118458,11 @@ module Http2 =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("Http2ServerResponse.once", "node:http2")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -118501,8 +118627,11 @@ module Http2 =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("Http2ServerResponse.on", "node:http2")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -118606,7 +118735,10 @@ module Http2 =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("Http2ServerResponse.listenerCount", "node:http2")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -118636,7 +118768,7 @@ module Http2 =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Http2ServerResponse.getEventListeners", "node:http2")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -118735,7 +118867,7 @@ module Http2 =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("Http2ServerResponse.errorMonitor", "node:http2")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -118744,7 +118876,7 @@ module Http2 =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("Http2ServerResponse.captureRejectionSymbol", "node:http2")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -119195,7 +119327,7 @@ module Http2 =
         /// an array value in order to provide a list of headers considered sensitive.
         /// </summary>
         [<Import("sensitiveHeaders", "node:http2")>]
-        static member sensitiveHeaders: obj = jsNative
+        static member sensitiveHeaders: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Returns an object containing the default settings for an <c>Http2Session</c> instance. This method returns a new object instance every time it is called
@@ -120168,7 +120300,7 @@ module Https =
         /// Alias for <c>emitter.on(eventName, listener)</c>.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract addListener: eventName: obj * listener: (obj[] -> unit) -> Agent
+        abstract addListener: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Agent
         /// <summary>
         /// Adds the <c>listener</c> function to the end of the listeners array for the event
         /// named <c>eventName</c>. No checks are made to see if the <c>listener</c> has already
@@ -120198,7 +120330,7 @@ module Https =
         /// <remarks>@since v0.1.101</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract on: eventName: obj * listener: (obj[] -> unit) -> Agent
+        abstract on: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Agent
         /// <summary>
         /// Adds a <b>one-time</b> <c>listener</c> function for the event named <c>eventName</c>. The
         /// next time <c>eventName</c> is triggered, this listener is removed and then invoked.
@@ -120226,7 +120358,7 @@ module Https =
         /// <remarks>@since v0.3.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract once: eventName: obj * listener: (obj[] -> unit) -> Agent
+        abstract once: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Agent
         /// <summary>
         /// Removes the specified <c>listener</c> from the listener array for the event named <c>eventName</c>.
         /// <code lang="js">
@@ -120306,12 +120438,12 @@ module Https =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeListener: eventName: obj * listener: (obj[] -> unit) -> Agent
+        abstract removeListener: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Agent
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Agent
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Agent
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -120322,7 +120454,7 @@ module Https =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Agent
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Agent
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -120349,7 +120481,8 @@ module Https =
         /// <remarks>@since v6.0.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract prependListener: eventName: obj * listener: (obj[] -> unit) -> Agent
+        abstract prependListener: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Agent
+
         /// <summary>
         /// Adds a <b>one-time</b><c>listener</c> function for the event named <c>eventName</c> to the _beginning_ of the listeners array. The next time <c>eventName</c> is triggered, this
         /// listener is removed, and then invoked.
@@ -120364,7 +120497,8 @@ module Https =
         /// <remarks>@since v6.0.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract prependOnceListener: eventName: obj * listener: (obj[] -> unit) -> Agent
+        abstract prependOnceListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Agent
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -120444,8 +120578,11 @@ module Https =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("Agent.once", "node:https")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -120610,8 +120747,11 @@ module Https =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("Agent.on", "node:https")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -120715,7 +120855,10 @@ module Https =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("Agent.listenerCount", "node:https")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -120745,7 +120888,7 @@ module Https =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Agent.getEventListeners", "node:https")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -120844,7 +120987,7 @@ module Https =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("Agent.errorMonitor", "node:https")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -120853,7 +120996,7 @@ module Https =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("Agent.captureRejectionSymbol", "node:https")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -121843,12 +121986,16 @@ module Https =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeListener: eventName: obj * listener: (obj[] -> unit) -> Server<'Request, 'Response>
+        abstract removeListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Server<'Request, 'Response>
+
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Server<'Request, 'Response>
+        abstract off:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Server<'Request, 'Response>
+
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -121859,7 +122006,7 @@ module Https =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Server<'Request, 'Response>
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Server<'Request, 'Response>
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -122391,8 +122538,11 @@ module Https =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("Server.once", "node:https")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -122557,8 +122707,11 @@ module Https =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("Server.on", "node:https")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -122662,7 +122815,10 @@ module Https =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("Server.listenerCount", "node:https")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -122692,7 +122848,7 @@ module Https =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Server.getEventListeners", "node:https")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -122791,7 +122947,7 @@ module Https =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("Server.errorMonitor", "node:https")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -122800,7 +122956,7 @@ module Https =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("Server.captureRejectionSymbol", "node:https")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -126195,7 +126351,7 @@ module Inspector =
         abstract addListenerTargetAttachedToTarget:
             listener: (InspectorNotification<Inspector.Target.AttachedToTargetEventDataType> -> unit) -> Session
 
-        abstract emit: ``event``: obj * [<ParamArray>] args: obj[] -> bool
+        abstract emit: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * [<ParamArray>] args: obj[] -> bool
 
         /// <summary>
         /// <code lang="ts">
@@ -128111,12 +128267,12 @@ module Inspector =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeListener: eventName: obj * listener: (obj[] -> unit) -> Session
+        abstract removeListener: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Session
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Session
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Session
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -128127,7 +128283,7 @@ module Inspector =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Session
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Session
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -128149,7 +128305,7 @@ module Inspector =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract listeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -128179,7 +128335,8 @@ module Inspector =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract rawListeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
+
         /// <summary>
         /// Returns the number of listeners listening for the event named <c>eventName</c>.
         /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -128188,7 +128345,28 @@ module Inspector =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
+        abstract listenerCount:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * ?listener: Fable.Core.TS.Es.Function -> float
+
+        /// <summary>
+        /// Returns an array listing the events for which the emitter has registered
+        /// listeners. The values in the array are strings or <c>Symbol</c>s.
+        /// <code lang="js">
+        /// import { EventEmitter } from 'node:events';
+        ///
+        /// const myEE = new EventEmitter();
+        /// myEE.on('foo', () =&gt; {});
+        /// myEE.on('bar', () =&gt; {});
+        ///
+        /// const sym = Symbol('symbol');
+        /// myEE.on(sym, () =&gt; {});
+        ///
+        /// console.log(myEE.eventNames());
+        /// // Prints: [ 'foo', 'bar', Symbol(symbol) ]
+        /// </code>
+        /// </summary>
+        /// <remarks>@since v6.0.0</remarks>
+        abstract eventNames: unit -> U2<string, Fable.Core.TS.Es.Symbol>[]
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -128268,8 +128446,11 @@ module Inspector =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("Session.once", "node:inspector")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -128434,8 +128615,11 @@ module Inspector =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("Session.on", "node:inspector")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -128539,7 +128723,10 @@ module Inspector =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("Session.listenerCount", "node:inspector")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -128569,7 +128756,7 @@ module Inspector =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Session.getEventListeners", "node:inspector")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -128668,7 +128855,7 @@ module Inspector =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("Session.errorMonitor", "node:inspector")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -128677,7 +128864,7 @@ module Inspector =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("Session.captureRejectionSymbol", "node:inspector")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -132349,7 +132536,7 @@ module Inspector =
                 listener: (Inspector.InspectorNotification<Inspector.Target.AttachedToTargetEventDataType> -> unit) ->
                     Session
 
-            abstract emit: ``event``: obj * [<ParamArray>] args: obj[] -> bool
+            abstract emit: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * [<ParamArray>] args: obj[] -> bool
 
             /// <summary>
             /// <code lang="ts">
@@ -134408,12 +134595,14 @@ module Inspector =
             /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
             /// </summary>
             /// <remarks>@since v0.1.26</remarks>
-            abstract removeListener: eventName: obj * listener: (obj[] -> unit) -> Session
+            abstract removeListener:
+                eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Session
+
             /// <summary>
             /// Alias for <c>emitter.removeListener()</c>.
             /// </summary>
             /// <remarks>@since v10.0.0</remarks>
-            abstract off: eventName: obj * listener: (obj[] -> unit) -> Session
+            abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Session
             /// <summary>
             /// Removes all listeners, or those of the specified <c>eventName</c>.
             /// <br /><br />
@@ -134424,7 +134613,7 @@ module Inspector =
             /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
             /// </summary>
             /// <remarks>@since v0.1.26</remarks>
-            abstract removeAllListeners: ?eventName: obj -> Session
+            abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Session
             /// <summary>
             /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
             /// added for a particular event. This is a useful default that helps finding
@@ -134446,7 +134635,7 @@ module Inspector =
             /// </code>
             /// </summary>
             /// <remarks>@since v0.1.26</remarks>
-            abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+            abstract listeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
             /// <summary>
             /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
             /// including any wrappers (such as those created by <c>.once()</c>).
@@ -134476,7 +134665,8 @@ module Inspector =
             /// </code>
             /// </summary>
             /// <remarks>@since v9.4.0</remarks>
-            abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+            abstract rawListeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
+
             /// <summary>
             /// Returns the number of listeners listening for the event named <c>eventName</c>.
             /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -134485,7 +134675,28 @@ module Inspector =
             /// <remarks>@since v3.2.0</remarks>
             /// <param name="eventName">The name of the event being listened for</param>
             /// <param name="listener">The event handler function</param>
-            abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
+            abstract listenerCount:
+                eventName: U2<string, Fable.Core.TS.Es.Symbol> * ?listener: Fable.Core.TS.Es.Function -> float
+
+            /// <summary>
+            /// Returns an array listing the events for which the emitter has registered
+            /// listeners. The values in the array are strings or <c>Symbol</c>s.
+            /// <code lang="js">
+            /// import { EventEmitter } from 'node:events';
+            ///
+            /// const myEE = new EventEmitter();
+            /// myEE.on('foo', () =&gt; {});
+            /// myEE.on('bar', () =&gt; {});
+            ///
+            /// const sym = Symbol('symbol');
+            /// myEE.on(sym, () =&gt; {});
+            ///
+            /// console.log(myEE.eventNames());
+            /// // Prints: [ 'foo', 'bar', Symbol(symbol) ]
+            /// </code>
+            /// </summary>
+            /// <remarks>@since v6.0.0</remarks>
+            abstract eventNames: unit -> U2<string, Fable.Core.TS.Es.Symbol>[]
 
             /// <summary>
             /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -134565,8 +134776,11 @@ module Inspector =
             /// <remarks>@since v11.13.0, v10.16.0</remarks>
             [<Import("Session.once", "node:inspector/promises")>]
             static member once
-                (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-                : JS.Promise<obj[]> =
+                (
+                    emitter: NodeJS.EventEmitter<unit[]>,
+                    eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                    ?options: StaticEventEmitterOptions
+                ) : JS.Promise<obj[]> =
                 jsNative
 
             /// <summary>
@@ -134731,8 +134945,11 @@ module Inspector =
             /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
             [<Import("Session.on", "node:inspector/promises")>]
             static member on
-                (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-                : NodeJS.AsyncIterator<obj[], obj, obj> =
+                (
+                    emitter: NodeJS.EventEmitter<unit[]>,
+                    eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                    ?options: StaticEventEmitterIteratorOptions
+                ) : NodeJS.AsyncIterator<obj[], obj, obj> =
                 jsNative
 
             /// <summary>
@@ -134836,7 +135053,10 @@ module Inspector =
             /// <param name="emitter">The emitter to query</param>
             /// <param name="eventName">The event name</param>
             [<Import("Session.listenerCount", "node:inspector/promises")>]
-            static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+            static member listenerCount
+                (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+                : float =
+                jsNative
 
             /// <summary>
             /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -134866,7 +135086,7 @@ module Inspector =
             /// <remarks>@since v15.2.0, v14.17.0</remarks>
             [<Import("Session.getEventListeners", "node:inspector/promises")>]
             static member getEventListeners
-                (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+                (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
                 : Fable.Core.TS.Es.Function[] =
                 jsNative
 
@@ -134965,7 +135185,7 @@ module Inspector =
             /// </summary>
             /// <remarks>@since v13.6.0, v12.17.0</remarks>
             [<Import("Session.errorMonitor", "node:inspector/promises")>]
-            static member errorMonitor: obj = jsNative
+            static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
             /// <summary>
             /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -134974,7 +135194,7 @@ module Inspector =
             /// </summary>
             /// <remarks>@since v13.4.0, v12.16.0</remarks>
             [<Import("Session.captureRejectionSymbol", "node:inspector/promises")>]
-            static member captureRejectionSymbol: obj = jsNative
+            static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
             /// <summary>
             /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -139266,7 +139486,7 @@ module Net =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Socket
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Socket
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -139277,7 +139497,7 @@ module Net =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Socket
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Socket
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -139486,7 +139706,7 @@ module Net =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> Socket
+        abstract removeListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Socket
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -139566,8 +139786,11 @@ module Net =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("Socket.once", "node:net")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -139732,8 +139955,11 @@ module Net =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("Socket.on", "node:net")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -139837,7 +140063,10 @@ module Net =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("Socket.listenerCount", "node:net")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -139867,7 +140096,7 @@ module Net =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Socket.getEventListeners", "node:net")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -139966,7 +140195,7 @@ module Net =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("Socket.errorMonitor", "node:net")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -139975,7 +140204,7 @@ module Net =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("Socket.captureRejectionSymbol", "node:net")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -140641,12 +140870,12 @@ module Net =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeListener: eventName: obj * listener: (obj[] -> unit) -> Server
+        abstract removeListener: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Server
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Server
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Server
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -140657,7 +140886,7 @@ module Net =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Server
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Server
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -141200,7 +141429,7 @@ module Net =
         /// // event with parameters 1, 2, 3, 4, 5 in third listener
         /// </code>
         /// </summary>
-        abstract emit: ``event``: obj * [<ParamArray>] args: obj[] -> bool
+        abstract emit: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * [<ParamArray>] args: obj[] -> bool
 
         /// <summary>
         /// <code lang="ts">
@@ -141495,7 +141724,7 @@ module Net =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract listeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -141525,7 +141754,8 @@ module Net =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract rawListeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
+
         /// <summary>
         /// Returns the number of listeners listening for the event named <c>eventName</c>.
         /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -141534,7 +141764,28 @@ module Net =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
+        abstract listenerCount:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * ?listener: Fable.Core.TS.Es.Function -> float
+
+        /// <summary>
+        /// Returns an array listing the events for which the emitter has registered
+        /// listeners. The values in the array are strings or <c>Symbol</c>s.
+        /// <code lang="js">
+        /// import { EventEmitter } from 'node:events';
+        ///
+        /// const myEE = new EventEmitter();
+        /// myEE.on('foo', () =&gt; {});
+        /// myEE.on('bar', () =&gt; {});
+        ///
+        /// const sym = Symbol('symbol');
+        /// myEE.on(sym, () =&gt; {});
+        ///
+        /// console.log(myEE.eventNames());
+        /// // Prints: [ 'foo', 'bar', Symbol(symbol) ]
+        /// </code>
+        /// </summary>
+        /// <remarks>@since v6.0.0</remarks>
+        abstract eventNames: unit -> U2<string, Fable.Core.TS.Es.Symbol>[]
 
         /// <summary>
         /// Calls Server.close() and returns a promise that fulfills when the server has closed.
@@ -141621,8 +141872,11 @@ module Net =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("Server.once", "node:net")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -141787,8 +142041,11 @@ module Net =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("Server.on", "node:net")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -141892,7 +142149,10 @@ module Net =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("Server.listenerCount", "node:net")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -141922,7 +142182,7 @@ module Net =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Server.getEventListeners", "node:net")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -142021,7 +142281,7 @@ module Net =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("Server.errorMonitor", "node:net")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -142030,7 +142290,7 @@ module Net =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("Server.captureRejectionSymbol", "node:net")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -143272,11 +143532,14 @@ module NodeJS =
                 unit
 
         abstract wrap: oldStream: ReadableStream -> ReadableStream
+
         /// <summary>
         /// Alias for <c>emitter.on(eventName, listener)</c>.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract addListener: eventName: obj * listener: (obj[] -> unit) -> ReadableStream
+        abstract addListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ReadableStream
+
         /// <summary>
         /// Adds the <c>listener</c> function to the end of the listeners array for the event
         /// named <c>eventName</c>. No checks are made to see if the <c>listener</c> has already
@@ -143306,7 +143569,7 @@ module NodeJS =
         /// <remarks>@since v0.1.101</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract on: eventName: obj * listener: (obj[] -> unit) -> ReadableStream
+        abstract on: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ReadableStream
         /// <summary>
         /// Adds a <b>one-time</b> <c>listener</c> function for the event named <c>eventName</c>. The
         /// next time <c>eventName</c> is triggered, this listener is removed and then invoked.
@@ -143334,7 +143597,8 @@ module NodeJS =
         /// <remarks>@since v0.3.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract once: eventName: obj * listener: (obj[] -> unit) -> ReadableStream
+        abstract once: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ReadableStream
+
         /// <summary>
         /// Removes the specified <c>listener</c> from the listener array for the event named <c>eventName</c>.
         /// <code lang="js">
@@ -143414,12 +143678,14 @@ module NodeJS =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeListener: eventName: obj * listener: (obj[] -> unit) -> ReadableStream
+        abstract removeListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ReadableStream
+
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> ReadableStream
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ReadableStream
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -143430,7 +143696,7 @@ module NodeJS =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> ReadableStream
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> ReadableStream
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -143452,7 +143718,7 @@ module NodeJS =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract listeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -143482,7 +143748,7 @@ module NodeJS =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract rawListeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Synchronously calls each of the listeners registered for the event named <c>eventName</c>, in the order they were registered, passing the supplied arguments
         /// to each.
@@ -143522,7 +143788,8 @@ module NodeJS =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract emit: eventName: obj * [<ParamArray>] args: obj[] -> bool
+        abstract emit: eventName: U2<string, Fable.Core.TS.Es.Symbol> * [<ParamArray>] args: obj[] -> bool
+
         /// <summary>
         /// Returns the number of listeners listening for the event named <c>eventName</c>.
         /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -143531,7 +143798,9 @@ module NodeJS =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
+        abstract listenerCount:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * ?listener: Fable.Core.TS.Es.Function -> float
+
         /// <summary>
         /// Adds the <c>listener</c> function to the _beginning_ of the listeners array for the
         /// event named <c>eventName</c>. No checks are made to see if the <c>listener</c> has
@@ -143548,7 +143817,9 @@ module NodeJS =
         /// <remarks>@since v6.0.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract prependListener: eventName: obj * listener: (obj[] -> unit) -> ReadableStream
+        abstract prependListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ReadableStream
+
         /// <summary>
         /// Adds a <b>one-time</b><c>listener</c> function for the event named <c>eventName</c> to the _beginning_ of the listeners array. The next time <c>eventName</c> is triggered, this
         /// listener is removed, and then invoked.
@@ -143563,7 +143834,28 @@ module NodeJS =
         /// <remarks>@since v6.0.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract prependOnceListener: eventName: obj * listener: (obj[] -> unit) -> ReadableStream
+        abstract prependOnceListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ReadableStream
+
+        /// <summary>
+        /// Returns an array listing the events for which the emitter has registered
+        /// listeners. The values in the array are strings or <c>Symbol</c>s.
+        /// <code lang="js">
+        /// import { EventEmitter } from 'node:events';
+        ///
+        /// const myEE = new EventEmitter();
+        /// myEE.on('foo', () =&gt; {});
+        /// myEE.on('bar', () =&gt; {});
+        ///
+        /// const sym = Symbol('symbol');
+        /// myEE.on(sym, () =&gt; {});
+        ///
+        /// console.log(myEE.eventNames());
+        /// // Prints: [ 'foo', 'bar', Symbol(symbol) ]
+        /// </code>
+        /// </summary>
+        /// <remarks>@since v6.0.0</remarks>
+        abstract eventNames: unit -> U2<string, Fable.Core.TS.Es.Symbol>[]
 
         [<Emit("$0[Symbol.asyncIterator]()")>]
         abstract SymbolAsyncIterator:
@@ -143592,11 +143884,14 @@ module NodeJS =
                 WritableStream
 
         abstract ``end``: str: string * ?encoding: Node.BufferEncoding * ?cb: (unit -> unit) -> WritableStream
+
         /// <summary>
         /// Alias for <c>emitter.on(eventName, listener)</c>.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract addListener: eventName: obj * listener: (obj[] -> unit) -> WritableStream
+        abstract addListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> WritableStream
+
         /// <summary>
         /// Adds the <c>listener</c> function to the end of the listeners array for the event
         /// named <c>eventName</c>. No checks are made to see if the <c>listener</c> has already
@@ -143626,7 +143921,7 @@ module NodeJS =
         /// <remarks>@since v0.1.101</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract on: eventName: obj * listener: (obj[] -> unit) -> WritableStream
+        abstract on: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> WritableStream
         /// <summary>
         /// Adds a <b>one-time</b> <c>listener</c> function for the event named <c>eventName</c>. The
         /// next time <c>eventName</c> is triggered, this listener is removed and then invoked.
@@ -143654,7 +143949,8 @@ module NodeJS =
         /// <remarks>@since v0.3.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract once: eventName: obj * listener: (obj[] -> unit) -> WritableStream
+        abstract once: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> WritableStream
+
         /// <summary>
         /// Removes the specified <c>listener</c> from the listener array for the event named <c>eventName</c>.
         /// <code lang="js">
@@ -143734,12 +144030,14 @@ module NodeJS =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeListener: eventName: obj * listener: (obj[] -> unit) -> WritableStream
+        abstract removeListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> WritableStream
+
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> WritableStream
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> WritableStream
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -143750,7 +144048,7 @@ module NodeJS =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> WritableStream
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> WritableStream
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -143772,7 +144070,7 @@ module NodeJS =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract listeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -143802,7 +144100,7 @@ module NodeJS =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract rawListeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Synchronously calls each of the listeners registered for the event named <c>eventName</c>, in the order they were registered, passing the supplied arguments
         /// to each.
@@ -143842,7 +144140,8 @@ module NodeJS =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract emit: eventName: obj * [<ParamArray>] args: obj[] -> bool
+        abstract emit: eventName: U2<string, Fable.Core.TS.Es.Symbol> * [<ParamArray>] args: obj[] -> bool
+
         /// <summary>
         /// Returns the number of listeners listening for the event named <c>eventName</c>.
         /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -143851,7 +144150,9 @@ module NodeJS =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
+        abstract listenerCount:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * ?listener: Fable.Core.TS.Es.Function -> float
+
         /// <summary>
         /// Adds the <c>listener</c> function to the _beginning_ of the listeners array for the
         /// event named <c>eventName</c>. No checks are made to see if the <c>listener</c> has
@@ -143868,7 +144169,9 @@ module NodeJS =
         /// <remarks>@since v6.0.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract prependListener: eventName: obj * listener: (obj[] -> unit) -> WritableStream
+        abstract prependListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> WritableStream
+
         /// <summary>
         /// Adds a <b>one-time</b><c>listener</c> function for the event named <c>eventName</c> to the _beginning_ of the listeners array. The next time <c>eventName</c> is triggered, this
         /// listener is removed, and then invoked.
@@ -143883,7 +144186,28 @@ module NodeJS =
         /// <remarks>@since v6.0.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract prependOnceListener: eventName: obj * listener: (obj[] -> unit) -> WritableStream
+        abstract prependOnceListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> WritableStream
+
+        /// <summary>
+        /// Returns an array listing the events for which the emitter has registered
+        /// listeners. The values in the array are strings or <c>Symbol</c>s.
+        /// <code lang="js">
+        /// import { EventEmitter } from 'node:events';
+        ///
+        /// const myEE = new EventEmitter();
+        /// myEE.on('foo', () =&gt; {});
+        /// myEE.on('bar', () =&gt; {});
+        ///
+        /// const sym = Symbol('symbol');
+        /// myEE.on(sym, () =&gt; {});
+        ///
+        /// console.log(myEE.eventNames());
+        /// // Prints: [ 'foo', 'bar', Symbol(symbol) ]
+        /// </code>
+        /// </summary>
+        /// <remarks>@since v6.0.0</remarks>
+        abstract eventNames: unit -> U2<string, Fable.Core.TS.Es.Symbol>[]
 
     type ReadWriteStream =
         inherit ReadableStream
@@ -143901,11 +144225,14 @@ module NodeJS =
                 ReadWriteStream
 
         abstract ``end``: str: string * ?encoding: Node.BufferEncoding * ?cb: (unit -> unit) -> ReadWriteStream
+
         /// <summary>
         /// Alias for <c>emitter.on(eventName, listener)</c>.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract addListener: eventName: obj * listener: (obj[] -> unit) -> ReadWriteStream
+        abstract addListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ReadWriteStream
+
         /// <summary>
         /// Adds the <c>listener</c> function to the end of the listeners array for the event
         /// named <c>eventName</c>. No checks are made to see if the <c>listener</c> has already
@@ -143935,7 +144262,7 @@ module NodeJS =
         /// <remarks>@since v0.1.101</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract on: eventName: obj * listener: (obj[] -> unit) -> ReadWriteStream
+        abstract on: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ReadWriteStream
         /// <summary>
         /// Adds a <b>one-time</b> <c>listener</c> function for the event named <c>eventName</c>. The
         /// next time <c>eventName</c> is triggered, this listener is removed and then invoked.
@@ -143963,7 +144290,8 @@ module NodeJS =
         /// <remarks>@since v0.3.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract once: eventName: obj * listener: (obj[] -> unit) -> ReadWriteStream
+        abstract once: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ReadWriteStream
+
         /// <summary>
         /// Removes the specified <c>listener</c> from the listener array for the event named <c>eventName</c>.
         /// <code lang="js">
@@ -144043,12 +144371,14 @@ module NodeJS =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeListener: eventName: obj * listener: (obj[] -> unit) -> ReadWriteStream
+        abstract removeListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ReadWriteStream
+
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> ReadWriteStream
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ReadWriteStream
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -144059,7 +144389,7 @@ module NodeJS =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> ReadWriteStream
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> ReadWriteStream
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -144070,6 +144400,7 @@ module NodeJS =
         /// </summary>
         /// <remarks>@since v0.3.5</remarks>
         abstract setMaxListeners: n: float -> ReadWriteStream
+
         /// <summary>
         /// Adds the <c>listener</c> function to the _beginning_ of the listeners array for the
         /// event named <c>eventName</c>. No checks are made to see if the <c>listener</c> has
@@ -144086,7 +144417,9 @@ module NodeJS =
         /// <remarks>@since v6.0.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract prependListener: eventName: obj * listener: (obj[] -> unit) -> ReadWriteStream
+        abstract prependListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ReadWriteStream
+
         /// <summary>
         /// Adds a <b>one-time</b><c>listener</c> function for the event named <c>eventName</c> to the _beginning_ of the listeners array. The next time <c>eventName</c> is triggered, this
         /// listener is removed, and then invoked.
@@ -144101,7 +144434,8 @@ module NodeJS =
         /// <remarks>@since v6.0.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract prependOnceListener: eventName: obj * listener: (obj[] -> unit) -> ReadWriteStream
+        abstract prependOnceListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ReadWriteStream
 
     [<Interface>]
     type RefCounted =
@@ -144380,7 +144714,7 @@ module NodeJS =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> ReadStream
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ReadStream
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -144391,7 +144725,7 @@ module NodeJS =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> ReadStream
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> ReadStream
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -145473,7 +145807,9 @@ module NodeJS =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> ReadStream
+        abstract removeListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ReadStream
+
         /// <summary>
         /// Allows configuration of <c>tty.ReadStream</c> so that it operates as a raw device.
         /// <br /><br />
@@ -145497,7 +145833,7 @@ module NodeJS =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> WriteStream
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> WriteStream
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -145508,7 +145844,7 @@ module NodeJS =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> WriteStream
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> WriteStream
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -146009,7 +146345,9 @@ module NodeJS =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> WriteStream
+        abstract removeListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> WriteStream
+
         /// <summary>
         /// events.EventEmitter
         ///   1. close
@@ -146440,7 +146778,7 @@ module NodeJS =
         /// Alias for <c>emitter.on(eventName, listener)</c>.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract addListener: eventName: obj * listener: (obj[] -> unit) -> Socket
+        abstract addListener: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Socket
         /// <summary>
         /// Adds the <c>listener</c> function to the end of the listeners array for the event
         /// named <c>eventName</c>. No checks are made to see if the <c>listener</c> has already
@@ -146470,7 +146808,7 @@ module NodeJS =
         /// <remarks>@since v0.1.101</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract on: eventName: obj * listener: (obj[] -> unit) -> Socket
+        abstract on: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Socket
         /// <summary>
         /// Adds a <b>one-time</b> <c>listener</c> function for the event named <c>eventName</c>. The
         /// next time <c>eventName</c> is triggered, this listener is removed and then invoked.
@@ -146498,7 +146836,7 @@ module NodeJS =
         /// <remarks>@since v0.3.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract once: eventName: obj * listener: (obj[] -> unit) -> Socket
+        abstract once: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Socket
         /// <summary>
         /// Removes the specified <c>listener</c> from the listener array for the event named <c>eventName</c>.
         /// <code lang="js">
@@ -146578,12 +146916,12 @@ module NodeJS =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeListener: eventName: obj * listener: (obj[] -> unit) -> Socket
+        abstract removeListener: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Socket
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Socket
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Socket
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -146594,7 +146932,7 @@ module NodeJS =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Socket
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Socket
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -146621,7 +146959,8 @@ module NodeJS =
         /// <remarks>@since v6.0.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract prependListener: eventName: obj * listener: (obj[] -> unit) -> Socket
+        abstract prependListener: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Socket
+
         /// <summary>
         /// Adds a <b>one-time</b><c>listener</c> function for the event named <c>eventName</c> to the _beginning_ of the listeners array. The next time <c>eventName</c> is triggered, this
         /// listener is removed, and then invoked.
@@ -146636,7 +146975,8 @@ module NodeJS =
         /// <remarks>@since v6.0.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract prependOnceListener: eventName: obj * listener: (obj[] -> unit) -> Socket
+        abstract prependOnceListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Socket
 
     type ProcessEnv =
         [<EmitIndexer>]
@@ -146942,12 +147282,12 @@ module NodeJS =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeListener: eventName: obj * listener: (obj[] -> unit) -> Process
+        abstract removeListener: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Process
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Process
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Process
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -146958,7 +147298,7 @@ module NodeJS =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Process
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Process
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -146998,7 +147338,8 @@ module NodeJS =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract rawListeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
+
         /// <summary>
         /// Returns the number of listeners listening for the event named <c>eventName</c>.
         /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -147007,7 +147348,28 @@ module NodeJS =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
+        abstract listenerCount:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * ?listener: Fable.Core.TS.Es.Function -> float
+
+        /// <summary>
+        /// Returns an array listing the events for which the emitter has registered
+        /// listeners. The values in the array are strings or <c>Symbol</c>s.
+        /// <code lang="js">
+        /// import { EventEmitter } from 'node:events';
+        ///
+        /// const myEE = new EventEmitter();
+        /// myEE.on('foo', () =&gt; {});
+        /// myEE.on('bar', () =&gt; {});
+        ///
+        /// const sym = Symbol('symbol');
+        /// myEE.on(sym, () =&gt; {});
+        ///
+        /// console.log(myEE.eventNames());
+        /// // Prints: [ 'foo', 'bar', Symbol(symbol) ]
+        /// </code>
+        /// </summary>
+        /// <remarks>@since v6.0.0</remarks>
+        abstract eventNames: unit -> U2<string, Fable.Core.TS.Es.Symbol>[]
         /// <summary>
         /// The <c>process.stdout</c> property returns a stream connected to<c>stdout</c> (fd <c>1</c>). It is a <c>net.Socket</c> (which is a <c>Duplex</c> stream) unless fd <c>1</c> refers to a file, in which case it is
         /// a <c>Writable</c> stream.
@@ -148907,7 +149269,7 @@ module NodeJS =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> Process
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Process
 
         /// <summary>
         /// <code lang="ts">
@@ -149055,7 +149417,7 @@ module NodeJS =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> Process
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Process
 
         /// <summary>
         /// <code lang="ts">
@@ -149579,7 +149941,7 @@ module NodeJS =
             /// Alias for <c>emitter.removeListener()</c>.
             /// </summary>
             /// <remarks>@since v10.0.0</remarks>
-            abstract off: eventName: obj * listener: (obj[] -> unit) -> Stderr
+            abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Stderr
             /// <summary>
             /// Removes all listeners, or those of the specified <c>eventName</c>.
             /// <br /><br />
@@ -149590,7 +149952,7 @@ module NodeJS =
             /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
             /// </summary>
             /// <remarks>@since v0.1.26</remarks>
-            abstract removeAllListeners: ?eventName: obj -> Stderr
+            abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Stderr
             /// <summary>
             /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
             /// added for a particular event. This is a useful default that helps finding
@@ -150092,7 +150454,9 @@ module NodeJS =
             /// <br /><br />
             /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
             /// </summary>
-            abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> Stderr
+            abstract removeListener:
+                ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Stderr
+
             /// <summary>
             /// events.EventEmitter
             ///   1. close
@@ -150262,7 +150626,7 @@ module NodeJS =
             /// Alias for <c>emitter.removeListener()</c>.
             /// </summary>
             /// <remarks>@since v10.0.0</remarks>
-            abstract off: eventName: obj * listener: (obj[] -> unit) -> Stdin
+            abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Stdin
             /// <summary>
             /// Removes all listeners, or those of the specified <c>eventName</c>.
             /// <br /><br />
@@ -150273,7 +150637,7 @@ module NodeJS =
             /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
             /// </summary>
             /// <remarks>@since v0.1.26</remarks>
-            abstract removeAllListeners: ?eventName: obj -> Stdin
+            abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Stdin
             /// <summary>
             /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
             /// added for a particular event. This is a useful default that helps finding
@@ -151356,7 +151720,7 @@ module NodeJS =
             /// <br /><br />
             /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
             /// </summary>
-            abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> Stdin
+            abstract removeListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Stdin
             /// <summary>
             /// Allows configuration of <c>tty.ReadStream</c> so that it operates as a raw device.
             /// <br /><br />
@@ -151403,7 +151767,7 @@ module NodeJS =
             /// Alias for <c>emitter.removeListener()</c>.
             /// </summary>
             /// <remarks>@since v10.0.0</remarks>
-            abstract off: eventName: obj * listener: (obj[] -> unit) -> Stdout
+            abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Stdout
             /// <summary>
             /// Removes all listeners, or those of the specified <c>eventName</c>.
             /// <br /><br />
@@ -151414,7 +151778,7 @@ module NodeJS =
             /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
             /// </summary>
             /// <remarks>@since v0.1.26</remarks>
-            abstract removeAllListeners: ?eventName: obj -> Stdout
+            abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Stdout
             /// <summary>
             /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
             /// added for a particular event. This is a useful default that helps finding
@@ -151916,7 +152280,9 @@ module NodeJS =
             /// <br /><br />
             /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
             /// </summary>
-            abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> Stdout
+            abstract removeListener:
+                ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Stdout
+
             /// <summary>
             /// events.EventEmitter
             ///   1. close
@@ -152256,7 +152622,7 @@ module Os =
         abstract cidr: string option with get, set
         abstract scopeid: float option with get, set
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"cidr\": o[\"cidr\"] ?? null}))($0)")>]
         static member Create
             (address: string, netmask: string, mac: string, ``internal``: bool, ?cidr: string, ?scopeid: float)
             : NetworkInterfaceBase =
@@ -152268,7 +152634,7 @@ module Os =
         /// <remarks>TypeScript type: <c>"IPv4"</c></remarks>
         abstract family: string with get, set
 
-        [<ParamObject; Emit("({ family: 'IPv4', ...$0 })")>]
+        [<ParamObject; Emit("(o => ({family: 'IPv4', ...o, \"cidr\": o[\"cidr\"] ?? null}))($0)")>]
         static member Create
             (address: string, netmask: string, mac: string, ``internal``: bool, ?cidr: string, ?scopeid: float)
             : NetworkInterfaceInfoIPv4 =
@@ -152286,7 +152652,7 @@ module Os =
         abstract family: string with get, set
         abstract scopeid: float with get, set
 
-        [<ParamObject; Emit("({ family: 'IPv6', ...$0 })")>]
+        [<ParamObject; Emit("(o => ({family: 'IPv6', ...o, \"cidr\": o[\"cidr\"] ?? null}))($0)")>]
         static member Create
             (scopeid: float, address: string, netmask: string, mac: string, ``internal``: bool, ?cidr: string)
             : NetworkInterfaceInfoIPv6 =
@@ -152305,7 +152671,7 @@ module Os =
         abstract shell: 'T option with get, set
         abstract homedir: 'T with get, set
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"shell\": o[\"shell\"] ?? null}))($0)")>]
         static member Create(username: 'T, uid: float, gid: float, homedir: 'T, ?shell: 'T) : UserInfo<'T> = jsNative
 
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("family", CaseRules.None)>]
@@ -154729,7 +155095,7 @@ module Readdir =
         abstract withFileTypes: bool option with get, set
         abstract recursive: bool option with get, set
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject; Emit("(o => ({...o, \"encoding\": o[\"encoding\"] ?? null}))($0)")>]
         static member Create(?encoding: BufferEncoding, ?withFileTypes: bool, ?recursive: bool) : Options = jsNative
 
     [<Interface>]
@@ -154787,7 +155153,7 @@ module Readdir =
             abstract withFileTypes: bool option with get, set
             abstract recursive: bool option with get, set
 
-            [<ParamObject; Emit("$0")>]
+            [<ParamObject; Emit("(o => ({...o, \"encoding\": o[\"encoding\"] ?? null}))($0)")>]
             static member Create(?encoding: BufferEncoding, ?withFileTypes: bool, ?recursive: bool) : Options = jsNative
 
         [<Interface>]
@@ -155201,7 +155567,7 @@ module Readline =
         /// // event with parameters 1, 2, 3, 4, 5 in third listener
         /// </code>
         /// </summary>
-        abstract emit: ``event``: obj * [<ParamArray>] args: obj[] -> bool
+        abstract emit: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * [<ParamArray>] args: obj[] -> bool
 
         /// <summary>
         /// <code lang="ts">
@@ -155684,12 +156050,12 @@ module Readline =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeListener: eventName: obj * listener: (obj[] -> unit) -> Interface
+        abstract removeListener: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Interface
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Interface
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Interface
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -155700,7 +156066,7 @@ module Readline =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Interface
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Interface
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -155722,7 +156088,7 @@ module Readline =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract listeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -155752,7 +156118,8 @@ module Readline =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract rawListeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
+
         /// <summary>
         /// Returns the number of listeners listening for the event named <c>eventName</c>.
         /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -155761,7 +156128,28 @@ module Readline =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
+        abstract listenerCount:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * ?listener: Fable.Core.TS.Es.Function -> float
+
+        /// <summary>
+        /// Returns an array listing the events for which the emitter has registered
+        /// listeners. The values in the array are strings or <c>Symbol</c>s.
+        /// <code lang="js">
+        /// import { EventEmitter } from 'node:events';
+        ///
+        /// const myEE = new EventEmitter();
+        /// myEE.on('foo', () =&gt; {});
+        /// myEE.on('bar', () =&gt; {});
+        ///
+        /// const sym = Symbol('symbol');
+        /// myEE.on(sym, () =&gt; {});
+        ///
+        /// console.log(myEE.eventNames());
+        /// // Prints: [ 'foo', 'bar', Symbol(symbol) ]
+        /// </code>
+        /// </summary>
+        /// <remarks>@since v6.0.0</remarks>
+        abstract eventNames: unit -> U2<string, Fable.Core.TS.Es.Symbol>[]
 
         /// <summary>
         /// Alias for <c>rl.close()</c>.
@@ -155851,8 +156239,11 @@ module Readline =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("Interface.once", "node:readline")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -156017,8 +156408,11 @@ module Readline =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("Interface.on", "node:readline")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -156122,7 +156516,10 @@ module Readline =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("Interface.listenerCount", "node:readline")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -156152,7 +156549,7 @@ module Readline =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Interface.getEventListeners", "node:readline")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -156251,7 +156648,7 @@ module Readline =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("Interface.errorMonitor", "node:readline")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -156260,7 +156657,7 @@ module Readline =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("Interface.captureRejectionSymbol", "node:readline")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -156889,6 +157286,7 @@ module Readline =
             /// <param name="query">A statement or query to write to <c>output</c>, prepended to the prompt.</param>
             /// <returns>A promise that is fulfilled with the user's input in response to the <c>query</c>.</returns>
             abstract question: query: string * options: Events.Abortable -> JS.Promise<string>
+
             /// <summary>
             /// Removes the specified <c>listener</c> from the listener array for the event named <c>eventName</c>.
             /// <code lang="js">
@@ -156968,12 +157366,14 @@ module Readline =
             /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
             /// </summary>
             /// <remarks>@since v0.1.26</remarks>
-            abstract removeListener: eventName: obj * listener: (obj[] -> unit) -> Interface
+            abstract removeListener:
+                eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Interface
+
             /// <summary>
             /// Alias for <c>emitter.removeListener()</c>.
             /// </summary>
             /// <remarks>@since v10.0.0</remarks>
-            abstract off: eventName: obj * listener: (obj[] -> unit) -> Interface
+            abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Interface
             /// <summary>
             /// Removes all listeners, or those of the specified <c>eventName</c>.
             /// <br /><br />
@@ -156984,7 +157384,7 @@ module Readline =
             /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
             /// </summary>
             /// <remarks>@since v0.1.26</remarks>
-            abstract removeAllListeners: ?eventName: obj -> Interface
+            abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Interface
             /// <summary>
             /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
             /// added for a particular event. This is a useful default that helps finding
@@ -157501,8 +157901,11 @@ module Readline =
             /// <remarks>@since v11.13.0, v10.16.0</remarks>
             [<Import("Interface.once", "node:readline/promises")>]
             static member once
-                (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-                : JS.Promise<obj[]> =
+                (
+                    emitter: NodeJS.EventEmitter<unit[]>,
+                    eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                    ?options: StaticEventEmitterOptions
+                ) : JS.Promise<obj[]> =
                 jsNative
 
             /// <summary>
@@ -157667,8 +158070,11 @@ module Readline =
             /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
             [<Import("Interface.on", "node:readline/promises")>]
             static member on
-                (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-                : NodeJS.AsyncIterator<obj[], obj, obj> =
+                (
+                    emitter: NodeJS.EventEmitter<unit[]>,
+                    eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                    ?options: StaticEventEmitterIteratorOptions
+                ) : NodeJS.AsyncIterator<obj[], obj, obj> =
                 jsNative
 
             /// <summary>
@@ -157772,7 +158178,10 @@ module Readline =
             /// <param name="emitter">The emitter to query</param>
             /// <param name="eventName">The event name</param>
             [<Import("Interface.listenerCount", "node:readline/promises")>]
-            static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+            static member listenerCount
+                (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+                : float =
+                jsNative
 
             /// <summary>
             /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -157802,7 +158211,7 @@ module Readline =
             /// <remarks>@since v15.2.0, v14.17.0</remarks>
             [<Import("Interface.getEventListeners", "node:readline/promises")>]
             static member getEventListeners
-                (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+                (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
                 : Fable.Core.TS.Es.Function[] =
                 jsNative
 
@@ -157901,7 +158310,7 @@ module Readline =
             /// </summary>
             /// <remarks>@since v13.6.0, v12.17.0</remarks>
             [<Import("Interface.errorMonitor", "node:readline/promises")>]
-            static member errorMonitor: obj = jsNative
+            static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
             /// <summary>
             /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -157910,7 +158319,7 @@ module Readline =
             /// </summary>
             /// <remarks>@since v13.4.0, v12.16.0</remarks>
             [<Import("Interface.captureRejectionSymbol", "node:readline/promises")>]
-            static member captureRejectionSymbol: obj = jsNative
+            static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
             /// <summary>
             /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -158401,7 +158810,7 @@ module Repl =
         /// - <c>repl.REPL_MODE_STRICT</c> - evaluates expressions in strict mode. This is equivalent to
         ///   prefacing every repl statement with <c>'use strict'</c>.
         /// </summary>
-        abstract replMode: obj option with get, set
+        abstract replMode: Fable.Core.TS.Es.Symbol option with get, set
         /// <summary>
         /// Stop evaluating the current piece of code when <c>SIGINT</c> is received, i.e. <c>Ctrl+C</c> is
         /// pressed. This cannot be used together with a custom <c>eval</c> function.
@@ -158423,7 +158832,7 @@ module Repl =
                 ?ignoreUndefined: bool,
                 ?writer: REPLWriter,
                 ?completer: U2<Readline.AsyncCompleter, Readline.Completer>,
-                ?replMode: obj,
+                ?replMode: Fable.Core.TS.Es.Symbol,
                 ?breakEvalOnSigint: bool
             ) : ReplOptions =
             jsNative
@@ -158576,7 +158985,7 @@ module Repl =
         /// - <c>repl.REPL_MODE_STRICT</c> - evaluates expressions in strict mode. This is equivalent to
         ///    prefacing every repl statement with <c>'use strict'</c>.
         /// </summary>
-        abstract replMode: obj
+        abstract replMode: Fable.Core.TS.Es.Symbol
         /// <summary>
         /// The <c>replServer.defineCommand()</c> method is used to add new <c>.</c>\-prefixed commands
         /// to the REPL instance. Such commands are invoked by typing a <c>.</c> followed by the <c>keyword</c>. The <c>cmd</c> is either a <c>Function</c> or an <c>Object</c> with the following
@@ -159196,12 +159605,14 @@ module Repl =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeListener: eventName: obj * listener: (obj[] -> unit) -> REPLServer
+        abstract removeListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> REPLServer
+
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> REPLServer
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> REPLServer
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -159212,7 +159623,7 @@ module Repl =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> REPLServer
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> REPLServer
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -159304,8 +159715,11 @@ module Repl =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("REPLServer.on", "node:repl")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -159409,7 +159823,10 @@ module Repl =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("REPLServer.listenerCount", "node:repl")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -159439,7 +159856,7 @@ module Repl =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("REPLServer.getEventListeners", "node:repl")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -159538,7 +159955,7 @@ module Repl =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("REPLServer.errorMonitor", "node:repl")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -159547,7 +159964,7 @@ module Repl =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("REPLServer.captureRejectionSymbol", "node:repl")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -159637,8 +160054,11 @@ module Repl =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("REPLServer.once", "node:repl")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -159907,33 +160327,17 @@ module Repl =
         static member writer: Writer = jsNative
 
         /// <summary>
-        /// Instances of <c>repl.REPLServer</c> are created using the start method
-        /// or directly using the JavaScript <c>new</c> keyword.
-        /// <code lang="js">
-        /// import repl from 'node:repl';
-        ///
-        /// const options = { useColors: true };
-        ///
-        /// const firstInstance = repl.start(options);
-        /// const secondInstance = new repl.REPLServer(options);
-        /// </code>
-        /// </summary>
-        /// <remarks>@since v0.1.91</remarks>
-        [<Import("REPLServer", "node:repl"); EmitConstructor>]
-        static member REPLServer() : REPLServer = jsNative
-
-        /// <summary>
         /// A flag passed in the REPL options. Evaluates expressions in sloppy mode.
         /// </summary>
         [<Import("REPL_MODE_SLOPPY", "node:repl")>]
-        static member REPL_MODE_SLOPPY: obj = jsNative
+        static member REPL_MODE_SLOPPY: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// A flag passed in the REPL options. Evaluates expressions in strict mode.
         /// This is equivalent to prefacing every repl statement with <c>'use strict'</c>.
         /// </summary>
         [<Import("REPL_MODE_STRICT", "node:repl")>]
-        static member REPL_MODE_STRICT: obj = jsNative
+        static member REPL_MODE_STRICT: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// The <c>repl.start()</c> method creates and starts a REPLServer instance.
@@ -160692,7 +161096,8 @@ module Sqlite =
         /// </summary>
         abstract ``type``: string option with get, set
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("(o => ({...o, \"column\": o[\"column\"] ?? null, \"database\": o[\"database\"] ?? null, \"table\": o[\"table\"] ?? null, \"type\": o[\"type\"] ?? null}))($0)")>]
         static member Create
             (name: string, ?column: string, ?database: string, ?table: string, ?``type``: string)
             : StatementColumnMetadata =
@@ -160979,21 +161384,6 @@ module Sqlite =
         static member DatabaseSync(path: Fs.PathLike, ?options: DatabaseSyncOptions) : DatabaseSync = jsNative
 
         /// <summary>
-        /// This class represents a single <a href="https://www.sqlite.org/c3ref/stmt.html">prepared statement</a>. This class cannot be
-        /// instantiated via its constructor. Instead, instances are created via the<c>database.prepare()</c> method. All APIs exposed by this class execute
-        /// synchronously.
-        /// <br /><br />
-        /// A prepared statement is an efficient binary representation of the SQL used to
-        /// create it. Prepared statements are parameterizable, and can be invoked multiple
-        /// times with different bound values. Parameters also offer protection against <a href="https://en.wikipedia.org/wiki/SQL_injection">SQL injection</a> attacks. For these reasons, prepared statements are
-        /// preferred
-        /// over hand-crafted SQL strings when handling user input.
-        /// </summary>
-        /// <remarks>@since v22.5.0</remarks>
-        [<Import("StatementSync", "node:sqlite"); EmitConstructor>]
-        static member StatementSync() : StatementSync = jsNative
-
-        /// <summary>
         /// This method makes a database backup. This method abstracts the
         /// <a href="https://www.sqlite.org/c3ref/backup_finish.html#sqlite3backupinit"><c>sqlite3_backup_init()</c></a>,
         /// <a href="https://www.sqlite.org/c3ref/backup_finish.html#sqlite3backupstep"><c>sqlite3_backup_step()</c></a>
@@ -161262,7 +161652,9 @@ module Stream =
         /// </summary>
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         abstract once:
-            emitter: NodeJS.EventEmitter<unit[]> * eventName: obj * ?options: StaticEventEmitterOptions ->
+            emitter: NodeJS.EventEmitter<unit[]> *
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> *
+            ?options: StaticEventEmitterOptions ->
                 JS.Promise<obj[]>
 
         /// <summary>
@@ -161423,7 +161815,9 @@ module Stream =
         /// <remarks>@since v13.6.0, v12.16.0</remarks>
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         abstract on:
-            emitter: NodeJS.EventEmitter<unit[]> * eventName: obj * ?options: StaticEventEmitterIteratorOptions ->
+            emitter: NodeJS.EventEmitter<unit[]> *
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> *
+            ?options: StaticEventEmitterIteratorOptions ->
                 NodeJS.AsyncIterator<obj[], obj, obj>
 
         /// <summary>
@@ -161524,7 +161918,8 @@ module Stream =
         /// <remarks>@deprecated Since v3.2.0 - Use <c>listenerCount</c> instead.</remarks>
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
-        abstract listenerCount: emitter: NodeJS.EventEmitter<unit[]> * eventName: obj -> float
+        abstract listenerCount:
+            emitter: NodeJS.EventEmitter<unit[]> * eventName: U2<string, Fable.Core.TS.Es.Symbol> -> float
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -161553,7 +161948,8 @@ module Stream =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         abstract getEventListeners:
-            emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget> * name: obj -> Fable.Core.TS.Es.Function[]
+            emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget> * name: U2<string, Fable.Core.TS.Es.Symbol> ->
+                Fable.Core.TS.Es.Function[]
 
         /// <summary>
         /// Returns the currently set max amount of listeners.
@@ -161643,14 +162039,14 @@ module Stream =
         /// regular <c>'error'</c> listener is installed.
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
-        abstract errorMonitor: obj
+        abstract errorMonitor: Fable.Core.TS.Es.Symbol
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
         /// <br /><br />
         /// See how to write a custom <c>rejection handler</c>.
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
-        abstract captureRejectionSymbol: obj
+        abstract captureRejectionSymbol: Fable.Core.TS.Es.Symbol
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
         /// <br /><br />
@@ -162184,7 +162580,9 @@ module Stream =
         /// </summary>
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         abstract once:
-            emitter: NodeJS.EventEmitter<unit[]> * eventName: obj * ?options: StaticEventEmitterOptions ->
+            emitter: NodeJS.EventEmitter<unit[]> *
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> *
+            ?options: StaticEventEmitterOptions ->
                 JS.Promise<obj[]>
 
         /// <summary>
@@ -162345,7 +162743,9 @@ module Stream =
         /// <remarks>@since v13.6.0, v12.16.0</remarks>
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         abstract on:
-            emitter: NodeJS.EventEmitter<unit[]> * eventName: obj * ?options: StaticEventEmitterIteratorOptions ->
+            emitter: NodeJS.EventEmitter<unit[]> *
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> *
+            ?options: StaticEventEmitterIteratorOptions ->
                 NodeJS.AsyncIterator<obj[], obj, obj>
 
         /// <summary>
@@ -162446,7 +162846,8 @@ module Stream =
         /// <remarks>@deprecated Since v3.2.0 - Use <c>listenerCount</c> instead.</remarks>
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
-        abstract listenerCount: emitter: NodeJS.EventEmitter<unit[]> * eventName: obj -> float
+        abstract listenerCount:
+            emitter: NodeJS.EventEmitter<unit[]> * eventName: U2<string, Fable.Core.TS.Es.Symbol> -> float
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -162475,7 +162876,8 @@ module Stream =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         abstract getEventListeners:
-            emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget> * name: obj -> Fable.Core.TS.Es.Function[]
+            emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget> * name: U2<string, Fable.Core.TS.Es.Symbol> ->
+                Fable.Core.TS.Es.Function[]
 
         /// <summary>
         /// Returns the currently set max amount of listeners.
@@ -162565,14 +162967,14 @@ module Stream =
         /// regular <c>'error'</c> listener is installed.
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
-        abstract errorMonitor: obj
+        abstract errorMonitor: Fable.Core.TS.Es.Symbol
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
         /// <br /><br />
         /// See how to write a custom <c>rejection handler</c>.
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
-        abstract captureRejectionSymbol: obj
+        abstract captureRejectionSymbol: Fable.Core.TS.Es.Symbol
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
         /// <br /><br />
@@ -163572,7 +163974,9 @@ module Stream =
         /// </summary>
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         abstract once:
-            emitter: NodeJS.EventEmitter<unit[]> * eventName: obj * ?options: StaticEventEmitterOptions ->
+            emitter: NodeJS.EventEmitter<unit[]> *
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> *
+            ?options: StaticEventEmitterOptions ->
                 JS.Promise<obj[]>
 
         /// <summary>
@@ -163733,7 +164137,9 @@ module Stream =
         /// <remarks>@since v13.6.0, v12.16.0</remarks>
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         abstract on:
-            emitter: NodeJS.EventEmitter<unit[]> * eventName: obj * ?options: StaticEventEmitterIteratorOptions ->
+            emitter: NodeJS.EventEmitter<unit[]> *
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> *
+            ?options: StaticEventEmitterIteratorOptions ->
                 NodeJS.AsyncIterator<obj[], obj, obj>
 
         /// <summary>
@@ -163834,7 +164240,8 @@ module Stream =
         /// <remarks>@deprecated Since v3.2.0 - Use <c>listenerCount</c> instead.</remarks>
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
-        abstract listenerCount: emitter: NodeJS.EventEmitter<unit[]> * eventName: obj -> float
+        abstract listenerCount:
+            emitter: NodeJS.EventEmitter<unit[]> * eventName: U2<string, Fable.Core.TS.Es.Symbol> -> float
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -163863,7 +164270,8 @@ module Stream =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         abstract getEventListeners:
-            emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget> * name: obj -> Fable.Core.TS.Es.Function[]
+            emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget> * name: U2<string, Fable.Core.TS.Es.Symbol> ->
+                Fable.Core.TS.Es.Function[]
 
         /// <summary>
         /// Returns the currently set max amount of listeners.
@@ -163953,14 +164361,14 @@ module Stream =
         /// regular <c>'error'</c> listener is installed.
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
-        abstract errorMonitor: obj
+        abstract errorMonitor: Fable.Core.TS.Es.Symbol
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
         /// <br /><br />
         /// See how to write a custom <c>rejection handler</c>.
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
-        abstract captureRejectionSymbol: obj
+        abstract captureRejectionSymbol: Fable.Core.TS.Es.Symbol
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
         /// <br /><br />
@@ -164441,7 +164849,9 @@ module Stream =
         /// </summary>
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         abstract once:
-            emitter: NodeJS.EventEmitter<unit[]> * eventName: obj * ?options: StaticEventEmitterOptions ->
+            emitter: NodeJS.EventEmitter<unit[]> *
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> *
+            ?options: StaticEventEmitterOptions ->
                 JS.Promise<obj[]>
 
         /// <summary>
@@ -164602,7 +165012,9 @@ module Stream =
         /// <remarks>@since v13.6.0, v12.16.0</remarks>
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         abstract on:
-            emitter: NodeJS.EventEmitter<unit[]> * eventName: obj * ?options: StaticEventEmitterIteratorOptions ->
+            emitter: NodeJS.EventEmitter<unit[]> *
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> *
+            ?options: StaticEventEmitterIteratorOptions ->
                 NodeJS.AsyncIterator<obj[], obj, obj>
 
         /// <summary>
@@ -164703,7 +165115,8 @@ module Stream =
         /// <remarks>@deprecated Since v3.2.0 - Use <c>listenerCount</c> instead.</remarks>
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
-        abstract listenerCount: emitter: NodeJS.EventEmitter<unit[]> * eventName: obj -> float
+        abstract listenerCount:
+            emitter: NodeJS.EventEmitter<unit[]> * eventName: U2<string, Fable.Core.TS.Es.Symbol> -> float
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -164732,7 +165145,8 @@ module Stream =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         abstract getEventListeners:
-            emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget> * name: obj -> Fable.Core.TS.Es.Function[]
+            emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget> * name: U2<string, Fable.Core.TS.Es.Symbol> ->
+                Fable.Core.TS.Es.Function[]
 
         /// <summary>
         /// Returns the currently set max amount of listeners.
@@ -164822,14 +165236,14 @@ module Stream =
         /// regular <c>'error'</c> listener is installed.
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
-        abstract errorMonitor: obj
+        abstract errorMonitor: Fable.Core.TS.Es.Symbol
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
         /// <br /><br />
         /// See how to write a custom <c>rejection handler</c>.
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
-        abstract captureRejectionSymbol: obj
+        abstract captureRejectionSymbol: Fable.Core.TS.Es.Symbol
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
         /// <br /><br />
@@ -165321,7 +165735,9 @@ module Stream =
         /// </summary>
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         abstract once:
-            emitter: NodeJS.EventEmitter<unit[]> * eventName: obj * ?options: StaticEventEmitterOptions ->
+            emitter: NodeJS.EventEmitter<unit[]> *
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> *
+            ?options: StaticEventEmitterOptions ->
                 JS.Promise<obj[]>
 
         /// <summary>
@@ -165482,7 +165898,9 @@ module Stream =
         /// <remarks>@since v13.6.0, v12.16.0</remarks>
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         abstract on:
-            emitter: NodeJS.EventEmitter<unit[]> * eventName: obj * ?options: StaticEventEmitterIteratorOptions ->
+            emitter: NodeJS.EventEmitter<unit[]> *
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> *
+            ?options: StaticEventEmitterIteratorOptions ->
                 NodeJS.AsyncIterator<obj[], obj, obj>
 
         /// <summary>
@@ -165583,7 +166001,8 @@ module Stream =
         /// <remarks>@deprecated Since v3.2.0 - Use <c>listenerCount</c> instead.</remarks>
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
-        abstract listenerCount: emitter: NodeJS.EventEmitter<unit[]> * eventName: obj -> float
+        abstract listenerCount:
+            emitter: NodeJS.EventEmitter<unit[]> * eventName: U2<string, Fable.Core.TS.Es.Symbol> -> float
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -165612,7 +166031,8 @@ module Stream =
         /// </summary>
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         abstract getEventListeners:
-            emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget> * name: obj -> Fable.Core.TS.Es.Function[]
+            emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget> * name: U2<string, Fable.Core.TS.Es.Symbol> ->
+                Fable.Core.TS.Es.Function[]
 
         /// <summary>
         /// Returns the currently set max amount of listeners.
@@ -165702,14 +166122,14 @@ module Stream =
         /// regular <c>'error'</c> listener is installed.
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
-        abstract errorMonitor: obj
+        abstract errorMonitor: Fable.Core.TS.Es.Symbol
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
         /// <br /><br />
         /// See how to write a custom <c>rejection handler</c>.
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
-        abstract captureRejectionSymbol: obj
+        abstract captureRejectionSymbol: Fable.Core.TS.Es.Symbol
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
         /// <br /><br />
@@ -166072,7 +166492,7 @@ module Stream =
         /// Alias for <c>emitter.on(eventName, listener)</c>.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract addListener: eventName: obj * listener: (obj[] -> unit) -> Stream
+        abstract addListener: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Stream
         /// <summary>
         /// Adds the <c>listener</c> function to the end of the listeners array for the event
         /// named <c>eventName</c>. No checks are made to see if the <c>listener</c> has already
@@ -166102,7 +166522,7 @@ module Stream =
         /// <remarks>@since v0.1.101</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract on: eventName: obj * listener: (obj[] -> unit) -> Stream
+        abstract on: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Stream
         /// <summary>
         /// Adds a <b>one-time</b> <c>listener</c> function for the event named <c>eventName</c>. The
         /// next time <c>eventName</c> is triggered, this listener is removed and then invoked.
@@ -166130,7 +166550,7 @@ module Stream =
         /// <remarks>@since v0.3.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract once: eventName: obj * listener: (obj[] -> unit) -> Stream
+        abstract once: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Stream
         /// <summary>
         /// Removes the specified <c>listener</c> from the listener array for the event named <c>eventName</c>.
         /// <code lang="js">
@@ -166210,12 +166630,12 @@ module Stream =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeListener: eventName: obj * listener: (obj[] -> unit) -> Stream
+        abstract removeListener: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Stream
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Stream
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Stream
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -166226,7 +166646,7 @@ module Stream =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Stream
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Stream
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -166248,7 +166668,7 @@ module Stream =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract listeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -166278,7 +166698,7 @@ module Stream =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract rawListeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Synchronously calls each of the listeners registered for the event named <c>eventName</c>, in the order they were registered, passing the supplied arguments
         /// to each.
@@ -166318,7 +166738,8 @@ module Stream =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract emit: eventName: obj * [<ParamArray>] args: obj[] -> bool
+        abstract emit: eventName: U2<string, Fable.Core.TS.Es.Symbol> * [<ParamArray>] args: obj[] -> bool
+
         /// <summary>
         /// Returns the number of listeners listening for the event named <c>eventName</c>.
         /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -166327,7 +166748,9 @@ module Stream =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
+        abstract listenerCount:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * ?listener: Fable.Core.TS.Es.Function -> float
+
         /// <summary>
         /// Adds the <c>listener</c> function to the _beginning_ of the listeners array for the
         /// event named <c>eventName</c>. No checks are made to see if the <c>listener</c> has
@@ -166344,7 +166767,8 @@ module Stream =
         /// <remarks>@since v6.0.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract prependListener: eventName: obj * listener: (obj[] -> unit) -> Stream
+        abstract prependListener: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Stream
+
         /// <summary>
         /// Adds a <b>one-time</b><c>listener</c> function for the event named <c>eventName</c> to the _beginning_ of the listeners array. The next time <c>eventName</c> is triggered, this
         /// listener is removed, and then invoked.
@@ -166359,7 +166783,28 @@ module Stream =
         /// <remarks>@since v6.0.0</remarks>
         /// <param name="eventName">The name of the event.</param>
         /// <param name="listener">The callback function</param>
-        abstract prependOnceListener: eventName: obj * listener: (obj[] -> unit) -> Stream
+        abstract prependOnceListener:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Stream
+
+        /// <summary>
+        /// Returns an array listing the events for which the emitter has registered
+        /// listeners. The values in the array are strings or <c>Symbol</c>s.
+        /// <code lang="js">
+        /// import { EventEmitter } from 'node:events';
+        ///
+        /// const myEE = new EventEmitter();
+        /// myEE.on('foo', () =&gt; {});
+        /// myEE.on('bar', () =&gt; {});
+        ///
+        /// const sym = Symbol('symbol');
+        /// myEE.on(sym, () =&gt; {});
+        ///
+        /// console.log(myEE.eventNames());
+        /// // Prints: [ 'foo', 'bar', Symbol(symbol) ]
+        /// </code>
+        /// </summary>
+        /// <remarks>@since v6.0.0</remarks>
+        abstract eventNames: unit -> U2<string, Fable.Core.TS.Es.Symbol>[]
 
         abstract pipe<'T when 'T :> NodeJS.WritableStream> :
             destination: 'T * ?options: Stream.Stream.Pipe.Options -> 'T
@@ -166378,21 +166823,21 @@ module Stream =
         [<ParamObject; Emit("$0")>]
         static member Create
             (
-                addListener: Func<obj, (obj[] -> unit), Stream>,
-                on: Func<obj, (obj[] -> unit), Stream>,
-                once: Func<obj, (obj[] -> unit), Stream>,
-                removeListener: Func<obj, (obj[] -> unit), Stream>,
-                off: Func<obj, (obj[] -> unit), Stream>,
-                removeAllListeners: (obj option -> Stream),
+                addListener: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), Stream>,
+                on: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), Stream>,
+                once: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), Stream>,
+                removeListener: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), Stream>,
+                off: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), Stream>,
+                removeAllListeners: (U2<string, Fable.Core.TS.Es.Symbol> option -> Stream),
                 setMaxListeners: (float -> Stream),
                 getMaxListeners: (unit -> float),
-                listeners: (obj -> Fable.Core.TS.Es.Function[]),
-                rawListeners: (obj -> Fable.Core.TS.Es.Function[]),
-                emit: Func<obj, obj[], bool>,
-                listenerCount: Func<obj, Fable.Core.TS.Es.Function option, float>,
-                prependListener: Func<obj, (obj[] -> unit), Stream>,
-                prependOnceListener: Func<obj, (obj[] -> unit), Stream>,
-                eventNames: (unit -> obj[]),
+                listeners: (U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]),
+                rawListeners: (U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]),
+                emit: Func<U2<string, Fable.Core.TS.Es.Symbol>, obj[], bool>,
+                listenerCount: Func<U2<string, Fable.Core.TS.Es.Symbol>, Fable.Core.TS.Es.Function option, float>,
+                prependListener: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), Stream>,
+                prependOnceListener: Func<U2<string, Fable.Core.TS.Es.Symbol>, (obj[] -> unit), Stream>,
+                eventNames: (unit -> U2<string, Fable.Core.TS.Es.Symbol>[]),
                 pipe: Func<'T, Stream.Stream.Pipe.Options option, 'T>,
                 compose:
                     Func<
@@ -166486,8 +166931,11 @@ module Stream =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("Stream.once", "node:stream")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -166652,8 +167100,11 @@ module Stream =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("Stream.on", "node:stream")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -166757,7 +167208,10 @@ module Stream =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("Stream.listenerCount", "node:stream")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -166787,7 +167241,7 @@ module Stream =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Stream.getEventListeners", "node:stream")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -166886,7 +167340,7 @@ module Stream =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("Stream.errorMonitor", "node:stream")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -166895,7 +167349,7 @@ module Stream =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("Stream.captureRejectionSymbol", "node:stream")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -167372,7 +167826,7 @@ module Stream =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Readable
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Readable
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -167383,7 +167837,7 @@ module Stream =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Readable
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Readable
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -167991,7 +168445,7 @@ module Stream =
         /// 6. readable
         /// 7. resume
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> Readable
+        abstract addListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Readable
 
         /// <summary>
         /// <code lang="ts">
@@ -168087,7 +168541,7 @@ module Stream =
         /// // event with parameters 1, 2, 3, 4, 5 in third listener
         /// </code>
         /// </summary>
-        abstract emit: ``event``: obj * [<ParamArray>] args: obj[] -> bool
+        abstract emit: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * [<ParamArray>] args: obj[] -> bool
 
         /// <summary>
         /// <code lang="ts">
@@ -168171,7 +168625,7 @@ module Stream =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> Readable
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Readable
 
         /// <summary>
         /// <code lang="ts">
@@ -168253,7 +168707,7 @@ module Stream =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> Readable
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Readable
 
         /// <summary>
         /// <code lang="ts">
@@ -168324,7 +168778,7 @@ module Stream =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> Readable
+        abstract prependListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Readable
 
         /// <summary>
         /// <code lang="ts">
@@ -168393,7 +168847,8 @@ module Stream =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> Readable
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Readable
 
         /// <summary>
         /// <code lang="ts">
@@ -168529,7 +168984,7 @@ module Stream =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> Readable
+        abstract removeListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Readable
 
         abstract pipe<'T when 'T :> NodeJS.WritableStream> :
             destination: 'T * ?options: Stream.Readable.Pipe.Options -> 'T
@@ -168633,8 +169088,11 @@ module Stream =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("Readable.once", "node:stream")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -168799,8 +169257,11 @@ module Stream =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("Readable.on", "node:stream")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -168904,7 +169365,10 @@ module Stream =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("Readable.listenerCount", "node:stream")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -168934,7 +169398,7 @@ module Stream =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Readable.getEventListeners", "node:stream")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -169033,7 +169497,7 @@ module Stream =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("Readable.errorMonitor", "node:stream")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -169042,7 +169506,7 @@ module Stream =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("Readable.captureRejectionSymbol", "node:stream")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -169967,7 +170431,7 @@ module Stream =
         /// 5. pipe
         /// 6. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> Writable
+        abstract addListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Writable
 
         /// <summary>
         /// <code lang="ts">
@@ -170055,7 +170519,7 @@ module Stream =
         /// // event with parameters 1, 2, 3, 4, 5 in third listener
         /// </code>
         /// </summary>
-        abstract emit: ``event``: obj * [<ParamArray>] args: obj[] -> bool
+        abstract emit: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * [<ParamArray>] args: obj[] -> bool
 
         /// <summary>
         /// <code lang="ts">
@@ -170131,7 +170595,7 @@ module Stream =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> Writable
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Writable
 
         /// <summary>
         /// <code lang="ts">
@@ -170205,7 +170669,7 @@ module Stream =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> Writable
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Writable
 
         /// <summary>
         /// <code lang="ts">
@@ -170268,7 +170732,7 @@ module Stream =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> Writable
+        abstract prependListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Writable
 
         /// <summary>
         /// <code lang="ts">
@@ -170329,7 +170793,8 @@ module Stream =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> Writable
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Writable
 
         /// <summary>
         /// <code lang="ts">
@@ -170457,12 +170922,12 @@ module Stream =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> Writable
+        abstract removeListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Writable
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Writable
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Writable
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -170473,7 +170938,7 @@ module Stream =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Writable
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Writable
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -170601,8 +171066,11 @@ module Stream =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("Writable.once", "node:stream")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -170767,8 +171235,11 @@ module Stream =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("Writable.on", "node:stream")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -170872,7 +171343,10 @@ module Stream =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("Writable.listenerCount", "node:stream")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -170902,7 +171376,7 @@ module Stream =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Writable.getEventListeners", "node:stream")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -171001,7 +171475,7 @@ module Stream =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("Writable.errorMonitor", "node:stream")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -171010,7 +171484,7 @@ module Stream =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("Writable.captureRejectionSymbol", "node:stream")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -171596,7 +172070,7 @@ module Stream =
         /// 10. resume
         /// 11. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> Duplex
+        abstract addListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Duplex
 
         /// <summary>
         /// <code lang="ts">
@@ -171712,7 +172186,7 @@ module Stream =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> Duplex
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Duplex
 
         /// <summary>
         /// <code lang="ts">
@@ -171826,7 +172300,7 @@ module Stream =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> Duplex
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Duplex
 
         /// <summary>
         /// <code lang="ts">
@@ -171929,7 +172403,7 @@ module Stream =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> Duplex
+        abstract prependListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Duplex
 
         /// <summary>
         /// <code lang="ts">
@@ -172030,7 +172504,8 @@ module Stream =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> Duplex
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Duplex
 
         /// <summary>
         /// <code lang="ts">
@@ -172198,12 +172673,12 @@ module Stream =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> Duplex
+        abstract removeListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Duplex
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Duplex
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Duplex
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -172214,7 +172689,7 @@ module Stream =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Duplex
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Duplex
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -172624,8 +173099,11 @@ module Stream =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("Duplex.once", "node:stream")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -172790,8 +173268,11 @@ module Stream =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("Duplex.on", "node:stream")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -172895,7 +173376,10 @@ module Stream =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("Duplex.listenerCount", "node:stream")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -172925,7 +173409,7 @@ module Stream =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Duplex.getEventListeners", "node:stream")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -173024,7 +173508,7 @@ module Stream =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("Duplex.errorMonitor", "node:stream")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -173033,7 +173517,7 @@ module Stream =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("Duplex.captureRejectionSymbol", "node:stream")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -173487,7 +173971,7 @@ module Stream =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Transform
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Transform
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -173498,7 +173982,7 @@ module Stream =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Transform
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Transform
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -173876,7 +174360,7 @@ module Stream =
         /// 10. resume
         /// 11. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> Transform
+        abstract addListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Transform
 
         /// <summary>
         /// <code lang="ts">
@@ -173992,7 +174476,7 @@ module Stream =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> Transform
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Transform
 
         /// <summary>
         /// <code lang="ts">
@@ -174106,7 +174590,7 @@ module Stream =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> Transform
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Transform
 
         /// <summary>
         /// <code lang="ts">
@@ -174209,7 +174693,8 @@ module Stream =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> Transform
+        abstract prependListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Transform
 
         /// <summary>
         /// <code lang="ts">
@@ -174310,7 +174795,8 @@ module Stream =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> Transform
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Transform
 
         /// <summary>
         /// <code lang="ts">
@@ -174478,7 +174964,7 @@ module Stream =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> Transform
+        abstract removeListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Transform
 
         /// <summary>
         /// Transform streams are <c>Duplex</c> streams where the output is in some way
@@ -174573,8 +175059,11 @@ module Stream =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("Transform.once", "node:stream")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -174739,8 +175228,11 @@ module Stream =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("Transform.on", "node:stream")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -174844,7 +175336,10 @@ module Stream =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("Transform.listenerCount", "node:stream")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -174874,7 +175369,7 @@ module Stream =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Transform.getEventListeners", "node:stream")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -174973,7 +175468,7 @@ module Stream =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("Transform.errorMonitor", "node:stream")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -174982,7 +175477,7 @@ module Stream =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("Transform.captureRejectionSymbol", "node:stream")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -175443,7 +175938,7 @@ module Stream =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> PassThrough
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> PassThrough
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -175454,7 +175949,7 @@ module Stream =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> PassThrough
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> PassThrough
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -175832,7 +176327,7 @@ module Stream =
         /// 10. resume
         /// 11. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> PassThrough
+        abstract addListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> PassThrough
 
         /// <summary>
         /// <code lang="ts">
@@ -175948,7 +176443,7 @@ module Stream =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> PassThrough
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> PassThrough
 
         /// <summary>
         /// <code lang="ts">
@@ -176062,7 +176557,7 @@ module Stream =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> PassThrough
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> PassThrough
 
         /// <summary>
         /// <code lang="ts">
@@ -176165,7 +176660,8 @@ module Stream =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> PassThrough
+        abstract prependListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> PassThrough
 
         /// <summary>
         /// <code lang="ts">
@@ -176266,7 +176762,8 @@ module Stream =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> PassThrough
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> PassThrough
 
         /// <summary>
         /// <code lang="ts">
@@ -176434,7 +176931,8 @@ module Stream =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> PassThrough
+        abstract removeListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> PassThrough
 
         /// <summary>
         /// The <c>stream.PassThrough</c> class is a trivial implementation of a <c>Transform</c> stream that simply passes the input bytes across to the output. Its purpose is
@@ -176522,8 +177020,11 @@ module Stream =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("PassThrough.once", "node:stream")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -176688,8 +177189,11 @@ module Stream =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("PassThrough.on", "node:stream")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -176793,7 +177297,10 @@ module Stream =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("PassThrough.listenerCount", "node:stream")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -176823,7 +177330,7 @@ module Stream =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("PassThrough.getEventListeners", "node:stream")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -176922,7 +177429,7 @@ module Stream =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("PassThrough.errorMonitor", "node:stream")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -176931,7 +177438,7 @@ module Stream =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("PassThrough.captureRejectionSymbol", "node:stream")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -178352,10 +178859,6 @@ module Stream =
         type ReadableStreamAsyncIterator<'T> =
             inherit NodeJS.AsyncIterator<'T, unit, obj>
 
-            abstract next:
-                [<ParamArray>] __0: obj[] ->
-                    JS.Promise<U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>>
-
             abstract ``return``:
                 (JS.Promise<unit> option
                         -> JS.Promise<
@@ -178427,7 +178930,7 @@ module Stream =
             abstract enqueue: chunk: 'R -> unit
             abstract error: ?e: obj -> unit
 
-            [<ParamObject; Emit("$0")>]
+            [<ParamObject; Emit("(o => ({...o, \"desiredSize\": o[\"desiredSize\"] ?? null}))($0)")>]
             static member Create
                 (close: (unit -> unit), enqueue: ('R -> unit), error: (obj option -> unit), ?desiredSize: float)
                 : ReadableStreamDefaultController<'R> =
@@ -178470,7 +178973,7 @@ module Stream =
             abstract error: ?reason: obj -> unit
             abstract terminate: unit -> unit
 
-            [<ParamObject; Emit("$0")>]
+            [<ParamObject; Emit("(o => ({...o, \"desiredSize\": o[\"desiredSize\"] ?? null}))($0)")>]
             static member Create
                 (enqueue: ('O -> unit), error: (obj option -> unit), terminate: (unit -> unit), ?desiredSize: float)
                 : TransformStreamDefaultController<'O> =
@@ -178514,7 +179017,7 @@ module Stream =
             abstract releaseLock: unit -> unit
             abstract write: chunk: 'W -> JS.Promise<unit>
 
-            [<ParamObject; Emit("$0")>]
+            [<ParamObject; Emit("(o => ({...o, \"desiredSize\": o[\"desiredSize\"] ?? null}))($0)")>]
             static member Create
                 (
                     closed: JS.Promise<unit>,
@@ -179900,7 +180403,7 @@ module Test =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> TestsStream
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> TestsStream
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -179911,7 +180414,7 @@ module Test =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> TestsStream
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> TestsStream
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -180173,7 +180676,8 @@ module Test =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> TestsStream
+        abstract removeListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> TestsStream
 
     /// <summary>
     /// An instance of <c>TestContext</c> is passed to each test function in order to
@@ -180700,8 +181204,7 @@ module Test =
         [<ParamObject; Emit("$0")>]
         static member Create(?getter: bool, ?setter: bool, ?times: float) : MockMethodOptions = jsNative
 
-    [<Erase>]
-    type Mock<'F> = private Mock__ of obj
+    type Mock<'F> = JS.Intersect<'F, Test.Mock.Members<'F>>
 
     [<Interface>]
     type MockModuleOptions =
@@ -180778,7 +181281,8 @@ module Test =
         /// The mocked function. The mocked function contains a special <c>mock</c> property, which is an instance of {@link MockFunctionContext}, and can be used for inspecting and changing the
         /// behavior of the mocked function.
         /// </returns>
-        abstract fn<'F> : ?original: 'F * ?options: MockFunctionOptions -> obj
+        abstract fn<'F> :
+            ?original: 'F * ?options: MockFunctionOptions -> JS.Intersect<'F, Test.MockTracker.Fn.Result.Members<'F>>
 
         /// <summary>
         /// This function is used to create a mock function.
@@ -180821,7 +181325,11 @@ module Test =
         /// behavior of the mocked function.
         /// </returns>
         abstract fn<'F, 'Implementation> :
-            ?original: 'F * ?implementation: 'Implementation * ?options: MockFunctionOptions -> obj
+            ?original: 'F * ?implementation: 'Implementation * ?options: MockFunctionOptions ->
+                U2<
+                    JS.Intersect<'F, Test.MockTracker.Fn.Result<'F, 'Implementation>>,
+                    JS.Intersect<'Implementation, Test.MockTracker.Fn.Result<'F, 'Implementation>>
+                 >
 
         /// <summary>
         /// This function is used to create a mock on an existing object method. The
@@ -181009,7 +181517,10 @@ module Test =
             methodName: typekeyof<'MockedObject, 'R> *
             ?implementation: 'Implementation *
             ?options: MockFunctionOptions ->
-                obj
+                U2<
+                    JS.Intersect<'Implementation, Test.MockTracker.Getter.Result2<'Implementation>>,
+                    Test.MockTracker.Getter.Result3<'Implementation>
+                 >
 
         /// <summary>
         /// This function is syntax sugar for <c>MockTracker.method</c> with <c>options.setter</c> set to <c>true</c>.
@@ -181028,7 +181539,10 @@ module Test =
             methodName: typekeyof<'MockedObject, 'R> *
             ?implementation: 'Implementation *
             ?options: MockFunctionOptions ->
-                obj
+                U2<
+                    JS.Intersect<'Implementation, Test.MockTracker.Setter.Result2<'Implementation>>,
+                    Test.MockTracker.Setter.Result3<'Implementation>
+                 >
 
         /// <summary>
         /// This function is used to mock the exports of ECMAScript modules, CommonJS modules, and Node.js builtin modules.
@@ -181078,7 +181592,8 @@ module Test =
         /// and can be used for inspecting and changing the behavior of the mocked property.
         /// </returns>
         abstract property<'MockedObject, 'R> :
-            ``object``: 'MockedObject * property: typekeyof<'MockedObject, 'R> * ?value: 'R -> obj
+            ``object``: 'MockedObject * property: typekeyof<'MockedObject, 'R> * ?value: 'R ->
+                JS.Intersect<'MockedObject, Test.MockTracker.Property.Result>
 
         /// <summary>
         /// This function restores the default behavior of all mocks that were previously
@@ -182727,6 +183242,14 @@ module Test =
 
             type TestSummary = Node.Test.EventData.TestSummary
 
+    module Mock =
+        [<Interface>]
+        type Members<'F> =
+            abstract mock: Node.Test.MockFunctionContext<'F> with get, set
+
+            [<ParamObject; Emit("$0")>]
+            static member Create(mock: Node.Test.MockFunctionContext<'F>) : Members<'F> = jsNative
+
     module MockPropertyContext =
         module Accesses =
             [<Interface>]
@@ -182757,6 +183280,25 @@ module Test =
                 | [<CompiledName("setTimeout")>] SetTimeout
 
     module MockTracker =
+        module Fn =
+            [<Interface>]
+            type Result<'F, 'Implementation> =
+                abstract mock: Node.Test.MockFunctionContext<U2<'F, 'Implementation>> with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create
+                    (mock: Node.Test.MockFunctionContext<U2<'F, 'Implementation>>)
+                    : Result<'F, 'Implementation> =
+                    jsNative
+
+            module Result =
+                [<Interface>]
+                type Members<'F> =
+                    abstract mock: Node.Test.MockFunctionContext<'F> with get, set
+
+                    [<ParamObject; Emit("$0")>]
+                    static member Create(mock: Node.Test.MockFunctionContext<'F>) : Members<'F> = jsNative
+
         module Getter =
             type Result =
                 abstract mock: Node.Test.MockFunctionContext<(unit -> obj)> with get, set
@@ -182764,8 +183306,18 @@ module Test =
                 [<Emit("$0($1...)")>]
                 abstract Invoke: unit -> obj
 
+            [<Interface>]
             type Result2<'Implementation> =
                 abstract mock: Node.Test.MockFunctionContext<U2<'Implementation, (unit -> obj)>> with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create
+                    (mock: Node.Test.MockFunctionContext<U2<'Implementation, (unit -> obj)>>)
+                    : Result2<'Implementation> =
+                    jsNative
+
+            type Result3<'Implementation> =
+                inherit Result2<'Implementation>
 
                 [<Emit("$0($1...)")>]
                 abstract Invoke: unit -> obj
@@ -182815,6 +183367,14 @@ module Test =
                 [<Emit("$0[Symbol.hasInstance]($1...)")>]
                 abstract SymbolHasInstance: value: obj -> bool
 
+        module Property =
+            [<Interface>]
+            type Result =
+                abstract mock: Node.Test.MockPropertyContext<obj> with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create(mock: Node.Test.MockPropertyContext<obj>) : Result = jsNative
+
         module Setter =
             type Result =
                 abstract mock: Node.Test.MockFunctionContext<(obj -> unit)> with get, set
@@ -182822,8 +183382,18 @@ module Test =
                 [<Emit("$0($1...)")>]
                 abstract Invoke: value: obj -> unit
 
+            [<Interface>]
             type Result2<'Implementation> =
                 abstract mock: Node.Test.MockFunctionContext<U2<'Implementation, (obj -> unit)>> with get, set
+
+                [<ParamObject; Emit("$0")>]
+                static member Create
+                    (mock: Node.Test.MockFunctionContext<U2<'Implementation, (obj -> unit)>>)
+                    : Result2<'Implementation> =
+                    jsNative
+
+            type Result3<'Implementation> =
+                inherit Result2<'Implementation>
 
                 [<Emit("$0($1...)")>]
                 abstract Invoke: value: obj -> unit
@@ -184500,7 +185070,7 @@ module Tls =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> TLSSocket
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> TLSSocket
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -184511,7 +185081,7 @@ module Tls =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> TLSSocket
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> TLSSocket
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -184802,7 +185372,7 @@ module Tls =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> TLSSocket
+        abstract removeListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> TLSSocket
 
         /// <summary>
         /// <code lang="js">
@@ -184884,8 +185454,11 @@ module Tls =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("TLSSocket.on", "node:tls")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -184989,7 +185562,10 @@ module Tls =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("TLSSocket.listenerCount", "node:tls")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -185019,7 +185595,7 @@ module Tls =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("TLSSocket.getEventListeners", "node:tls")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -185118,7 +185694,7 @@ module Tls =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("TLSSocket.errorMonitor", "node:tls")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -185127,7 +185703,7 @@ module Tls =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("TLSSocket.captureRejectionSymbol", "node:tls")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -185258,8 +185834,11 @@ module Tls =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("TLSSocket.once", "node:tls")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -186045,12 +186624,12 @@ module Tls =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeListener: eventName: obj * listener: (obj[] -> unit) -> Server
+        abstract removeListener: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Server
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Server
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Server
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -186061,7 +186640,7 @@ module Tls =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Server
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Server
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -186979,8 +187558,11 @@ module Tls =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("Server.once", "node:tls")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -187145,8 +187727,11 @@ module Tls =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("Server.on", "node:tls")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -187250,7 +187835,10 @@ module Tls =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("Server.listenerCount", "node:tls")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -187280,7 +187868,7 @@ module Tls =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Server.getEventListeners", "node:tls")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -187379,7 +187967,7 @@ module Tls =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("Server.errorMonitor", "node:tls")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -187388,7 +187976,7 @@ module Tls =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("Server.captureRejectionSymbol", "node:tls")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -188692,7 +189280,7 @@ module Tty =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> ReadStream
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ReadStream
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -188703,7 +189291,7 @@ module Tty =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> ReadStream
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> ReadStream
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -189775,7 +190363,8 @@ module Tty =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> ReadStream
+        abstract removeListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ReadStream
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -189855,8 +190444,11 @@ module Tty =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("ReadStream.once", "node:tty")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -190021,8 +190613,11 @@ module Tty =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("ReadStream.on", "node:tty")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -190126,7 +190721,10 @@ module Tty =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("ReadStream.listenerCount", "node:tty")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -190156,7 +190754,7 @@ module Tty =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("ReadStream.getEventListeners", "node:tty")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -190255,7 +190853,7 @@ module Tty =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("ReadStream.errorMonitor", "node:tty")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -190264,7 +190862,7 @@ module Tty =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("ReadStream.captureRejectionSymbol", "node:tty")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -191207,7 +191805,7 @@ module Tty =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> WriteStream
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> WriteStream
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -191218,7 +191816,7 @@ module Tty =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> WriteStream
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> WriteStream
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -191561,7 +192159,8 @@ module Tty =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> WriteStream
+        abstract removeListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> WriteStream
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -191641,8 +192240,11 @@ module Tty =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("WriteStream.once", "node:tty")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -191807,8 +192409,11 @@ module Tty =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("WriteStream.on", "node:tty")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -191912,7 +192517,10 @@ module Tty =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("WriteStream.listenerCount", "node:tty")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -191942,7 +192550,7 @@ module Tty =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("WriteStream.getEventListeners", "node:tty")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -192041,7 +192649,7 @@ module Tty =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("WriteStream.errorMonitor", "node:tty")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -192050,7 +192658,7 @@ module Tty =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("WriteStream.captureRejectionSymbol", "node:tty")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -192893,7 +193501,8 @@ module Url =
         abstract port: string option with get, set
         abstract query: U2<string, Querystring.ParsedUrlQuery> option with get, set
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("(o => ({...o, \"auth\": o[\"auth\"] ?? null, \"hash\": o[\"hash\"] ?? null, \"host\": o[\"host\"] ?? null, \"hostname\": o[\"hostname\"] ?? null, \"path\": o[\"path\"] ?? null, \"pathname\": o[\"pathname\"] ?? null, \"protocol\": o[\"protocol\"] ?? null, \"search\": o[\"search\"] ?? null, \"slashes\": o[\"slashes\"] ?? null, \"port\": o[\"port\"] ?? null, \"query\": o[\"query\"] ?? null}))($0)")>]
         static member Create
             (
                 href: string,
@@ -192916,7 +193525,8 @@ module Url =
         inherit Url
         abstract query: Querystring.ParsedUrlQuery with get, set
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("(o => ({...o, \"auth\": o[\"auth\"] ?? null, \"hash\": o[\"hash\"] ?? null, \"host\": o[\"host\"] ?? null, \"hostname\": o[\"hostname\"] ?? null, \"path\": o[\"path\"] ?? null, \"pathname\": o[\"pathname\"] ?? null, \"protocol\": o[\"protocol\"] ?? null, \"search\": o[\"search\"] ?? null, \"slashes\": o[\"slashes\"] ?? null, \"port\": o[\"port\"] ?? null}))($0)")>]
         static member Create
             (
                 query: Querystring.ParsedUrlQuery,
@@ -192939,7 +193549,8 @@ module Url =
         inherit Url
         abstract query: string option with get, set
 
-        [<ParamObject; Emit("$0")>]
+        [<ParamObject;
+          Emit("(o => ({...o, \"query\": o[\"query\"] ?? null, \"auth\": o[\"auth\"] ?? null, \"hash\": o[\"hash\"] ?? null, \"host\": o[\"host\"] ?? null, \"hostname\": o[\"hostname\"] ?? null, \"path\": o[\"path\"] ?? null, \"pathname\": o[\"pathname\"] ?? null, \"protocol\": o[\"protocol\"] ?? null, \"search\": o[\"search\"] ?? null, \"slashes\": o[\"slashes\"] ?? null, \"port\": o[\"port\"] ?? null}))($0)")>]
         static member Create
             (
                 href: string,
@@ -193402,10 +194013,6 @@ module Url =
 
     type URLSearchParamsIterator<'T> =
         inherit NodeJS.Iterator<'T, unit, obj>
-
-        abstract next:
-            [<ParamArray>] __0: obj[] ->
-                U2<Fable.Core.TS.Es.IteratorReturnResult<unit>, Fable.Core.TS.Es.IteratorYieldResult<'T>>
 
     /// <summary>
     /// The <c>URLSearchParams</c> API provides read and write access to the query of a <c>URL</c>. The <c>URLSearchParams</c> class can also be used standalone with one of the
@@ -201700,7 +202307,7 @@ module WorkerThreads =
         /// were passed as CLI options to the script.
         /// </summary>
         abstract argv: obj[] option with get, set
-        abstract env: obj option with get, set
+        abstract env: U2<Fable.Core.TS.Es.Symbol, JS.Record<string, string option>> option with get, set
         abstract eval: bool option with get, set
         abstract workerData: obj option with get, set
         abstract stdin: bool option with get, set
@@ -201725,7 +202332,7 @@ module WorkerThreads =
         static member Create
             (
                 ?argv: obj[],
-                ?env: obj,
+                ?env: U2<Fable.Core.TS.Es.Symbol, JS.Record<string, string option>>,
                 ?eval: bool,
                 ?workerData: obj,
                 ?stdin: bool,
@@ -202005,7 +202612,7 @@ module WorkerThreads =
         /// <summary>
         /// Alias for <c>emitter.on(eventName, listener)</c>.
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> Worker
+        abstract addListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Worker
 
         /// <summary>
         /// <code lang="ts">
@@ -202085,7 +202692,7 @@ module WorkerThreads =
         /// // event with parameters 1, 2, 3, 4, 5 in third listener
         /// </code>
         /// </summary>
-        abstract emit: ``event``: obj * [<ParamArray>] args: obj[] -> bool
+        abstract emit: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * [<ParamArray>] args: obj[] -> bool
 
         /// <summary>
         /// <code lang="ts">
@@ -202153,7 +202760,7 @@ module WorkerThreads =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> Worker
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Worker
 
         /// <summary>
         /// <code lang="ts">
@@ -202219,7 +202826,7 @@ module WorkerThreads =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> Worker
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Worker
 
         /// <summary>
         /// <code lang="ts">
@@ -202274,7 +202881,7 @@ module WorkerThreads =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> Worker
+        abstract prependListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Worker
 
         /// <summary>
         /// <code lang="ts">
@@ -202327,7 +202934,8 @@ module WorkerThreads =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> Worker
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Worker
 
         /// <summary>
         /// <code lang="ts">
@@ -202447,7 +203055,7 @@ module WorkerThreads =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> Worker
+        abstract removeListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Worker
 
         /// <summary>
         /// <code lang="ts">
@@ -202492,7 +203100,7 @@ module WorkerThreads =
         /// <summary>
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
-        abstract off: ``event``: obj * listener: (obj[] -> unit) -> Worker
+        abstract off: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Worker
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -202503,7 +203111,7 @@ module WorkerThreads =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Worker
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Worker
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -202525,7 +203133,7 @@ module WorkerThreads =
         /// </code>
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract listeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract listeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>,
         /// including any wrappers (such as those created by <c>.once()</c>).
@@ -202555,7 +203163,8 @@ module WorkerThreads =
         /// </code>
         /// </summary>
         /// <remarks>@since v9.4.0</remarks>
-        abstract rawListeners: eventName: obj -> Fable.Core.TS.Es.Function[]
+        abstract rawListeners: eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Fable.Core.TS.Es.Function[]
+
         /// <summary>
         /// Returns the number of listeners listening for the event named <c>eventName</c>.
         /// If <c>listener</c> is provided, it will return how many times the listener is found
@@ -202564,7 +203173,28 @@ module WorkerThreads =
         /// <remarks>@since v3.2.0</remarks>
         /// <param name="eventName">The name of the event being listened for</param>
         /// <param name="listener">The event handler function</param>
-        abstract listenerCount: eventName: obj * ?listener: Fable.Core.TS.Es.Function -> float
+        abstract listenerCount:
+            eventName: U2<string, Fable.Core.TS.Es.Symbol> * ?listener: Fable.Core.TS.Es.Function -> float
+
+        /// <summary>
+        /// Returns an array listing the events for which the emitter has registered
+        /// listeners. The values in the array are strings or <c>Symbol</c>s.
+        /// <code lang="js">
+        /// import { EventEmitter } from 'node:events';
+        ///
+        /// const myEE = new EventEmitter();
+        /// myEE.on('foo', () =&gt; {});
+        /// myEE.on('bar', () =&gt; {});
+        ///
+        /// const sym = Symbol('symbol');
+        /// myEE.on(sym, () =&gt; {});
+        ///
+        /// console.log(myEE.eventNames());
+        /// // Prints: [ 'foo', 'bar', Symbol(symbol) ]
+        /// </code>
+        /// </summary>
+        /// <remarks>@since v6.0.0</remarks>
+        abstract eventNames: unit -> U2<string, Fable.Core.TS.Es.Symbol>[]
 
         /// <summary>
         /// Calls <c>worker.terminate()</c> when the dispose scope is exited.
@@ -202622,7 +203252,7 @@ module WorkerThreads =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("Worker.errorMonitor", "node:worker_threads")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -202631,7 +203261,7 @@ module WorkerThreads =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("Worker.captureRejectionSymbol", "node:worker_threads")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -202803,8 +203433,11 @@ module WorkerThreads =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("Worker.once", "node:worker_threads")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -202969,8 +203602,11 @@ module WorkerThreads =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("Worker.on", "node:worker_threads")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -203074,7 +203710,10 @@ module WorkerThreads =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("Worker.listenerCount", "node:worker_threads")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -203104,7 +203743,7 @@ module WorkerThreads =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Worker.getEventListeners", "node:worker_threads")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -203255,7 +203894,7 @@ module WorkerThreads =
         static member resourceLimits: ResourceLimits = jsNative
 
         [<Import("SHARE_ENV", "node:worker_threads")>]
-        static member SHARE_ENV: obj = jsNative
+        static member SHARE_ENV: Fable.Core.TS.Es.Symbol = jsNative
 
         [<Import("threadId", "node:worker_threads")>]
         static member threadId: float = jsNative
@@ -203874,7 +204513,7 @@ module Zlib =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> BrotliCompress
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> BrotliCompress
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -203885,7 +204524,7 @@ module Zlib =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> BrotliCompress
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> BrotliCompress
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -204263,7 +204902,8 @@ module Zlib =
         /// 10. resume
         /// 11. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> BrotliCompress
+        abstract addListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> BrotliCompress
 
         /// <summary>
         /// <code lang="ts">
@@ -204379,7 +205019,7 @@ module Zlib =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> BrotliCompress
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> BrotliCompress
 
         /// <summary>
         /// <code lang="ts">
@@ -204493,7 +205133,7 @@ module Zlib =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> BrotliCompress
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> BrotliCompress
 
         /// <summary>
         /// <code lang="ts">
@@ -204596,7 +205236,8 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> BrotliCompress
+        abstract prependListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> BrotliCompress
 
         /// <summary>
         /// <code lang="ts">
@@ -204697,7 +205338,8 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> BrotliCompress
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> BrotliCompress
 
         /// <summary>
         /// <code lang="ts">
@@ -204865,7 +205507,8 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> BrotliCompress
+        abstract removeListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> BrotliCompress
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -204945,8 +205588,11 @@ module Zlib =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("BrotliCompress.once", "node:zlib")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -205111,8 +205757,11 @@ module Zlib =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("BrotliCompress.on", "node:zlib")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -205216,7 +205865,10 @@ module Zlib =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("BrotliCompress.listenerCount", "node:zlib")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -205246,7 +205898,7 @@ module Zlib =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("BrotliCompress.getEventListeners", "node:zlib")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -205345,7 +205997,7 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("BrotliCompress.errorMonitor", "node:zlib")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -205354,7 +206006,7 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("BrotliCompress.captureRejectionSymbol", "node:zlib")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -205832,7 +206484,7 @@ module Zlib =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> BrotliDecompress
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> BrotliDecompress
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -205843,7 +206495,7 @@ module Zlib =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> BrotliDecompress
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> BrotliDecompress
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -206221,7 +206873,8 @@ module Zlib =
         /// 10. resume
         /// 11. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> BrotliDecompress
+        abstract addListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> BrotliDecompress
 
         /// <summary>
         /// <code lang="ts">
@@ -206337,7 +206990,7 @@ module Zlib =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> BrotliDecompress
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> BrotliDecompress
 
         /// <summary>
         /// <code lang="ts">
@@ -206451,7 +207104,7 @@ module Zlib =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> BrotliDecompress
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> BrotliDecompress
 
         /// <summary>
         /// <code lang="ts">
@@ -206554,7 +207207,8 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> BrotliDecompress
+        abstract prependListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> BrotliDecompress
 
         /// <summary>
         /// <code lang="ts">
@@ -206655,7 +207309,8 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> BrotliDecompress
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> BrotliDecompress
 
         /// <summary>
         /// <code lang="ts">
@@ -206823,7 +207478,8 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> BrotliDecompress
+        abstract removeListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> BrotliDecompress
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -206903,8 +207559,11 @@ module Zlib =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("BrotliDecompress.once", "node:zlib")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -207069,8 +207728,11 @@ module Zlib =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("BrotliDecompress.on", "node:zlib")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -207174,7 +207836,10 @@ module Zlib =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("BrotliDecompress.listenerCount", "node:zlib")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -207204,7 +207869,7 @@ module Zlib =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("BrotliDecompress.getEventListeners", "node:zlib")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -207303,7 +207968,7 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("BrotliDecompress.errorMonitor", "node:zlib")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -207312,7 +207977,7 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("BrotliDecompress.captureRejectionSymbol", "node:zlib")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -207790,7 +208455,7 @@ module Zlib =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Gzip
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Gzip
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -207801,7 +208466,7 @@ module Zlib =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Gzip
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Gzip
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -208177,7 +208842,7 @@ module Zlib =
         /// 10. resume
         /// 11. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> Gzip
+        abstract addListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Gzip
 
         /// <summary>
         /// <code lang="ts">
@@ -208293,7 +208958,7 @@ module Zlib =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> Gzip
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Gzip
 
         /// <summary>
         /// <code lang="ts">
@@ -208407,7 +209072,7 @@ module Zlib =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> Gzip
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Gzip
 
         /// <summary>
         /// <code lang="ts">
@@ -208510,7 +209175,7 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> Gzip
+        abstract prependListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Gzip
 
         /// <summary>
         /// <code lang="ts">
@@ -208611,7 +209276,7 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> Gzip
+        abstract prependOnceListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Gzip
 
         /// <summary>
         /// <code lang="ts">
@@ -208779,7 +209444,7 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> Gzip
+        abstract removeListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Gzip
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -208859,8 +209524,11 @@ module Zlib =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("Gzip.once", "node:zlib")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -209025,8 +209693,11 @@ module Zlib =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("Gzip.on", "node:zlib")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -209130,7 +209801,10 @@ module Zlib =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("Gzip.listenerCount", "node:zlib")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -209160,7 +209834,7 @@ module Zlib =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Gzip.getEventListeners", "node:zlib")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -209259,7 +209933,7 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("Gzip.errorMonitor", "node:zlib")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -209268,7 +209942,7 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("Gzip.captureRejectionSymbol", "node:zlib")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -209746,7 +210420,7 @@ module Zlib =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Gunzip
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Gunzip
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -209757,7 +210431,7 @@ module Zlib =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Gunzip
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Gunzip
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -210133,7 +210807,7 @@ module Zlib =
         /// 10. resume
         /// 11. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> Gunzip
+        abstract addListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Gunzip
 
         /// <summary>
         /// <code lang="ts">
@@ -210249,7 +210923,7 @@ module Zlib =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> Gunzip
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Gunzip
 
         /// <summary>
         /// <code lang="ts">
@@ -210363,7 +211037,7 @@ module Zlib =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> Gunzip
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Gunzip
 
         /// <summary>
         /// <code lang="ts">
@@ -210466,7 +211140,7 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> Gunzip
+        abstract prependListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Gunzip
 
         /// <summary>
         /// <code lang="ts">
@@ -210567,7 +211241,8 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> Gunzip
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Gunzip
 
         /// <summary>
         /// <code lang="ts">
@@ -210735,7 +211410,7 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> Gunzip
+        abstract removeListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Gunzip
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -210815,8 +211490,11 @@ module Zlib =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("Gunzip.once", "node:zlib")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -210981,8 +211659,11 @@ module Zlib =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("Gunzip.on", "node:zlib")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -211086,7 +211767,10 @@ module Zlib =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("Gunzip.listenerCount", "node:zlib")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -211116,7 +211800,7 @@ module Zlib =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Gunzip.getEventListeners", "node:zlib")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -211215,7 +211899,7 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("Gunzip.errorMonitor", "node:zlib")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -211224,7 +211908,7 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("Gunzip.captureRejectionSymbol", "node:zlib")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -211704,7 +212388,7 @@ module Zlib =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Deflate
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Deflate
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -211715,7 +212399,7 @@ module Zlib =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Deflate
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Deflate
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -212091,7 +212775,7 @@ module Zlib =
         /// 10. resume
         /// 11. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> Deflate
+        abstract addListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Deflate
 
         /// <summary>
         /// <code lang="ts">
@@ -212207,7 +212891,7 @@ module Zlib =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> Deflate
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Deflate
 
         /// <summary>
         /// <code lang="ts">
@@ -212321,7 +213005,7 @@ module Zlib =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> Deflate
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Deflate
 
         /// <summary>
         /// <code lang="ts">
@@ -212424,7 +213108,7 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> Deflate
+        abstract prependListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Deflate
 
         /// <summary>
         /// <code lang="ts">
@@ -212525,7 +213209,8 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> Deflate
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Deflate
 
         /// <summary>
         /// <code lang="ts">
@@ -212693,7 +213378,7 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> Deflate
+        abstract removeListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Deflate
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -212773,8 +213458,11 @@ module Zlib =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("Deflate.once", "node:zlib")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -212939,8 +213627,11 @@ module Zlib =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("Deflate.on", "node:zlib")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -213044,7 +213735,10 @@ module Zlib =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("Deflate.listenerCount", "node:zlib")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -213074,7 +213768,7 @@ module Zlib =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Deflate.getEventListeners", "node:zlib")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -213173,7 +213867,7 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("Deflate.errorMonitor", "node:zlib")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -213182,7 +213876,7 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("Deflate.captureRejectionSymbol", "node:zlib")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -213661,7 +214355,7 @@ module Zlib =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Inflate
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Inflate
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -213672,7 +214366,7 @@ module Zlib =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Inflate
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Inflate
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -214048,7 +214742,7 @@ module Zlib =
         /// 10. resume
         /// 11. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> Inflate
+        abstract addListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Inflate
 
         /// <summary>
         /// <code lang="ts">
@@ -214164,7 +214858,7 @@ module Zlib =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> Inflate
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Inflate
 
         /// <summary>
         /// <code lang="ts">
@@ -214278,7 +214972,7 @@ module Zlib =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> Inflate
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Inflate
 
         /// <summary>
         /// <code lang="ts">
@@ -214381,7 +215075,7 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> Inflate
+        abstract prependListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Inflate
 
         /// <summary>
         /// <code lang="ts">
@@ -214482,7 +215176,8 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> Inflate
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Inflate
 
         /// <summary>
         /// <code lang="ts">
@@ -214650,7 +215345,7 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> Inflate
+        abstract removeListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Inflate
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -214730,8 +215425,11 @@ module Zlib =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("Inflate.once", "node:zlib")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -214896,8 +215594,11 @@ module Zlib =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("Inflate.on", "node:zlib")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -215001,7 +215702,10 @@ module Zlib =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("Inflate.listenerCount", "node:zlib")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -215031,7 +215735,7 @@ module Zlib =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Inflate.getEventListeners", "node:zlib")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -215130,7 +215834,7 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("Inflate.errorMonitor", "node:zlib")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -215139,7 +215843,7 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("Inflate.captureRejectionSymbol", "node:zlib")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -215619,7 +216323,7 @@ module Zlib =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> DeflateRaw
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DeflateRaw
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -215630,7 +216334,7 @@ module Zlib =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> DeflateRaw
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> DeflateRaw
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -216008,7 +216712,7 @@ module Zlib =
         /// 10. resume
         /// 11. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> DeflateRaw
+        abstract addListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DeflateRaw
 
         /// <summary>
         /// <code lang="ts">
@@ -216124,7 +216828,7 @@ module Zlib =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> DeflateRaw
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DeflateRaw
 
         /// <summary>
         /// <code lang="ts">
@@ -216238,7 +216942,7 @@ module Zlib =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> DeflateRaw
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DeflateRaw
 
         /// <summary>
         /// <code lang="ts">
@@ -216341,7 +217045,8 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> DeflateRaw
+        abstract prependListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DeflateRaw
 
         /// <summary>
         /// <code lang="ts">
@@ -216442,7 +217147,8 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> DeflateRaw
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DeflateRaw
 
         /// <summary>
         /// <code lang="ts">
@@ -216610,7 +217316,8 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> DeflateRaw
+        abstract removeListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> DeflateRaw
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -216690,8 +217397,11 @@ module Zlib =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("DeflateRaw.once", "node:zlib")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -216856,8 +217566,11 @@ module Zlib =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("DeflateRaw.on", "node:zlib")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -216961,7 +217674,10 @@ module Zlib =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("DeflateRaw.listenerCount", "node:zlib")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -216991,7 +217707,7 @@ module Zlib =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("DeflateRaw.getEventListeners", "node:zlib")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -217090,7 +217806,7 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("DeflateRaw.errorMonitor", "node:zlib")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -217099,7 +217815,7 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("DeflateRaw.captureRejectionSymbol", "node:zlib")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -217578,7 +218294,7 @@ module Zlib =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> InflateRaw
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> InflateRaw
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -217589,7 +218305,7 @@ module Zlib =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> InflateRaw
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> InflateRaw
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -217967,7 +218683,7 @@ module Zlib =
         /// 10. resume
         /// 11. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> InflateRaw
+        abstract addListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> InflateRaw
 
         /// <summary>
         /// <code lang="ts">
@@ -218083,7 +218799,7 @@ module Zlib =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> InflateRaw
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> InflateRaw
 
         /// <summary>
         /// <code lang="ts">
@@ -218197,7 +218913,7 @@ module Zlib =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> InflateRaw
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> InflateRaw
 
         /// <summary>
         /// <code lang="ts">
@@ -218300,7 +219016,8 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> InflateRaw
+        abstract prependListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> InflateRaw
 
         /// <summary>
         /// <code lang="ts">
@@ -218401,7 +219118,8 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> InflateRaw
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> InflateRaw
 
         /// <summary>
         /// <code lang="ts">
@@ -218569,7 +219287,8 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> InflateRaw
+        abstract removeListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> InflateRaw
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -218649,8 +219368,11 @@ module Zlib =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("InflateRaw.once", "node:zlib")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -218815,8 +219537,11 @@ module Zlib =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("InflateRaw.on", "node:zlib")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -218920,7 +219645,10 @@ module Zlib =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("InflateRaw.listenerCount", "node:zlib")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -218950,7 +219678,7 @@ module Zlib =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("InflateRaw.getEventListeners", "node:zlib")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -219049,7 +219777,7 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("InflateRaw.errorMonitor", "node:zlib")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -219058,7 +219786,7 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("InflateRaw.captureRejectionSymbol", "node:zlib")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -219536,7 +220264,7 @@ module Zlib =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> Unzip
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Unzip
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -219547,7 +220275,7 @@ module Zlib =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> Unzip
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> Unzip
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -219923,7 +220651,7 @@ module Zlib =
         /// 10. resume
         /// 11. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> Unzip
+        abstract addListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Unzip
 
         /// <summary>
         /// <code lang="ts">
@@ -220039,7 +220767,7 @@ module Zlib =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> Unzip
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Unzip
 
         /// <summary>
         /// <code lang="ts">
@@ -220153,7 +220881,7 @@ module Zlib =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> Unzip
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Unzip
 
         /// <summary>
         /// <code lang="ts">
@@ -220256,7 +220984,7 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> Unzip
+        abstract prependListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Unzip
 
         /// <summary>
         /// <code lang="ts">
@@ -220357,7 +221085,8 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> Unzip
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Unzip
 
         /// <summary>
         /// <code lang="ts">
@@ -220525,7 +221254,7 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> Unzip
+        abstract removeListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> Unzip
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -220605,8 +221334,11 @@ module Zlib =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("Unzip.once", "node:zlib")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -220771,8 +221503,11 @@ module Zlib =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("Unzip.on", "node:zlib")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -220876,7 +221611,10 @@ module Zlib =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("Unzip.listenerCount", "node:zlib")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -220906,7 +221644,7 @@ module Zlib =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("Unzip.getEventListeners", "node:zlib")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -221005,7 +221743,7 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("Unzip.errorMonitor", "node:zlib")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -221014,7 +221752,7 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("Unzip.captureRejectionSymbol", "node:zlib")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -221493,7 +222231,7 @@ module Zlib =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> ZstdCompress
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ZstdCompress
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -221504,7 +222242,7 @@ module Zlib =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> ZstdCompress
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> ZstdCompress
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -221882,7 +222620,7 @@ module Zlib =
         /// 10. resume
         /// 11. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> ZstdCompress
+        abstract addListener: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ZstdCompress
 
         /// <summary>
         /// <code lang="ts">
@@ -221998,7 +222736,7 @@ module Zlib =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> ZstdCompress
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ZstdCompress
 
         /// <summary>
         /// <code lang="ts">
@@ -222112,7 +222850,7 @@ module Zlib =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> ZstdCompress
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ZstdCompress
 
         /// <summary>
         /// <code lang="ts">
@@ -222215,7 +222953,8 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> ZstdCompress
+        abstract prependListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ZstdCompress
 
         /// <summary>
         /// <code lang="ts">
@@ -222316,7 +223055,8 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> ZstdCompress
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ZstdCompress
 
         /// <summary>
         /// <code lang="ts">
@@ -222484,7 +223224,8 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> ZstdCompress
+        abstract removeListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ZstdCompress
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -222564,8 +223305,11 @@ module Zlib =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("ZstdCompress.once", "node:zlib")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -222730,8 +223474,11 @@ module Zlib =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("ZstdCompress.on", "node:zlib")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -222835,7 +223582,10 @@ module Zlib =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("ZstdCompress.listenerCount", "node:zlib")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -222865,7 +223615,7 @@ module Zlib =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("ZstdCompress.getEventListeners", "node:zlib")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -222964,7 +223714,7 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("ZstdCompress.errorMonitor", "node:zlib")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -222973,7 +223723,7 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("ZstdCompress.captureRejectionSymbol", "node:zlib")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
@@ -223452,7 +224202,7 @@ module Zlib =
         /// Alias for <c>emitter.removeListener()</c>.
         /// </summary>
         /// <remarks>@since v10.0.0</remarks>
-        abstract off: eventName: obj * listener: (obj[] -> unit) -> ZstdDecompress
+        abstract off: eventName: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ZstdDecompress
         /// <summary>
         /// Removes all listeners, or those of the specified <c>eventName</c>.
         /// <br /><br />
@@ -223463,7 +224213,7 @@ module Zlib =
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
         /// <remarks>@since v0.1.26</remarks>
-        abstract removeAllListeners: ?eventName: obj -> ZstdDecompress
+        abstract removeAllListeners: ?eventName: U2<string, Fable.Core.TS.Es.Symbol> -> ZstdDecompress
         /// <summary>
         /// By default <c>EventEmitter</c>s will print a warning if more than <c>10</c> listeners are
         /// added for a particular event. This is a useful default that helps finding
@@ -223841,7 +224591,8 @@ module Zlib =
         /// 10. resume
         /// 11. unpipe
         /// </summary>
-        abstract addListener: ``event``: obj * listener: (obj[] -> unit) -> ZstdDecompress
+        abstract addListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ZstdDecompress
 
         /// <summary>
         /// <code lang="ts">
@@ -223957,7 +224708,7 @@ module Zlib =
         /// //   a
         /// </code>
         /// </summary>
-        abstract on: ``event``: obj * listener: (obj[] -> unit) -> ZstdDecompress
+        abstract on: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ZstdDecompress
 
         /// <summary>
         /// <code lang="ts">
@@ -224071,7 +224822,7 @@ module Zlib =
         /// //   a
         /// </code>
         /// </summary>
-        abstract once: ``event``: obj * listener: (obj[] -> unit) -> ZstdDecompress
+        abstract once: ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ZstdDecompress
 
         /// <summary>
         /// <code lang="ts">
@@ -224174,7 +224925,8 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependListener: ``event``: obj * listener: (obj[] -> unit) -> ZstdDecompress
+        abstract prependListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ZstdDecompress
 
         /// <summary>
         /// <code lang="ts">
@@ -224275,7 +225027,8 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract prependOnceListener: ``event``: obj * listener: (obj[] -> unit) -> ZstdDecompress
+        abstract prependOnceListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ZstdDecompress
 
         /// <summary>
         /// <code lang="ts">
@@ -224443,7 +225196,8 @@ module Zlib =
         /// <br /><br />
         /// Returns a reference to the <c>EventEmitter</c>, so that calls can be chained.
         /// </summary>
-        abstract removeListener: ``event``: obj * listener: (obj[] -> unit) -> ZstdDecompress
+        abstract removeListener:
+            ``event``: U2<string, Fable.Core.TS.Es.Symbol> * listener: (obj[] -> unit) -> ZstdDecompress
 
         /// <summary>
         /// Creates a <c>Promise</c> that is fulfilled when the <c>EventEmitter</c> emits the given
@@ -224523,8 +225277,11 @@ module Zlib =
         /// <remarks>@since v11.13.0, v10.16.0</remarks>
         [<Import("ZstdDecompress.once", "node:zlib")>]
         static member once
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterOptions)
-            : JS.Promise<obj[]> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterOptions
+            ) : JS.Promise<obj[]> =
             jsNative
 
         /// <summary>
@@ -224689,8 +225446,11 @@ module Zlib =
         /// <returns>An <c>AsyncIterator</c> that iterates <c>eventName</c> events emitted by the <c>emitter</c></returns>
         [<Import("ZstdDecompress.on", "node:zlib")>]
         static member on
-            (emitter: NodeJS.EventEmitter<unit[]>, eventName: obj, ?options: StaticEventEmitterIteratorOptions)
-            : NodeJS.AsyncIterator<obj[], obj, obj> =
+            (
+                emitter: NodeJS.EventEmitter<unit[]>,
+                eventName: U2<string, Fable.Core.TS.Es.Symbol>,
+                ?options: StaticEventEmitterIteratorOptions
+            ) : NodeJS.AsyncIterator<obj[], obj, obj> =
             jsNative
 
         /// <summary>
@@ -224794,7 +225554,10 @@ module Zlib =
         /// <param name="emitter">The emitter to query</param>
         /// <param name="eventName">The event name</param>
         [<Import("ZstdDecompress.listenerCount", "node:zlib")>]
-        static member listenerCount(emitter: NodeJS.EventEmitter<unit[]>, eventName: obj) : float = jsNative
+        static member listenerCount
+            (emitter: NodeJS.EventEmitter<unit[]>, eventName: U2<string, Fable.Core.TS.Es.Symbol>)
+            : float =
+            jsNative
 
         /// <summary>
         /// Returns a copy of the array of listeners for the event named <c>eventName</c>.
@@ -224824,7 +225587,7 @@ module Zlib =
         /// <remarks>@since v15.2.0, v14.17.0</remarks>
         [<Import("ZstdDecompress.getEventListeners", "node:zlib")>]
         static member getEventListeners
-            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: obj)
+            (emitter: U2<NodeJS.EventEmitter<unit[]>, EventTarget>, name: U2<string, Fable.Core.TS.Es.Symbol>)
             : Fable.Core.TS.Es.Function[] =
             jsNative
 
@@ -224923,7 +225686,7 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v13.6.0, v12.17.0</remarks>
         [<Import("ZstdDecompress.errorMonitor", "node:zlib")>]
-        static member errorMonitor: obj = jsNative
+        static member errorMonitor: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <c>Symbol.for('nodejs.rejection')</c>
@@ -224932,7 +225695,7 @@ module Zlib =
         /// </summary>
         /// <remarks>@since v13.4.0, v12.16.0</remarks>
         [<Import("ZstdDecompress.captureRejectionSymbol", "node:zlib")>]
-        static member captureRejectionSymbol: obj = jsNative
+        static member captureRejectionSymbol: Fable.Core.TS.Es.Symbol = jsNative
 
         /// <summary>
         /// Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a>
