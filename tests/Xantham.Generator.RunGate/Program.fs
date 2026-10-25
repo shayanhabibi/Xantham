@@ -2177,10 +2177,7 @@ let private exportLayout () =
     LayoutLab.Globals.Exports.sharedFlag <- true
     check "a mutable global writes through to globalThis" (emitJsExpr () "globalThis.sharedFlag === true")
 
-    equal
-        "a return-only overload pair is one member whose union carries what the function returns"
-        "x"
-        (unbox<string>(LayoutLab.Exports.pick "x"))
+    equal "source-identical overloads retain the first applicable string return" "x" (LayoutLab.Exports.pick "x")
 
     equal
         "a literal-separated overload selects the one exported function"

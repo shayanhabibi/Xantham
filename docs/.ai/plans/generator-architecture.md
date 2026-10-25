@@ -3472,3 +3472,9 @@ SP001 1,179 → 1,177, SP003 504 → 506); the lib-ship and catalog-library-entr
 lib.scripthost's SafeArray and VarDate. Node loses fourteen `[<EmitConstructor>]` exports of private constructors (`Cipher`,
 `Hash`, `Stats`, `REPLServer` and others). Catalogue identity keys do not move; RawJSON's `api`
 hash in Core.TS's `declarations.json` does.
+
+## Census batch 2 catalogue compatibility (2026-10-25)
+
+Ambient export-equals value recovery adds imported value members, and source-identical overload selection preserves the first applicable return instead of unioning unreachable alternatives. Schema 2 advances API version 11 to 12 and inference version 4 to 5 so prior producers are rejected before reuse. Identity version 7, customization version 1 and contract version 1 remain unchanged: declaration identities, source authentication and selector semantics retain their existing rules. The Core.TS producer is regenerated with the new contract alongside the affected Node bindings.
+
+Batch measurements: Node HG001 4 to 0 and DO008 30 to 26; non-lab widened/escape finding occurrences 6708 to 6698. The new process import adds one existing SE003 read-only-import finding while its writable global stays intact. Both tier audits report zero regressions and zero unexplained removals. All 154 golden write tests, 1634 generator tests, 105 Wire tests, 664 runtime checks and the Partas source/DLL consumer gate passed (one ignored test in each Expecto suite).

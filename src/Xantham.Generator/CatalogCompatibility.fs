@@ -30,8 +30,8 @@ let current compiler =
     {
         ContractVersion = 1
         IdentityVersion = 7
-        ApiVersion = 11
-        InferenceVersion = 4
+        ApiVersion = 12
+        InferenceVersion = 5
         CustomizationVersion = 1
         Compiler = compiler
     }

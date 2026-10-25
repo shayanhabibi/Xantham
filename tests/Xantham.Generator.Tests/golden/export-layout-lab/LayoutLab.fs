@@ -30,7 +30,7 @@ type Exports =
     [<Import("convert", "layout-lab")>]
     static member convert (value: float) : float = jsNative
     [<Import("pick", "layout-lab")>]
-    static member pick (value: string) : U2<string, float> = jsNative
+    static member pick (value: string) : string = jsNative
     [<Import("dispatch", "layout-lab")>]
     static member dispatch (kind: Exports.Left) : Exports.Left = jsNative
     [<Import("dispatch", "layout-lab")>]

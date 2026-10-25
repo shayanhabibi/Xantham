@@ -44,8 +44,18 @@ let tests =
                  contract.ApiVersion,
                  contract.InferenceVersion,
                  contract.CustomizationVersion)
-                (1, 7, 11, 4, 1)
-                "identity 7 keys mapped aliases by declaration; API 11 and inference 4 retain merged callable declaration provenance"
+                (1, 7, 12, 5, 1)
+                "identity 7 keys mapped aliases by declaration; API 12 and inference 5 preserve ambient exported values and first source overload returns"
+
+        testCase "the API contract rejects catalogues built before ambient values and source overload selection" <| fun _ ->
+            rejects "API version" (fun () ->
+                validateContract 2 expected.Compiler expected.Generator "profile"
+                    (Some { expected.Contract with ApiVersion = 11 }))
+
+        testCase "the inference contract rejects catalogues built before source overload selection" <| fun _ ->
+            rejects "inference version" (fun () ->
+                validateContract 2 expected.Compiler expected.Generator "profile"
+                    (Some { expected.Contract with InferenceVersion = 4 }))
 
         testCase "the API contract rejects catalogues built before merged callable methods" <| fun _ ->
             rejects "API version" (fun () ->

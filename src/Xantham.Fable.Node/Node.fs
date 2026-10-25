@@ -45540,7 +45540,16 @@ module Console =
             | [<CompiledValue(false)>] False
             | [<CompiledValue(true)>] True
 
+/// <summary>node:constants</summary>
 module Constants =
+    type Constants =
+        inherit Dlopen
+        inherit Errno
+        inherit Priority
+        inherit Os.SignalConstants
+        inherit Constants2
+        inherit Node.Constants
+
     [<Interface>]
     type Dlopen =
         abstract RTLD_LAZY: float
@@ -45714,6 +45723,12 @@ module Constants =
                 PRIORITY_HIGHEST: float
             ) : Priority =
             jsNative
+
+    /// <summary>The package's value exports, each bound to its import.</summary>
+    [<Erase>]
+    type Exports =
+        [<Import("default", "node:constants")>]
+        static member constants: Constants = jsNative
 
 /// <summary>node:crypto</summary>
 module Crypto =
@@ -90615,7 +90630,7 @@ module Fs =
         /// </summary>
         /// <remarks>@since v0.1.31</remarks>
         [<Import("readlinkSync", "node:fs")>]
-        static member readlinkSync(path: PathLike, ?options: EncodingOption) : U2<string, NonSharedBuffer> = jsNative
+        static member readlinkSync(path: PathLike, ?options: EncodingOption) : string = jsNative
 
         /// <summary>
         /// Returns the symbolic link's string value.
@@ -90932,7 +90947,7 @@ module Fs =
         /// </summary>
         /// <remarks>@since v5.10.0</remarks>
         [<Import("mkdtempSync", "node:fs")>]
-        static member mkdtempSync(prefix: string, ?options: EncodingOption) : U2<string, NonSharedBuffer> = jsNative
+        static member mkdtempSync(prefix: string, ?options: EncodingOption) : string = jsNative
 
         /// <summary>
         /// Returns the created directory path.
@@ -94273,7 +94288,7 @@ module Fs =
             [<Import("realpath", "node:fs/promises")>]
             static member realpath
                 (path: Fs.PathLike, ?options: U2<string, Fs.ObjectEncodingOptions>)
-                : U2<JS.Promise<string>, JS.Promise<U2<string, NonSharedBuffer>>> =
+                : JS.Promise<string> =
                 jsNative
 
             /// <summary>
@@ -94330,9 +94345,7 @@ module Fs =
             /// <remarks>@since v10.0.0</remarks>
             /// <returns>Fulfills with a string containing the file system path of the newly created temporary directory.</returns>
             [<Import("mkdtemp", "node:fs/promises")>]
-            static member mkdtemp
-                (prefix: string, ?options: U2<string, Fs.ObjectEncodingOptions>)
-                : U2<JS.Promise<string>, JS.Promise<U2<string, NonSharedBuffer>>> =
+            static member mkdtemp(prefix: string, ?options: U2<string, Fs.ObjectEncodingOptions>) : JS.Promise<string> =
                 jsNative
 
             /// <summary>
@@ -154613,6 +154626,14 @@ module PerfHooks =
 
                 [<ParamObject; Emit("$0")>]
                 static member Create(``type``: PerfHooks.EntryType, ?buffered: bool) : Options2 = jsNative
+
+/// <summary>node:process</summary>
+module Process =
+    /// <summary>The package's value exports, each bound to its import.</summary>
+    [<Erase>]
+    type Exports =
+        [<Import("default", "node:process")>]
+        static member ``process``: NodeJS.Process = jsNative
 
 module Promisify =
     type Fn<'T1, 'TResult> = delegate of arg1: 'T1 * callback: Promisify.Fn.Callback2<'TResult> -> unit
