@@ -454,10 +454,11 @@ uncounted. `declare var` is the form that gets a setter.
 
 ## Also Fable's, not written up
 
-**`symbol` and `unique symbol` have no `Fable.Core` 5.2.0 binding** (`TR041` 5, `TR042` 6; 11
-sites). The binding widens to `obj`, and the run gate proves a real JavaScript symbol survives the
-round trip through it - `flags-lab` reads `typeof` back as `"symbol"`. The workaround and the
-binding are the same thing, so there is nothing to show.
+**`symbol` and `unique symbol` have no `Fable.Core` 5.2.0 binding.** The generator writes them as
+the compiler lib's own `Symbol` interface, which Core.TS generates (`Fable.Core.TS.Es.Symbol`,
+`TR069`; W1, 2026-10-24). A `unique symbol` adds `TR042` for its identity, and `obj` with `TR041`
+remains only where the interface has no name in the run. The run gate proves a real JavaScript
+symbol survives the round trip - `flags-lab` reads `typeof` back as `"symbol"`.
 
 ---
 
