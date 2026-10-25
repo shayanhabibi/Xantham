@@ -174,6 +174,7 @@ module FindingCodes =
             "MB.SymbolKeyedMemberAsEmit", "MB009"
             "MB.LiteralOverloadAsMethod", "MB010"
             "MB.LiteralMemberAsConstant", "MB011"
+            "MB.StringKeyedMemberAsEmit", "MB012"
             "NE.TypeNameSuffixed", "NE001"
             "HG.AmbientModuleDropped", "HG001"
             "HG.UnwritableGlobalDropped", "HG002"
@@ -769,6 +770,7 @@ type Members =
     /// primitive, the literal is a `[<Literal>]` in the declaration's same-named module, and
     /// `Create` writes it.
     | [<Ergonomic>] LiteralMemberAsConstant of literal: string
+    | [<Ergonomic>] StringKeyedMemberAsEmit of key: string * name: string
 
     interface IFindingKind with
         member this.Message =
@@ -786,6 +788,7 @@ type Members =
             | SymbolKeyedMemberAsEmit(symbol, name) -> $"[Symbol.{symbol}] reads as {name} through [<Emit>]"
             | LiteralOverloadAsMethod(literal, name) ->
                 $"overload on literal \"{literal}\" reads as {name} through [<Emit>]"
+            | StringKeyedMemberAsEmit(key, name) -> $"string-keyed member {key} reads as {name} through [<Emit>]"
             | LiteralMemberAsConstant literal ->
                 $"literal member {literal}: read as its primitive, declared as a [<Literal>], written by Create"
 
