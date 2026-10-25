@@ -1524,8 +1524,8 @@ let internal applyWithProducer
                     | _ -> None)
                 |> Map.ofList
 
-            let rec canonicalReference visited vars reference =
-                let canonical = canonicalReference visited vars
+            let rec canonicalReference (abbreviations: Map<string, FsAbbrevDecl>) visited vars reference =
+                let canonical = canonicalReference abbreviations visited vars
 
                 let named name arguments applied =
                     let arguments = List.map canonical arguments
@@ -1538,7 +1538,7 @@ let internal applyWithProducer
                         let bindings =
                             List.zip (alias.TypeParameters |> List.map _.Name) arguments |> Map.ofList
 
-                        canonicalReference (Set.add name visited) bindings alias.Target
+                        canonicalReference abbreviations (Set.add name visited) bindings alias.Target
                     | _ ->
                         let name = Map.tryFind name canonicalNames |> Option.defaultValue name
                         if applied then FsApp(name, arguments) else FsNamed name
@@ -1557,7 +1557,7 @@ let internal applyWithProducer
                     FsBranded(canonical primitive, Map.tryFind measure canonicalNames |> Option.defaultValue measure)
                 | other -> other
 
-            let constraints decl =
+            let constraintsFor abbreviations decl =
                 let parameters = parameters decl
 
                 let vars =
@@ -1565,20 +1565,71 @@ let internal applyWithProducer
                     |> List.mapi (fun index parameter -> parameter.Name, FsTypeVar(string index))
                     |> Map.ofList
 
-                let canonical = canonicalReference Set.empty vars
+                let canonical = canonicalReference abbreviations Set.empty vars
 
                 parameters
                 |> List.map (fun parameter ->
                     parameter.Constraint |> Canonical.option (canonical >> Canonical.reference))
                 |> List.toArray
 
-            let surface decl =
+            let constraints = constraintsFor abbreviations
+
+            let declarationsByName =
+                shape.Decls |> List.map (fun decl -> Render.declName decl, decl) |> Map.ofList
+
+            let originalDeclarationsByName =
+                originalShape.Decls
+                |> List.map (fun decl -> Render.declName decl, decl)
+                |> Map.ofList
+
+            let originalAbbreviations =
+                originalShape.Decls
+                |> List.choose (function
+                    | FsAbbrev alias -> Some(alias.Name, alias)
+                    | _ -> None)
+                |> Map.ofList
+
+            let rec forwardedDeclaration declarationsByName abbreviations visited decl =
+                let name = Render.declName decl
+
+                match decl with
+                | FsAbbrev alias when alias.Value.IsNone && not (Set.contains name visited) ->
+                    let target =
+                        match alias.Target with
+                        | FsNamed target when alias.TypeParameters.IsEmpty -> Some(target, [])
+                        | FsApp(target, arguments) -> Some(target, arguments)
+                        | _ -> None
+
+                    match target with
+                    | Some(target, arguments) when
+                        arguments = (alias.TypeParameters |> List.map (fun parameter -> FsTypeVar parameter.Name))
+                        ->
+                        match
+                            Map.tryFind name identities,
+                            Map.tryFind target identities,
+                            Map.tryFind target declarationsByName
+                        with
+                        | Some own, Some defining, Some declaration when
+                            own.Key = defining.Key
+                            && (parameters declaration).Length = alias.TypeParameters.Length
+                            && constraintsFor abbreviations declaration = constraintsFor abbreviations decl
+                            ->
+                            forwardedDeclaration declarationsByName abbreviations (Set.add name visited) declaration
+                        | _ -> decl
+                    | _ -> decl
+                | _ -> decl
+
+            let surfaceWith declarationsByName abbreviations decl =
+                // A type-only occurrence forwarding the exact binders of the same authenticated
+                // declaration has its defining surface, not a new abbreviation representation.
+                let decl = forwardedDeclaration declarationsByName abbreviations Set.empty decl
+
                 let bind prefix (parameters: FsTypeParam list) vars =
                     parameters
                     |> List.mapi (fun index parameter -> parameter.Name, FsTypeVar(prefix + string index))
                     |> List.fold (fun vars (name, key) -> Map.add name key vars) vars
 
-                let reference = canonicalReference Set.empty
+                let reference = canonicalReference abbreviations Set.empty
 
                 let vars = bind "type:" (parameters decl) Map.empty
 
@@ -1761,6 +1812,9 @@ let internal applyWithProducer
 
                 hashText api
 
+            let surface = surfaceWith declarationsByName abbreviations
+            let originalSurface = surfaceWith originalDeclarationsByName originalAbbreviations
+
             let mutable ownedVariants = []
 
             let owned =
@@ -1809,7 +1863,7 @@ let internal applyWithProducer
                             let originalApi =
                                 originalShape.Decls
                                 |> List.tryFind (fun d -> Render.declName d = name)
-                                |> Option.map surface
+                                |> Option.map originalSurface
                                 |> Option.defaultValue (surface decl)
 
                             let api =
@@ -1850,13 +1904,37 @@ let internal applyWithProducer
                                 }))
 
             let exportedNames =
-                shape.Harvest.Exports
-                |> List.map (fun export ->
-                    shape.ExportTypes
-                    |> Map.tryFind export.Symbol.SymbolId
-                    |> Option.bind _.Declared
-                    |> Option.bind (fun typeId -> Map.tryFind typeId shape.DeclNames)
-                    |> Option.defaultValue (Shape.Spec.fsName (Shape.Spec.defaultExportName ctx) export))
+                let exportPath =
+                    Shape.ExportLayout.declPath (Shape.ExportLayout.modulePaths shape) shape
+
+                [
+                    yield!
+                        shape.Harvest.Exports
+                        |> List.map (fun export ->
+                            shape.ExportTypes
+                            |> Map.tryFind export.Symbol.SymbolId
+                            |> Option.bind _.Declared
+                            |> Option.bind (fun typeId -> Map.tryFind typeId shape.DeclNames)
+                            |> Option.defaultValue (Shape.Spec.fsName (Shape.Spec.defaultExportName ctx) export))
+                    yield!
+                        shape.Harvest.Exports
+                        |> List.choose (fun export ->
+                            if (export.Symbol.Flags &&& SymbolFlags.Type) = SymbolFlags.None then
+                                None
+                            else
+                                Some(
+                                    String.concat
+                                        "."
+                                        (exportPath export
+                                         @ [
+                                             Shape.Spec.underNamespace
+                                                 (Shape.Spec.exportNamespacePath shape.Harvest.Namespaces export)
+                                                 (Naming.typeNameSegment (
+                                                     Shape.Spec.fsName (Shape.Spec.defaultExportName ctx) export
+                                                 ))
+                                         ])
+                                ))
+                ]
                 |> Set.ofList
 
             let localName (declaration: Declaration) =
@@ -1888,7 +1966,16 @@ let internal applyWithProducer
                         |> List.sortBy (fun entry ->
                             let name = localName entry
 
+                            let forwarding =
+                                declarationsByName
+                                |> Map.tryFind name
+                                |> Option.exists (fun decl ->
+                                    forwardedDeclaration declarationsByName abbreviations Set.empty decl
+                                    |> Render.declName
+                                    |> ((<>) name))
+
                             constrainedCount entry,
+                            forwarding,
                             not (Set.contains name exportedNames),
                             name.Split('.').Length,
                             name)

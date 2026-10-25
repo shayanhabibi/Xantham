@@ -3681,3 +3681,29 @@ matching Workers source compile together against net8.0/Fable.Core5.6.0 with zer
 The phantom-only diff is 81 private case prefixes; all 4214 catalogue contracts (identity,
 canonical API, arity and constraints) and manifest tiers remain unchanged. Final packaged
 consumer-family validation and the consolidated runtime gate follow producer regeneration.
+
+### Catalogue: authenticated transparent declaration occurrences (2026-10-26)
+
+Canonical API normalization follows a type-only abbreviation to its actual local defining
+declaration only when their complete source identities match, every binder forwards in order,
+arity and canonical constraints agree, and the chain is acyclic. Unrelated source aliases,
+transformed arguments and value bindings retain their own surfaces. Original and current
+declaration/abbreviation maps remain separate when computing customization base APIs.
+
+Within one identity group, an authenticated defining declaration precedes its forwarding
+wrappers in canonical ownership selection; all unrelated ordering stays unchanged. Otherwise
+same-depth lexical ordering can choose Mirror.Compute before Original.Compute and redirect the
+definition back to its own alias. Harvested Type export occurrence paths are retained using
+the exact shaping qualification, preserving the public Mirror.Compute alias after deduplication.
+
+The mapped phantom namespace reexport lab reproduces Core.TS Omit's API conflict. It checks
+the public alias with a bounded consumer build, alpha-renamed forwarding, transformed/partial/
+permuted arguments, changed constraints, value bindings, unrelated structural/opaque targets,
+cycles, carrier changes and customization base API isolation. This changes the canonical API
+normal form for authenticated transparent occurrences within the unpublished API14 batch;
+all final producer catalogues and packaged consumers require regeneration together.
+
+Identity contract 9 rejects namespace aliases authenticated through generated parent roles.
+The CoreTS audit accounts for all 65 removed GlobalThis catalogue rows as actual source aliases;
+all emitted public type paths remain present. API contract 14 covers faithful alias surface normalization.
+A stale identity-8/API-14 producer is rejected independently of its API version.

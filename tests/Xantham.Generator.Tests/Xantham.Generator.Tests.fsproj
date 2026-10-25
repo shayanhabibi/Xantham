@@ -30,6 +30,7 @@
         <Compile Include="NamespaceUtilityIdentity.test.fs" />
         <Compile Include="CompositeHandleIdentity.test.fs" />
         <Compile Include="PhantomCaseNames.test.fs" />
+        <Compile Include="PhantomReexportIdentity.test.fs" />
         <Compile Include="CatalogPortability.test.fs" />
         <Compile Include="CatalogLibraryLab.fs" />
         <Compile Include="CatalogLibrary.test.fs" />

@@ -1805,7 +1805,7 @@ let pipelineTests =
                     // which FS0035 forbids in an abbreviation and a union admits.
                     Expect.stringContains
                         source
-                        "type SurplusParameter<'T, 'Reserved> = private SurplusParameter__ of"
+                        "type SurplusParameter<'T, 'Reserved> = private Phantom_SurplusParameter__ of"
                         "the head keeps both parameters behind an erased private case"
 
                     Expect.stringContains source "[<Erase>]" "erased, so the phantom costs nothing at runtime"
@@ -1917,19 +1917,19 @@ let pipelineTests =
                     // survive as a phantom with a private case - a cast is the only use of it.
                     Expect.stringContains
                         source
-                        "type DeepPartial<'T> = private DeepPartial__ of obj"
+                        "type DeepPartial<'T> = private Phantom_DeepPartial__ of obj"
                         "a mapped type over an open operand"
 
                     Expect.stringContains
                         source
-                        "type Unwrap<'T> = private Unwrap__ of obj"
+                        "type Unwrap<'T> = private Phantom_Unwrap__ of obj"
                         "a conditional over an open operand"
 
                     // A template literal is still a string at runtime whatever it interpolates,
                     // so the phantom carries one.
                     Expect.stringContains
                         source
-                        "type Prefixed<'T> = private Prefixed__ of string"
+                        "type Prefixed<'T> = private Phantom_Prefixed__ of string"
                         "a template literal over an open operand"
 
                     Expect.stringContains source "[<Erase>]" "and each is erased"
@@ -2499,7 +2499,7 @@ let pipelineTests =
                       // stays the phantom, which keeps the arity `string` would have lost.
                       Expect.stringContains source "type ModeEvent =" "a closed template literal is a StringEnum"
                       Expect.stringContains source "[<CompiledName(\"onRead\")>] OnRead" "expanded, not widened"
-                      Expect.stringContains source "type Tagged<'T> = private Tagged__ of string" "open operand: phantom"
+                      Expect.stringContains source "type Tagged<'T> = private Phantom_Tagged__ of string" "open operand: phantom"
 
                       // bigint is exact, and an exact mapping is reported nowhere at all.
                       Expect.stringContains source "abstract balance: bigint" "a bigint member"
@@ -2889,7 +2889,7 @@ let pipelineTests =
 
                       // The declaration binds Element even though the deferred tuple loses
                       // its length computation. Preserve both arity and the known carrier.
-                      Expect.stringContains source "type ReadonlyTuple<'Element, 'Length> = private ReadonlyTuple__ of 'Element[]" "the element binder and array carrier survive"
+                      Expect.stringContains source "type ReadonlyTuple<'Element, 'Length> = private Phantom_ReadonlyTuple__ of 'Element[]" "the element binder and array carrier survive"
 
                   testCase "an indexable shape with none of Array's members stays a shape" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -6728,7 +6728,7 @@ let pipelineTests =
                   testCase "tag-map-lab: T[keyof T] reads as proptypelock" <| fun _ ->
                       let source = generate () |> sourceOf
 
-                      Expect.stringContains source "type ValueOf<'ObjectType, 'ValueType> = private ValueOf__ of proptypelock<'ObjectType>" "the defaulted key binder survives with the known carrier"
+                      Expect.stringContains source "type ValueOf<'ObjectType, 'ValueType> = private Phantom_ValueOf__ of proptypelock<'ObjectType>" "the defaulted key binder survives with the known carrier"
                       Expect.stringContains source "type ValuesOf<'T> = proptypelock<'T>" "a written keyof"
 
                       Expect.stringContains
@@ -6736,7 +6736,7 @@ let pipelineTests =
                           "static member valuesOf<'T> (source: 'T) : proptypelock<'T>[] = jsNative"
                           "a signature's own parameter"
 
-                      Expect.stringContains source "type Picked<'T, 'K> = private Picked__ of obj" "a key with no default stays widened without losing its binders"
+                      Expect.stringContains source "type Picked<'T, 'K> = private Phantom_Picked__ of obj" "a key with no default stays widened without losing its binders"
 
                   testCase "tag-map-lab: a key-independent mapped type reads as PropertyRecord" <| fun _ ->
                       let rendered = generate ()
@@ -6749,7 +6749,7 @@ let pipelineTests =
 
                       Expect.stringContains
                           source
-                          "type Mirrored<'T> = private Mirrored__ of obj"
+                          "type Mirrored<'T> = private Phantom_Mirrored__ of obj"
                           "a value that reads the key stays a phantom"
 
                       Expect.equal (symbolsOf rendered "TR067") [ "Stringified" ] "one finding per PropertyRecord"
@@ -7691,7 +7691,7 @@ let openIntersectionFixtureTests =
                 Expect.stringContains source "static member listen (handler: (Listen.Handler.E -> unit)) : unit" "a closed application flattens its intersection"
 
                 let keyed key = rendered.Findings |> List.filter (fun finding -> finding.Key = key) |> List.map _.Symbol
-                Expect.stringContains source "type Exclusive<'T, 'U> = private Exclusive__ of obj" "a mapped operand is not read as restating the bound"
+                Expect.stringContains source "type Exclusive<'T, 'U> = private Phantom_Exclusive__ of obj" "a mapped operand is not read as restating the bound"
                 Expect.equal (keyed "TR018") [ "Exclusive"; "Tally" ] "an operand with no reference of its own, and a primitive operand, widen"
                 Expect.equal (keyed "TR073") [ "Listener(res)" ] "the restating reduction is exact"
                 Expect.equal (keyed "TR049") [ "Defined" ] "the empty reduction is exact"
@@ -7942,4 +7942,10 @@ let compositeHandleIdentityFixtureTests =
 let phantomCaseNameFixtureTests =
     testList "phantom case name fixture" [
         yield! fixtureTests "phantom-case-name-lab" (handFixture "phantom-case-name-lab") GeneratorConfig.Default (fun _ -> [])
+    ]
+
+[<Tests>]
+let phantomReexportIdentityFixtureTests =
+    testList "phantom reexport identity fixture" [
+        yield! fixtureTests "phantom-reexport-identity-lab" (handFixture "phantom-reexport-identity-lab") GeneratorConfig.Default (fun _ -> [])
     ]

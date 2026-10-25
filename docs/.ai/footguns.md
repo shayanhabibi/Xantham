@@ -191,6 +191,11 @@ reads to logical EOF; compatibility, declarations and variants use that shared d
 Compression belongs to Pipeline.run's disk boundary. Generation retains a declarations.json
 text entry, output reports the actual filename, and switching formats retains old output.
 
+**Namespace alias ownership requires identity contract 9.** Namespace export occurrences use
+their actual alias declaration handles, rather than the enclosing global namespace identity.
+Earlier identity-8 producers must be rejected even when they carry API contract 14. Canonical
+faithful-alias normalization remains in the unpublished API-14 batch; regenerate every producer.
+
 **Schema 2 compatibility is an explicit maintenance contract.** Assess every change to
 catalogue identity, source closure or ownership (`identityVersion`), canonical API/constraint
 hashing or emitted ABI (`apiVersion`), inference/profile semantics (`inferenceVersion`), and
@@ -720,3 +725,17 @@ spelling as a private DU case still triggers FS0053; quoting it does not establi
 case naming. Prefix every private phantom case with a fixed uppercase marker while preserving
 the complete spelling. Capitalizing alone loses the distinction between lower and Lower.
 Keep the public alias, type binders, private payload and Erase contract unchanged.
+
+## Transparent occurrences need defining surfaces and noncyclic ownership (2026-10-26)
+
+Core.TS Omit and GlobalThis.Omit are the same source alias represented by a phantom definition
+and a forwarding abbreviation. Normalize their declaration surfaces only with the same full
+authenticated identity, actual target declaration and exact ordered binder/constraint forwarding.
+Shared carrier or rendered spelling is not evidence. Compute original customization APIs using
+the original declaration/alias maps, not targets from the changed shape.
+
+Prefer the defining representation to its faithful wrappers within an identity group. A lexical
+winner that merely forwards to another group member can become a self-alias after redirects.
+Keep genuine harvested public namespace occurrences after deduplication, while internal helper
+arms remain governed by their existing declaration policy. Bounded consumer compilation catches
+both dropped public paths and alias cycles without stranding the build lane.
