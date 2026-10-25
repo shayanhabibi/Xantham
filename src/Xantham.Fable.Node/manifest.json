@@ -38,10 +38,10 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 26291,
+      "total": 26277,
       "exact": 384,
       "ergonomic": 24187,
-      "widened": 1720
+      "widened": 1706
     },
     {
       "pass": "SA - shape-aliases",
