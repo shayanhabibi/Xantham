@@ -712,3 +712,11 @@ declaration incorrectly rejects them. Source-union A|B and A|C have the same iss
 the full authenticated identities and require complete key equality for ownership reuse;
 apply nominal declaration-set drift checks to nominal roles. Nominal augmentation inside a
 composition must still reject through the declaration/API guards.
+
+## A legal alias name is not necessarily a legal union case (2026-10-26)
+
+Zod exports lowercase phantom aliases such as objectInputType and flatten. Reusing the alias
+spelling as a private DU case still triggers FS0053; quoting it does not establish uppercase
+case naming. Prefix every private phantom case with a fixed uppercase marker while preserving
+the complete spelling. Capitalizing alone loses the distinction between lower and Lower.
+Keep the public alias, type binders, private payload and Erase contract unchanged.

@@ -7937,3 +7937,9 @@ let compositeHandleIdentityFixtureTests =
     testList "composite handle identity fixture" [
         yield! fixtureTests "composite-handle-identity-lab" (handFixture "composite-handle-identity-lab") GeneratorConfig.Default (fun _ -> [])
     ]
+
+[<Tests>]
+let phantomCaseNameFixtureTests =
+    testList "phantom case name fixture" [
+        yield! fixtureTests "phantom-case-name-lab" (handFixture "phantom-case-name-lab") GeneratorConfig.Default (fun _ -> [])
+    ]

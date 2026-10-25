@@ -3664,3 +3664,20 @@ mapped declaration, and also covers overlapping nominal unions. Their complete i
 and owners remain distinct. Nominal augmentation inside either composition must still fail.
 This fixes conflict classification without changing stored identities, hashing or valid-match
 semantics; identity8 and the unpublished API14 contract retain their meanings.
+
+### Render: private phantom case identifiers (2026-10-26)
+
+Phantom declarations retain the exact public type name, generic parameters, private carrier
+and Erase attribute. Their implementation case uses a fixed uppercase Phantom_ prefix before
+the complete original spelling. This is injective across lower/Upper spellings and legal when
+the public alias begins lowercase, with an underscore, or is an escaped F# keyword. Changing
+only that private implementation identifier preserves the canonical public API and erasure.
+The phantom case lab compiles those aliases and a source alias already beginning Phantom_,
+and rejects generic/nominal substitutions and external access to the private representation.
+
+With the namespace and composite-identity corrections, exact latest Zod4.6.7 owner generation
+succeeds against the captured Workers catalogue. The complete fresh Zod source and current
+matching Workers source compile together against net8.0/Fable.Core5.6.0 with zero errors.
+The phantom-only diff is 81 private case prefixes; all 4214 catalogue contracts (identity,
+canonical API, arity and constraints) and manifest tiers remain unchanged. Final packaged
+consumer-family validation and the consolidated runtime gate follow producer regeneration.
