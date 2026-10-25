@@ -2866,11 +2866,24 @@ and internal objectRef
                         | (Ship | Widen | Map _), _ when
                             facts.Members.IsEmpty && facts.IndexInfos.IsEmpty && not facts.PrivateMembers
                             ->
-                            // A member-less object type maps completely to `obj`, and the
-                            // declaration it would have taken would hold the same. An
-                            // author-written name read from somewhere else stays a declaration
-                            // this run owes the reader.
+                            let ownedInterface =
+                                GeneratorConfig.disposition ctx.Config facts.Origin = Ship
+                                && hasAny SymbolFlags.Interface facts.SymbolFlags
+                                && (model.Harvest.Exports
+                                    |> List.exists (fun export ->
+                                        hasAny SymbolFlags.Type export.Symbol.Flags
+                                        && GeneratorConfig.disposition
+                                            ctx.Config
+                                            (Grouping.classify ctx.PackageDir (ValueSome export.Symbol))
+                                            =
+                                            Ship
+                                        && (Map.tryFind export.Symbol.SymbolId model.ExportTypes
+                                            |> Option.bind _.Declared)
+                                            =
+                                            Some facts.Response.TypeId))
+
                             match facts.SymbolName with
+                            | _ when ownedInterface -> FsObj, [ Finding.make owner TypeReference.ObjectWithoutMembers ]
                             | Some shown when shown / uom<symbolName> <> owner && not (isSyntheticName shown) ->
                                 FsObj,
                                 [

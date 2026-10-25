@@ -7675,6 +7675,23 @@ let openIntersectionFixtureTests =
     ]
 
 [<Tests>]
+let censusEmptyOwnedInterfaceFixtureTests =
+    testList "census empty owned interface" [
+        yield! fixtureTests "census-empty-owned-interface-lab" (handFixture "census-empty-owned-interface-lab") GeneratorConfig.Default (fun package -> [
+            testCase "qualified owned empty declarations retain the empty-object diagnostic" <| fun _ ->
+                let rendered = Pipeline.generate GeneratorConfig.Default package |> Async.RunSynchronously
+                let source = rendered.Files |> List.head |> snd
+                Expect.stringContains source "type Empty = obj" "empty interfaces keep the existing obj policy"
+                Expect.stringContains source "type Renamed = obj" "renamed empty aliases keep the existing obj ABI"
+                Expect.isEmpty (rendered.Findings |> List.filter (fun finding -> finding.Key = "TR023")) "owned empty types are present in the selected program"
+                Expect.contains (rendered.Findings |> List.filter (fun finding -> finding.Key = "TR047") |> List.map _.Symbol) "Scope.Empty" "a qualified empty interface has the ordinary empty-object loss"
+                Expect.stringContains source "type Private =" "private class instances keep their nominal declaration"
+                Expect.isFalse (source.Contains "type Private = obj") "private nominal instances are not empty objects"
+                Expect.contains (rendered.Findings |> List.map _.Key) "TR008" "source any keeps its primitive classification"
+        ])
+    ]
+
+[<Tests>]
 let censusCallableProvenanceFixtureTests =
     testList "census callable provenance" [
         yield! fixtureTests "census-callable-provenance-lab" (handFixture "census-callable-provenance-lab") GeneratorConfig.Default (fun package -> [

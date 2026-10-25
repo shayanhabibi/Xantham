@@ -329,6 +329,12 @@ Phases — each ends with the compile gate green on its fixtures:
   `shape-interfaces`, `shape-aliases`, `shape-classes`, `shape-exports`,
   `synthesize-paramobjects`, `order-declarations`, `audit-coverage`); `DeclNames` is
   keyed by *type id* so exported and synthesized declarations share one naming table.
+  Empty shipped interfaces retain the `obj` ABI and `TR047` after alias shaping suppresses
+  their own name. Ownership uses an exact checker type id in the selected harvested type
+  exports, with both declaration groups shipped and the type symbol marked as an interface.
+  Qualified and renamed occurrences therefore retain the empty-object loss rather than
+  `TR023`; an unselected type, a widened or referenced group, and a private nominal instance
+  keep their existing paths. `census-empty-owned-interface-lab` pins the diagnostic correction.
   A hand-authored tracked fixture (`tests/fixtures/lab`) pins each feature under the
   live compiler alongside the `animejs` rung. Decisions the fixtures forced, recorded
   here rather than re-derived later:

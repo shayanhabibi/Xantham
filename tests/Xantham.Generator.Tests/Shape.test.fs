@@ -11,6 +11,40 @@ open Xantham.Generator
 open Xantham.Generator.Shape
 
 [<Tests>]
+let emptyOwnedObjectReferenceTests =
+    let symbol = Build.symbol 100 "Empty" SymbolFlags.Interface
+    let facts =
+        { Build.facts { Build.typeResponse 10 TypeFlags.Object with Symbol = ValueSome(Build.compactOf symbol) } with
+            SymbolName = Some("Empty" * uom<symbolName>)
+            SymbolFlags = SymbolFlags.Interface }
+    let model =
+        { Build.shapeModel [ facts ] with
+            Harvest = { HarvestModel.Empty with Exports = [ Build.export "Renamed" symbol ] }
+            ExportTypes = Map.ofList [ symbol.SymbolId, { Declared = Some 10<typeId>; Value = None; AliasParameters = None } ] }
+    let keys context model facts =
+        let reference, findings = Spec.objectRef context model None "Scope.Renamed" facts
+        Expect.equal reference FsObj "the empty-object representation is unchanged"
+        findings |> List.map _.Key
+    testList "empty owned object references" [
+        testCase "a selected compiler type is owned independently of its spelling" <| fun _ ->
+            Expect.equal (keys Build.context model facts) [ "TR047" ] "selected empty interfaces use the empty-object diagnostic"
+        testCase "an unselected type still owes a declaration" <| fun _ ->
+            Expect.equal (keys Build.context { model with Harvest = HarvestModel.Empty } facts) [ "TR023" ] "a type-table entry does not establish ownership"
+        testCase "an unrelated selected type cannot establish ownership" <| fun _ ->
+            let unrelated = { model with ExportTypes = Map.ofList [ symbol.SymbolId, { Declared = Some 11<typeId>; Value = None; AliasParameters = None } ] }
+            Expect.equal (keys Build.context unrelated facts) [ "TR023" ] "ownership requires the exact compiler type"
+        testCase "private nominal instances retain the missing-declaration path" <| fun _ ->
+            Expect.equal (keys Build.context model { facts with PrivateMembers = true }) [ "TR023" ] "private members keep nominal identity"
+        testCase "widened groups do not acquire selected ownership" <| fun _ ->
+            Expect.equal (keys Build.context model { facts with Origin = CompilerLib }) [ "TR023" ] "the default compiler-library group is widened"
+        testCase "referenced owners retain the referenced declaration" <| fun _ ->
+            let context = { Build.context with Config = { Build.context.Config with Groups = Map.ofList [ "typescript/lib" * uom<npmDependency>, Reference ] } }
+            let reference, findings = Spec.objectRef context model None "Scope.Renamed" { facts with Origin = CompilerLib }
+            Expect.isFalse (reference = FsObj) "reference disposition retains its external name"
+            Expect.isEmpty findings "an empty reference adds no local ownership finding"
+    ]
+
+[<Tests>]
 let inheritedCallableTests =
     let invoke variable result =
         FsInvoke { Docs = ""; Tags = []; TypeParameters = [ { Name = variable; Constraint = None } ]
