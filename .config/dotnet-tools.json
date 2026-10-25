@@ -4,7 +4,9 @@
   "tools": {
     "easybuild.shipit": {
       "version": "3.1.0",
-      "commands": ["shipit"],
+      "commands": [
+        "shipit"
+      ],
       "rollForward": false
     },
     "fsdocs-tool": {
@@ -22,7 +24,7 @@
       "rollForward": false
     },
     "fickl": {
-      "version": "0.6.0",
+      "version": "0.6.2",
       "commands": [
         "fickl"
       ],

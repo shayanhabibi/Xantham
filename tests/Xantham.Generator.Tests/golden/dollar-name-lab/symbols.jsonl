@@ -14,4 +14,4 @@
 {"name":"Exports.$Cls","tier":"exact","findings":[]}
 {"name":"Exports.pick","tier":"ergonomic","findings":[{"name":"SY.NameSanitisedForIdentifier","key":"SY005","pass":"shape-exports","tier":"ergonomic","symbol":"Exports.pick","fields":{"key":"K$","sanitised":"K_"},"message":"K$ declared as K_; the source name spells characters an F# declaration name refuses"}]}
 {"name":"Exports.use","tier":"exact","findings":[]}
-{"name":"Ns.Apart","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SY.NameNestedUnderOwner","key":"SY004","pass":"synthesize-anonymous","tier":"exact","symbol":"Ns.Apart","fields":{"nestedAs":"Ns.Apart"},"message":"anonymous shape named Ns.Apart under the declaration that owns it"},{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Ns.Apart","message":"ParamObject Create synthesized (D3)"}]}
+{"name":"Ns.Apart","file":"index.d.ts","tier":"ergonomic","findings":[{"name":"SP.ParamObjectSynthesized","key":"SP001","pass":"synthesize-paramobjects","tier":"ergonomic","symbol":"Ns.Apart","message":"ParamObject Create synthesized (D3)"}]}

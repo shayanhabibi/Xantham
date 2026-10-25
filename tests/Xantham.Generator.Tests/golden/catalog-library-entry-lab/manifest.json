@@ -3,7 +3,7 @@
   "package": "catalog-library-entry-lab",
   "module": "Library.Consumer",
   "counts": {
-    "exact": 10,
+    "exact": 23,
     "ergonomic": 16,
     "widened": 1,
     "escape": 0

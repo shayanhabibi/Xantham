@@ -35,6 +35,7 @@ declare abstract class Anvil {
 
 /** An ambient module declaring its own class, function and interface. */
 declare module "ambient-lab:tools" {
+    export type ToolId = string;
     /** A class exported from a specifier rather than from `globalThis`. */
     export class Hammer {
         constructor(weight: number);
@@ -80,6 +81,9 @@ declare module "ambient-lab:tools" {
 
 /** An ambient module re-exporting a module-local declaration under another name. */
 declare module "ambient-lab:sockets" {
+    export namespace Identifiers {
+        export type RequestId = string;
+    }
     function _connect(label: string): Payload;
     export { _connect as connect };
 }
@@ -130,6 +134,12 @@ declare module "ambient-lab:lab/promises" {
 
 /** An ambient module exporting nothing. */
 declare module "ambient-lab:empty" {}
+
+declare module "ambient-lab:mirror" {
+    class Mirror { readonly value: string }
+    namespace Mirror { export { Mirror }; }
+    export = Mirror;
+}
 
 /** A wildcard specifier: no import expression can name the module it stands for. */
 declare module "ambient-lab:*" {

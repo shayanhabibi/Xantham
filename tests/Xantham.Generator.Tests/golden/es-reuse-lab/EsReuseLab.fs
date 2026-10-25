@@ -43,7 +43,7 @@ type Exports =
     /// A namespace member: Core.TS flattens it to its bare name.
     /// </summary>
     [<Import("format", "es-reuse-lab")>]
-    static member format (options: Fable.Core.TS.Es.NumberFormatOptions) : string = jsNative
+    static member format (options: Fable.Core.TS.Es.Intl.NumberFormatOptions) : string = jsNative
     /// <summary>
     /// The ecosystem's promise support is written against Fable.Core's JS.Promise.
     /// </summary>

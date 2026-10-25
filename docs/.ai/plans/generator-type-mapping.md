@@ -829,6 +829,13 @@ Fable F# tuples *are* JS arrays — a happy exact match:
 ### 4.13 Modules, namespaces, exports, declaration merging
 
 - ES module / `.d.ts` file → F# module; nested `namespace` → nested module.
+- Namespace type members retain their namespace path whether reached by a signature or only
+  exported by the namespace. The namespace's value binding remains beside its F# module.
+  Alias occurrences retain their exporting namespace independently of the target symbol's
+  defining namespace. References to library and dependency members use the same nested paths.
+- A single-signature callback with an abbreviation cycle uses a Fickl callable interface.
+  Recursive references preserve type arguments on the interface; recursion through an ordinary
+  object's members already has a nominal boundary and retains the usual callback mapping.
 - Import binding: default export → `[<ImportDefault>]`, `export =` → `[<ImportAll>]`/
   `[<ImportDefault>]` per module kind (`SourceFileMetadata.ImpliedNodeFormat` and
   `PackageJsonType` are on the wire — use them instead of guessing), named exports →

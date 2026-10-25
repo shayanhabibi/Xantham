@@ -3,9 +3,9 @@
   "package": "solid-js",
   "module": "SolidJs",
   "counts": {
-    "exact": 72,
-    "ergonomic": 194,
-    "widened": 79,
+    "exact": 325,
+    "ergonomic": 406,
+    "widened": 327,
     "escape": 1
   },
   "passes": [
@@ -15,9 +15,19 @@
       "escape": 11
     },
     {
+      "pass": "RT - resolve-type-table",
+      "total": 2,
+      "widened": 2
+    },
+    {
       "pass": "SY - synthesize-anonymous",
-      "total": 149,
-      "exact": 149
+      "total": 410,
+      "exact": 410
+    },
+    {
+      "pass": "LU - classify-literal-unions",
+      "total": 20,
+      "exact": 20
     },
     {
       "pass": "DT - detect-tagged-unions",
@@ -26,42 +36,41 @@
     },
     {
       "pass": "shape-callbacks",
-      "total": 150,
-      "ergonomic": 103,
-      "widened": 47
+      "total": 170,
+      "ergonomic": 111,
+      "widened": 59
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 984,
-      "exact": 15,
-      "ergonomic": 830,
-      "widened": 139
+      "total": 298399,
+      "exact": 2197,
+      "ergonomic": 289177,
+      "widened": 7025
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 58,
-      "exact": 4,
-      "ergonomic": 20,
-      "widened": 34
+      "total": 110,
+      "exact": 9,
+      "ergonomic": 31,
+      "widened": 70
     },
     {
       "pass": "SE - shape-exports",
-      "total": 247,
-      "exact": 2,
-      "ergonomic": 213,
-      "widened": 32
+      "total": 233,
+      "ergonomic": 205,
+      "widened": 28
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 170,
-      "ergonomic": 162,
+      "total": 579,
+      "ergonomic": 571,
       "widened": 8
     },
     {
       "pass": "RA - repair-arity",
-      "total": 12,
+      "total": 20,
       "ergonomic": 7,
-      "widened": 5
+      "widened": 13
     },
     {
       "pass": "DD - drop-orphan-delegates",

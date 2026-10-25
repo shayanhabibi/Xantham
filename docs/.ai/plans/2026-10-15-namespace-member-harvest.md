@@ -1953,6 +1953,47 @@ rtk git commit -m "docs(plans): record namespace-member rename measures" -m "Co-
 
 ## Self-review
 
+### Implementation measurement, 2026-10-24
+
+The pinned Node source inventory contains 391 namespace type members. Fresh FCS checks of
+the regenerated Node project are clean. FCS declarations (including abbreviation definition
+lookups, excluding module-only matches) account for all 391 at their expected public paths.
+The same normalization applied to the preserved baseline gives 83 already nested, 245 with
+a matching leaf elsewhere, and 63 absent. The 245 figure is an inventory classification, not
+an assertion that every same-named baseline declaration has the same source identity.
+
+Normalization preserves the generated owner module and namespace casing. For `events`,
+`module`, `stream`, and `node:test`, the pinned declaration's `export =` container is already
+represented by that owner module; it is not repeated. For example, `EventEmitter.Abortable`
+maps to `Node.Events.Abortable`, and `test.EventData.LocationInfo` maps to
+`Node.Test.EventData.LocationInfo`. Raw suffix matching undercounted these declarations.
+
+Reproduction evidence lives under `tests/.scratch/namespace-member-harvest/`:
+`node-namespace-baseline.json`, `node-semantic-names.json`,
+`node-semantic-names-final.json`, `compare-node-final.cjs`, and `node-namespace-final.json`.
+The baseline files were preserved. This census proves namespace declaration coverage; it
+does not by itself prove member signatures, runtime behavior, or absence of widening.
+
+The corresponding Core.TS census finds all **149/149** source namespace types at qualified
+namespace paths, compared with the baseline's 1 nested, 125 matching leaves elsewhere and
+23 absent. The refreshed semantic snapshot is `core-ts-semantic-names-final.json`; the source
+inventory and baseline classification remain in `core-ts-namespace-baseline.json`. As with
+Node, same-named leaves elsewhere are an inventory classification, not proof of source identity.
+
+Pairing Core.TS declarations by their complete source-handle set and role gives the migration
+counts below. All 95 TypeScript input file hashes and versions match the baseline. This pairing
+also finds formerly position-named declarations that the leaf-name census could not match.
+`core-namespace-renames.cjs` and `core-namespace-renames.json` contain the reproducible full list.
+
+| Namespace | Renamed | Newly declared | Unchanged | Example (below `Fable.Core.TS`) |
+| --- | ---: | ---: | ---: | --- |
+| Intl | 49 | 14 | 0 | `Es.CollatorOptions` → `Es.Intl.CollatorOptions` |
+| WebAssembly | 25 | 5 | 0 | `Dom.CompileError` → `Dom.WebAssembly.CompileError` |
+| Temporal | 55 | 0 | 1 | `Es.CalendarLike` → `Es.Temporal.CalendarLike` |
+
+Total: 129 renamed, 19 newly declared, 1 already at its namespace path. Catalogue identity hashes
+alone are unsuitable for pairing because they also capture changes beyond source location.
+
 - **Spec coverage:**
   - Findings §"Root cause":
     - seeding: Task 3 Step 8

@@ -1823,8 +1823,17 @@ let private renderBody
 
     // `group.Module :: scope` is the path a reference resolves against; the file's own module
     // is the root of every nested path.
-    let qualify (scope: string list) (name: string) =
-        relativeQualification (group.Module :: scope) $"{group.Module}.{name}"
+    let qualify shadowed (scope: string list) (name: string) =
+        let absolute = $"{group.Module}.{name}"
+        let relative = relativeQualification (group.Module :: scope) absolute
+
+        if relative.Contains '.' && Set.contains ((relative.Split '.')[0]) shadowed then
+            if Set.contains ((absolute.Split '.')[0]) shadowed then
+                $"global.{absolute}"
+            else
+                absolute
+        else
+            relative
 
     let scopedReferences =
         names
@@ -1844,7 +1853,7 @@ let private renderBody
                 shadowed
                 |> Set.toList
                 |> List.collect (fun leaf -> Map.tryFind leaf namesByLeaf |> Option.defaultValue [])
-                |> List.map (fun name -> name, qualify scope name)
+                |> List.map (fun name -> name, qualify shadowed scope name)
                 |> List.filter (fun (name, qualified) -> qualified <> name)
                 |> Map.ofList
 

@@ -6257,234 +6257,12 @@ type OverrideProperties<'TOriginal, 'TOverride> = private OverrideProperties__ o
 /// <remarks>@category File</remarks>
 type PackageJson =
     inherit JsonObject
-    /// <summary>
-    /// Defines which package manager is expected to be used when working on the current project. It can set to any of the <a href="https://nodejs.org/api/corepack.html#supported-package-managers">supported package managers</a>, and will ensure that your teams use the exact same package manager versions without having to install anything else than Node.js.
-    /// <br /><br />
-    /// __This field is currently experimental and needs to be opted-in; check the <a href="https://nodejs.org/api/corepack.html">Corepack</a> page for details about the procedure.__
-    /// </summary>
-    /// <example>
-    /// <code>
-    /// ```json
-    /// {
-    /// 	"packageManager": "&lt;package manager name&gt;@&lt;version&gt;"
-    /// }
-    /// </code>
-    /// <code>
-    /// </code>
-    /// </example>
-    abstract packageManager: string option with get, set
-    /// <summary>
-    /// The name of the package.
-    /// </summary>
-    abstract name: string option with get, set
-    /// <summary>
-    /// Package version, parseable by <a href="https://github.com/npm/node-semver"><c>node-semver</c></a>.
-    /// </summary>
-    abstract version: string option with get, set
-    /// <summary>
-    /// Package description, listed in <c>npm search</c>.
-    /// </summary>
-    abstract description: string option with get, set
-    /// <summary>
-    /// Keywords associated with package, listed in <c>npm search</c>.
-    /// </summary>
-    abstract keywords: string[] option with get, set
-    /// <summary>
-    /// The URL to the package's homepage.
-    /// </summary>
-    abstract homepage: string option with get, set
-    /// <summary>
-    /// The URL to the package's issue tracker and/or the email address to which issues should be reported.
-    /// </summary>
-    abstract bugs: U2<string, PackageJson.Bugs> option with get, set
-    /// <summary>
-    /// The license for the package.
-    /// </summary>
-    abstract license: string option with get, set
-    /// <summary>
-    /// The licenses for the package.
-    /// </summary>
-    abstract licenses: PackageJson.Licenses.Item[] option with get, set
-    abstract author: U2<string, PackageJson.Author> option with get, set
-    /// <summary>
-    /// A list of people who contributed to the package.
-    /// </summary>
-    abstract contributors: U2<string, PackageJson.Author>[] option with get, set
-    /// <summary>
-    /// A list of people who maintain the package.
-    /// </summary>
-    abstract maintainers: U2<string, PackageJson.Author>[] option with get, set
-    /// <summary>
-    /// The files included in the package.
-    /// </summary>
-    abstract files: string[] option with get, set
-    /// <summary>
-    /// Resolution algorithm for importing ".js" files from the package's scope.
-    /// <br /><br />
-    /// <a href="https://nodejs.org/api/esm.html#esm_package_json_type_field">Read more.</a>
-    /// </summary>
-    abstract ``type``: PackageJson.Type option with get, set
-    /// <summary>
-    /// The module ID that is the primary entry point to the program.
-    /// </summary>
-    abstract main: string option with get, set
-    /// <summary>
-    /// Subpath exports to define entry points of the package.
-    /// <br /><br />
-    /// <a href="https://nodejs.org/api/packages.html#subpath-exports">Read more.</a>
-    /// </summary>
-    abstract exports: U3<string, U2<string, PackageJson.Exports.Item>[], PackageJson.Exports.Item> option with get, set
-    /// <summary>
-    /// Subpath imports to define internal package import maps that only apply to import specifiers from within the package itself.
-    /// <br /><br />
-    /// <a href="https://nodejs.org/api/packages.html#subpath-imports">Read more.</a>
-    /// </summary>
-    abstract imports: JS.Record<string, U3<string, U2<string, PackageJson.Exports.Item>[], PackageJson.Exports.Item> option> option with get, set
-    /// <summary>
-    /// The executable files that should be installed into the <c>PATH</c>.
-    /// </summary>
-    abstract bin: U2<string, JS.Record<string, string option>> option with get, set
-    /// <summary>
-    /// Filenames to put in place for the <c>man</c> program to find.
-    /// </summary>
-    abstract man: U2<string, string[]> option with get, set
-    /// <summary>
-    /// Indicates the structure of the package.
-    /// </summary>
-    abstract directories: PackageJson.Directories option with get, set
-    /// <summary>
-    /// Location for the code repository.
-    /// </summary>
-    abstract repository: U2<string, PackageJson.Repository> option with get, set
-    /// <summary>
-    /// Script commands that are run at various times in the lifecycle of the package. The key is the lifecycle event, and the value is the command to run at that point.
-    /// </summary>
-    abstract scripts: PackageJson.Scripts option with get, set
-    /// <summary>
-    /// Is used to set configuration parameters used in package scripts that persist across upgrades.
-    /// </summary>
-    abstract config: JsonObject option with get, set
-    /// <summary>
-    /// The dependencies of the package.
-    /// </summary>
-    abstract dependencies: JS.Record<string, string option> option with get, set
-    /// <summary>
-    /// Additional tooling dependencies that are not required for the package to work. Usually test, build, or documentation tooling.
-    /// </summary>
-    abstract devDependencies: JS.Record<string, string option> option with get, set
-    /// <summary>
-    /// Dependencies that are skipped if they fail to install.
-    /// </summary>
-    abstract optionalDependencies: JS.Record<string, string option> option with get, set
-    /// <summary>
-    /// Dependencies that will usually be required by the package user directly or via another dependency.
-    /// </summary>
-    abstract peerDependencies: JS.Record<string, string option> option with get, set
-    /// <summary>
-    /// Indicate peer dependencies that are optional.
-    /// </summary>
-    abstract peerDependenciesMeta: JS.Record<string, PackageJson.PeerDependenciesMeta.Item option> option with get, set
-    /// <summary>
-    /// Package names that are bundled when the package is published.
-    /// </summary>
-    abstract bundledDependencies: string[] option with get, set
-    /// <summary>
-    /// Alias of <c>bundledDependencies</c>.
-    /// </summary>
-    abstract bundleDependencies: string[] option with get, set
-    /// <summary>
-    /// Overrides is used to support selective version overrides using npm, which lets you define custom package versions or ranges inside your dependencies.
-    /// </summary>
-    abstract overrides: PackageJson.Overrides option with get, set
-    /// <summary>
-    /// Engines that this package runs on.
-    /// </summary>
-    abstract engines: PackageJson.Engines option with get, set
-    /// <remarks>@deprecated</remarks>
-    abstract engineStrict: bool option with get, set
-    /// <summary>
-    /// Operating systems the module runs on.
-    /// </summary>
-    abstract os: string[] option with get, set
-    /// <summary>
-    /// CPU architectures the module runs on.
-    /// </summary>
-    abstract cpu: string[] option with get, set
-    /// <summary>
-    /// Define the runtime and package manager for developing the current project.
-    /// </summary>
-    abstract devEngines: PackageJson.DevEngines option with get, set
-    /// <summary>
-    /// If set to <c>true</c>, a warning will be shown if package is installed locally. Useful if the package is primarily a command-line application that should be installed globally.
-    /// </summary>
-    /// <remarks>@deprecated</remarks>
-    abstract preferGlobal: bool option with get, set
-    /// <summary>
-    /// If set to <c>true</c>, then npm will refuse to publish it.
-    /// </summary>
-    abstract ``private``: bool option with get, set
-    /// <summary>
-    /// A set of config values that will be used at publish-time. It's especially handy to set the tag, registry or access, to ensure that a given package is not tagged with 'latest', published to the global public registry or that a scoped module is private by default.
-    /// </summary>
-    abstract publishConfig: PackageJson.PublishConfig option with get, set
-    /// <summary>
-    /// Describes and notifies consumers of a package's monetary support information.
-    /// <br /><br />
-    /// <a href="https://github.com/npm/rfcs/blob/main/implemented/0017-add-funding-support.md">Read more.</a>
-    /// </summary>
-    abstract funding: U2<string, PackageJson.Funding> option with get, set
-    /// <summary>
-    /// Used to configure <a href="https://docs.npmjs.com/cli/using-npm/workspaces">npm workspaces</a> / <a href="https://classic.yarnpkg.com/docs/workspaces/">Yarn workspaces</a>.
-    /// <br /><br />
-    /// Workspaces allow you to manage multiple packages within the same repository in such a way that you only need to run your install command once in order to install all of them in a single pass.
-    /// <br /><br />
-    /// Please note that the top-level <c>private</c> property of <c>package.json</c> <b>must</b> be set to <c>true</c> in order to use workspaces.
-    /// </summary>
-    abstract workspaces: U2<string[], PackageJson.Workspaces> option with get, set
-    /// <summary>
-    /// An ECMAScript module ID that is the primary entry point to the program.
-    /// </summary>
-    abstract ``module``: string option with get, set
-    /// <summary>
-    /// A module ID with untranspiled code that is the primary entry point to the program.
-    /// </summary>
-    abstract esnext: U2<string, PackageJson.Esnext> option with get, set
-    /// <summary>
-    /// A hint to JavaScript bundlers or component tools when packaging modules for client side use.
-    /// </summary>
-    abstract browser: U2<string, JS.Record<string, U2<string, bool> option>> option with get, set
-    /// <summary>
-    /// Denote which files in your project are "pure" and therefore safe for Webpack to prune if unused.
-    /// <br /><br />
-    /// <a href="https://webpack.js.org/guides/tree-shaking/">Read more.</a>
-    /// </summary>
-    abstract sideEffects: U2<bool, string[]> option with get, set
-    /// <summary>
-    /// Location of the bundled TypeScript declaration file.
-    /// </summary>
-    abstract types: string option with get, set
-    /// <summary>
-    /// Version selection map of TypeScript.
-    /// </summary>
-    abstract typesVersions: JS.Record<string, JS.Record<string, string[] option> option> option with get, set
-    /// <summary>
-    /// Location of the bundled TypeScript declaration file. Alias of <c>types</c>.
-    /// </summary>
-    abstract typings: string option with get, set
-    /// <summary>
-    /// If your package only allows one version of a given dependency, and you’d like to enforce the same behavior as <c>yarn install --flat</c> on the command-line, set this to <c>true</c>.
-    /// <br /><br />
-    /// Note that if your <c>package.json</c> contains <c>"flat": true</c> and other packages depend on yours (e.g. you are building a library rather than an app), those other packages will also need <c>"flat": true</c> in their <c>package.json</c> or be installed with <c>yarn install --flat</c> on the command-line.
-    /// </summary>
-    abstract flat: bool option with get, set
-    /// <summary>
-    /// Selective version resolutions. Allows the definition of custom package versions inside dependencies without manual edits in the <c>yarn.lock</c> file.
-    /// </summary>
-    abstract resolutions: JS.Record<string, string option> option with get, set
-    /// <summary>
-    /// JSPM configuration.
-    /// </summary>
-    abstract jspm: PackageJson option with get, set
+    inherit PackageJson.NodeJsStandard
+    inherit PackageJson.PackageJsonStandard
+    inherit PackageJson.NonStandardEntryPoints
+    inherit PackageJson.TypeScriptConfiguration
+    inherit PackageJson.YarnConfiguration
+    inherit PackageJson.JSPMConfiguration
 
 /// <remarks>@see {@link PartialDeep}</remarks>
 [<Interface>]
@@ -9681,9 +9459,9 @@ type TsConfigJson =
     /// <summary>
     /// Referenced projects.
     /// </summary>
-    abstract references: TsConfigJson.References.Item[] option with get, set
+    abstract references: TsConfigJson.References[] option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?compilerOptions: TsConfigJson.CompilerOptions, ?watchOptions: TsConfigJson.WatchOptions, ?typeAcquisition: TsConfigJson.TypeAcquisition, ?compileOnSave: bool, ?extends: U2<string, string[]>, ?files: string[], ?exclude: string[], ?``include``: string[], ?references: TsConfigJson.References.Item[]) : TsConfigJson = jsNative
+    static member Create (?compilerOptions: TsConfigJson.CompilerOptions, ?watchOptions: TsConfigJson.WatchOptions, ?typeAcquisition: TsConfigJson.TypeAcquisition, ?compileOnSave: bool, ?extends: U2<string, string[]>, ?files: string[], ?exclude: string[], ?``include``: string[], ?references: TsConfigJson.References[]) : TsConfigJson = jsNative
 
 /// <summary>
 /// Create a tuple type of the specified length with elements of the specified type.
@@ -10606,9 +10384,9 @@ module Globals =
     /// <remarks>@category Observable</remarks>
     [<Interface>]
     type ObservableLike<'ValueType> =
-        abstract subscribe: ?observer: ObservableLike.Subscribe.Observer<'ValueType> -> Unsubscribable
+        abstract subscribe: ?observer: TypeFest.Globals.ObservableLike.Subscribe.Observer<'ValueType> -> Unsubscribable
         [<ParamObject; Emit("$0")>]
-        static member Create (subscribe: (ObservableLike.Subscribe.Observer<'ValueType> option -> Unsubscribable)) : ObservableLike<'ValueType> = jsNative
+        static member Create (subscribe: (TypeFest.Globals.ObservableLike.Subscribe.Observer<'ValueType> option -> Unsubscribable)) : ObservableLike<'ValueType> = jsNative
 
     module ObservableLike =
         module Subscribe =
@@ -10657,41 +10435,13 @@ module PackageJson =
 
     [<Interface>]
     type DevEngines =
-        abstract os: U2<PackageJson.DevEngines.Os.Item[], PackageJson.DevEngines.Os.Item> option with get, set
-        abstract cpu: U2<PackageJson.DevEngines.Os.Item[], PackageJson.DevEngines.Os.Item> option with get, set
-        abstract libc: U2<PackageJson.DevEngines.Os.Item[], PackageJson.DevEngines.Os.Item> option with get, set
-        abstract runtime: U2<PackageJson.DevEngines.Os.Item[], PackageJson.DevEngines.Os.Item> option with get, set
-        abstract packageManager: U2<PackageJson.DevEngines.Os.Item[], PackageJson.DevEngines.Os.Item> option with get, set
+        abstract os: U2<DevEngineDependency[], DevEngineDependency> option with get, set
+        abstract cpu: U2<DevEngineDependency[], DevEngineDependency> option with get, set
+        abstract libc: U2<DevEngineDependency[], DevEngineDependency> option with get, set
+        abstract runtime: U2<DevEngineDependency[], DevEngineDependency> option with get, set
+        abstract packageManager: U2<DevEngineDependency[], DevEngineDependency> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?os: U2<PackageJson.DevEngines.Os.Item[], PackageJson.DevEngines.Os.Item>, ?cpu: U2<PackageJson.DevEngines.Os.Item[], PackageJson.DevEngines.Os.Item>, ?libc: U2<PackageJson.DevEngines.Os.Item[], PackageJson.DevEngines.Os.Item>, ?runtime: U2<PackageJson.DevEngines.Os.Item[], PackageJson.DevEngines.Os.Item>, ?packageManager: U2<PackageJson.DevEngines.Os.Item[], PackageJson.DevEngines.Os.Item>) : DevEngines = jsNative
-
-    type Directories =
-        /// <summary>
-        /// Location for executable scripts. Sugar to generate entries in the <c>bin</c> property by walking the folder.
-        /// </summary>
-        abstract bin: string option with get, set
-        /// <summary>
-        /// Location for Markdown files.
-        /// </summary>
-        abstract doc: string option with get, set
-        /// <summary>
-        /// Location for example scripts.
-        /// </summary>
-        abstract example: string option with get, set
-        /// <summary>
-        /// Location for the bulk of the library.
-        /// </summary>
-        abstract lib: string option with get, set
-        /// <summary>
-        /// Location for man pages. Sugar to generate a <c>man</c> array by walking the folder.
-        /// </summary>
-        abstract man: string option with get, set
-        /// <summary>
-        /// Location for test files.
-        /// </summary>
-        abstract test: string option with get, set
-        [<EmitIndexer>]
-        abstract Item: string -> U5<string, float, bool, JsonValue[], JsonObject> option with get, set
+        static member Create (?os: U2<DevEngineDependency[], DevEngineDependency>, ?cpu: U2<DevEngineDependency[], DevEngineDependency>, ?libc: U2<DevEngineDependency[], DevEngineDependency>, ?runtime: U2<DevEngineDependency[], DevEngineDependency>, ?packageManager: U2<DevEngineDependency[], DevEngineDependency>) : DevEngines = jsNative
 
     type Engines =
         abstract node: string option with get, set
@@ -10718,30 +10468,6 @@ module PackageJson =
         [<ParamObject; Emit("$0")>]
         static member Create (url: string, ?``type``: string) : Funding = jsNative
 
-    type Overrides =
-        [<EmitIndexer>]
-        abstract Item: string -> U2<string, Overrides> option with get, set
-
-    type PublishConfig =
-        /// <summary>
-        /// When publishing scoped packages, the access level defaults to restricted. If you want your scoped package to be publicly viewable (and installable) set <c>--access=public</c>. The only valid values for access are public and restricted. Unscoped packages always have an access level of public.
-        /// </summary>
-        abstract access: PackageJson.PublishConfig.Access option with get, set
-        /// <summary>
-        /// The base URL of the npm registry.
-        /// <br /><br />
-        /// Default: <c>'https://registry.npmjs.org/'</c>
-        /// </summary>
-        abstract registry: string option with get, set
-        /// <summary>
-        /// The tag to publish the package under.
-        /// <br /><br />
-        /// Default: <c>'latest'</c>
-        /// </summary>
-        abstract tag: string option with get, set
-        [<EmitIndexer>]
-        abstract Item: string -> U5<string, float, bool, JsonValue[], JsonObject> option with get, set
-
     [<Interface>]
     type Repository =
         abstract ``type``: string with get, set
@@ -10754,6 +10480,46 @@ module PackageJson =
         abstract directory: string option with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (``type``: string, url: string, ?directory: string) : Repository = jsNative
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Type =
+        | [<CompiledName("commonjs")>] Commonjs
+        | [<CompiledName("module")>] Module
+
+    /// <summary>
+    /// A person who has been involved in creating or maintaining the package.
+    /// </summary>
+    type Person = U2<string, Author>
+
+    type BugsLocation = U2<string, Bugs>
+
+    type DirectoryLocations =
+        /// <summary>
+        /// Location for executable scripts. Sugar to generate entries in the <c>bin</c> property by walking the folder.
+        /// </summary>
+        abstract bin: string option with get, set
+        /// <summary>
+        /// Location for Markdown files.
+        /// </summary>
+        abstract doc: string option with get, set
+        /// <summary>
+        /// Location for example scripts.
+        /// </summary>
+        abstract example: string option with get, set
+        /// <summary>
+        /// Location for the bulk of the library.
+        /// </summary>
+        abstract lib: string option with get, set
+        /// <summary>
+        /// Location for man pages. Sugar to generate a <c>man</c> array by walking the folder.
+        /// </summary>
+        abstract man: string option with get, set
+        /// <summary>
+        /// Location for test files.
+        /// </summary>
+        abstract test: string option with get, set
+        [<EmitIndexer>]
+        abstract Item: string -> U5<string, float, bool, JsonValue[], JsonObject> option with get, set
 
     type Scripts =
         /// <summary>
@@ -10871,13 +10637,91 @@ module PackageJson =
         [<EmitIndexer>]
         abstract Item: string -> string option with get, set
 
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Type =
-        | [<CompiledName("commonjs")>] Commonjs
-        | [<CompiledName("module")>] Module
+    /// <summary>
+    /// Dependencies of the package. The version range is a string which has one or more space-separated descriptors. Dependencies can also be identified with a tarball or Git URL.
+    /// </summary>
+    type Dependency = JS.Record<string, string option>
+
+    /// <summary>
+    /// Recursive map describing selective dependency version overrides supported by npm.
+    /// </summary>
+    type DependencyOverrides =
+        [<EmitIndexer>]
+        abstract Item: string -> U2<string, DependencyOverrides> option with get, set
+
+    /// <summary>
+    /// Specifies requirements for development environment components such as operating systems, runtimes, or package managers. Used to ensure consistent development environments across the team.
+    /// </summary>
+    [<Interface>]
+    type DevEngineDependency =
+        abstract name: string with get, set
+        abstract version: string option with get, set
+        abstract onFail: PackageJson.DevEngineDependency.OnFail option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string, ?version: string, ?onFail: PackageJson.DevEngineDependency.OnFail) : DevEngineDependency = jsNative
+
+    /// <summary>
+    /// A mapping of conditions and the paths to which they resolve.
+    /// </summary>
+    type ExportConditions =
+        [<EmitIndexer>]
+        abstract Item: string -> Exports with get, set
+
+    /// <summary>
+    /// Entry points of a module, optionally with conditions and subpath exports.
+    /// </summary>
+    type Exports = U3<string, U2<string, ExportConditions>[], ExportConditions> option
+
+    /// <summary>
+    /// Import map entries of a module, optionally with conditions and subpath imports.
+    /// </summary>
+    type Imports = JS.Record<string, Exports>
 
     [<Interface>]
-    type Workspaces =
+    type NonStandardEntryPoints =
+        /// <summary>
+        /// An ECMAScript module ID that is the primary entry point to the program.
+        /// </summary>
+        abstract ``module``: string option with get, set
+        /// <summary>
+        /// A module ID with untranspiled code that is the primary entry point to the program.
+        /// </summary>
+        abstract esnext: U2<string, Esnext> option with get, set
+        /// <summary>
+        /// A hint to JavaScript bundlers or component tools when packaging modules for client side use.
+        /// </summary>
+        abstract browser: U2<string, JS.Record<string, U2<string, bool> option>> option with get, set
+        /// <summary>
+        /// Denote which files in your project are "pure" and therefore safe for Webpack to prune if unused.
+        /// <br /><br />
+        /// <a href="https://webpack.js.org/guides/tree-shaking/">Read more.</a>
+        /// </summary>
+        abstract sideEffects: U2<bool, string[]> option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?``module``: string, ?esnext: U2<string, Esnext>, ?browser: U2<string, JS.Record<string, U2<string, bool> option>>, ?sideEffects: U2<bool, string[]>) : NonStandardEntryPoints = jsNative
+
+    [<Interface>]
+    type TypeScriptConfiguration =
+        /// <summary>
+        /// Location of the bundled TypeScript declaration file.
+        /// </summary>
+        abstract types: string option with get, set
+        /// <summary>
+        /// Version selection map of TypeScript.
+        /// </summary>
+        abstract typesVersions: JS.Record<string, JS.Record<string, string[] option> option> option with get, set
+        /// <summary>
+        /// Location of the bundled TypeScript declaration file. Alias of <c>types</c>.
+        /// </summary>
+        abstract typings: string option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?types: string, ?typesVersions: JS.Record<string, JS.Record<string, string[] option> option>, ?typings: string) : TypeScriptConfiguration = jsNative
+
+    /// <summary>
+    /// An alternative configuration for workspaces.
+    /// </summary>
+    [<Interface>]
+    type WorkspaceConfig =
         /// <summary>
         /// An array of workspace pattern strings which contain the workspace packages.
         /// </summary>
@@ -10890,30 +10734,269 @@ module PackageJson =
         /// </summary>
         abstract nohoist: string[] option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?packages: string[], ?nohoist: string[]) : Workspaces = jsNative
+        static member Create (?packages: string[], ?nohoist: string[]) : WorkspaceConfig = jsNative
 
-    module DevEngines =
-        module Os =
-            [<Interface>]
-            type Item =
-                abstract name: string with get, set
-                abstract version: string option with get, set
-                abstract onFail: PackageJson.DevEngines.Os.Item.OnFail option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (name: string, ?version: string, ?onFail: PackageJson.DevEngines.Os.Item.OnFail) : Item = jsNative
+    /// <summary>
+    /// A workspace pattern points to a directory or group of directories which contain packages that should be included in the workspace installation process.
+    /// <br /><br />
+    /// The patterns are handled with <a href="https://github.com/isaacs/minimatch">minimatch</a>.
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// `docs` → Include the docs directory and install its dependencies.
+    /// `packages/*` → Include all nested directories within the packages directory, like `packages/cli` and `packages/core`.
+    /// </code>
+    /// </example>
+    type WorkspacePattern = string
 
-            module Item =
-                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                type OnFail =
-                    | [<CompiledName("download")>] Download
-                    | [<CompiledName("error")>] Error
-                    | [<CompiledName("ignore")>] Ignore
-                    | [<CompiledName("warn")>] Warn
+    [<Interface>]
+    type YarnConfiguration =
+        /// <summary>
+        /// If your package only allows one version of a given dependency, and you’d like to enforce the same behavior as <c>yarn install --flat</c> on the command-line, set this to <c>true</c>.
+        /// <br /><br />
+        /// Note that if your <c>package.json</c> contains <c>"flat": true</c> and other packages depend on yours (e.g. you are building a library rather than an app), those other packages will also need <c>"flat": true</c> in their <c>package.json</c> or be installed with <c>yarn install --flat</c> on the command-line.
+        /// </summary>
+        abstract flat: bool option with get, set
+        /// <summary>
+        /// Selective version resolutions. Allows the definition of custom package versions inside dependencies without manual edits in the <c>yarn.lock</c> file.
+        /// </summary>
+        abstract resolutions: Dependency option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?flat: bool, ?resolutions: Dependency) : YarnConfiguration = jsNative
 
-    module Exports =
-        type Item =
-            [<EmitIndexer>]
-            abstract Item: string -> U3<string, U2<string, Item>[], Item> option with get, set
+    [<Interface>]
+    type JSPMConfiguration =
+        /// <summary>
+        /// JSPM configuration.
+        /// </summary>
+        abstract jspm: PackageJson option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?jspm: PackageJson) : JSPMConfiguration = jsNative
+
+    /// <summary>
+    /// Type for <a href="https://docs.npmjs.com/creating-a-package-json-file">npm's <c>package.json</c> file</a>. Containing standard npm properties.
+    /// </summary>
+    type PackageJsonStandard =
+        /// <summary>
+        /// The name of the package.
+        /// </summary>
+        abstract name: string option with get, set
+        /// <summary>
+        /// Package version, parseable by <a href="https://github.com/npm/node-semver"><c>node-semver</c></a>.
+        /// </summary>
+        abstract version: string option with get, set
+        /// <summary>
+        /// Package description, listed in <c>npm search</c>.
+        /// </summary>
+        abstract description: string option with get, set
+        /// <summary>
+        /// Keywords associated with package, listed in <c>npm search</c>.
+        /// </summary>
+        abstract keywords: string[] option with get, set
+        /// <summary>
+        /// The URL to the package's homepage.
+        /// </summary>
+        abstract homepage: string option with get, set
+        /// <summary>
+        /// The URL to the package's issue tracker and/or the email address to which issues should be reported.
+        /// </summary>
+        abstract bugs: BugsLocation option with get, set
+        /// <summary>
+        /// The license for the package.
+        /// </summary>
+        abstract license: string option with get, set
+        /// <summary>
+        /// The licenses for the package.
+        /// </summary>
+        abstract licenses: PackageJson.Licenses.Item[] option with get, set
+        abstract author: Person option with get, set
+        /// <summary>
+        /// A list of people who contributed to the package.
+        /// </summary>
+        abstract contributors: Person[] option with get, set
+        /// <summary>
+        /// A list of people who maintain the package.
+        /// </summary>
+        abstract maintainers: Person[] option with get, set
+        /// <summary>
+        /// The files included in the package.
+        /// </summary>
+        abstract files: string[] option with get, set
+        /// <summary>
+        /// Resolution algorithm for importing ".js" files from the package's scope.
+        /// <br /><br />
+        /// <a href="https://nodejs.org/api/esm.html#esm_package_json_type_field">Read more.</a>
+        /// </summary>
+        abstract ``type``: Type option with get, set
+        /// <summary>
+        /// The module ID that is the primary entry point to the program.
+        /// </summary>
+        abstract main: string option with get, set
+        /// <summary>
+        /// Subpath exports to define entry points of the package.
+        /// <br /><br />
+        /// <a href="https://nodejs.org/api/packages.html#subpath-exports">Read more.</a>
+        /// </summary>
+        abstract exports: U3<string, U2<string, ExportConditions>[], ExportConditions> option with get, set
+        /// <summary>
+        /// Subpath imports to define internal package import maps that only apply to import specifiers from within the package itself.
+        /// <br /><br />
+        /// <a href="https://nodejs.org/api/packages.html#subpath-imports">Read more.</a>
+        /// </summary>
+        abstract imports: Imports option with get, set
+        /// <summary>
+        /// The executable files that should be installed into the <c>PATH</c>.
+        /// </summary>
+        abstract bin: U2<string, JS.Record<string, string option>> option with get, set
+        /// <summary>
+        /// Filenames to put in place for the <c>man</c> program to find.
+        /// </summary>
+        abstract man: U2<string, string[]> option with get, set
+        /// <summary>
+        /// Indicates the structure of the package.
+        /// </summary>
+        abstract directories: DirectoryLocations option with get, set
+        /// <summary>
+        /// Location for the code repository.
+        /// </summary>
+        abstract repository: U2<string, Repository> option with get, set
+        /// <summary>
+        /// Script commands that are run at various times in the lifecycle of the package. The key is the lifecycle event, and the value is the command to run at that point.
+        /// </summary>
+        abstract scripts: Scripts option with get, set
+        /// <summary>
+        /// Is used to set configuration parameters used in package scripts that persist across upgrades.
+        /// </summary>
+        abstract config: JsonObject option with get, set
+        /// <summary>
+        /// The dependencies of the package.
+        /// </summary>
+        abstract dependencies: Dependency option with get, set
+        /// <summary>
+        /// Additional tooling dependencies that are not required for the package to work. Usually test, build, or documentation tooling.
+        /// </summary>
+        abstract devDependencies: Dependency option with get, set
+        /// <summary>
+        /// Dependencies that are skipped if they fail to install.
+        /// </summary>
+        abstract optionalDependencies: Dependency option with get, set
+        /// <summary>
+        /// Dependencies that will usually be required by the package user directly or via another dependency.
+        /// </summary>
+        abstract peerDependencies: Dependency option with get, set
+        /// <summary>
+        /// Indicate peer dependencies that are optional.
+        /// </summary>
+        abstract peerDependenciesMeta: JS.Record<string, PackageJson.PeerDependenciesMeta.Item option> option with get, set
+        /// <summary>
+        /// Package names that are bundled when the package is published.
+        /// </summary>
+        abstract bundledDependencies: string[] option with get, set
+        /// <summary>
+        /// Alias of <c>bundledDependencies</c>.
+        /// </summary>
+        abstract bundleDependencies: string[] option with get, set
+        /// <summary>
+        /// Overrides is used to support selective version overrides using npm, which lets you define custom package versions or ranges inside your dependencies.
+        /// </summary>
+        abstract overrides: DependencyOverrides option with get, set
+        /// <summary>
+        /// Engines that this package runs on.
+        /// </summary>
+        abstract engines: Engines option with get, set
+        /// <remarks>@deprecated</remarks>
+        abstract engineStrict: bool option with get, set
+        /// <summary>
+        /// Operating systems the module runs on.
+        /// </summary>
+        abstract os: string[] option with get, set
+        /// <summary>
+        /// CPU architectures the module runs on.
+        /// </summary>
+        abstract cpu: string[] option with get, set
+        /// <summary>
+        /// Define the runtime and package manager for developing the current project.
+        /// </summary>
+        abstract devEngines: DevEngines option with get, set
+        /// <summary>
+        /// If set to <c>true</c>, a warning will be shown if package is installed locally. Useful if the package is primarily a command-line application that should be installed globally.
+        /// </summary>
+        /// <remarks>@deprecated</remarks>
+        abstract preferGlobal: bool option with get, set
+        /// <summary>
+        /// If set to <c>true</c>, then npm will refuse to publish it.
+        /// </summary>
+        abstract ``private``: bool option with get, set
+        /// <summary>
+        /// A set of config values that will be used at publish-time. It's especially handy to set the tag, registry or access, to ensure that a given package is not tagged with 'latest', published to the global public registry or that a scoped module is private by default.
+        /// </summary>
+        abstract publishConfig: PublishConfig option with get, set
+        /// <summary>
+        /// Describes and notifies consumers of a package's monetary support information.
+        /// <br /><br />
+        /// <a href="https://github.com/npm/rfcs/blob/main/implemented/0017-add-funding-support.md">Read more.</a>
+        /// </summary>
+        abstract funding: U2<string, Funding> option with get, set
+        /// <summary>
+        /// Used to configure <a href="https://docs.npmjs.com/cli/using-npm/workspaces">npm workspaces</a> / <a href="https://classic.yarnpkg.com/docs/workspaces/">Yarn workspaces</a>.
+        /// <br /><br />
+        /// Workspaces allow you to manage multiple packages within the same repository in such a way that you only need to run your install command once in order to install all of them in a single pass.
+        /// <br /><br />
+        /// Please note that the top-level <c>private</c> property of <c>package.json</c> <b>must</b> be set to <c>true</c> in order to use workspaces.
+        /// </summary>
+        abstract workspaces: U2<string[], WorkspaceConfig> option with get, set
+
+    /// <summary>
+    /// Type for <a href="https://nodejs.org/api/packages.html#nodejs-packagejson-field-definitions"><c>package.json</c> file used by the Node.js runtime</a>.
+    /// </summary>
+    [<Interface>]
+    type NodeJsStandard =
+        /// <summary>
+        /// Defines which package manager is expected to be used when working on the current project. It can set to any of the <a href="https://nodejs.org/api/corepack.html#supported-package-managers">supported package managers</a>, and will ensure that your teams use the exact same package manager versions without having to install anything else than Node.js.
+        /// <br /><br />
+        /// __This field is currently experimental and needs to be opted-in; check the <a href="https://nodejs.org/api/corepack.html">Corepack</a> page for details about the procedure.__
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// ```json
+        /// {
+        /// 	"packageManager": "&lt;package manager name&gt;@&lt;version&gt;"
+        /// }
+        /// </code>
+        /// <code>
+        /// </code>
+        /// </example>
+        abstract packageManager: string option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?packageManager: string) : NodeJsStandard = jsNative
+
+    type PublishConfig =
+        /// <summary>
+        /// When publishing scoped packages, the access level defaults to restricted. If you want your scoped package to be publicly viewable (and installable) set <c>--access=public</c>. The only valid values for access are public and restricted. Unscoped packages always have an access level of public.
+        /// </summary>
+        abstract access: PackageJson.PublishConfig.Access option with get, set
+        /// <summary>
+        /// The base URL of the npm registry.
+        /// <br /><br />
+        /// Default: <c>'https://registry.npmjs.org/'</c>
+        /// </summary>
+        abstract registry: string option with get, set
+        /// <summary>
+        /// The tag to publish the package under.
+        /// <br /><br />
+        /// Default: <c>'latest'</c>
+        /// </summary>
+        abstract tag: string option with get, set
+        [<EmitIndexer>]
+        abstract Item: string -> U5<string, float, bool, JsonValue[], JsonObject> option with get, set
+
+    module DevEngineDependency =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type OnFail =
+            | [<CompiledName("download")>] Download
+            | [<CompiledName("error")>] Error
+            | [<CompiledName("ignore")>] Ignore
+            | [<CompiledName("warn")>] Warn
 
     module Licenses =
         [<Interface>]
@@ -11014,7 +11097,7 @@ module TsConfigJson =
         /// Specify what JSX code is generated.
         /// </summary>
         /// <defaultValue>'preserve'</defaultValue>
-        abstract jsx: TsConfigJson.CompilerOptions.Jsx option with get, set
+        abstract jsx: TsConfigJson.CompilerOptions.JSX option with get, set
         /// <summary>
         /// Specifies the object invoked for <c>createElement</c> and <c>__spread</c> when targeting <c>'react'</c> JSX emit.
         /// </summary>
@@ -11314,7 +11397,7 @@ module TsConfigJson =
         /// <summary>
         /// List of TypeScript language server plugins to load.
         /// </summary>
-        abstract plugins: TsConfigJson.CompilerOptions.Plugins.Item[] option with get, set
+        abstract plugins: TsConfigJson.CompilerOptions.Plugin[] option with get, set
         /// <summary>
         /// Specify list of root directories to be used when resolving modules.
         /// </summary>
@@ -11366,7 +11449,7 @@ module TsConfigJson =
         /// <summary>
         /// List of library files to be included in the compilation.
         /// </summary>
-        abstract lib: TsConfigJson.CompilerOptions.Lib.Item[] option with get, set
+        abstract lib: TsConfigJson.CompilerOptions.Lib[] option with get, set
         /// <summary>
         /// Enable strict null checks.
         /// </summary>
@@ -11552,27 +11635,6 @@ module TsConfigJson =
         abstract libReplacement: bool option with get, set
 
     [<Interface>]
-    type TypeAcquisition =
-        /// <summary>
-        /// Enable auto type acquisition.
-        /// </summary>
-        abstract enable: bool option with get, set
-        /// <summary>
-        /// Specifies a list of type declarations to be included in auto type acquisition. For example, <c>['jquery', 'lodash']</c>.
-        /// </summary>
-        abstract ``include``: string[] option with get, set
-        /// <summary>
-        /// Specifies a list of type declarations to be excluded from auto type acquisition. For example, <c>['jquery', 'lodash']</c>.
-        /// </summary>
-        abstract exclude: string[] option with get, set
-        /// <summary>
-        /// Disable inferring what types should be added based on filenames in a project.
-        /// </summary>
-        abstract disableFilenameBasedTypeAcquisition: bool option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?enable: bool, ?``include``: string[], ?exclude: string[], ?disableFilenameBasedTypeAcquisition: bool) : TypeAcquisition = jsNative
-
-    [<Interface>]
     type WatchOptions =
         /// <summary>
         /// Specify the strategy for watching individual files.
@@ -11603,30 +11665,57 @@ module TsConfigJson =
         [<ParamObject; Emit("$0")>]
         static member Create (?watchFile: TsConfigJson.WatchOptions.WatchFile, ?watchDirectory: TsConfigJson.WatchOptions.WatchDirectory, ?fallbackPolling: TsConfigJson.WatchOptions.FallbackPolling, ?synchronousWatchDirectory: bool, ?excludeDirectories: string[], ?excludeFiles: string[]) : WatchOptions = jsNative
 
+    /// <summary>
+    /// Auto type (.d.ts) acquisition options for this project.
+    /// </summary>
+    [<Interface>]
+    type TypeAcquisition =
+        /// <summary>
+        /// Enable auto type acquisition.
+        /// </summary>
+        abstract enable: bool option with get, set
+        /// <summary>
+        /// Specifies a list of type declarations to be included in auto type acquisition. For example, <c>['jquery', 'lodash']</c>.
+        /// </summary>
+        abstract ``include``: string[] option with get, set
+        /// <summary>
+        /// Specifies a list of type declarations to be excluded from auto type acquisition. For example, <c>['jquery', 'lodash']</c>.
+        /// </summary>
+        abstract exclude: string[] option with get, set
+        /// <summary>
+        /// Disable inferring what types should be added based on filenames in a project.
+        /// </summary>
+        abstract disableFilenameBasedTypeAcquisition: bool option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?enable: bool, ?``include``: string[], ?exclude: string[], ?disableFilenameBasedTypeAcquisition: bool) : TypeAcquisition = jsNative
+
+    [<Interface>]
+    type References =
+        /// <summary>
+        /// A normalized path on disk.
+        /// </summary>
+        abstract path: string with get, set
+        /// <summary>
+        /// The path as the user originally wrote it.
+        /// </summary>
+        abstract originalPath: string option with get, set
+        /// <summary>
+        /// True if the output of this reference should be prepended to the output of this project.
+        /// <br /><br />
+        /// Only valid for <c>--outFile</c> compilations.
+        /// </summary>
+        /// <remarks>@deprecated This option will be removed in TypeScript 5.5.</remarks>
+        abstract prepend: bool option with get, set
+        /// <summary>
+        /// True if it is intended that this reference form a circularity.
+        /// </summary>
+        abstract circular: bool option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (path: string, ?originalPath: string, ?prepend: bool, ?circular: bool) : References = jsNative
+
     module CompilerOptions =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type FallbackPolling =
-            | [<CompiledName("dynamicPriority")>] DynamicPriority
-            | [<CompiledName("dynamicPriorityPolling")>] DynamicPriorityPolling
-            | [<CompiledName("fixedChunkSize")>] FixedChunkSize
-            | [<CompiledName("fixedInterval")>] FixedInterval
-            | [<CompiledName("fixedPollingInterval")>] FixedPollingInterval
-            | [<CompiledName("priorityInterval")>] PriorityInterval
-            | [<CompiledName("priorityPollingInterval")>] PriorityPollingInterval
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type IgnoreDeprecations =
-            | [<CompiledName("5.0")>] N50
-            | [<CompiledName("6.0")>] N60
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type ImportsNotUsedAsValues =
-            | [<CompiledName("error")>] Error
-            | [<CompiledName("preserve")>] Preserve
-            | [<CompiledName("remove")>] Remove
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Jsx =
+        type JSX =
             | [<CompiledName("preserve")>] Preserve
             | [<CompiledName("react")>] React
             | [<CompiledName("react-jsx")>] ReactJsx
@@ -11665,27 +11754,6 @@ module TsConfigJson =
             | [<CompiledName("preserve")>] Preserve2
             | [<CompiledName("system")>] System2
             | [<CompiledName("umd")>] Umd
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type ModuleDetection =
-            | [<CompiledName("auto")>] Auto
-            | [<CompiledName("force")>] Force
-            | [<CompiledName("legacy")>] Legacy
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type ModuleResolution =
-            | Bundler
-            | Classic
-            | Node
-            | Node10
-            | Node16
-            | NodeNext
-            | [<CompiledName("bundler")>] Bundler2
-            | [<CompiledName("classic")>] Classic2
-            | [<CompiledName("node")>] Node2
-            | [<CompiledName("node10")>] Node102
-            | [<CompiledName("node16")>] Node162
-            | [<CompiledName("nodenext")>] Nodenext
 
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
         type NewLine =
@@ -11728,6 +11796,242 @@ module TsConfigJson =
             | [<CompiledName("esnext")>] Esnext
 
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Lib =
+            | DOM
+            | [<CompiledName("DOM.AsyncIterable")>] DOMAsyncIterable
+            | [<CompiledName("DOM.Iterable")>] DOMIterable
+            | Decorators
+            | [<CompiledName("Decorators.Legacy")>] DecoratorsLegacy
+            | ES2015
+            | [<CompiledName("ES2015.Collection")>] ES2015Collection
+            | [<CompiledName("ES2015.Core")>] ES2015Core
+            | [<CompiledName("ES2015.Generator")>] ES2015Generator
+            | [<CompiledName("ES2015.Iterable")>] ES2015Iterable
+            | [<CompiledName("ES2015.Promise")>] ES2015Promise
+            | [<CompiledName("ES2015.Proxy")>] ES2015Proxy
+            | [<CompiledName("ES2015.Reflect")>] ES2015Reflect
+            | [<CompiledName("ES2015.Symbol")>] ES2015Symbol
+            | [<CompiledName("ES2015.Symbol.WellKnown")>] ES2015SymbolWellKnown
+            | ES2016
+            | [<CompiledName("ES2016.Array.Include")>] ES2016ArrayInclude
+            | ES2017
+            | [<CompiledName("ES2017.ArrayBuffer")>] ES2017ArrayBuffer
+            | [<CompiledName("ES2017.Date")>] ES2017Date
+            | [<CompiledName("ES2017.Intl")>] ES2017Intl
+            | [<CompiledName("ES2017.Object")>] ES2017Object
+            | [<CompiledName("ES2017.SharedMemory")>] ES2017SharedMemory
+            | [<CompiledName("ES2017.String")>] ES2017String
+            | [<CompiledName("ES2017.TypedArrays")>] ES2017TypedArrays
+            | ES2018
+            | [<CompiledName("ES2018.AsyncGenerator")>] ES2018AsyncGenerator
+            | [<CompiledName("ES2018.AsyncIterable")>] ES2018AsyncIterable
+            | [<CompiledName("ES2018.Intl")>] ES2018Intl
+            | [<CompiledName("ES2018.Promise")>] ES2018Promise
+            | [<CompiledName("ES2018.Regexp")>] ES2018Regexp
+            | ES2019
+            | [<CompiledName("ES2019.Array")>] ES2019Array
+            | [<CompiledName("ES2019.Intl")>] ES2019Intl
+            | [<CompiledName("ES2019.Object")>] ES2019Object
+            | [<CompiledName("ES2019.String")>] ES2019String
+            | [<CompiledName("ES2019.Symbol")>] ES2019Symbol
+            | ES2020
+            | [<CompiledName("ES2020.BigInt")>] ES2020BigInt
+            | [<CompiledName("ES2020.Date")>] ES2020Date
+            | [<CompiledName("ES2020.Intl")>] ES2020Intl
+            | [<CompiledName("ES2020.Number")>] ES2020Number
+            | [<CompiledName("ES2020.Promise")>] ES2020Promise
+            | [<CompiledName("ES2020.SharedMemory")>] ES2020SharedMemory
+            | [<CompiledName("ES2020.String")>] ES2020String
+            | [<CompiledName("ES2020.Symbol.WellKnown")>] ES2020SymbolWellKnown
+            | ES2021
+            | [<CompiledName("ES2021.Intl")>] ES2021Intl
+            | [<CompiledName("ES2021.Promise")>] ES2021Promise
+            | [<CompiledName("ES2021.String")>] ES2021String
+            | [<CompiledName("ES2021.WeakRef")>] ES2021WeakRef
+            | ES2022
+            | [<CompiledName("ES2022.Array")>] ES2022Array
+            | [<CompiledName("ES2022.Error")>] ES2022Error
+            | [<CompiledName("ES2022.Intl")>] ES2022Intl
+            | [<CompiledName("ES2022.Object")>] ES2022Object
+            | [<CompiledName("ES2022.RegExp")>] ES2022RegExp
+            | [<CompiledName("ES2022.SharedMemory")>] ES2022SharedMemory
+            | [<CompiledName("ES2022.String")>] ES2022String
+            | ES2023
+            | [<CompiledName("ES2023.Array")>] ES2023Array
+            | [<CompiledName("ES2023.Collection")>] ES2023Collection
+            | [<CompiledName("ES2023.Intl")>] ES2023Intl
+            | ES2024
+            | [<CompiledName("ES2024.ArrayBuffer")>] ES2024ArrayBuffer
+            | [<CompiledName("ES2024.Collection")>] ES2024Collection
+            | [<CompiledName("ES2024.Object")>] ES2024Object
+            | [<CompiledName("ES2024.Promise")>] ES2024Promise
+            | [<CompiledName("ES2024.Regexp")>] ES2024Regexp
+            | [<CompiledName("ES2024.SharedMemory")>] ES2024SharedMemory
+            | [<CompiledName("ES2024.String")>] ES2024String
+            | ES2025
+            | [<CompiledName("ES2025.Collection")>] ES2025Collection
+            | [<CompiledName("ES2025.Float16")>] ES2025Float16
+            | [<CompiledName("ES2025.Intl")>] ES2025Intl
+            | [<CompiledName("ES2025.Iterator")>] ES2025Iterator
+            | [<CompiledName("ES2025.Promise")>] ES2025Promise
+            | [<CompiledName("ES2025.RegExp")>] ES2025RegExp
+            | ES5
+            | ES6
+            | ES7
+            | ESNext
+            | [<CompiledName("ESNext.Array")>] ESNextArray
+            | [<CompiledName("ESNext.AsyncIterable")>] ESNextAsyncIterable
+            | [<CompiledName("ESNext.BigInt")>] ESNextBigInt
+            | [<CompiledName("ESNext.Collection")>] ESNextCollection
+            | [<CompiledName("ESNext.Decorators")>] ESNextDecorators
+            | [<CompiledName("ESNext.Disposable")>] ESNextDisposable
+            | [<CompiledName("ESNext.Error")>] ESNextError
+            | [<CompiledName("ESNext.Float16")>] ESNextFloat16
+            | [<CompiledName("ESNext.Intl")>] ESNextIntl
+            | [<CompiledName("ESNext.Iterator")>] ESNextIterator
+            | [<CompiledName("ESNext.Object")>] ESNextObject
+            | [<CompiledName("ESNext.Promise")>] ESNextPromise
+            | [<CompiledName("ESNext.Regexp")>] ESNextRegexp
+            | [<CompiledName("ESNext.String")>] ESNextString
+            | [<CompiledName("ESNext.Symbol")>] ESNextSymbol
+            | [<CompiledName("ESNext.Temporal")>] ESNextTemporal
+            | [<CompiledName("ESNext.WeakRef")>] ESNextWeakRef
+            | ScriptHost
+            | WebWorker
+            | [<CompiledName("WebWorker.AsyncIterable")>] WebWorkerAsyncIterable
+            | [<CompiledName("WebWorker.ImportScripts")>] WebWorkerImportScripts
+            | [<CompiledName("WebWorker.Iterable")>] WebWorkerIterable
+            | [<CompiledName("decorators")>] Decorators2
+            | [<CompiledName("decorators.legacy")>] DecoratorsLegacy2
+            | [<CompiledName("dom")>] Dom
+            | [<CompiledName("dom.asynciterable")>] DomAsynciterable
+            | [<CompiledName("dom.iterable")>] DomIterable
+            | [<CompiledName("es2015")>] Es2015
+            | [<CompiledName("es2015.collection")>] Es2015Collection
+            | [<CompiledName("es2015.core")>] Es2015Core
+            | [<CompiledName("es2015.generator")>] Es2015Generator
+            | [<CompiledName("es2015.iterable")>] Es2015Iterable
+            | [<CompiledName("es2015.promise")>] Es2015Promise
+            | [<CompiledName("es2015.proxy")>] Es2015Proxy
+            | [<CompiledName("es2015.reflect")>] Es2015Reflect
+            | [<CompiledName("es2015.symbol")>] Es2015Symbol
+            | [<CompiledName("es2015.symbol.wellknown")>] Es2015SymbolWellknown
+            | [<CompiledName("es2016")>] Es2016
+            | [<CompiledName("es2016.array.include")>] Es2016ArrayInclude
+            | [<CompiledName("es2017")>] Es2017
+            | [<CompiledName("es2017.arraybuffer")>] Es2017Arraybuffer
+            | [<CompiledName("es2017.date")>] Es2017Date
+            | [<CompiledName("es2017.intl")>] Es2017Intl
+            | [<CompiledName("es2017.object")>] Es2017Object
+            | [<CompiledName("es2017.sharedmemory")>] Es2017Sharedmemory
+            | [<CompiledName("es2017.string")>] Es2017String
+            | [<CompiledName("es2017.typedarrays")>] Es2017Typedarrays
+            | [<CompiledName("es2018")>] Es2018
+            | [<CompiledName("es2018.asyncgenerator")>] Es2018Asyncgenerator
+            | [<CompiledName("es2018.asynciterable")>] Es2018Asynciterable
+            | [<CompiledName("es2018.intl")>] Es2018Intl
+            | [<CompiledName("es2018.promise")>] Es2018Promise
+            | [<CompiledName("es2018.regexp")>] Es2018Regexp
+            | [<CompiledName("es2019")>] Es2019
+            | [<CompiledName("es2019.array")>] Es2019Array
+            | [<CompiledName("es2019.intl")>] Es2019Intl
+            | [<CompiledName("es2019.object")>] Es2019Object
+            | [<CompiledName("es2019.string")>] Es2019String
+            | [<CompiledName("es2019.symbol")>] Es2019Symbol
+            | [<CompiledName("es2020")>] Es2020
+            | [<CompiledName("es2020.bigint")>] Es2020Bigint
+            | [<CompiledName("es2020.date")>] Es2020Date
+            | [<CompiledName("es2020.intl")>] Es2020Intl
+            | [<CompiledName("es2020.number")>] Es2020Number
+            | [<CompiledName("es2020.promise")>] Es2020Promise
+            | [<CompiledName("es2020.sharedmemory")>] Es2020Sharedmemory
+            | [<CompiledName("es2020.string")>] Es2020String
+            | [<CompiledName("es2020.symbol.wellknown")>] Es2020SymbolWellknown
+            | [<CompiledName("es2021")>] Es2021
+            | [<CompiledName("es2021.intl")>] Es2021Intl
+            | [<CompiledName("es2021.promise")>] Es2021Promise
+            | [<CompiledName("es2021.string")>] Es2021String
+            | [<CompiledName("es2021.weakref")>] Es2021Weakref
+            | [<CompiledName("es2022")>] Es2022
+            | [<CompiledName("es2022.array")>] Es2022Array
+            | [<CompiledName("es2022.error")>] Es2022Error
+            | [<CompiledName("es2022.intl")>] Es2022Intl
+            | [<CompiledName("es2022.object")>] Es2022Object
+            | [<CompiledName("es2022.regexp")>] Es2022Regexp
+            | [<CompiledName("es2022.sharedmemory")>] Es2022Sharedmemory
+            | [<CompiledName("es2022.string")>] Es2022String
+            | [<CompiledName("es2023")>] Es2023
+            | [<CompiledName("es2023.array")>] Es2023Array
+            | [<CompiledName("es2023.collection")>] Es2023Collection
+            | [<CompiledName("es2023.intl")>] Es2023Intl
+            | [<CompiledName("es2024")>] Es2024
+            | [<CompiledName("es2024.arraybuffer")>] Es2024Arraybuffer
+            | [<CompiledName("es2024.collection")>] Es2024Collection
+            | [<CompiledName("es2024.object")>] Es2024Object
+            | [<CompiledName("es2024.promise")>] Es2024Promise
+            | [<CompiledName("es2024.regexp")>] Es2024Regexp
+            | [<CompiledName("es2024.sharedmemory")>] Es2024Sharedmemory
+            | [<CompiledName("es2024.string")>] Es2024String
+            | [<CompiledName("es2025")>] Es2025
+            | [<CompiledName("es2025.collection")>] Es2025Collection
+            | [<CompiledName("es2025.float16")>] Es2025Float16
+            | [<CompiledName("es2025.intl")>] Es2025Intl
+            | [<CompiledName("es2025.iterator")>] Es2025Iterator
+            | [<CompiledName("es2025.promise")>] Es2025Promise
+            | [<CompiledName("es2025.regexp")>] Es2025Regexp
+            | [<CompiledName("es5")>] Es5
+            | [<CompiledName("es6")>] Es6
+            | [<CompiledName("es7")>] Es7
+            | [<CompiledName("esnext")>] Esnext
+            | [<CompiledName("esnext.array")>] EsnextArray
+            | [<CompiledName("esnext.asynciterable")>] EsnextAsynciterable
+            | [<CompiledName("esnext.bigint")>] EsnextBigint
+            | [<CompiledName("esnext.collection")>] EsnextCollection
+            | [<CompiledName("esnext.decorators")>] EsnextDecorators
+            | [<CompiledName("esnext.disposable")>] EsnextDisposable
+            | [<CompiledName("esnext.error")>] EsnextError
+            | [<CompiledName("esnext.float16")>] EsnextFloat16
+            | [<CompiledName("esnext.intl")>] EsnextIntl
+            | [<CompiledName("esnext.iterator")>] EsnextIterator
+            | [<CompiledName("esnext.object")>] EsnextObject
+            | [<CompiledName("esnext.promise")>] EsnextPromise
+            | [<CompiledName("esnext.regexp")>] EsnextRegexp
+            | [<CompiledName("esnext.string")>] EsnextString
+            | [<CompiledName("esnext.symbol")>] EsnextSymbol
+            | [<CompiledName("esnext.temporal")>] EsnextTemporal
+            | [<CompiledName("esnext.weakref")>] EsnextWeakref
+            | [<CompiledName("scripthost")>] Scripthost
+            | [<CompiledName("webworker")>] Webworker
+            | [<CompiledName("webworker.asynciterable")>] WebworkerAsynciterable
+            | [<CompiledName("webworker.importscripts")>] WebworkerImportscripts
+            | [<CompiledName("webworker.iterable")>] WebworkerIterable
+
+        [<Interface>]
+        type Plugin =
+            /// <summary>
+            /// Plugin name.
+            /// </summary>
+            abstract name: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (name: string) : Plugin = jsNative
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type ImportsNotUsedAsValues =
+            | [<CompiledName("error")>] Error
+            | [<CompiledName("preserve")>] Preserve
+            | [<CompiledName("remove")>] Remove
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type FallbackPolling =
+            | [<CompiledName("dynamicPriority")>] DynamicPriority
+            | [<CompiledName("dynamicPriorityPolling")>] DynamicPriorityPolling
+            | [<CompiledName("fixedChunkSize")>] FixedChunkSize
+            | [<CompiledName("fixedInterval")>] FixedInterval
+            | [<CompiledName("fixedPollingInterval")>] FixedPollingInterval
+            | [<CompiledName("priorityInterval")>] PriorityInterval
+            | [<CompiledName("priorityPollingInterval")>] PriorityPollingInterval
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
         type WatchDirectory =
             | [<CompiledName("dynamicPriorityPolling")>] DynamicPriorityPolling
             | [<CompiledName("fixedChunkSizePolling")>] FixedChunkSizePolling
@@ -11743,252 +12047,31 @@ module TsConfigJson =
             | [<CompiledName("useFsEvents")>] UseFsEvents
             | [<CompiledName("useFsEventsOnParentDirectory")>] UseFsEventsOnParentDirectory
 
-        module Lib =
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type Item =
-                | DOM
-                | [<CompiledName("DOM.AsyncIterable")>] DOMAsyncIterable
-                | [<CompiledName("DOM.Iterable")>] DOMIterable
-                | Decorators
-                | [<CompiledName("Decorators.Legacy")>] DecoratorsLegacy
-                | ES2015
-                | [<CompiledName("ES2015.Collection")>] ES2015Collection
-                | [<CompiledName("ES2015.Core")>] ES2015Core
-                | [<CompiledName("ES2015.Generator")>] ES2015Generator
-                | [<CompiledName("ES2015.Iterable")>] ES2015Iterable
-                | [<CompiledName("ES2015.Promise")>] ES2015Promise
-                | [<CompiledName("ES2015.Proxy")>] ES2015Proxy
-                | [<CompiledName("ES2015.Reflect")>] ES2015Reflect
-                | [<CompiledName("ES2015.Symbol")>] ES2015Symbol
-                | [<CompiledName("ES2015.Symbol.WellKnown")>] ES2015SymbolWellKnown
-                | ES2016
-                | [<CompiledName("ES2016.Array.Include")>] ES2016ArrayInclude
-                | ES2017
-                | [<CompiledName("ES2017.ArrayBuffer")>] ES2017ArrayBuffer
-                | [<CompiledName("ES2017.Date")>] ES2017Date
-                | [<CompiledName("ES2017.Intl")>] ES2017Intl
-                | [<CompiledName("ES2017.Object")>] ES2017Object
-                | [<CompiledName("ES2017.SharedMemory")>] ES2017SharedMemory
-                | [<CompiledName("ES2017.String")>] ES2017String
-                | [<CompiledName("ES2017.TypedArrays")>] ES2017TypedArrays
-                | ES2018
-                | [<CompiledName("ES2018.AsyncGenerator")>] ES2018AsyncGenerator
-                | [<CompiledName("ES2018.AsyncIterable")>] ES2018AsyncIterable
-                | [<CompiledName("ES2018.Intl")>] ES2018Intl
-                | [<CompiledName("ES2018.Promise")>] ES2018Promise
-                | [<CompiledName("ES2018.Regexp")>] ES2018Regexp
-                | ES2019
-                | [<CompiledName("ES2019.Array")>] ES2019Array
-                | [<CompiledName("ES2019.Intl")>] ES2019Intl
-                | [<CompiledName("ES2019.Object")>] ES2019Object
-                | [<CompiledName("ES2019.String")>] ES2019String
-                | [<CompiledName("ES2019.Symbol")>] ES2019Symbol
-                | ES2020
-                | [<CompiledName("ES2020.BigInt")>] ES2020BigInt
-                | [<CompiledName("ES2020.Date")>] ES2020Date
-                | [<CompiledName("ES2020.Intl")>] ES2020Intl
-                | [<CompiledName("ES2020.Number")>] ES2020Number
-                | [<CompiledName("ES2020.Promise")>] ES2020Promise
-                | [<CompiledName("ES2020.SharedMemory")>] ES2020SharedMemory
-                | [<CompiledName("ES2020.String")>] ES2020String
-                | [<CompiledName("ES2020.Symbol.WellKnown")>] ES2020SymbolWellKnown
-                | ES2021
-                | [<CompiledName("ES2021.Intl")>] ES2021Intl
-                | [<CompiledName("ES2021.Promise")>] ES2021Promise
-                | [<CompiledName("ES2021.String")>] ES2021String
-                | [<CompiledName("ES2021.WeakRef")>] ES2021WeakRef
-                | ES2022
-                | [<CompiledName("ES2022.Array")>] ES2022Array
-                | [<CompiledName("ES2022.Error")>] ES2022Error
-                | [<CompiledName("ES2022.Intl")>] ES2022Intl
-                | [<CompiledName("ES2022.Object")>] ES2022Object
-                | [<CompiledName("ES2022.RegExp")>] ES2022RegExp
-                | [<CompiledName("ES2022.SharedMemory")>] ES2022SharedMemory
-                | [<CompiledName("ES2022.String")>] ES2022String
-                | ES2023
-                | [<CompiledName("ES2023.Array")>] ES2023Array
-                | [<CompiledName("ES2023.Collection")>] ES2023Collection
-                | [<CompiledName("ES2023.Intl")>] ES2023Intl
-                | ES2024
-                | [<CompiledName("ES2024.ArrayBuffer")>] ES2024ArrayBuffer
-                | [<CompiledName("ES2024.Collection")>] ES2024Collection
-                | [<CompiledName("ES2024.Object")>] ES2024Object
-                | [<CompiledName("ES2024.Promise")>] ES2024Promise
-                | [<CompiledName("ES2024.Regexp")>] ES2024Regexp
-                | [<CompiledName("ES2024.SharedMemory")>] ES2024SharedMemory
-                | [<CompiledName("ES2024.String")>] ES2024String
-                | ES2025
-                | [<CompiledName("ES2025.Collection")>] ES2025Collection
-                | [<CompiledName("ES2025.Float16")>] ES2025Float16
-                | [<CompiledName("ES2025.Intl")>] ES2025Intl
-                | [<CompiledName("ES2025.Iterator")>] ES2025Iterator
-                | [<CompiledName("ES2025.Promise")>] ES2025Promise
-                | [<CompiledName("ES2025.RegExp")>] ES2025RegExp
-                | ES5
-                | ES6
-                | ES7
-                | ESNext
-                | [<CompiledName("ESNext.Array")>] ESNextArray
-                | [<CompiledName("ESNext.AsyncIterable")>] ESNextAsyncIterable
-                | [<CompiledName("ESNext.BigInt")>] ESNextBigInt
-                | [<CompiledName("ESNext.Collection")>] ESNextCollection
-                | [<CompiledName("ESNext.Decorators")>] ESNextDecorators
-                | [<CompiledName("ESNext.Disposable")>] ESNextDisposable
-                | [<CompiledName("ESNext.Error")>] ESNextError
-                | [<CompiledName("ESNext.Float16")>] ESNextFloat16
-                | [<CompiledName("ESNext.Intl")>] ESNextIntl
-                | [<CompiledName("ESNext.Iterator")>] ESNextIterator
-                | [<CompiledName("ESNext.Object")>] ESNextObject
-                | [<CompiledName("ESNext.Promise")>] ESNextPromise
-                | [<CompiledName("ESNext.Regexp")>] ESNextRegexp
-                | [<CompiledName("ESNext.String")>] ESNextString
-                | [<CompiledName("ESNext.Symbol")>] ESNextSymbol
-                | [<CompiledName("ESNext.Temporal")>] ESNextTemporal
-                | [<CompiledName("ESNext.WeakRef")>] ESNextWeakRef
-                | ScriptHost
-                | WebWorker
-                | [<CompiledName("WebWorker.AsyncIterable")>] WebWorkerAsyncIterable
-                | [<CompiledName("WebWorker.ImportScripts")>] WebWorkerImportScripts
-                | [<CompiledName("WebWorker.Iterable")>] WebWorkerIterable
-                | [<CompiledName("decorators")>] Decorators2
-                | [<CompiledName("decorators.legacy")>] DecoratorsLegacy2
-                | [<CompiledName("dom")>] Dom
-                | [<CompiledName("dom.asynciterable")>] DomAsynciterable
-                | [<CompiledName("dom.iterable")>] DomIterable
-                | [<CompiledName("es2015")>] Es2015
-                | [<CompiledName("es2015.collection")>] Es2015Collection
-                | [<CompiledName("es2015.core")>] Es2015Core
-                | [<CompiledName("es2015.generator")>] Es2015Generator
-                | [<CompiledName("es2015.iterable")>] Es2015Iterable
-                | [<CompiledName("es2015.promise")>] Es2015Promise
-                | [<CompiledName("es2015.proxy")>] Es2015Proxy
-                | [<CompiledName("es2015.reflect")>] Es2015Reflect
-                | [<CompiledName("es2015.symbol")>] Es2015Symbol
-                | [<CompiledName("es2015.symbol.wellknown")>] Es2015SymbolWellknown
-                | [<CompiledName("es2016")>] Es2016
-                | [<CompiledName("es2016.array.include")>] Es2016ArrayInclude
-                | [<CompiledName("es2017")>] Es2017
-                | [<CompiledName("es2017.arraybuffer")>] Es2017Arraybuffer
-                | [<CompiledName("es2017.date")>] Es2017Date
-                | [<CompiledName("es2017.intl")>] Es2017Intl
-                | [<CompiledName("es2017.object")>] Es2017Object
-                | [<CompiledName("es2017.sharedmemory")>] Es2017Sharedmemory
-                | [<CompiledName("es2017.string")>] Es2017String
-                | [<CompiledName("es2017.typedarrays")>] Es2017Typedarrays
-                | [<CompiledName("es2018")>] Es2018
-                | [<CompiledName("es2018.asyncgenerator")>] Es2018Asyncgenerator
-                | [<CompiledName("es2018.asynciterable")>] Es2018Asynciterable
-                | [<CompiledName("es2018.intl")>] Es2018Intl
-                | [<CompiledName("es2018.promise")>] Es2018Promise
-                | [<CompiledName("es2018.regexp")>] Es2018Regexp
-                | [<CompiledName("es2019")>] Es2019
-                | [<CompiledName("es2019.array")>] Es2019Array
-                | [<CompiledName("es2019.intl")>] Es2019Intl
-                | [<CompiledName("es2019.object")>] Es2019Object
-                | [<CompiledName("es2019.string")>] Es2019String
-                | [<CompiledName("es2019.symbol")>] Es2019Symbol
-                | [<CompiledName("es2020")>] Es2020
-                | [<CompiledName("es2020.bigint")>] Es2020Bigint
-                | [<CompiledName("es2020.date")>] Es2020Date
-                | [<CompiledName("es2020.intl")>] Es2020Intl
-                | [<CompiledName("es2020.number")>] Es2020Number
-                | [<CompiledName("es2020.promise")>] Es2020Promise
-                | [<CompiledName("es2020.sharedmemory")>] Es2020Sharedmemory
-                | [<CompiledName("es2020.string")>] Es2020String
-                | [<CompiledName("es2020.symbol.wellknown")>] Es2020SymbolWellknown
-                | [<CompiledName("es2021")>] Es2021
-                | [<CompiledName("es2021.intl")>] Es2021Intl
-                | [<CompiledName("es2021.promise")>] Es2021Promise
-                | [<CompiledName("es2021.string")>] Es2021String
-                | [<CompiledName("es2021.weakref")>] Es2021Weakref
-                | [<CompiledName("es2022")>] Es2022
-                | [<CompiledName("es2022.array")>] Es2022Array
-                | [<CompiledName("es2022.error")>] Es2022Error
-                | [<CompiledName("es2022.intl")>] Es2022Intl
-                | [<CompiledName("es2022.object")>] Es2022Object
-                | [<CompiledName("es2022.regexp")>] Es2022Regexp
-                | [<CompiledName("es2022.sharedmemory")>] Es2022Sharedmemory
-                | [<CompiledName("es2022.string")>] Es2022String
-                | [<CompiledName("es2023")>] Es2023
-                | [<CompiledName("es2023.array")>] Es2023Array
-                | [<CompiledName("es2023.collection")>] Es2023Collection
-                | [<CompiledName("es2023.intl")>] Es2023Intl
-                | [<CompiledName("es2024")>] Es2024
-                | [<CompiledName("es2024.arraybuffer")>] Es2024Arraybuffer
-                | [<CompiledName("es2024.collection")>] Es2024Collection
-                | [<CompiledName("es2024.object")>] Es2024Object
-                | [<CompiledName("es2024.promise")>] Es2024Promise
-                | [<CompiledName("es2024.regexp")>] Es2024Regexp
-                | [<CompiledName("es2024.sharedmemory")>] Es2024Sharedmemory
-                | [<CompiledName("es2024.string")>] Es2024String
-                | [<CompiledName("es2025")>] Es2025
-                | [<CompiledName("es2025.collection")>] Es2025Collection
-                | [<CompiledName("es2025.float16")>] Es2025Float16
-                | [<CompiledName("es2025.intl")>] Es2025Intl
-                | [<CompiledName("es2025.iterator")>] Es2025Iterator
-                | [<CompiledName("es2025.promise")>] Es2025Promise
-                | [<CompiledName("es2025.regexp")>] Es2025Regexp
-                | [<CompiledName("es5")>] Es5
-                | [<CompiledName("es6")>] Es6
-                | [<CompiledName("es7")>] Es7
-                | [<CompiledName("esnext")>] Esnext
-                | [<CompiledName("esnext.array")>] EsnextArray
-                | [<CompiledName("esnext.asynciterable")>] EsnextAsynciterable
-                | [<CompiledName("esnext.bigint")>] EsnextBigint
-                | [<CompiledName("esnext.collection")>] EsnextCollection
-                | [<CompiledName("esnext.decorators")>] EsnextDecorators
-                | [<CompiledName("esnext.disposable")>] EsnextDisposable
-                | [<CompiledName("esnext.error")>] EsnextError
-                | [<CompiledName("esnext.float16")>] EsnextFloat16
-                | [<CompiledName("esnext.intl")>] EsnextIntl
-                | [<CompiledName("esnext.iterator")>] EsnextIterator
-                | [<CompiledName("esnext.object")>] EsnextObject
-                | [<CompiledName("esnext.promise")>] EsnextPromise
-                | [<CompiledName("esnext.regexp")>] EsnextRegexp
-                | [<CompiledName("esnext.string")>] EsnextString
-                | [<CompiledName("esnext.symbol")>] EsnextSymbol
-                | [<CompiledName("esnext.temporal")>] EsnextTemporal
-                | [<CompiledName("esnext.weakref")>] EsnextWeakref
-                | [<CompiledName("scripthost")>] Scripthost
-                | [<CompiledName("webworker")>] Webworker
-                | [<CompiledName("webworker.asynciterable")>] WebworkerAsynciterable
-                | [<CompiledName("webworker.importscripts")>] WebworkerImportscripts
-                | [<CompiledName("webworker.iterable")>] WebworkerIterable
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type ModuleResolution =
+            | Bundler
+            | Classic
+            | Node
+            | Node10
+            | Node16
+            | NodeNext
+            | [<CompiledName("bundler")>] Bundler2
+            | [<CompiledName("classic")>] Classic2
+            | [<CompiledName("node")>] Node2
+            | [<CompiledName("node10")>] Node102
+            | [<CompiledName("node16")>] Node162
+            | [<CompiledName("nodenext")>] Nodenext
 
-        module Plugins =
-            [<Interface>]
-            type Item =
-                /// <summary>
-                /// Plugin name.
-                /// </summary>
-                abstract name: string with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (name: string) : Item = jsNative
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type ModuleDetection =
+            | [<CompiledName("auto")>] Auto
+            | [<CompiledName("force")>] Force
+            | [<CompiledName("legacy")>] Legacy
 
-    module References =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// A normalized path on disk.
-            /// </summary>
-            abstract path: string with get, set
-            /// <summary>
-            /// The path as the user originally wrote it.
-            /// </summary>
-            abstract originalPath: string option with get, set
-            /// <summary>
-            /// True if the output of this reference should be prepended to the output of this project.
-            /// <br /><br />
-            /// Only valid for <c>--outFile</c> compilations.
-            /// </summary>
-            /// <remarks>@deprecated This option will be removed in TypeScript 5.5.</remarks>
-            abstract prepend: bool option with get, set
-            /// <summary>
-            /// True if it is intended that this reference form a circularity.
-            /// </summary>
-            abstract circular: bool option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (path: string, ?originalPath: string, ?prepend: bool, ?circular: bool) : Item = jsNative
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type IgnoreDeprecations =
+            | [<CompiledName("5.0")>] N50
+            | [<CompiledName("6.0")>] N60
 
     module WatchOptions =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -12027,6 +12110,29 @@ module TsConfigJson =
             | [<CompiledName("prioritypollinginterval")>] Prioritypollinginterval
             | [<CompiledName("usefsevents")>] Usefsevents
             | [<CompiledName("usefseventsonparentdirectory")>] Usefseventsonparentdirectory
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type WatchFileKind =
+            | DynamicPriorityPolling
+            | FixedChunkSizePolling
+            | FixedPollingInterval
+            | PriorityPollingInterval
+            | UseFsEvents
+            | UseFsEventsOnParentDirectory
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type WatchDirectoryKind =
+            | DynamicPriorityPolling
+            | FixedChunkSizePolling
+            | FixedPollingInterval
+            | UseFsEvents
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type PollingWatchKind =
+            | DynamicPriority
+            | FixedChunkSize
+            | FixedInterval
+            | PriorityInterval
 
 [<Erase>]
 type U12<'t1, 't2, 't3, 't4, 't5, 't6, 't7, 't8, 't9, 't10, 't11, 't12> =

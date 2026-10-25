@@ -91,3 +91,16 @@ export type ReadonlySecond =
     | { id: string; a: number; b?: never }
     | { readonly id: string; b: string; a?: never };
 export function readonlyPairs(first: ReadonlyFirst, second: ReadonlySecond): void;
+
+// Applied aliases can create position-specific copies while each union arm is shaped.
+export type Wrap<T> = { value: T };
+export type F1 =
+    | { w: Wrap<{ n: number }>; a: number; b?: never }
+    | { w: Wrap<{ n: number }>; b: string; a?: never };
+
+// Source-written namespace aliases remain public API even when no signature reads them.
+export type FW = { left: number; right?: never } | { right: string; left?: never };
+export namespace FW {
+    export type Box<T> = { boxed: T };
+    export type Applied = Box<string>;
+}

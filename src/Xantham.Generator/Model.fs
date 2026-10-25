@@ -1132,6 +1132,12 @@ type HarvestedExport =
         ExportName: string
         /// The origin symbol (`getAliasedSymbol` applied until stable).
         Symbol: SymbolResponse
+        /// The namespace exporting this occurrence. An alias can be exported from a different
+        /// namespace than its resolved target symbol, whose identity remains unchanged.
+        DeclaringNamespace: SymbolKey option
+        /// Public namespace path for this export occurrence, including namespace aliases.
+        /// The canonical namespace map remains keyed by the resolved source symbol.
+        NamespacePath: string option
         /// The entry exposes this symbol as a value, through no type-only import/export edge.
         /// The origin symbol's value flags alone do not establish a runtime export.
         HasValueExport: bool
@@ -1147,9 +1153,8 @@ type HarvestModel =
         Exports: HarvestedExport list
         /// Runtime class exports from ambient modules, available to reached declarations.
         AmbientClasses: HarvestedExport list
-        /// The namespaces the entry package declares, by symbol id, under names an F# module
-        /// can be spelled with. A declaration written inside one nests under it where a second
-        /// declaration claims the same name.
+        /// Namespace module paths keyed by complete symbol identity. Nested namespaces carry
+        /// dotted paths, and their exported declarations retain that source namespace.
         Namespaces: Map<SymbolKey, string<symbolName>>
         /// Count of the entry package's own declared names that a `lib.*.d.ts` declaration of
         /// the same name precedes: `harvest-globals` groups such a name as the compiler lib
@@ -1274,6 +1279,9 @@ type TypeFacts =
         /// Symbol id of the declaration the type's own symbol is written inside - a namespace,
         /// where `HarvestModel.Namespaces` has a name for it.
         SymbolParent: SymbolKey option
+        /// Source namespaces enclosing the declaration, outermost first. Module specifiers
+        /// and the global augmentation wrapper are not namespace segments.
+        NamespacePath: string list
         /// Flags of the type's own symbol: `Class`, or `Interface` merged with a variable for a
         /// constructable host interface. `None` where the type has no symbol.
         SymbolFlags: SymbolFlags
@@ -1348,6 +1356,7 @@ module TypeFacts =
             DeclarationArguments = []
             AliasDeclarations = []
             SymbolParent = None
+            NamespacePath = []
             SymbolFlags = SymbolFlags.None
             Members = []
             IndexInfos = []
@@ -1915,6 +1924,9 @@ type ShapeModel =
         DeclParams: Map<int<typeId>, int<typeId> list>
         /// Recognized generic application id -> the declaration id whose name it references.
         AliasApplications: Map<int<typeId>, int<typeId>>
+        /// Names claimed from derived member, argument or arm positions. Source export roots,
+        /// including namespace members, are excluded even when their types are anonymous.
+        MintedNames: Set<string>
         /// `Exports` members accumulated by the class/function/value passes, keyed by harvest
         /// position so `order-declarations` can assemble them in source order.
         ExportMembers: OwnedExportMember list

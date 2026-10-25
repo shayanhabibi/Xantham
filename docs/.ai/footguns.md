@@ -9,6 +9,16 @@ reproducible from this checkout and were dropped rather than carried.
 
 ## Compiler API
 
+**A global namespace can have a parent.** At TypeScript 7.1, a namespace inside `declare global`
+is parented by the augmentation's `__global` symbol. A parentless-symbol test misses it and can
+mistake module locals or an `export =` body for globals. `Ast.moduleAugmentations` identifies
+augmentation **name nodes**, not module declarations: select the identifier `global`, then read
+its parent module and body. The module's keyword is `ModuleKeyword`, not `GlobalKeyword`.
+
+**An export alias has its own namespace.** `getAliasedSymbol` returns the target's parent.
+Keep the harvested occurrence's `DeclaringNamespace` separately: `Pool.Depth = Pool.Inner.Deep`
+declares `Depth` in `Pool` without changing the `Deep` symbol's identity or defining namespace.
+
 **A symbol id alone does not identify a symbol.** At TypeScript 7.1 a symbol is a reference. A
 file-owned one, which a declaration's symbol, a module's and its exports are, carries its source
 file and an id unique within that file. A snapshot-owned one, a transient or merged symbol, carries
@@ -61,7 +71,14 @@ Following an application's members again recreates substituted method binders in
 follow its arguments instead, and keep explicit structural promotion separate. A conditional
 alias can reduce to an anonymous type literal carrying `Instantiated`; that flag alone does
 not invalidate a nested contract reached from a canonical owner. Mapped computations remain
-outside that traversal. Successful derivation removes both pending and `NotFollowed` entries.
+outside that traversal. Successful derivation removes both pending and `NotFollowed` entries. The
+contract walk must stay linear in the table: memoise per type, never per path. Path-keyed
+memoisation enumerates every path through an interface diamond, and declaration ancestry alone
+admits one instantiation per permutation of mutually wrapping generic aliases. Moving a batch of
+checker queries changes the order checker type ids are assigned in; Shape naming must not read
+that order (see "A name, owner or placement must never depend on checker type-id order" under
+Generator passes). Regenerate Core.TS after reordering session queries, and diff its symbol
+names, not only its tiers.
 
 ## Declaration catalogs
 
@@ -199,6 +216,31 @@ the corresponding lab under `tests/fixtures/` is the reducer.
 ambient modules are harvested alphabetically. "The declaring module wins" is unimplementable;
 `Shape/Classes.fs` uses the class's own binding specifier instead, falling back to the first
 harvested occurrence, and reports `SC010` per dropped member.
+
+**A name, owner or placement must never depend on checker type-id order or scope enumeration
+order.** Type ids follow the order of session queries, and `getSymbolsInScope` enumerates the
+checker's symbol tables in an order that varies between runs, so `Intl.Locale` and
+`globalThis.Intl.Locale` reach `harvest-order` in either order with an equal source position and
+export name. A first-wins choice over `Map.toList` of a type-id map, or over harvest order with
+an unbroken tie, moved sixteen `Intl.*Constructor` and `WebAssembly.*Constructor` declarations
+under `GlobalThis` between identical runs. `orderExports` therefore breaks ties by the
+declaring namespace's own path first, then ordinal path, leaving occurrences from different
+origins in harvest-pass order (an origin-string key moves solid-js's `For.Props` under `Web`); and `name-constructor-objects`
+descends its roots in source order, then by name. Order every root list that decides a claim by
+`DeclOrders` and name; prove a change deterministic by regenerating compiler-lib three times and
+comparing the `symbols.jsonl` hashes.
+
+**A frontier generation must never read what the same generation writes.** `resolve-type-table`
+derives a generation under `Async.Parallel`, and derivation both writes and reads the walk's
+registers: a union registers its operands as structural, a signature registers its type
+parameters, and an instantiation decides identity-versus-full derivation by reading both. With
+live `ConcurrentDictionary` reads, an operand derived in the same generation as its union came
+out identity or full depending on which answer arrived first, and solid-js's first
+`FrontierTooWide` count drifted between identical runs (280392, 281116, 281110, 280874). Each
+`Register` in `Resolve.fs` therefore answers from its state at the last `Commit`, and the walk
+commits only between generations (and after `boundedFrontier`, which writes but does not derive).
+A new register, or a new read of one, goes through `Register`; `XANTHAM_RESOLVE_COUNTERS=1`
+prints `staged-reads`, the reads per generation that a live read would have answered by timing.
 
 **`__@<name>@<id>` does not identify a well-known symbol.** A package's own `declare const
 iterator: unique symbol` escapes to the same `__@iterator@<id>` as `[Symbol.iterator]`. Resolve

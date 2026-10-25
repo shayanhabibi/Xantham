@@ -1,4 +1,4 @@
-﻿/// The terse model-construction vocabulary the per-pass tests are written in: wire responses
+/// The terse model-construction vocabulary the per-pass tests are written in: wire responses
 /// have many fields and the tests care about two or three, so each shape is written out once
 /// here and copy-updated at use sites.
 module Xantham.Generator.Tests.Build
@@ -112,6 +112,8 @@ let export (name: string) (sym: SymbolResponse) : HarvestedExport =
     {
         ExportName = name
         Symbol = sym
+        DeclaringNamespace = sym.ParentSymbolId |> ValueOption.toOption
+        NamespacePath = None
         HasValueExport = uint32 (sym.Flags &&& SymbolFlags.Value) <> 0u
         Docs = ""
         Tags = []
@@ -133,6 +135,7 @@ let shapeModel (table: TypeFacts list) : ShapeModel =
         DeclOrders = Map.empty
         DeclParams = Map.empty
         AliasApplications = Map.empty
+        MintedNames = Set.empty
         ExportMembers = []
         TypeVars = Map.empty
         KeyVars = Map.empty

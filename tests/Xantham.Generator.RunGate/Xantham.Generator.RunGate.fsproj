@@ -76,6 +76,7 @@
         <Compile Include="GenericCallableReferences.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\generic-callable-interface-lab\GenericCallableInterfaceLab.fs" Link="generic-callable-interface-lab\GenericCallableInterfaceLab.fs" />
         <Compile Include="GenericCallableInterfaces.fs" />
+        <Compile Include="RecursiveCallbacks.fs" />
         <Compile Include="Program.fs" />
         <None Include="register.mjs" />
     </ItemGroup>

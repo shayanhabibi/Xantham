@@ -3,10 +3,10 @@
   "package": "@types/node",
   "module": "Node",
   "counts": {
-    "exact": 817,
-    "ergonomic": 2156,
-    "widened": 595,
-    "escape": 5
+    "exact": 1023,
+    "ergonomic": 2179,
+    "widened": 598,
+    "escape": 4
   },
   "passes": [
     {
@@ -17,8 +17,8 @@
     },
     {
       "pass": "SY - synthesize-anonymous",
-      "total": 2146,
-      "exact": 2146
+      "total": 2136,
+      "exact": 2136
     },
     {
       "pass": "LU - classify-literal-unions",
@@ -32,48 +32,48 @@
     },
     {
       "pass": "shape-callbacks",
-      "total": 2365,
-      "ergonomic": 2226,
-      "widened": 139
+      "total": 2370,
+      "ergonomic": 2229,
+      "widened": 141
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 26833,
-      "exact": 377,
-      "ergonomic": 22658,
-      "widened": 3798
+      "total": 27359,
+      "exact": 384,
+      "ergonomic": 23096,
+      "widened": 3879
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 55,
-      "ergonomic": 22,
-      "widened": 33
+      "total": 60,
+      "ergonomic": 25,
+      "widened": 35
     },
     {
       "pass": "SC - shape-classes",
-      "total": 2904,
+      "total": 2899,
       "exact": 535,
-      "ergonomic": 1431,
-      "widened": 938
+      "ergonomic": 1430,
+      "widened": 934
     },
     {
       "pass": "SE - shape-exports",
-      "total": 1355,
+      "total": 1353,
       "exact": 8,
-      "ergonomic": 950,
-      "widened": 397
+      "ergonomic": 949,
+      "widened": 396
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 2135,
+      "total": 2147,
       "exact": 69,
-      "ergonomic": 2042,
+      "ergonomic": 2054,
       "widened": 24
     },
     {
       "pass": "settle-symbol-members",
-      "total": 51,
-      "ergonomic": 49,
+      "total": 48,
+      "ergonomic": 46,
       "widened": 2
     },
     {
@@ -96,13 +96,8 @@
     },
     {
       "pass": "DD - drop-orphan-delegates",
-      "total": 15,
-      "exact": 15
-    },
-    {
-      "pass": "AC - audit-coverage",
-      "total": 2,
-      "escape": 2
+      "total": 13,
+      "exact": 13
     }
   ]
 }

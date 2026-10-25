@@ -31,6 +31,12 @@ The catalogue retains qualified names and arities, including
 `Fable.Core.TS.Es.Map<'K, 'V>`. Reuse requires the exact TypeScript release/source revision
 and compatible generation settings recorded in the catalogue.
 
+Namespace members now retain their TypeScript namespace: for example,
+`Fable.Core.TS.Es.NumberFormatOptions` moves to `Fable.Core.TS.Es.Intl.NumberFormatOptions`.
+Regenerate dependent bindings and update uses of the former flat names. Catalogue API
+contract 9 rejects earlier catalogues; consumers and the producer must use regenerated
+catalogues together.
+
 ## Regenerate
 
 The source file is generated from `tools/fable-core-ts-input`; regenerate it with:

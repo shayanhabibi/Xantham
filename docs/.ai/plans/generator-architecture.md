@@ -161,6 +161,17 @@ rewrites could fuse — do not fuse them; the seam is the test point.
 
 - **Invariant (tier exit):** the shaped model contains only `FsDecl` constructs the renderer
   has cases for, and `audit-coverage` has accounted for every export.
+  A namespace is represented through its harvested descendants, including declarations under
+  `Globals` or a subpath module. If all harvested children are absent, the namespace and its
+  missing children each receive `AC001`; an empty type-only namespace remains excused.
+  `synthesize-anonymous` records position-derived names in `ShapeModel.MintedNames` at their
+  claim sites. Orphan pruning uses that provenance for unused declarations under folded-arm
+  roots; source-written namespace aliases and export roots remain outside that set. Alias
+  identity alone does not establish whether a declaration was generated from a position.
+  Reference-only type facts retain the declaration's namespace ancestry, so library and
+  dependency references use the producer's nested spelling. When an object is named through
+  its alias, the reference carries every alias application argument, including concrete types;
+  the parameter-only list used to bind declaration variables is insufficient for a reference.
 
 ### Tier 4 — Render
 
@@ -1347,8 +1358,8 @@ Under the default `widen` disposition of `typescript/lib`, a compiler-lib ECMASc
 that `Naming.LibBindings` does not bind is written as `Fable.Core.TS.Es.{name}` with all of its
 checker type arguments, as the DOM half above already is. The table still answers first
 for its three remaining rows (below). Checker placeholders (`__type`) and `globalThis` keep the
-existing widening. Namespace members take their bare name, which is the name Core.TS flattens
-them to (`Intl.NumberFormatOptions` → `Fable.Core.TS.Es.NumberFormatOptions`).
+existing widening. Namespace members retain their namespace path
+(`Intl.NumberFormatOptions` → `Fable.Core.TS.Es.Intl.NumberFormatOptions`).
 
 - **`widen` only.** A `map` disposition keeps its own table (group-map-lab maps `RegExp` to
   `System.Text.RegularExpressions.Regex`), and `reference` keeps the O7 template
@@ -3299,3 +3310,84 @@ The full public-feed .NET run passes 1,543 generator tests and 105 Wire tests, i
 Core.TS package consumers. All 143 golden regeneration tests pass. Core.TS and corpus changes
 received independent review. The corrected callable-overload, setter and type-scope assertions
 verify invocation-owned binders and first-class callable values.
+
+## Namespace member contracts (2026-10-24)
+
+Harvest includes type members exported by namespaces, including unreached declarations and
+package-owned global namespaces. Each occurrence retains its declaring namespace separately
+from the resolved target symbol. Declaration names and references use the namespace path;
+position-derived names retain separate provenance for orphan pruning. Catalogue API contract
+9 requires regenerated producers and consumers for these changed public names.
+
+Single-signature callbacks that recur through abbreviation bodies use Fickl callable
+interfaces. Their signature edges, union members and type arguments determine recursion;
+ordinary object members terminate the traversal at a nominal boundary. Each reachable type
+is visited once per classification. Source binders remain on the callable interface and its
+recursive references. The nested-name lab covers recursive and generic callbacks, ordinary
+callbacks and recursion through object members.
+
+Compiled overload identity excludes ParamArray metadata. Overloads with identical compiled
+parameter types share a .NET signature even when only one is a rest overload; deduplication
+retains the first and reports the existing DO001 finding for the dropped contract.
+
+Harvest deduplication includes the declaring namespace, preserving a same-named re-export
+beside its root export. Distinct source type-alias symbols retain their declarations across
+module owners even when the checker shares their type ID, including primitive aliases.
+
+Shape computes canonical abbreviations and phantoms before materializing their re-exports.
+The re-export parameter lookup includes declarations produced in that same pass. Re-exporting
+the same source symbol applies its canonical type and forwards its binders; only a distinct
+source alias reinterprets its own alias parameters. This keeps `GlobalThis.Array<'T>` typed
+and makes `GlobalThis.Partial<'T>` the same F# type as the canonical `Partial<'T>`, rather
+than a second erased wrapper. The compiler-library consumer gate pins both assignability
+and generic arity.
+
+Namespace traversal retains both the canonical source path and each public export path.
+`HarvestedExport.NamespacePath` records occurrence ancestry, while `Namespaces` remains the
+source-symbol map. Traversal uses ancestor symbols to stop cycles without suppressing a sibling
+alias of the same namespace. Declaration selection prefers a canonical occurrence; other paths
+emit type abbreviations forwarding generic parameters. The nested-name lab and its consumer
+compile gate cover a root namespace alias, nested members, and two sibling aliases sharing the
+same source types.
+
+Width-cutoff protection includes the contract edges of explicit export seeds, not only class
+and interface declarations. Exported functions and anonymous object aliases can otherwise lose
+their options/member types when a newly harvested namespace fills the frontier. Applications
+still contribute their arguments without recursively opening substituted members. The bounded
+frontier regression covers exported generic function options alongside the generic-expansion
+termination case. A generic alias's own declaration also carries alias arguments; Resolve
+authenticates that declaration before deciding whether those arguments mark an application.
+Substituted contracts are followed from source roots with declaration ancestry. A private
+per-generation cache reads both the type symbol's and alias symbol's declaration handles;
+catalogue identity fields are not populated until a later pass. Revisiting a declaration with
+new arguments stops expansion on that path, while siblings keep independent paths. Anonymous
+union/intersection edges preserve ancestry. Fresh generic method binders remain outside
+application expansion. Traversal memoization reuses a path only when its ancestor set is no
+more restrictive. The regression pins callback parameter identity and bounds recursive
+callable trees through both returns and parameters; real-package findings are audited after
+regeneration.
+
+The contract walk's cost is linear in the table. Contracts are computed once per generation and
+shared by the deferred-type retry and the width cutoff; declaration handles for the whole table
+are prefetched in chunks of 128, and the traversal itself is a synchronous work-stack loop. The
+canonical-seed-alias set is still computed before the first generation: deferring it to the first
+oversized frontier reorders checker queries, and with them the checker type ids, which moved 16
+Core.TS constructor objects (`WebAssembly.*Constructor`, `Intl.*Constructor`) under `GlobalThis`.
+A nominal declaration restarts the ancestry and the depth,
+so its contract is the same on every path and a diamond of interfaces is walked once per node.
+Ancestry still stops an application from re-entering one of its own declarations; in addition,
+an application whose arguments wrap (anything beyond type parameters, primitives, literals and
+unions of those) consumes one unit of `ContractDepth` (1) when its members are followed, so
+mutually wrapping generic aliases admit a bounded number of instantiations instead of one per
+permutation of their declarations. Applications with plain arguments are bounded by the per-type
+memo, which expands each type at most once per remaining depth. Computed literal arguments are
+plain and unbounded in principle (`${S}k` spells out its path); measured on six to eight mutually
+recursive aliases, each appending its own digit, the table grows polynomially (209 entries at six,
+483 at eight), and a rule spending depth on literal arguments below an application left those
+counts unchanged, so none is applied.
+A generic call signature on an application keeps its parameters, return type and type
+parameters. A failed declaration-handle or seed lookup fails the pass. The width-1 regressions
+cover a 20-deep interface diamond chain, bounded by contract-walk visits per table entry through
+`resolveTypeTableObserved`; six mutually wrapping interfaces and aliases; six aliases over
+computed literal arguments; a callback below an application shared by two roots, in both root
+orders; and `Mapper<T>`.

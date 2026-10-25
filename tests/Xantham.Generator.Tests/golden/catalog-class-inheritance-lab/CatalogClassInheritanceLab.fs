@@ -10,10 +10,6 @@ open Fable.Core.JsInterop
 open Fable.Core.JS
 open Fable.Core.TS.Dom
 
-[<Import("Actor", "class-lab:runtime"); AbstractClass>]
-type Actor<'T> (seed: 'T) =
-    member _.seed: 'T = jsNative
-
 [<Interface>]
 type Explicit<'T> =
     abstract seed: 'T
@@ -59,9 +55,14 @@ type Exports =
     [<Import("Implicit", "catalog-class-inheritance-lab"); EmitConstructor>]
     static member Implicit<'T> (seed: 'T) : Implicit<'T> = jsNative
 
-module Actor =
-    [<Interface>]
-    type IFetchHandler<'T> =
-        abstract fetch: value: 'T -> 'T
-        [<ParamObject; Emit("$0")>]
-        static member Create (fetch: ('T -> 'T)) : IFetchHandler<'T> = jsNative
+module ClassRuntime =
+    [<Import("Actor", "class-lab:runtime"); AbstractClass>]
+    type Actor<'T> (seed: 'T) =
+        member _.seed: 'T = jsNative
+
+    module Actor =
+        [<Interface>]
+        type IFetchHandler<'T> =
+            abstract fetch: value: 'T -> 'T
+            [<ParamObject; Emit("$0")>]
+            static member Create (fetch: ('T -> 'T)) : IFetchHandler<'T> = jsNative

@@ -161,16 +161,6 @@ let private armRoots (model: ShapeModel) (arms: Set<string>) : string list =
 
     unionRoots @ [ for arm in arms -> $"{arm}." ]
 
-/// The declaration names the generator minted for an inline shape.
-let private mintedNames (model: ShapeModel) : Set<string> =
-    model.DeclNames
-    |> Map.toList
-    |> List.choose (fun (typeId, name) ->
-        match Map.tryFind typeId model.Types with
-        | Some facts when isAnonymousArm facts -> Some name
-        | _ -> None)
-    |> Set.ofList
-
 /// The name a declaration is written under; `None` for the `Exports` container.
 let private declName (decl: FsDecl) =
     match decl with
@@ -186,7 +176,8 @@ let private declName (decl: FsDecl) =
     | FsExports _ -> None
 
 /// The declaration set with every unread delegate, unread tagged-union arm interface and unread
-/// generator-minted declaration under an arm root removed, and the names removed. A declaration
+/// position-derived declaration recorded in `ShapeModel.MintedNames` under an arm root removed,
+/// and the names removed. A declaration
 /// whose removal would leave a harvested export unrepresented is retained. Dropping one
 /// declaration can leave another unread, so the removal repeats until the set is stable.
 let rec private prune
@@ -268,7 +259,7 @@ let dropOrphanDelegates: Pass<ShapeModel> =
                         |> Set.ofList
 
                     let decls, dropped =
-                        prune arms (mintedNames model) (armRoots model arms) (exportNames ctx model) [] model.Decls
+                        prune arms model.MintedNames (armRoots model arms) (exportNames ctx model) [] model.Decls
 
                     // A delegate read only by declarations dropped alongside it is an arm
                     // declaration, graded as one: its readers were arm declarations.

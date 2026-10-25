@@ -11,8 +11,8 @@
   "passes": [
     {
       "pass": "SY - synthesize-anonymous",
-      "total": 9,
-      "exact": 4,
+      "total": 8,
+      "exact": 3,
       "ergonomic": 5
     },
     {

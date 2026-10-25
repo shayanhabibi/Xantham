@@ -253,142 +253,18 @@ type BufferSource = U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBuffe
 type TypedArray = U11<Fable.Core.TS.Es.BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
 
 [<Interface>]
-type CompileError =
-    abstract name: string with get, set
-    abstract message: string with get, set
-    abstract stack: string option with get, set
-    abstract cause: obj option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (name: string, message: string, ?stack: string, ?cause: obj) : CompileError = jsNative
-
-type CompileErrorConstructor =
-    /// <summary>
-    /// Indicates whether the argument provided is a built-in Error instance or not.
-    /// </summary>
-    abstract isError: error: obj -> bool
-    [<EmitConstructor>]
-    abstract Create: ?message: string -> CompileError
-
-[<Interface>]
-type Global =
-    abstract value: obj with get, set
-    abstract valueOf: unit -> obj
-    [<ParamObject; Emit("$0")>]
-    static member Create (value: obj, valueOf: (unit -> obj)) : Global = jsNative
-
-type GlobalConstructor =
-    [<EmitConstructor>]
-    abstract Create: descriptor: GlobalDescriptor * ?value: obj -> Global
-
-[<Interface>]
-type GlobalDescriptor =
-    abstract value: GlobalDescriptor.Value with get, set
-    abstract ``mutable``: bool option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (value: GlobalDescriptor.Value, ?``mutable``: bool) : GlobalDescriptor = jsNative
-
-[<Interface>]
-type Instance =
-    abstract exports: JS.Record<string, U4<Fable.Core.TS.Es.Function, Global, Memory, Table>>
-    [<ParamObject; Emit("$0")>]
-    static member Create (exports: JS.Record<string, U4<Fable.Core.TS.Es.Function, Global, Memory, Table>>) : Instance = jsNative
-
-type InstanceConstructor =
-    [<EmitConstructor>]
-    abstract Create: ``module``: obj * ?imports: JS.Record<string, JS.Record<string, U5<float, Fable.Core.TS.Es.Function, Global, Memory, Table>>> -> Instance
-
-[<Interface>]
-type Memory =
-    abstract buffer: Fable.Core.TS.Es.ArrayBuffer
-    abstract grow: delta: float -> float
-    [<ParamObject; Emit("$0")>]
-    static member Create (buffer: Fable.Core.TS.Es.ArrayBuffer, grow: (float -> float)) : Memory = jsNative
-
-type MemoryConstructor =
-    [<EmitConstructor>]
-    abstract Create: descriptor: MemoryDescriptor -> Memory
-
-[<Interface>]
-type MemoryDescriptor =
-    abstract initial: float with get, set
-    abstract maximum: float option with get, set
-    abstract shared: bool option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (initial: float, ?maximum: float, ?shared: bool) : MemoryDescriptor = jsNative
-
-type ModuleConstructor =
-    abstract customSections: ``module``: obj * sectionName: string -> Fable.Core.TS.Es.ArrayBuffer[]
-    abstract exports: ``module``: obj -> ModuleExportDescriptor[]
-    abstract imports: ``module``: obj -> ModuleImportDescriptor[]
-    [<EmitConstructor>]
-    abstract Create: unit -> obj
-
-[<Interface>]
-type ModuleExportDescriptor =
-    abstract kind: ModuleExportDescriptor.Kind with get, set
-    abstract name: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (kind: ModuleExportDescriptor.Kind, name: string) : ModuleExportDescriptor = jsNative
-
-[<Interface>]
-type ModuleImportDescriptor =
-    abstract kind: ModuleExportDescriptor.Kind with get, set
-    abstract ``module``: string with get, set
-    abstract name: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (kind: ModuleExportDescriptor.Kind, ``module``: string, name: string) : ModuleImportDescriptor = jsNative
-
-[<Interface>]
-type RuntimeError =
-    abstract name: string with get, set
-    abstract message: string with get, set
-    abstract stack: string option with get, set
-    abstract cause: obj option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (name: string, message: string, ?stack: string, ?cause: obj) : RuntimeError = jsNative
-
-type RuntimeErrorConstructor =
-    /// <summary>
-    /// Indicates whether the argument provided is a built-in Error instance or not.
-    /// </summary>
-    abstract isError: error: obj -> bool
-    [<EmitConstructor>]
-    abstract Create: ?message: string -> RuntimeError
-
-[<Interface>]
-type Table =
-    abstract length: float
-    abstract get: index: float -> obj
-    abstract grow: delta: float * ?value: obj -> float
-    abstract set: index: float * ?value: obj -> unit
-    [<ParamObject; Emit("$0")>]
-    static member Create (length: float, get: (float -> obj), grow: Func<float, obj option, float>, set: Action<float, obj option>) : Table = jsNative
-
-type TableConstructor =
-    [<EmitConstructor>]
-    abstract Create: descriptor: TableDescriptor * ?value: obj -> Table
-
-[<Interface>]
-type TableDescriptor =
-    abstract element: TableDescriptor.Element with get, set
-    abstract initial: float with get, set
-    abstract maximum: float option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (element: TableDescriptor.Element, initial: float, ?maximum: float) : TableDescriptor = jsNative
-
-[<Interface>]
 type WebAssembly =
-    abstract CompileError: CompileErrorConstructor with get, set
-    abstract RuntimeError: RuntimeErrorConstructor with get, set
-    abstract Global: GlobalConstructor with get, set
-    abstract Instance: InstanceConstructor with get, set
-    abstract Memory: MemoryConstructor with get, set
-    abstract Module: ModuleConstructor with get, set
-    abstract Table: TableConstructor with get, set
-    abstract instantiate: ``module``: obj * ?imports: JS.Record<string, JS.Record<string, U5<float, Fable.Core.TS.Es.Function, Global, Memory, Table>>> -> JS.Promise<Instance>
+    abstract CompileError: WebAssembly.CompileErrorConstructor with get, set
+    abstract RuntimeError: WebAssembly.RuntimeErrorConstructor with get, set
+    abstract Global: WebAssembly.GlobalConstructor with get, set
+    abstract Instance: WebAssembly.InstanceConstructor with get, set
+    abstract Memory: WebAssembly.MemoryConstructor with get, set
+    abstract Module: WebAssembly.ModuleConstructor with get, set
+    abstract Table: WebAssembly.TableConstructor with get, set
+    abstract instantiate: ``module``: WebAssembly.Module * ?imports: WebAssembly.Imports -> JS.Promise<WebAssembly.Instance>
     abstract validate: bytes: BufferSource -> bool
     [<ParamObject; Emit("$0")>]
-    static member Create (CompileError: CompileErrorConstructor, RuntimeError: RuntimeErrorConstructor, Global: GlobalConstructor, Instance: InstanceConstructor, Memory: MemoryConstructor, Module: ModuleConstructor, Table: TableConstructor, instantiate: Func<obj, JS.Record<string, JS.Record<string, U5<float, Fable.Core.TS.Es.Function, Global, Memory, Table>>> option, JS.Promise<Instance>>, validate: (BufferSource -> bool)) : WebAssembly = jsNative
+    static member Create (CompileError: WebAssembly.CompileErrorConstructor, RuntimeError: WebAssembly.RuntimeErrorConstructor, Global: WebAssembly.GlobalConstructor, Instance: WebAssembly.InstanceConstructor, Memory: WebAssembly.MemoryConstructor, Module: WebAssembly.ModuleConstructor, Table: WebAssembly.TableConstructor, instantiate: Func<WebAssembly.Module, WebAssembly.Imports option, JS.Promise<WebAssembly.Instance>>, validate: (BufferSource -> bool)) : WebAssembly = jsNative
 
 type AbortControllerConstructor =
     [<EmitConstructor>]
@@ -857,14 +733,14 @@ type TestController = obj
 type ExecutionContext<'Props> =
     abstract waitUntil: promise: JS.Promise<obj> -> unit
     abstract passThroughOnException: unit -> unit
-    abstract exports: obj
+    abstract exports: Cloudflare.Exports
     abstract props: 'Props
     abstract cache: CacheContext option with get, set
     abstract access: CloudflareAccessContext option
     abstract tracing: Tracing with get, set
     abstract abort: ?reason: obj -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), exports: obj, props: 'Props, tracing: Tracing, abort: (obj option -> unit), ?cache: CacheContext, ?access: CloudflareAccessContext) : ExecutionContext<'Props> = jsNative
+    static member Create (waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), exports: Cloudflare.Exports, props: 'Props, tracing: Tracing, abort: (obj option -> unit), ?cache: CacheContext, ?access: CloudflareAccessContext) : ExecutionContext<'Props> = jsNative
 
 type ExportedHandlerFetchHandler<'Env, 'CfHostMetadata, 'Props> = delegate of request: Request<'CfHostMetadata, IncomingRequestCfProperties<'CfHostMetadata>> * env: 'Env * ctx: ExecutionContext<'Props> -> U2<JS.Promise<Response>, Response>
 
@@ -874,403 +750,7 @@ type ExportedHandlerTailHandler<'Env, 'Props> = delegate of events: TraceItem[] 
 
 type ExportedHandlerTraceHandler<'Env, 'Props> = delegate of traces: TraceItem[] * env: 'Env * ctx: ExecutionContext<'Props> -> JS.Promise<unit> option
 
-[<Interface>]
-type AlarmEventInfo =
-    /// <remarks>TypeScript type: <c>"alarm"</c></remarks>
-    abstract ``type``: string
-    abstract scheduledTime: Fable.Core.TS.Es.Date
-    [<ParamObject; Emit("({ type: 'alarm', ...$0 })")>]
-    static member Create (scheduledTime: Fable.Core.TS.Es.Date) : AlarmEventInfo = jsNative
-
-module AlarmEventInfo =
-    /// <remarks>TypeScript type: <c>"alarm"</c></remarks>
-    [<Literal>]
-    let ``type`` = "alarm"
-
-[<Interface>]
-type Attribute =
-    abstract name: string
-    abstract value: U8<string, float, bigint, bool, string[], float[], bigint[], bool[]>
-    [<ParamObject; Emit("$0")>]
-    static member Create (name: string, value: U8<string, float, bigint, bool, string[], float[], bigint[], bool[]>) : Attribute = jsNative
-
-[<Interface>]
-type Attributes =
-    /// <remarks>TypeScript type: <c>"attributes"</c></remarks>
-    abstract ``type``: string
-    abstract info: Attribute[]
-    [<ParamObject; Emit("({ type: 'attributes', ...$0 })")>]
-    static member Create (info: Attribute[]) : Attributes = jsNative
-
-module Attributes =
-    /// <remarks>TypeScript type: <c>"attributes"</c></remarks>
-    [<Literal>]
-    let ``type`` = "attributes"
-
-[<Interface>]
-type ConnectEventInfo =
-    /// <remarks>TypeScript type: <c>"connect"</c></remarks>
-    abstract ``type``: string
-    [<Emit("({ type: 'connect' })")>]
-    static member Create () : ConnectEventInfo = jsNative
-
-module ConnectEventInfo =
-    /// <remarks>TypeScript type: <c>"connect"</c></remarks>
-    [<Literal>]
-    let ``type`` = "connect"
-
-[<Interface>]
-type CustomEventInfo =
-    /// <remarks>TypeScript type: <c>"custom"</c></remarks>
-    abstract ``type``: string
-    [<Emit("({ type: 'custom' })")>]
-    static member Create () : CustomEventInfo = jsNative
-
-module CustomEventInfo =
-    /// <remarks>TypeScript type: <c>"custom"</c></remarks>
-    [<Literal>]
-    let ``type`` = "custom"
-
-[<Interface>]
-type DiagnosticChannelEvent =
-    /// <remarks>TypeScript type: <c>"diagnosticChannel"</c></remarks>
-    abstract ``type``: string
-    abstract channel: string
-    abstract message: obj
-    [<ParamObject; Emit("({ type: 'diagnosticChannel', ...$0 })")>]
-    static member Create (channel: string, message: obj) : DiagnosticChannelEvent = jsNative
-
-module DiagnosticChannelEvent =
-    /// <remarks>TypeScript type: <c>"diagnosticChannel"</c></remarks>
-    [<Literal>]
-    let ``type`` = "diagnosticChannel"
-
-[<Interface>]
-type DroppedEventsDiagnostic =
-    /// <remarks>TypeScript type: <c>"droppedEvents"</c></remarks>
-    abstract diagnosticsType: string
-    abstract count: float
-    [<ParamObject; Emit("({ diagnosticsType: 'droppedEvents', ...$0 })")>]
-    static member Create (count: float) : DroppedEventsDiagnostic = jsNative
-
-module DroppedEventsDiagnostic =
-    /// <remarks>TypeScript type: <c>"droppedEvents"</c></remarks>
-    [<Literal>]
-    let diagnosticsType = "droppedEvents"
-
-[<Interface>]
-type EmailEventInfo =
-    /// <remarks>TypeScript type: <c>"email"</c></remarks>
-    abstract ``type``: string
-    abstract mailFrom: string
-    abstract rcptTo: string
-    abstract rawSize: float
-    [<ParamObject; Emit("({ type: 'email', ...$0 })")>]
-    static member Create (mailFrom: string, rcptTo: string, rawSize: float) : EmailEventInfo = jsNative
-
-module EmailEventInfo =
-    /// <remarks>TypeScript type: <c>"email"</c></remarks>
-    [<Literal>]
-    let ``type`` = "email"
-
-[<Interface>]
-type Exception =
-    /// <remarks>TypeScript type: <c>"exception"</c></remarks>
-    abstract ``type``: string
-    abstract name: string
-    abstract message: string
-    abstract stack: string option
-    [<ParamObject; Emit("({ type: 'exception', ...$0 })")>]
-    static member Create (name: string, message: string, ?stack: string) : Exception = jsNative
-
-module Exception =
-    /// <remarks>TypeScript type: <c>"exception"</c></remarks>
-    [<Literal>]
-    let ``type`` = "exception"
-
-[<Interface>]
-type FetchEventInfo =
-    /// <remarks>TypeScript type: <c>"fetch"</c></remarks>
-    abstract ``type``: string
-    abstract ``method``: string
-    abstract url: string
-    abstract cfJson: obj option
-    abstract headers: Header[]
-    [<ParamObject; Emit("({ type: 'fetch', ...$0 })")>]
-    static member Create (``method``: string, url: string, headers: Header[], ?cfJson: obj) : FetchEventInfo = jsNative
-
-module FetchEventInfo =
-    /// <remarks>TypeScript type: <c>"fetch"</c></remarks>
-    [<Literal>]
-    let ``type`` = "fetch"
-
-[<Interface>]
-type FetchResponseInfo =
-    /// <remarks>TypeScript type: <c>"fetch"</c></remarks>
-    abstract ``type``: string
-    abstract statusCode: float
-    [<ParamObject; Emit("({ type: 'fetch', ...$0 })")>]
-    static member Create (statusCode: float) : FetchResponseInfo = jsNative
-
-module FetchResponseInfo =
-    /// <remarks>TypeScript type: <c>"fetch"</c></remarks>
-    [<Literal>]
-    let ``type`` = "fetch"
-
-[<Interface>]
-type Header =
-    abstract name: string
-    abstract value: string
-    [<ParamObject; Emit("$0")>]
-    static member Create (name: string, value: string) : Header = jsNative
-
-[<Interface>]
-type HibernatableWebSocketEventInfo =
-    /// <remarks>TypeScript type: <c>"hibernatableWebSocket"</c></remarks>
-    abstract ``type``: string
-    abstract info: HibernatableWebSocketEventInfo.Info
-    [<ParamObject; Emit("({ type: 'hibernatableWebSocket', ...$0 })")>]
-    static member Create (info: HibernatableWebSocketEventInfo.Info) : HibernatableWebSocketEventInfo = jsNative
-
-module HibernatableWebSocketEventInfo =
-    /// <remarks>TypeScript type: <c>"hibernatableWebSocket"</c></remarks>
-    [<Literal>]
-    let ``type`` = "hibernatableWebSocket"
-
-    [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-    type Info =
-        | [<CompiledName("close"); Fickl.Core.InlineInterface>] Close of HibernatableWebSocketEventInfoClose
-        | [<CompiledName("error"); Fickl.Core.InlineInterface>] Error of HibernatableWebSocketEventInfoError
-        | [<CompiledName("message"); Fickl.Core.InlineInterface>] Message of HibernatableWebSocketEventInfoMessage
-
-[<Interface>]
-type HibernatableWebSocketEventInfoClose =
-    /// <remarks>TypeScript type: <c>"close"</c></remarks>
-    abstract ``type``: string
-    abstract code: float
-    abstract wasClean: bool
-    [<ParamObject; Emit("({ type: 'close', ...$0 })")>]
-    static member Create (code: float, wasClean: bool) : HibernatableWebSocketEventInfoClose = jsNative
-
-module HibernatableWebSocketEventInfoClose =
-    /// <remarks>TypeScript type: <c>"close"</c></remarks>
-    [<Literal>]
-    let ``type`` = "close"
-
-[<Interface>]
-type HibernatableWebSocketEventInfoError =
-    /// <remarks>TypeScript type: <c>"error"</c></remarks>
-    abstract ``type``: string
-    [<Emit("({ type: 'error' })")>]
-    static member Create () : HibernatableWebSocketEventInfoError = jsNative
-
-module HibernatableWebSocketEventInfoError =
-    /// <remarks>TypeScript type: <c>"error"</c></remarks>
-    [<Literal>]
-    let ``type`` = "error"
-
-[<Interface>]
-type HibernatableWebSocketEventInfoMessage =
-    /// <remarks>TypeScript type: <c>"message"</c></remarks>
-    abstract ``type``: string
-    [<Emit("({ type: 'message' })")>]
-    static member Create () : HibernatableWebSocketEventInfoMessage = jsNative
-
-module HibernatableWebSocketEventInfoMessage =
-    /// <remarks>TypeScript type: <c>"message"</c></remarks>
-    [<Literal>]
-    let ``type`` = "message"
-
-[<Interface>]
-type JsRpcEventInfo =
-    /// <remarks>TypeScript type: <c>"jsrpc"</c></remarks>
-    abstract ``type``: string
-    [<Emit("({ type: 'jsrpc' })")>]
-    static member Create () : JsRpcEventInfo = jsNative
-
-module JsRpcEventInfo =
-    /// <remarks>TypeScript type: <c>"jsrpc"</c></remarks>
-    [<Literal>]
-    let ``type`` = "jsrpc"
-
-[<Interface>]
-type Onset =
-    /// <remarks>TypeScript type: <c>"onset"</c></remarks>
-    abstract ``type``: string
-    abstract attributes: Attribute[]
-    abstract spanId: string
-    abstract dispatchNamespace: string option
-    abstract entrypoint: string option
-    abstract executionModel: string
-    abstract durableObjectId: string option
-    abstract scriptName: string option
-    abstract scriptTags: string[] option
-    abstract scriptVersion: TailStream.ScriptVersion option
-    abstract preview: TailStream.TracePreviewInfo option
-    abstract info: Onset.Info
-    [<ParamObject; Emit("({ type: 'onset', ...$0 })")>]
-    static member Create (attributes: Attribute[], spanId: string, executionModel: string, info: Onset.Info, ?dispatchNamespace: string, ?entrypoint: string, ?durableObjectId: string, ?scriptName: string, ?scriptTags: string[], ?scriptVersion: TailStream.ScriptVersion, ?preview: TailStream.TracePreviewInfo) : Onset = jsNative
-
-module Onset =
-    /// <remarks>TypeScript type: <c>"onset"</c></remarks>
-    [<Literal>]
-    let ``type`` = "onset"
-
-    [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-    type Info =
-        | [<CompiledName("alarm"); Fickl.Core.InlineInterface>] Alarm of AlarmEventInfo
-        | [<CompiledName("connect"); Fickl.Core.InlineInterface>] Connect of ConnectEventInfo
-        | [<CompiledName("custom"); Fickl.Core.InlineInterface>] Custom of CustomEventInfo
-        | [<CompiledName("email"); Fickl.Core.InlineInterface>] Email of EmailEventInfo
-        | [<CompiledName("fetch"); Fickl.Core.InlineInterface>] Fetch of FetchEventInfo
-        | [<CompiledName("hibernatableWebSocket"); Fickl.Core.InlineInterface>] HibernatableWebSocket of HibernatableWebSocketEventInfo
-        | [<CompiledName("jsrpc"); Fickl.Core.InlineInterface>] Jsrpc of JsRpcEventInfo
-        | [<CompiledName("queue"); Fickl.Core.InlineInterface>] Queue of QueueEventInfo
-        | [<CompiledName("scheduled"); Fickl.Core.InlineInterface>] Scheduled of ScheduledEventInfo
-        | [<CompiledName("trace"); Fickl.Core.InlineInterface>] Trace of TraceEventInfo
-
-[<Interface>]
-type Outcome =
-    /// <remarks>TypeScript type: <c>"outcome"</c></remarks>
-    abstract ``type``: string
-    abstract outcome: Outcome.Outcome
-    abstract cpuTime: float
-    abstract wallTime: float
-    [<ParamObject; Emit("({ type: 'outcome', ...$0 })")>]
-    static member Create (outcome: Outcome.Outcome, cpuTime: float, wallTime: float) : Outcome = jsNative
-
-module Outcome =
-    /// <remarks>TypeScript type: <c>"outcome"</c></remarks>
-    [<Literal>]
-    let ``type`` = "outcome"
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Outcome =
-        | [<CompiledName("aborted")>] Aborted
-        | [<CompiledName("canceled")>] Canceled
-        | [<CompiledName("daemonDown")>] DaemonDown
-        | [<CompiledName("exceededCpu")>] ExceededCpu
-        | [<CompiledName("exceededMemory")>] ExceededMemory
-        | [<CompiledName("exceededWallTime")>] ExceededWallTime
-        | [<CompiledName("exception")>] Exception
-        | [<CompiledName("internalError")>] InternalError
-        | [<CompiledName("killSwitch")>] KillSwitch
-        | [<CompiledName("loadShed")>] LoadShed
-        | [<CompiledName("ok")>] Ok
-        | [<CompiledName("responseStreamDisconnected")>] ResponseStreamDisconnected
-        | [<CompiledName("scriptNotFound")>] ScriptNotFound
-        | [<CompiledName("unknown")>] Unknown
-
-[<Interface>]
-type QueueEventInfo =
-    /// <remarks>TypeScript type: <c>"queue"</c></remarks>
-    abstract ``type``: string
-    abstract queueName: string
-    abstract batchSize: float
-    [<ParamObject; Emit("({ type: 'queue', ...$0 })")>]
-    static member Create (queueName: string, batchSize: float) : QueueEventInfo = jsNative
-
-module QueueEventInfo =
-    /// <remarks>TypeScript type: <c>"queue"</c></remarks>
-    [<Literal>]
-    let ``type`` = "queue"
-
-[<Interface>]
-type Return =
-    /// <remarks>TypeScript type: <c>"return"</c></remarks>
-    abstract ``type``: string
-    abstract info: FetchResponseInfo option
-    [<ParamObject; Emit("({ type: 'return', ...$0 })")>]
-    static member Create (?info: FetchResponseInfo) : Return = jsNative
-
-module Return =
-    /// <remarks>TypeScript type: <c>"return"</c></remarks>
-    [<Literal>]
-    let ``type`` = "return"
-
-[<Interface>]
-type ScheduledEventInfo =
-    /// <remarks>TypeScript type: <c>"scheduled"</c></remarks>
-    abstract ``type``: string
-    abstract scheduledTime: Fable.Core.TS.Es.Date
-    abstract cron: string
-    [<ParamObject; Emit("({ type: 'scheduled', ...$0 })")>]
-    static member Create (scheduledTime: Fable.Core.TS.Es.Date, cron: string) : ScheduledEventInfo = jsNative
-
-module ScheduledEventInfo =
-    /// <remarks>TypeScript type: <c>"scheduled"</c></remarks>
-    [<Literal>]
-    let ``type`` = "scheduled"
-
-[<Interface>]
-type SpanClose =
-    /// <remarks>TypeScript type: <c>"spanClose"</c></remarks>
-    abstract ``type``: string
-    abstract outcome: Outcome.Outcome
-    [<ParamObject; Emit("({ type: 'spanClose', ...$0 })")>]
-    static member Create (outcome: Outcome.Outcome) : SpanClose = jsNative
-
-module SpanClose =
-    /// <remarks>TypeScript type: <c>"spanClose"</c></remarks>
-    [<Literal>]
-    let ``type`` = "spanClose"
-
-[<Interface>]
-type SpanContext =
-    abstract traceId: string
-    abstract spanId: string option
-    abstract traceFlags: float option
-    [<ParamObject; Emit("$0")>]
-    static member Create (traceId: string, ?spanId: string, ?traceFlags: float) : SpanContext = jsNative
-
-[<Interface>]
-type SpanOpen =
-    /// <remarks>TypeScript type: <c>"spanOpen"</c></remarks>
-    abstract ``type``: string
-    abstract name: string
-    abstract spanId: string
-    abstract info: U3<Attributes, FetchEventInfo, JsRpcEventInfo> option
-    [<ParamObject; Emit("({ type: 'spanOpen', ...$0 })")>]
-    static member Create (name: string, spanId: string, ?info: U3<Attributes, FetchEventInfo, JsRpcEventInfo>) : SpanOpen = jsNative
-
-module SpanOpen =
-    /// <remarks>TypeScript type: <c>"spanOpen"</c></remarks>
-    [<Literal>]
-    let ``type`` = "spanOpen"
-
-[<Interface>]
-type StreamDiagnostic =
-    /// <remarks>TypeScript type: <c>"streamDiagnostic"</c></remarks>
-    abstract ``type``: string
-    abstract diagnostic: DroppedEventsDiagnostic
-    [<ParamObject; Emit("({ type: 'streamDiagnostic', ...$0 })")>]
-    static member Create (diagnostic: DroppedEventsDiagnostic) : StreamDiagnostic = jsNative
-
-module StreamDiagnostic =
-    /// <remarks>TypeScript type: <c>"streamDiagnostic"</c></remarks>
-    [<Literal>]
-    let ``type`` = "streamDiagnostic"
-
-[<Interface>]
-type TailStreamErrorInfo =
-    abstract name: string
-    abstract message: string
-    abstract stack: string option
-    [<ParamObject; Emit("$0")>]
-    static member Create (name: string, message: string, ?stack: string) : TailStreamErrorInfo = jsNative
-
-[<Interface>]
-type TraceEventInfo =
-    /// <remarks>TypeScript type: <c>"trace"</c></remarks>
-    abstract ``type``: string
-    abstract traces: string option[]
-    [<ParamObject; Emit("({ type: 'trace', ...$0 })")>]
-    static member Create (traces: string option[]) : TraceEventInfo = jsNative
-
-module TraceEventInfo =
-    /// <remarks>TypeScript type: <c>"trace"</c></remarks>
-    [<Literal>]
-    let ``type`` = "trace"
+type ExportedHandlerTailStreamHandler<'Env, 'Props> = delegate of ``event``: TailStream.TailEvent<TailStream.Onset> * env: 'Env * ctx: ExecutionContext<'Props> -> U3<JS.Promise<TailStream.TailEventHandlerType>, (TailStream.TailEvent<TailStream.EventType> -> JS.Promise<unit> option), TailStream.TailEventHandlerObject>
 
 type ExportedHandlerScheduledHandler<'Env, 'Props> = delegate of controller: ScheduledController * env: 'Env * ctx: ExecutionContext<'Props> -> JS.Promise<unit> option
 
@@ -1284,13 +764,13 @@ type ExportedHandler<'Env, 'QueueHandlerMessage, 'CfHostMetadata, 'Props> =
     abstract connect: Func<Socket, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
     abstract tail: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
     abstract trace: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
-    abstract tailStream: Func<TailStream.TailEvent<Onset>, 'Env, ExecutionContext<'Props>, U3<JS.Promise<U2<(TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>>, (TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>> option with get, set
+    abstract tailStream: Func<TailStream.TailEvent<TailStream.Onset>, 'Env, ExecutionContext<'Props>, U3<JS.Promise<TailStream.TailEventHandlerType>, (TailStream.TailEvent<TailStream.EventType> -> JS.Promise<unit> option), TailStream.TailEventHandlerObject>> option with get, set
     abstract scheduled: Func<ScheduledController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
     abstract test: Func<TestController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
     abstract email: Func<ForwardableEmailMessage, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
     abstract queue: Func<MessageBatch<'QueueHandlerMessage>, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?fetch: Func<Request<'CfHostMetadata, IncomingRequestCfProperties<'CfHostMetadata>>, 'Env, ExecutionContext<'Props>, U2<JS.Promise<Response>, Response>>, ?connect: Func<Socket, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?tail: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?trace: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?tailStream: Func<TailStream.TailEvent<Onset>, 'Env, ExecutionContext<'Props>, U3<JS.Promise<U2<(TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>>, (TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>>, ?scheduled: Func<ScheduledController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?test: Func<TestController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?email: Func<ForwardableEmailMessage, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?queue: Func<MessageBatch<'QueueHandlerMessage>, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>) : ExportedHandler<'Env, 'QueueHandlerMessage, 'CfHostMetadata, 'Props> = jsNative
+    static member Create (?fetch: Func<Request<'CfHostMetadata, IncomingRequestCfProperties<'CfHostMetadata>>, 'Env, ExecutionContext<'Props>, U2<JS.Promise<Response>, Response>>, ?connect: Func<Socket, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?tail: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?trace: Func<TraceItem[], 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?tailStream: Func<TailStream.TailEvent<TailStream.Onset>, 'Env, ExecutionContext<'Props>, U3<JS.Promise<TailStream.TailEventHandlerType>, (TailStream.TailEvent<TailStream.EventType> -> JS.Promise<unit> option), TailStream.TailEventHandlerObject>>, ?scheduled: Func<ScheduledController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?test: Func<TestController, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?email: Func<ForwardableEmailMessage, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>, ?queue: Func<MessageBatch<'QueueHandlerMessage>, 'Env, ExecutionContext<'Props>, JS.Promise<unit> option>) : ExportedHandler<'Env, 'QueueHandlerMessage, 'CfHostMetadata, 'Props> = jsNative
 
 [<Interface>]
 type StructuredSerializeOptions =
@@ -1462,7 +942,7 @@ type ContainerDirectorySnapshotRestoreParams3 =
 [<Interface>]
 type DurableObjectState<'Props> =
     abstract waitUntil: promise: JS.Promise<obj> -> unit
-    abstract exports: obj
+    abstract exports: Cloudflare.Exports
     abstract props: 'Props
     abstract id: DurableObjectId
     abstract storage: DurableObjectStorage
@@ -1479,7 +959,7 @@ type DurableObjectState<'Props> =
     abstract getTags: ws: WebSocket -> string[]
     abstract abort: ?reason: string * ?options: DurableObjectAbortOptions -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (waitUntil: (JS.Promise<obj> -> unit), exports: obj, props: 'Props, id: DurableObjectId, storage: DurableObjectStorage, facets: DurableObjectFacets, blockConcurrencyWhile: ((unit -> JS.Promise<'T>) -> JS.Promise<'T>), acceptWebSocket: Action<WebSocket, string[] option>, getWebSockets: (string option -> WebSocket[]), setWebSocketAutoResponse: (WebSocketRequestResponsePair option -> unit), getWebSocketAutoResponse: (unit -> WebSocketRequestResponsePair option), getWebSocketAutoResponseTimestamp: (WebSocket -> Fable.Core.TS.Es.Date option), setHibernatableWebSocketEventTimeout: (float option -> unit), getHibernatableWebSocketEventTimeout: (unit -> float option), getTags: (WebSocket -> string[]), abort: Action<string option, DurableObjectAbortOptions option>, ?container: Container) : DurableObjectState<'Props> = jsNative
+    static member Create (waitUntil: (JS.Promise<obj> -> unit), exports: Cloudflare.Exports, props: 'Props, id: DurableObjectId, storage: DurableObjectStorage, facets: DurableObjectFacets, blockConcurrencyWhile: ((unit -> JS.Promise<'T>) -> JS.Promise<'T>), acceptWebSocket: Action<WebSocket, string[] option>, getWebSockets: (string option -> WebSocket[]), setWebSocketAutoResponse: (WebSocketRequestResponsePair option -> unit), getWebSocketAutoResponse: (unit -> WebSocketRequestResponsePair option), getWebSocketAutoResponseTimestamp: (WebSocket -> Fable.Core.TS.Es.Date option), setHibernatableWebSocketEventTimeout: (float option -> unit), getHibernatableWebSocketEventTimeout: (unit -> float option), getTags: (WebSocket -> string[]), abort: Action<string option, DurableObjectAbortOptions option>, ?container: Container) : DurableObjectState<'Props> = jsNative
 
 type DurableObjectTransaction =
     abstract get<'T>: key: string * ?options: DurableObjectGetOptions -> JS.Promise<'T option>
@@ -10973,9 +10453,9 @@ type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response =
     /// <summary>
     /// Log probabilities for the prompt (if requested)
     /// </summary>
-    abstract prompt_logprobs: obj option with get, set
+    abstract prompt_logprobs: Cloudflare.MainModule option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?id: string, ?``object``: string, ?created: float, ?model: string, ?choices: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Choices.Item[], ?usage: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Usage, ?prompt_logprobs: obj) : Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response = jsNative
+    static member Create (?id: string, ?``object``: string, ?created: float, ?model: string, ?choices: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Choices.Item[], ?usage: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Usage, ?prompt_logprobs: Cloudflare.MainModule) : Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response = jsNative
 
 [<Interface>]
 type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Text_Completion_Response =
@@ -11712,9 +11192,9 @@ type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response =
     /// <summary>
     /// Log probabilities for the prompt (if requested)
     /// </summary>
-    abstract prompt_logprobs: obj option with get, set
+    abstract prompt_logprobs: Cloudflare.MainModule option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?id: string, ?``object``: string, ?created: float, ?model: string, ?choices: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Choices.Item[], ?usage: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Usage, ?prompt_logprobs: obj) : Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response = jsNative
+    static member Create (?id: string, ?``object``: string, ?created: float, ?model: string, ?choices: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Choices.Item[], ?usage: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Usage, ?prompt_logprobs: Cloudflare.MainModule) : Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response = jsNative
 
 [<Interface>]
 type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Text_Completion_Response =
@@ -17604,33 +17084,77 @@ module Rpc =
     [<Literal>]
     let __WORKFLOW_ENTRYPOINT_BRAND = "__WORKFLOW_ENTRYPOINT_BRAND"
 
+    [<Interface>]
+    type RpcTargetBranded =
+        abstract __RPC_TARGET_BRAND: unit
+        [<ParamObject; Emit("$0")>]
+        static member Create () : RpcTargetBranded = jsNative
+
+    [<Interface>]
+    type WorkerEntrypointBranded =
+        abstract __WORKER_ENTRYPOINT_BRAND: unit
+        [<ParamObject; Emit("$0")>]
+        static member Create () : WorkerEntrypointBranded = jsNative
+
+    [<Interface>]
+    type DurableObjectBranded =
+        abstract __DURABLE_OBJECT_BRAND: unit
+        [<ParamObject; Emit("$0")>]
+        static member Create () : DurableObjectBranded = jsNative
+
+    [<Interface>]
+    type WorkflowEntrypointBranded =
+        abstract __WORKFLOW_ENTRYPOINT_BRAND: unit
+        [<ParamObject; Emit("$0")>]
+        static member Create () : WorkflowEntrypointBranded = jsNative
+
+    type EntrypointBranded = U3<Cloudflare.WorkersTypes.Rpc.DurableObjectBranded, Cloudflare.WorkersTypes.Rpc.WorkerEntrypointBranded, Cloudflare.WorkersTypes.Rpc.WorkflowEntrypointBranded>
+
+    type Stubable = U2<Cloudflare.WorkersTypes.Rpc.RpcTargetBranded, (obj[] -> obj)>
+
+    [<Erase>]
+    type Serializable<'T> = private Serializable__ of obj option
+
+    type StubBase<'T> =
+        inherit Disposable
+        abstract __RPC_STUB_BRAND: 'T with get, set
+        abstract dup: unit -> Cloudflare.WorkersTypes.Rpc.StubBase<'T>
+
+    [<Erase>]
+    type Stub<'T> = private Stub__ of obj
+
+    type BaseType = U25<string, float, bigint, bool, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Date, exn, Fable.Core.TS.Es.Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Headers, Fable.Core.TS.Es.Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, ReadableStream<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, Fable.Core.TS.Es.RegExp, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, Response, Fable.Core.TS.Es.Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, WritableStream<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>> option
+
+    [<Erase>]
+    type Stubify<'T> = private Stubify__ of obj
+
+    [<Erase>]
+    type Unstubify<'T> = private Unstubify__ of obj
+
+    [<Erase>]
+    type UnstubifyAll<'A> = private UnstubifyAll__ of obj[]
+
+    [<Erase>]
+    type MaybeProvider<'T> = private MaybeProvider__ of obj
+
+    [<Erase>]
+    type MaybeDisposable<'T> = private MaybeDisposable__ of obj
+
+    [<Erase>]
+    type Result<'R> = private Result__ of obj
+
+    [<Erase>]
+    type MethodOrProperty<'V> = private MethodOrProperty__ of obj
+
+    [<Erase>]
+    type MaybeCallableProvider<'T> = private MaybeCallableProvider__ of obj
+
+    [<Erase>]
+    type Provider<'T, 'Reserved> = private Provider__ of obj
+
 type RpcStubConstructor =
     [<EmitConstructor>]
     abstract Create<'T>: value: 'T -> obj
-
-[<Interface>]
-type RpcTargetBranded =
-    abstract __RPC_TARGET_BRAND: unit
-    [<ParamObject; Emit("$0")>]
-    static member Create () : RpcTargetBranded = jsNative
-
-[<Interface>]
-type WorkerEntrypointBranded =
-    abstract __WORKER_ENTRYPOINT_BRAND: unit
-    [<ParamObject; Emit("$0")>]
-    static member Create () : WorkerEntrypointBranded = jsNative
-
-[<Interface>]
-type DurableObjectBranded =
-    abstract __DURABLE_OBJECT_BRAND: unit
-    [<ParamObject; Emit("$0")>]
-    static member Create () : DurableObjectBranded = jsNative
-
-[<Interface>]
-type WorkflowEntrypointBranded =
-    abstract __WORKFLOW_ENTRYPOINT_BRAND: unit
-    [<ParamObject; Emit("$0")>]
-    static member Create () : WorkflowEntrypointBranded = jsNative
 
 [<Interface>]
 type SecretsStoreSecret =
@@ -20964,9 +20488,9 @@ module Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response =
             /// <summary>
             /// Log probabilities (if requested)
             /// </summary>
-            abstract logprobs: obj option with get, set
+            abstract logprobs: Cloudflare.MainModule option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?index: float, ?message: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Choices.Item.Message, ?finish_reason: string, ?stop_reason: string, ?logprobs: obj) : Item = jsNative
+            static member Create (?index: float, ?message: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Choices.Item.Message, ?finish_reason: string, ?stop_reason: string, ?logprobs: Cloudflare.MainModule) : Item = jsNative
 
         module Item =
             [<Interface>]
@@ -21368,13 +20892,13 @@ module Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Text_Completion_Response =
             /// <summary>
             /// Log probabilities (if requested)
             /// </summary>
-            abstract logprobs: obj option with get, set
+            abstract logprobs: Cloudflare.MainModule option with get, set
             /// <summary>
             /// Log probabilities for the prompt (if requested)
             /// </summary>
-            abstract prompt_logprobs: obj option with get, set
+            abstract prompt_logprobs: Cloudflare.MainModule option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (index: float, text: string, finish_reason: string, ?stop_reason: string, ?logprobs: obj, ?prompt_logprobs: obj) : Item = jsNative
+            static member Create (index: float, text: string, finish_reason: string, ?stop_reason: string, ?logprobs: Cloudflare.MainModule, ?prompt_logprobs: Cloudflare.MainModule) : Item = jsNative
 
 module Ai_Cf_Baai_Bge_Base_En_V1_5_Input2 =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -23099,9 +22623,9 @@ module Ai_Cf_Moondream_Moondream3_1_9B_A2B_Output =
         /// <summary>
         /// Grounding information.
         /// </summary>
-        abstract grounding: obj[] option with get, set
+        abstract grounding: Cloudflare.MainModule[] option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (text: string, ?grounding: obj[]) : Reasoning = jsNative
+        static member Create (text: string, ?grounding: Cloudflare.MainModule[]) : Reasoning = jsNative
 
     module Objects =
         [<Interface>]
@@ -23479,9 +23003,9 @@ module Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response =
             /// <summary>
             /// Log probabilities (if requested)
             /// </summary>
-            abstract logprobs: obj option with get, set
+            abstract logprobs: Cloudflare.MainModule option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?index: float, ?message: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Choices.Item.Message, ?finish_reason: string, ?stop_reason: string, ?logprobs: obj) : Item = jsNative
+            static member Create (?index: float, ?message: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Choices.Item.Message, ?finish_reason: string, ?stop_reason: string, ?logprobs: Cloudflare.MainModule) : Item = jsNative
 
         module Item =
             [<Interface>]
@@ -23883,13 +23407,13 @@ module Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Text_Completion_Response =
             /// <summary>
             /// Log probabilities (if requested)
             /// </summary>
-            abstract logprobs: obj option with get, set
+            abstract logprobs: Cloudflare.MainModule option with get, set
             /// <summary>
             /// Log probabilities for the prompt (if requested)
             /// </summary>
-            abstract prompt_logprobs: obj option with get, set
+            abstract prompt_logprobs: Cloudflare.MainModule option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (index: float, text: string, finish_reason: string, ?stop_reason: string, ?logprobs: obj, ?prompt_logprobs: obj) : Item = jsNative
+            static member Create (index: float, text: string, finish_reason: string, ?stop_reason: string, ?logprobs: Cloudflare.MainModule, ?prompt_logprobs: Cloudflare.MainModule) : Item = jsNative
 
 module Ai_Cf_Qwen_Qwq_32B_Messages =
     module Functions =
@@ -24718,6 +24242,17 @@ module ChatCompletionsCommonOptions =
             | [<CompiledName("text")>] Text
 
 module Cloudflare =
+    type Env = obj
+
+    type GlobalProps = obj
+
+    [<Erase>]
+    type GlobalProp<'K, 'Default> = private GlobalProp__ of obj
+
+    type MainModule = obj
+
+    type Exports = obj
+
     /// <summary>cloudflare:email</summary>
     module Email =
         /// <summary>The package's value exports, each bound to its import.</summary>
@@ -25027,9 +24562,9 @@ module Cloudflare =
             [<Import("withEnvAndExports", "cloudflare:workers")>]
             static member withEnvAndExports (newEnv: obj, newExports: obj, fn: (unit -> obj)) : obj = jsNative
             [<Import("env", "cloudflare:workers")>]
-            static member env: obj = jsNative
+            static member env: Cloudflare.WorkersTypes.Cloudflare.Env = jsNative
             [<Import("exports", "cloudflare:workers")>]
-            static member exports: obj = jsNative
+            static member exports: Cloudflare.WorkersTypes.Cloudflare.Exports = jsNative
             [<Import("cache", "cloudflare:workers")>]
             static member cache: CacheContext = jsNative
             [<Import("tracing", "cloudflare:workers")>]
@@ -25111,9 +24646,9 @@ module Cloudflare =
 
             [<Interface>]
             type ITailStreamHandler =
-                abstract tailStream: ``event``: TailStream.TailEvent<Onset> -> U3<JS.Promise<U2<(TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>>, (TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>
+                abstract tailStream: ``event``: TailStream.TailEvent<TailStream.Onset> -> U3<JS.Promise<TailStream.TailEventHandlerType>, (TailStream.TailEvent<TailStream.EventType> -> JS.Promise<unit> option), TailStream.TailEventHandlerObject>
                 [<ParamObject; Emit("$0")>]
-                static member Create (tailStream: (TailStream.TailEvent<Onset> -> U3<JS.Promise<U2<(TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>>, (TailStream.TailEvent<ExportedHandlerTailStreamHandler.Result.Item.Event.Item> -> JS.Promise<unit> option), ExportedHandlerTailStreamHandler.Result.Item>)) : ITailStreamHandler = jsNative
+                static member Create (tailStream: (TailStream.TailEvent<TailStream.Onset> -> U3<JS.Promise<TailStream.TailEventHandlerType>, (TailStream.TailEvent<TailStream.EventType> -> JS.Promise<unit> option), TailStream.TailEventHandlerObject>)) : ITailStreamHandler = jsNative
 
             [<Interface>]
             type ITestHandler =
@@ -25583,71 +25118,6 @@ module EventCounts =
 module EventPluginContext =
     type Next = delegate of input: U2<string, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>> option * init: RequestInit<U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>> option -> JS.Promise<Response>
 
-module ExportedHandlerTailStreamHandler =
-    module Result =
-        [<Interface>]
-        type Item =
-            abstract outcome: (TailStream.TailEvent<Outcome> -> JS.Promise<unit> option) option with get, set
-            abstract spanOpen: (TailStream.TailEvent<SpanOpen> -> JS.Promise<unit> option) option with get, set
-            abstract spanClose: (TailStream.TailEvent<SpanClose> -> JS.Promise<unit> option) option with get, set
-            abstract diagnosticChannel: (TailStream.TailEvent<DiagnosticChannelEvent> -> JS.Promise<unit> option) option with get, set
-            abstract ``exception``: (TailStream.TailEvent<Exception> -> JS.Promise<unit> option) option with get, set
-            abstract log: (TailStream.TailEvent<Cloudflare.WorkersTypes.ExportedHandlerTailStreamHandler.Result.Item.Log.Event.Item> -> JS.Promise<unit> option) option with get, set
-            abstract ``return``: (TailStream.TailEvent<Return> -> JS.Promise<unit> option) option with get, set
-            abstract attributes: (TailStream.TailEvent<Attributes> -> JS.Promise<unit> option) option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?outcome: (TailStream.TailEvent<Outcome> -> JS.Promise<unit> option), ?spanOpen: (TailStream.TailEvent<SpanOpen> -> JS.Promise<unit> option), ?spanClose: (TailStream.TailEvent<SpanClose> -> JS.Promise<unit> option), ?diagnosticChannel: (TailStream.TailEvent<DiagnosticChannelEvent> -> JS.Promise<unit> option), ?``exception``: (TailStream.TailEvent<Exception> -> JS.Promise<unit> option), ?log: (TailStream.TailEvent<Cloudflare.WorkersTypes.ExportedHandlerTailStreamHandler.Result.Item.Log.Event.Item> -> JS.Promise<unit> option), ?``return``: (TailStream.TailEvent<Return> -> JS.Promise<unit> option), ?attributes: (TailStream.TailEvent<Attributes> -> JS.Promise<unit> option)) : Item = jsNative
-
-        module Item =
-            module Event =
-                [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-                type Item =
-                    | [<CompiledName("attributes"); Fickl.Core.InlineInterface>] Attributes of Attributes
-                    | [<CompiledName("diagnosticChannel"); Fickl.Core.InlineInterface>] DiagnosticChannel of DiagnosticChannelEvent
-                    | [<CompiledName("exception"); Fickl.Core.InlineInterface>] Exception of Exception
-                    | [<CompiledName("onset"); Fickl.Core.InlineInterface>] Onset of Onset
-                    | [<CompiledName("outcome"); Fickl.Core.InlineInterface>] Outcome of Outcome
-                    | [<CompiledName("return"); Fickl.Core.InlineInterface>] Return of Return
-                    | [<CompiledName("spanClose"); Fickl.Core.InlineInterface>] SpanClose of SpanClose
-                    | [<CompiledName("spanOpen"); Fickl.Core.InlineInterface>] SpanOpen of SpanOpen
-                    | [<CompiledName("streamDiagnostic"); Fickl.Core.InlineInterface>] StreamDiagnostic of StreamDiagnostic
-                    | [<CompiledName("log"); CaseTest("($0.truncated === false || $0.truncated === undefined)")>] Log of level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level * errorInfo: TailStreamErrorInfo option[] option * message: obj * truncated: bool option
-                    /// <param name="level"></param>
-                    /// <param name="errorInfo"></param>
-                    /// <param name="message"></param>
-                    /// <param name="truncated">TypeScript type: <c>true</c></param>
-                    | [<CompiledName("log"); CaseTest("$0.truncated === true")>] Log2 of level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level * errorInfo: TailStreamErrorInfo option[] option * message: string * truncated: bool
-                    [<ParamObject; Emit("({ type: 'log', ...$0 })")>]
-                    static member CreateLog (level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level, message: obj, ?errorInfo: TailStreamErrorInfo option[], ?truncated: bool) : Item = jsNative
-                    [<ParamObject; Emit("({ type: 'log', truncated: true, ...$0 })")>]
-                    static member CreateLog2 (level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level, message: string, ?errorInfo: TailStreamErrorInfo option[]) : Item = jsNative
-
-                module Item =
-                    module Cases =
-                        module Log =
-                            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                            type Level =
-                                | [<CompiledName("debug")>] Debug
-                                | [<CompiledName("error")>] Error
-                                | [<CompiledName("info")>] Info
-                                | [<CompiledName("log")>] Log
-                                | [<CompiledName("warn")>] Warn
-
-            module Log =
-                module Event =
-                    [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-                    type Item =
-                        | [<CompiledName("log"); CaseTest("($0.truncated === false || $0.truncated === undefined)")>] Log of level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level * errorInfo: TailStreamErrorInfo option[] option * message: obj * truncated: bool option
-                        /// <param name="level"></param>
-                        /// <param name="errorInfo"></param>
-                        /// <param name="message"></param>
-                        /// <param name="truncated">TypeScript type: <c>true</c></param>
-                        | [<CompiledName("log"); CaseTest("$0.truncated === true")>] Log2 of level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level * errorInfo: TailStreamErrorInfo option[] option * message: string * truncated: bool
-                        [<ParamObject; Emit("({ type: 'log', ...$0 })")>]
-                        static member CreateLog (level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level, message: obj, ?errorInfo: TailStreamErrorInfo option[], ?truncated: bool) : Item = jsNative
-                        [<ParamObject; Emit("({ type: 'log', truncated: true, ...$0 })")>]
-                        static member CreateLog2 (level: ExportedHandlerTailStreamHandler.Result.Item.Event.Item.Cases.Log.Level, message: string, ?errorInfo: TailStreamErrorInfo option[]) : Item = jsNative
-
 module FormData =
     module ForEach =
         type Callback = delegate of value: U2<string, File> * key: string * parent: FormData -> unit
@@ -25659,17 +25129,6 @@ module GatewayRetries =
         | N3 = 3
         | N4 = 4
         | N5 = 5
-
-module GlobalDescriptor =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Value =
-        | [<CompiledName("anyfunc")>] Anyfunc
-        | [<CompiledName("externref")>] Externref
-        | [<CompiledName("f32")>] F32
-        | [<CompiledName("f64")>] F64
-        | [<CompiledName("i32")>] I32
-        | [<CompiledName("i64")>] I64
-        | [<CompiledName("v128")>] V128
 
 module Headers =
     module ForEach =
@@ -26100,14 +25559,6 @@ module MediaTransformationOutputOptions =
         | [<CompiledName("spritesheet")>] Spritesheet
         | [<CompiledName("video")>] Video
 
-module ModuleExportDescriptor =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Kind =
-        | [<CompiledName("function")>] Function
-        | [<CompiledName("global")>] Global
-        | [<CompiledName("memory")>] Memory
-        | [<CompiledName("table")>] Table
-
 module PagesFunction =
     [<Interface>]
     type Context<'Env, 'Params, 'Data> =
@@ -26442,13 +25893,222 @@ module SqlStorageCursor =
             [<ParamObject; Emit("$0")>]
             static member Create (``done``: bool, ?value: unit) : Result2 = jsNative
 
-module TableDescriptor =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Element =
-        | [<CompiledName("anyfunc")>] Anyfunc
-        | [<CompiledName("externref")>] Externref
-
 module TailStream =
+    [<Interface>]
+    type Header =
+        abstract name: string
+        abstract value: string
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string, value: string) : Header = jsNative
+
+    [<Interface>]
+    type FetchEventInfo =
+        /// <remarks>TypeScript type: <c>"fetch"</c></remarks>
+        abstract ``type``: string
+        abstract ``method``: string
+        abstract url: string
+        abstract cfJson: obj option
+        abstract headers: Cloudflare.WorkersTypes.TailStream.Header[]
+        [<ParamObject; Emit("({ type: 'fetch', ...$0 })")>]
+        static member Create (``method``: string, url: string, headers: Cloudflare.WorkersTypes.TailStream.Header[], ?cfJson: obj) : FetchEventInfo = jsNative
+
+    module FetchEventInfo =
+        /// <remarks>TypeScript type: <c>"fetch"</c></remarks>
+        [<Literal>]
+        let ``type`` = "fetch"
+
+    [<Interface>]
+    type JsRpcEventInfo =
+        /// <remarks>TypeScript type: <c>"jsrpc"</c></remarks>
+        abstract ``type``: string
+        [<Emit("({ type: 'jsrpc' })")>]
+        static member Create () : JsRpcEventInfo = jsNative
+
+    module JsRpcEventInfo =
+        /// <remarks>TypeScript type: <c>"jsrpc"</c></remarks>
+        [<Literal>]
+        let ``type`` = "jsrpc"
+
+    [<Interface>]
+    type ScheduledEventInfo =
+        /// <remarks>TypeScript type: <c>"scheduled"</c></remarks>
+        abstract ``type``: string
+        abstract scheduledTime: Fable.Core.TS.Es.Date
+        abstract cron: string
+        [<ParamObject; Emit("({ type: 'scheduled', ...$0 })")>]
+        static member Create (scheduledTime: Fable.Core.TS.Es.Date, cron: string) : ScheduledEventInfo = jsNative
+
+    module ScheduledEventInfo =
+        /// <remarks>TypeScript type: <c>"scheduled"</c></remarks>
+        [<Literal>]
+        let ``type`` = "scheduled"
+
+    [<Interface>]
+    type AlarmEventInfo =
+        /// <remarks>TypeScript type: <c>"alarm"</c></remarks>
+        abstract ``type``: string
+        abstract scheduledTime: Fable.Core.TS.Es.Date
+        [<ParamObject; Emit("({ type: 'alarm', ...$0 })")>]
+        static member Create (scheduledTime: Fable.Core.TS.Es.Date) : AlarmEventInfo = jsNative
+
+    module AlarmEventInfo =
+        /// <remarks>TypeScript type: <c>"alarm"</c></remarks>
+        [<Literal>]
+        let ``type`` = "alarm"
+
+    [<Interface>]
+    type QueueEventInfo =
+        /// <remarks>TypeScript type: <c>"queue"</c></remarks>
+        abstract ``type``: string
+        abstract queueName: string
+        abstract batchSize: float
+        [<ParamObject; Emit("({ type: 'queue', ...$0 })")>]
+        static member Create (queueName: string, batchSize: float) : QueueEventInfo = jsNative
+
+    module QueueEventInfo =
+        /// <remarks>TypeScript type: <c>"queue"</c></remarks>
+        [<Literal>]
+        let ``type`` = "queue"
+
+    [<Interface>]
+    type EmailEventInfo =
+        /// <remarks>TypeScript type: <c>"email"</c></remarks>
+        abstract ``type``: string
+        abstract mailFrom: string
+        abstract rcptTo: string
+        abstract rawSize: float
+        [<ParamObject; Emit("({ type: 'email', ...$0 })")>]
+        static member Create (mailFrom: string, rcptTo: string, rawSize: float) : EmailEventInfo = jsNative
+
+    module EmailEventInfo =
+        /// <remarks>TypeScript type: <c>"email"</c></remarks>
+        [<Literal>]
+        let ``type`` = "email"
+
+    [<Interface>]
+    type TraceEventInfo =
+        /// <remarks>TypeScript type: <c>"trace"</c></remarks>
+        abstract ``type``: string
+        abstract traces: string option[]
+        [<ParamObject; Emit("({ type: 'trace', ...$0 })")>]
+        static member Create (traces: string option[]) : TraceEventInfo = jsNative
+
+    module TraceEventInfo =
+        /// <remarks>TypeScript type: <c>"trace"</c></remarks>
+        [<Literal>]
+        let ``type`` = "trace"
+
+    [<Interface>]
+    type HibernatableWebSocketEventInfoMessage =
+        /// <remarks>TypeScript type: <c>"message"</c></remarks>
+        abstract ``type``: string
+        [<Emit("({ type: 'message' })")>]
+        static member Create () : HibernatableWebSocketEventInfoMessage = jsNative
+
+    module HibernatableWebSocketEventInfoMessage =
+        /// <remarks>TypeScript type: <c>"message"</c></remarks>
+        [<Literal>]
+        let ``type`` = "message"
+
+    [<Interface>]
+    type HibernatableWebSocketEventInfoError =
+        /// <remarks>TypeScript type: <c>"error"</c></remarks>
+        abstract ``type``: string
+        [<Emit("({ type: 'error' })")>]
+        static member Create () : HibernatableWebSocketEventInfoError = jsNative
+
+    module HibernatableWebSocketEventInfoError =
+        /// <remarks>TypeScript type: <c>"error"</c></remarks>
+        [<Literal>]
+        let ``type`` = "error"
+
+    [<Interface>]
+    type HibernatableWebSocketEventInfoClose =
+        /// <remarks>TypeScript type: <c>"close"</c></remarks>
+        abstract ``type``: string
+        abstract code: float
+        abstract wasClean: bool
+        [<ParamObject; Emit("({ type: 'close', ...$0 })")>]
+        static member Create (code: float, wasClean: bool) : HibernatableWebSocketEventInfoClose = jsNative
+
+    module HibernatableWebSocketEventInfoClose =
+        /// <remarks>TypeScript type: <c>"close"</c></remarks>
+        [<Literal>]
+        let ``type`` = "close"
+
+    [<Interface>]
+    type HibernatableWebSocketEventInfo =
+        /// <remarks>TypeScript type: <c>"hibernatableWebSocket"</c></remarks>
+        abstract ``type``: string
+        abstract info: TailStream.HibernatableWebSocketEventInfo.Info
+        [<ParamObject; Emit("({ type: 'hibernatableWebSocket', ...$0 })")>]
+        static member Create (info: TailStream.HibernatableWebSocketEventInfo.Info) : HibernatableWebSocketEventInfo = jsNative
+
+    module HibernatableWebSocketEventInfo =
+        /// <remarks>TypeScript type: <c>"hibernatableWebSocket"</c></remarks>
+        [<Literal>]
+        let ``type`` = "hibernatableWebSocket"
+
+        [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+        type Info =
+            | [<CompiledName("close"); Fickl.Core.InlineInterface>] Close of Cloudflare.WorkersTypes.TailStream.HibernatableWebSocketEventInfoClose
+            | [<CompiledName("error"); Fickl.Core.InlineInterface>] Error of Cloudflare.WorkersTypes.TailStream.HibernatableWebSocketEventInfoError
+            | [<CompiledName("message"); Fickl.Core.InlineInterface>] Message of Cloudflare.WorkersTypes.TailStream.HibernatableWebSocketEventInfoMessage
+
+    [<Interface>]
+    type CustomEventInfo =
+        /// <remarks>TypeScript type: <c>"custom"</c></remarks>
+        abstract ``type``: string
+        [<Emit("({ type: 'custom' })")>]
+        static member Create () : CustomEventInfo = jsNative
+
+    module CustomEventInfo =
+        /// <remarks>TypeScript type: <c>"custom"</c></remarks>
+        [<Literal>]
+        let ``type`` = "custom"
+
+    [<Interface>]
+    type FetchResponseInfo =
+        /// <remarks>TypeScript type: <c>"fetch"</c></remarks>
+        abstract ``type``: string
+        abstract statusCode: float
+        [<ParamObject; Emit("({ type: 'fetch', ...$0 })")>]
+        static member Create (statusCode: float) : FetchResponseInfo = jsNative
+
+    module FetchResponseInfo =
+        /// <remarks>TypeScript type: <c>"fetch"</c></remarks>
+        [<Literal>]
+        let ``type`` = "fetch"
+
+    [<Interface>]
+    type ConnectEventInfo =
+        /// <remarks>TypeScript type: <c>"connect"</c></remarks>
+        abstract ``type``: string
+        [<Emit("({ type: 'connect' })")>]
+        static member Create () : ConnectEventInfo = jsNative
+
+    module ConnectEventInfo =
+        /// <remarks>TypeScript type: <c>"connect"</c></remarks>
+        [<Literal>]
+        let ``type`` = "connect"
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type EventOutcome =
+        | [<CompiledName("aborted")>] Aborted
+        | [<CompiledName("canceled")>] Canceled
+        | [<CompiledName("daemonDown")>] DaemonDown
+        | [<CompiledName("exceededCpu")>] ExceededCpu
+        | [<CompiledName("exceededMemory")>] ExceededMemory
+        | [<CompiledName("exceededWallTime")>] ExceededWallTime
+        | [<CompiledName("exception")>] Exception
+        | [<CompiledName("internalError")>] InternalError
+        | [<CompiledName("killSwitch")>] KillSwitch
+        | [<CompiledName("loadShed")>] LoadShed
+        | [<CompiledName("ok")>] Ok
+        | [<CompiledName("responseStreamDisconnected")>] ResponseStreamDisconnected
+        | [<CompiledName("scriptNotFound")>] ScriptNotFound
+        | [<CompiledName("unknown")>] Unknown
+
     [<Interface>]
     type ScriptVersion =
         abstract id: string
@@ -26458,22 +26118,268 @@ module TailStream =
         static member Create (id: string, ?tag: string, ?message: string) : ScriptVersion = jsNative
 
     [<Interface>]
-    type TailEvent<'Event> =
-        abstract invocationId: string
-        abstract spanContext: SpanContext
-        abstract timestamp: Fable.Core.TS.Es.Date
-        abstract sequence: float
-        abstract ``event``: 'Event
-        [<ParamObject; Emit("$0")>]
-        static member Create (invocationId: string, spanContext: SpanContext, timestamp: Fable.Core.TS.Es.Date, sequence: float, ``event``: 'Event) : TailEvent<'Event> = jsNative
-
-    [<Interface>]
     type TracePreviewInfo =
         abstract id: string
         abstract slug: string
         abstract name: string
         [<ParamObject; Emit("$0")>]
         static member Create (id: string, slug: string, name: string) : TracePreviewInfo = jsNative
+
+    [<Interface>]
+    type Onset =
+        /// <remarks>TypeScript type: <c>"onset"</c></remarks>
+        abstract ``type``: string
+        abstract attributes: Cloudflare.WorkersTypes.TailStream.Attribute[]
+        abstract spanId: string
+        abstract dispatchNamespace: string option
+        abstract entrypoint: string option
+        abstract executionModel: string
+        abstract durableObjectId: string option
+        abstract scriptName: string option
+        abstract scriptTags: string[] option
+        abstract scriptVersion: Cloudflare.WorkersTypes.TailStream.ScriptVersion option
+        abstract preview: Cloudflare.WorkersTypes.TailStream.TracePreviewInfo option
+        abstract info: TailStream.Onset.Info
+        [<ParamObject; Emit("({ type: 'onset', ...$0 })")>]
+        static member Create (attributes: Cloudflare.WorkersTypes.TailStream.Attribute[], spanId: string, executionModel: string, info: TailStream.Onset.Info, ?dispatchNamespace: string, ?entrypoint: string, ?durableObjectId: string, ?scriptName: string, ?scriptTags: string[], ?scriptVersion: Cloudflare.WorkersTypes.TailStream.ScriptVersion, ?preview: Cloudflare.WorkersTypes.TailStream.TracePreviewInfo) : Onset = jsNative
+
+    module Onset =
+        /// <remarks>TypeScript type: <c>"onset"</c></remarks>
+        [<Literal>]
+        let ``type`` = "onset"
+
+        [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+        type Info =
+            | [<CompiledName("alarm"); Fickl.Core.InlineInterface>] Alarm of Cloudflare.WorkersTypes.TailStream.AlarmEventInfo
+            | [<CompiledName("connect"); Fickl.Core.InlineInterface>] Connect of Cloudflare.WorkersTypes.TailStream.ConnectEventInfo
+            | [<CompiledName("custom"); Fickl.Core.InlineInterface>] Custom of Cloudflare.WorkersTypes.TailStream.CustomEventInfo
+            | [<CompiledName("email"); Fickl.Core.InlineInterface>] Email of Cloudflare.WorkersTypes.TailStream.EmailEventInfo
+            | [<CompiledName("fetch"); Fickl.Core.InlineInterface>] Fetch of Cloudflare.WorkersTypes.TailStream.FetchEventInfo
+            | [<CompiledName("hibernatableWebSocket"); Fickl.Core.InlineInterface>] HibernatableWebSocket of Cloudflare.WorkersTypes.TailStream.HibernatableWebSocketEventInfo
+            | [<CompiledName("jsrpc"); Fickl.Core.InlineInterface>] Jsrpc of Cloudflare.WorkersTypes.TailStream.JsRpcEventInfo
+            | [<CompiledName("queue"); Fickl.Core.InlineInterface>] Queue of Cloudflare.WorkersTypes.TailStream.QueueEventInfo
+            | [<CompiledName("scheduled"); Fickl.Core.InlineInterface>] Scheduled of Cloudflare.WorkersTypes.TailStream.ScheduledEventInfo
+            | [<CompiledName("trace"); Fickl.Core.InlineInterface>] Trace of Cloudflare.WorkersTypes.TailStream.TraceEventInfo
+
+    [<Interface>]
+    type Outcome =
+        /// <remarks>TypeScript type: <c>"outcome"</c></remarks>
+        abstract ``type``: string
+        abstract outcome: Cloudflare.WorkersTypes.TailStream.EventOutcome
+        abstract cpuTime: float
+        abstract wallTime: float
+        [<ParamObject; Emit("({ type: 'outcome', ...$0 })")>]
+        static member Create (outcome: Cloudflare.WorkersTypes.TailStream.EventOutcome, cpuTime: float, wallTime: float) : Outcome = jsNative
+
+    module Outcome =
+        /// <remarks>TypeScript type: <c>"outcome"</c></remarks>
+        [<Literal>]
+        let ``type`` = "outcome"
+
+    [<Interface>]
+    type SpanOpen =
+        /// <remarks>TypeScript type: <c>"spanOpen"</c></remarks>
+        abstract ``type``: string
+        abstract name: string
+        abstract spanId: string
+        abstract info: U3<Cloudflare.WorkersTypes.TailStream.Attributes, Cloudflare.WorkersTypes.TailStream.FetchEventInfo, Cloudflare.WorkersTypes.TailStream.JsRpcEventInfo> option
+        [<ParamObject; Emit("({ type: 'spanOpen', ...$0 })")>]
+        static member Create (name: string, spanId: string, ?info: U3<Cloudflare.WorkersTypes.TailStream.Attributes, Cloudflare.WorkersTypes.TailStream.FetchEventInfo, Cloudflare.WorkersTypes.TailStream.JsRpcEventInfo>) : SpanOpen = jsNative
+
+    module SpanOpen =
+        /// <remarks>TypeScript type: <c>"spanOpen"</c></remarks>
+        [<Literal>]
+        let ``type`` = "spanOpen"
+
+    [<Interface>]
+    type SpanClose =
+        /// <remarks>TypeScript type: <c>"spanClose"</c></remarks>
+        abstract ``type``: string
+        abstract outcome: Cloudflare.WorkersTypes.TailStream.EventOutcome
+        [<ParamObject; Emit("({ type: 'spanClose', ...$0 })")>]
+        static member Create (outcome: Cloudflare.WorkersTypes.TailStream.EventOutcome) : SpanClose = jsNative
+
+    module SpanClose =
+        /// <remarks>TypeScript type: <c>"spanClose"</c></remarks>
+        [<Literal>]
+        let ``type`` = "spanClose"
+
+    [<Interface>]
+    type DiagnosticChannelEvent =
+        /// <remarks>TypeScript type: <c>"diagnosticChannel"</c></remarks>
+        abstract ``type``: string
+        abstract channel: string
+        abstract message: obj
+        [<ParamObject; Emit("({ type: 'diagnosticChannel', ...$0 })")>]
+        static member Create (channel: string, message: obj) : DiagnosticChannelEvent = jsNative
+
+    module DiagnosticChannelEvent =
+        /// <remarks>TypeScript type: <c>"diagnosticChannel"</c></remarks>
+        [<Literal>]
+        let ``type`` = "diagnosticChannel"
+
+    [<Interface>]
+    type Exception =
+        /// <remarks>TypeScript type: <c>"exception"</c></remarks>
+        abstract ``type``: string
+        abstract name: string
+        abstract message: string
+        abstract stack: string option
+        [<ParamObject; Emit("({ type: 'exception', ...$0 })")>]
+        static member Create (name: string, message: string, ?stack: string) : Exception = jsNative
+
+    module Exception =
+        /// <remarks>TypeScript type: <c>"exception"</c></remarks>
+        [<Literal>]
+        let ``type`` = "exception"
+
+    [<Interface>]
+    type TailStreamErrorInfo =
+        abstract name: string
+        abstract message: string
+        abstract stack: string option
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string, message: string, ?stack: string) : TailStreamErrorInfo = jsNative
+
+    [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+    type Log =
+        | [<CompiledName("log"); CaseTest("($0.truncated === false || $0.truncated === undefined)")>] Log of level: TailStream.EventType.Cases.Log.Level * errorInfo: Cloudflare.WorkersTypes.TailStream.TailStreamErrorInfo option[] option * message: obj * truncated: bool option
+        /// <param name="level"></param>
+        /// <param name="errorInfo"></param>
+        /// <param name="message"></param>
+        /// <param name="truncated">TypeScript type: <c>true</c></param>
+        | [<CompiledName("log"); CaseTest("$0.truncated === true")>] Log2 of level: TailStream.EventType.Cases.Log.Level * errorInfo: Cloudflare.WorkersTypes.TailStream.TailStreamErrorInfo option[] option * message: string * truncated: bool
+        [<ParamObject; Emit("({ type: 'log', ...$0 })")>]
+        static member CreateLog (level: TailStream.EventType.Cases.Log.Level, message: obj, ?errorInfo: Cloudflare.WorkersTypes.TailStream.TailStreamErrorInfo option[], ?truncated: bool) : Log = jsNative
+        [<ParamObject; Emit("({ type: 'log', truncated: true, ...$0 })")>]
+        static member CreateLog2 (level: TailStream.EventType.Cases.Log.Level, message: string, ?errorInfo: Cloudflare.WorkersTypes.TailStream.TailStreamErrorInfo option[]) : Log = jsNative
+
+    [<Interface>]
+    type DroppedEventsDiagnostic =
+        /// <remarks>TypeScript type: <c>"droppedEvents"</c></remarks>
+        abstract diagnosticsType: string
+        abstract count: float
+        [<ParamObject; Emit("({ diagnosticsType: 'droppedEvents', ...$0 })")>]
+        static member Create (count: float) : DroppedEventsDiagnostic = jsNative
+
+    module DroppedEventsDiagnostic =
+        /// <remarks>TypeScript type: <c>"droppedEvents"</c></remarks>
+        [<Literal>]
+        let diagnosticsType = "droppedEvents"
+
+    [<Interface>]
+    type StreamDiagnostic =
+        /// <remarks>TypeScript type: <c>"streamDiagnostic"</c></remarks>
+        abstract ``type``: string
+        abstract diagnostic: Cloudflare.WorkersTypes.TailStream.DroppedEventsDiagnostic
+        [<ParamObject; Emit("({ type: 'streamDiagnostic', ...$0 })")>]
+        static member Create (diagnostic: Cloudflare.WorkersTypes.TailStream.DroppedEventsDiagnostic) : StreamDiagnostic = jsNative
+
+    module StreamDiagnostic =
+        /// <remarks>TypeScript type: <c>"streamDiagnostic"</c></remarks>
+        [<Literal>]
+        let ``type`` = "streamDiagnostic"
+
+    [<Interface>]
+    type Return =
+        /// <remarks>TypeScript type: <c>"return"</c></remarks>
+        abstract ``type``: string
+        abstract info: Cloudflare.WorkersTypes.TailStream.FetchResponseInfo option
+        [<ParamObject; Emit("({ type: 'return', ...$0 })")>]
+        static member Create (?info: Cloudflare.WorkersTypes.TailStream.FetchResponseInfo) : Return = jsNative
+
+    module Return =
+        /// <remarks>TypeScript type: <c>"return"</c></remarks>
+        [<Literal>]
+        let ``type`` = "return"
+
+    [<Interface>]
+    type Attribute =
+        abstract name: string
+        abstract value: U8<string, float, bigint, bool, string[], float[], bigint[], bool[]>
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string, value: U8<string, float, bigint, bool, string[], float[], bigint[], bool[]>) : Attribute = jsNative
+
+    [<Interface>]
+    type Attributes =
+        /// <remarks>TypeScript type: <c>"attributes"</c></remarks>
+        abstract ``type``: string
+        abstract info: Cloudflare.WorkersTypes.TailStream.Attribute[]
+        [<ParamObject; Emit("({ type: 'attributes', ...$0 })")>]
+        static member Create (info: Cloudflare.WorkersTypes.TailStream.Attribute[]) : Attributes = jsNative
+
+    module Attributes =
+        /// <remarks>TypeScript type: <c>"attributes"</c></remarks>
+        [<Literal>]
+        let ``type`` = "attributes"
+
+    [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+    type EventType =
+        | [<CompiledName("attributes"); Fickl.Core.InlineInterface>] Attributes of Cloudflare.WorkersTypes.TailStream.Attributes
+        | [<CompiledName("diagnosticChannel"); Fickl.Core.InlineInterface>] DiagnosticChannel of Cloudflare.WorkersTypes.TailStream.DiagnosticChannelEvent
+        | [<CompiledName("exception"); Fickl.Core.InlineInterface>] Exception of Cloudflare.WorkersTypes.TailStream.Exception
+        | [<CompiledName("onset"); Fickl.Core.InlineInterface>] Onset of Cloudflare.WorkersTypes.TailStream.Onset
+        | [<CompiledName("outcome"); Fickl.Core.InlineInterface>] Outcome of Cloudflare.WorkersTypes.TailStream.Outcome
+        | [<CompiledName("return"); Fickl.Core.InlineInterface>] Return of Cloudflare.WorkersTypes.TailStream.Return
+        | [<CompiledName("spanClose"); Fickl.Core.InlineInterface>] SpanClose of Cloudflare.WorkersTypes.TailStream.SpanClose
+        | [<CompiledName("spanOpen"); Fickl.Core.InlineInterface>] SpanOpen of Cloudflare.WorkersTypes.TailStream.SpanOpen
+        | [<CompiledName("streamDiagnostic"); Fickl.Core.InlineInterface>] StreamDiagnostic of Cloudflare.WorkersTypes.TailStream.StreamDiagnostic
+        | [<CompiledName("log"); CaseTest("($0.truncated === false || $0.truncated === undefined)")>] Log of level: TailStream.EventType.Cases.Log.Level * errorInfo: Cloudflare.WorkersTypes.TailStream.TailStreamErrorInfo option[] option * message: obj * truncated: bool option
+        /// <param name="level"></param>
+        /// <param name="errorInfo"></param>
+        /// <param name="message"></param>
+        /// <param name="truncated">TypeScript type: <c>true</c></param>
+        | [<CompiledName("log"); CaseTest("$0.truncated === true")>] Log2 of level: TailStream.EventType.Cases.Log.Level * errorInfo: Cloudflare.WorkersTypes.TailStream.TailStreamErrorInfo option[] option * message: string * truncated: bool
+        [<ParamObject; Emit("({ type: 'log', ...$0 })")>]
+        static member CreateLog (level: TailStream.EventType.Cases.Log.Level, message: obj, ?errorInfo: Cloudflare.WorkersTypes.TailStream.TailStreamErrorInfo option[], ?truncated: bool) : EventType = jsNative
+        [<ParamObject; Emit("({ type: 'log', truncated: true, ...$0 })")>]
+        static member CreateLog2 (level: TailStream.EventType.Cases.Log.Level, message: string, ?errorInfo: Cloudflare.WorkersTypes.TailStream.TailStreamErrorInfo option[]) : EventType = jsNative
+
+    [<Interface>]
+    type SpanContext =
+        abstract traceId: string
+        abstract spanId: string option
+        abstract traceFlags: float option
+        [<ParamObject; Emit("$0")>]
+        static member Create (traceId: string, ?spanId: string, ?traceFlags: float) : SpanContext = jsNative
+
+    [<Interface>]
+    type TailEvent<'Event> =
+        abstract invocationId: string
+        abstract spanContext: Cloudflare.WorkersTypes.TailStream.SpanContext
+        abstract timestamp: Fable.Core.TS.Es.Date
+        abstract sequence: float
+        abstract ``event``: 'Event
+        [<ParamObject; Emit("$0")>]
+        static member Create (invocationId: string, spanContext: Cloudflare.WorkersTypes.TailStream.SpanContext, timestamp: Fable.Core.TS.Es.Date, sequence: float, ``event``: 'Event) : TailEvent<'Event> = jsNative
+
+    type TailEventHandler<'Event> = (Cloudflare.WorkersTypes.TailStream.TailEvent<'Event> -> JS.Promise<unit> option)
+
+    [<Interface>]
+    type TailEventHandlerObject =
+        abstract outcome: (Cloudflare.WorkersTypes.TailStream.TailEvent<Cloudflare.WorkersTypes.TailStream.Outcome> -> JS.Promise<unit> option) option with get, set
+        abstract spanOpen: (Cloudflare.WorkersTypes.TailStream.TailEvent<Cloudflare.WorkersTypes.TailStream.SpanOpen> -> JS.Promise<unit> option) option with get, set
+        abstract spanClose: (Cloudflare.WorkersTypes.TailStream.TailEvent<Cloudflare.WorkersTypes.TailStream.SpanClose> -> JS.Promise<unit> option) option with get, set
+        abstract diagnosticChannel: (Cloudflare.WorkersTypes.TailStream.TailEvent<Cloudflare.WorkersTypes.TailStream.DiagnosticChannelEvent> -> JS.Promise<unit> option) option with get, set
+        abstract ``exception``: (Cloudflare.WorkersTypes.TailStream.TailEvent<Cloudflare.WorkersTypes.TailStream.Exception> -> JS.Promise<unit> option) option with get, set
+        abstract log: (Cloudflare.WorkersTypes.TailStream.TailEvent<Cloudflare.WorkersTypes.TailStream.Log> -> JS.Promise<unit> option) option with get, set
+        abstract ``return``: (Cloudflare.WorkersTypes.TailStream.TailEvent<Cloudflare.WorkersTypes.TailStream.Return> -> JS.Promise<unit> option) option with get, set
+        abstract attributes: (Cloudflare.WorkersTypes.TailStream.TailEvent<Cloudflare.WorkersTypes.TailStream.Attributes> -> JS.Promise<unit> option) option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?outcome: (Cloudflare.WorkersTypes.TailStream.TailEvent<Cloudflare.WorkersTypes.TailStream.Outcome> -> JS.Promise<unit> option), ?spanOpen: (Cloudflare.WorkersTypes.TailStream.TailEvent<Cloudflare.WorkersTypes.TailStream.SpanOpen> -> JS.Promise<unit> option), ?spanClose: (Cloudflare.WorkersTypes.TailStream.TailEvent<Cloudflare.WorkersTypes.TailStream.SpanClose> -> JS.Promise<unit> option), ?diagnosticChannel: (Cloudflare.WorkersTypes.TailStream.TailEvent<Cloudflare.WorkersTypes.TailStream.DiagnosticChannelEvent> -> JS.Promise<unit> option), ?``exception``: (Cloudflare.WorkersTypes.TailStream.TailEvent<Cloudflare.WorkersTypes.TailStream.Exception> -> JS.Promise<unit> option), ?log: (Cloudflare.WorkersTypes.TailStream.TailEvent<Cloudflare.WorkersTypes.TailStream.Log> -> JS.Promise<unit> option), ?``return``: (Cloudflare.WorkersTypes.TailStream.TailEvent<Cloudflare.WorkersTypes.TailStream.Return> -> JS.Promise<unit> option), ?attributes: (Cloudflare.WorkersTypes.TailStream.TailEvent<Cloudflare.WorkersTypes.TailStream.Attributes> -> JS.Promise<unit> option)) : TailEventHandlerObject = jsNative
+
+    type TailEventHandlerType = U2<(Cloudflare.WorkersTypes.TailStream.TailEvent<Cloudflare.WorkersTypes.TailStream.EventType> -> JS.Promise<unit> option), Cloudflare.WorkersTypes.TailStream.TailEventHandlerObject>
+
+    module EventType =
+        module Cases =
+            module Log =
+                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                type Level =
+                    | [<CompiledName("debug")>] Debug
+                    | [<CompiledName("error")>] Error
+                    | [<CompiledName("info")>] Info
+                    | [<CompiledName("log")>] Log
+                    | [<CompiledName("warn")>] Warn
 
 module TextOptions =
     [<Interface>]
@@ -26559,6 +26465,165 @@ module VectorizeVectorMetadataFilter =
         abstract ``$nin``: U3<string, float, bool>[] option with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (?``$in``: U3<string, float, bool>[], ?``$nin``: U3<string, float, bool>[]) : Item2 = jsNative
+
+module WebAssembly =
+    type CompileErrorConstructor =
+        /// <summary>
+        /// Indicates whether the argument provided is a built-in Error instance or not.
+        /// </summary>
+        abstract isError: error: obj -> bool
+        [<EmitConstructor>]
+        abstract Create: ?message: string -> Cloudflare.WorkersTypes.WebAssembly.CompileError
+
+    type GlobalConstructor =
+        [<EmitConstructor>]
+        abstract Create: descriptor: Cloudflare.WorkersTypes.WebAssembly.GlobalDescriptor * ?value: obj -> Cloudflare.WorkersTypes.WebAssembly.Global
+
+    type InstanceConstructor =
+        [<EmitConstructor>]
+        abstract Create: ``module``: Cloudflare.WorkersTypes.WebAssembly.Module * ?imports: Cloudflare.WorkersTypes.WebAssembly.Imports -> Cloudflare.WorkersTypes.WebAssembly.Instance
+
+    type MemoryConstructor =
+        [<EmitConstructor>]
+        abstract Create: descriptor: Cloudflare.WorkersTypes.WebAssembly.MemoryDescriptor -> Cloudflare.WorkersTypes.WebAssembly.Memory
+
+    type ModuleConstructor =
+        abstract customSections: ``module``: Cloudflare.WorkersTypes.WebAssembly.Module * sectionName: string -> Fable.Core.TS.Es.ArrayBuffer[]
+        abstract exports: ``module``: Cloudflare.WorkersTypes.WebAssembly.Module -> Cloudflare.WorkersTypes.WebAssembly.ModuleExportDescriptor[]
+        abstract imports: ``module``: Cloudflare.WorkersTypes.WebAssembly.Module -> Cloudflare.WorkersTypes.WebAssembly.ModuleImportDescriptor[]
+        [<EmitConstructor>]
+        abstract Create: unit -> Cloudflare.WorkersTypes.WebAssembly.Module
+
+    type RuntimeErrorConstructor =
+        /// <summary>
+        /// Indicates whether the argument provided is a built-in Error instance or not.
+        /// </summary>
+        abstract isError: error: obj -> bool
+        [<EmitConstructor>]
+        abstract Create: ?message: string -> Cloudflare.WorkersTypes.WebAssembly.RuntimeError
+
+    type TableConstructor =
+        [<EmitConstructor>]
+        abstract Create: descriptor: Cloudflare.WorkersTypes.WebAssembly.TableDescriptor * ?value: obj -> Cloudflare.WorkersTypes.WebAssembly.Table
+
+    [<Interface>]
+    type CompileError =
+        abstract name: string with get, set
+        abstract message: string with get, set
+        abstract stack: string option with get, set
+        abstract cause: obj option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string, message: string, ?stack: string, ?cause: obj) : CompileError = jsNative
+
+    [<Interface>]
+    type RuntimeError =
+        abstract name: string with get, set
+        abstract message: string with get, set
+        abstract stack: string option with get, set
+        abstract cause: obj option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string, message: string, ?stack: string, ?cause: obj) : RuntimeError = jsNative
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type ValueType =
+        | [<CompiledName("anyfunc")>] Anyfunc
+        | [<CompiledName("externref")>] Externref
+        | [<CompiledName("f32")>] F32
+        | [<CompiledName("f64")>] F64
+        | [<CompiledName("i32")>] I32
+        | [<CompiledName("i64")>] I64
+        | [<CompiledName("v128")>] V128
+
+    [<Interface>]
+    type GlobalDescriptor =
+        abstract value: Cloudflare.WorkersTypes.WebAssembly.ValueType with get, set
+        abstract ``mutable``: bool option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (value: Cloudflare.WorkersTypes.WebAssembly.ValueType, ?``mutable``: bool) : GlobalDescriptor = jsNative
+
+    [<Interface>]
+    type Global =
+        abstract value: obj with get, set
+        abstract valueOf: unit -> obj
+        [<ParamObject; Emit("$0")>]
+        static member Create (value: obj, valueOf: (unit -> obj)) : Global = jsNative
+
+    type ImportValue = U5<float, Fable.Core.TS.Es.Function, Cloudflare.WorkersTypes.WebAssembly.Global, Cloudflare.WorkersTypes.WebAssembly.Memory, Cloudflare.WorkersTypes.WebAssembly.Table>
+
+    type ModuleImports = JS.Record<string, Cloudflare.WorkersTypes.WebAssembly.ImportValue>
+
+    type Imports = JS.Record<string, Cloudflare.WorkersTypes.WebAssembly.ModuleImports>
+
+    type ExportValue = U4<Fable.Core.TS.Es.Function, Cloudflare.WorkersTypes.WebAssembly.Global, Cloudflare.WorkersTypes.WebAssembly.Memory, Cloudflare.WorkersTypes.WebAssembly.Table>
+
+    type Exports = JS.Record<string, Cloudflare.WorkersTypes.WebAssembly.ExportValue>
+
+    [<Interface>]
+    type Instance =
+        abstract exports: Cloudflare.WorkersTypes.WebAssembly.Exports
+        [<ParamObject; Emit("$0")>]
+        static member Create (exports: Cloudflare.WorkersTypes.WebAssembly.Exports) : Instance = jsNative
+
+    [<Interface>]
+    type MemoryDescriptor =
+        abstract initial: float with get, set
+        abstract maximum: float option with get, set
+        abstract shared: bool option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (initial: float, ?maximum: float, ?shared: bool) : MemoryDescriptor = jsNative
+
+    [<Interface>]
+    type Memory =
+        abstract buffer: Fable.Core.TS.Es.ArrayBuffer
+        abstract grow: delta: float -> float
+        [<ParamObject; Emit("$0")>]
+        static member Create (buffer: Fable.Core.TS.Es.ArrayBuffer, grow: (float -> float)) : Memory = jsNative
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type ImportExportKind =
+        | [<CompiledName("function")>] Function
+        | [<CompiledName("global")>] Global
+        | [<CompiledName("memory")>] Memory
+        | [<CompiledName("table")>] Table
+
+    [<Interface>]
+    type ModuleExportDescriptor =
+        abstract kind: Cloudflare.WorkersTypes.WebAssembly.ImportExportKind with get, set
+        abstract name: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (kind: Cloudflare.WorkersTypes.WebAssembly.ImportExportKind, name: string) : ModuleExportDescriptor = jsNative
+
+    [<Interface>]
+    type ModuleImportDescriptor =
+        abstract kind: Cloudflare.WorkersTypes.WebAssembly.ImportExportKind with get, set
+        abstract ``module``: string with get, set
+        abstract name: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (kind: Cloudflare.WorkersTypes.WebAssembly.ImportExportKind, ``module``: string, name: string) : ModuleImportDescriptor = jsNative
+
+    type Module = obj
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type TableKind =
+        | [<CompiledName("anyfunc")>] Anyfunc
+        | [<CompiledName("externref")>] Externref
+
+    [<Interface>]
+    type TableDescriptor =
+        abstract element: Cloudflare.WorkersTypes.WebAssembly.TableKind with get, set
+        abstract initial: float with get, set
+        abstract maximum: float option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (element: Cloudflare.WorkersTypes.WebAssembly.TableKind, initial: float, ?maximum: float) : TableDescriptor = jsNative
+
+    [<Interface>]
+    type Table =
+        abstract length: float
+        abstract get: index: float -> obj
+        abstract grow: delta: float * ?value: obj -> float
+        abstract set: index: float * ?value: obj -> unit
+        [<ParamObject; Emit("$0")>]
+        static member Create (length: float, get: (float -> obj), grow: Func<float, obj option, float>, set: Action<float, obj option>) : Table = jsNative
 
 module WebSocket =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -26650,3 +26715,57 @@ type U11<'t1, 't2, 't3, 't4, 't5, 't6, 't7, 't8, 't9, 't10, 't11> =
     static member op_ErasedCast(x: 't9) = Case9 x
     static member op_ErasedCast(x: 't10) = Case10 x
     static member op_ErasedCast(x: 't11) = Case11 x
+
+[<Erase>]
+type U25<'t1, 't2, 't3, 't4, 't5, 't6, 't7, 't8, 't9, 't10, 't11, 't12, 't13, 't14, 't15, 't16, 't17, 't18, 't19, 't20, 't21, 't22, 't23, 't24, 't25> =
+    | Case1 of 't1
+    | Case2 of 't2
+    | Case3 of 't3
+    | Case4 of 't4
+    | Case5 of 't5
+    | Case6 of 't6
+    | Case7 of 't7
+    | Case8 of 't8
+    | Case9 of 't9
+    | Case10 of 't10
+    | Case11 of 't11
+    | Case12 of 't12
+    | Case13 of 't13
+    | Case14 of 't14
+    | Case15 of 't15
+    | Case16 of 't16
+    | Case17 of 't17
+    | Case18 of 't18
+    | Case19 of 't19
+    | Case20 of 't20
+    | Case21 of 't21
+    | Case22 of 't22
+    | Case23 of 't23
+    | Case24 of 't24
+    | Case25 of 't25
+
+    static member op_ErasedCast(x: 't1) = Case1 x
+    static member op_ErasedCast(x: 't2) = Case2 x
+    static member op_ErasedCast(x: 't3) = Case3 x
+    static member op_ErasedCast(x: 't4) = Case4 x
+    static member op_ErasedCast(x: 't5) = Case5 x
+    static member op_ErasedCast(x: 't6) = Case6 x
+    static member op_ErasedCast(x: 't7) = Case7 x
+    static member op_ErasedCast(x: 't8) = Case8 x
+    static member op_ErasedCast(x: 't9) = Case9 x
+    static member op_ErasedCast(x: 't10) = Case10 x
+    static member op_ErasedCast(x: 't11) = Case11 x
+    static member op_ErasedCast(x: 't12) = Case12 x
+    static member op_ErasedCast(x: 't13) = Case13 x
+    static member op_ErasedCast(x: 't14) = Case14 x
+    static member op_ErasedCast(x: 't15) = Case15 x
+    static member op_ErasedCast(x: 't16) = Case16 x
+    static member op_ErasedCast(x: 't17) = Case17 x
+    static member op_ErasedCast(x: 't18) = Case18 x
+    static member op_ErasedCast(x: 't19) = Case19 x
+    static member op_ErasedCast(x: 't20) = Case20 x
+    static member op_ErasedCast(x: 't21) = Case21 x
+    static member op_ErasedCast(x: 't22) = Case22 x
+    static member op_ErasedCast(x: 't23) = Case23 x
+    static member op_ErasedCast(x: 't24) = Case24 x
+    static member op_ErasedCast(x: 't25) = Case25 x

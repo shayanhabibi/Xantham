@@ -91,7 +91,130 @@ declare namespace Cluster {
     interface Node {
         peers: number;
     }
+    namespace Inner {
+        interface PrivateItem { key: string }
+    }
 }
 
 /** Reaches the namespaced declaration, so the reference position is pinned too. */
 export declare function joinCluster(node: Cluster.Node): Node;
+export declare function clusterItem(): Cluster.Inner.PrivateItem;
+
+// A function abbreviation cannot close this cycle in F#, but a callable interface can.
+export namespace Recursive {
+    export interface Thunk { (): Value }
+    export type Value = string | Thunk;
+    export interface GenericThunk<T> { (): GenericValue<T> }
+    export type GenericValue<T> = T | GenericThunk<T>;
+    export interface Reader { (): Record }
+    export interface Record { next: Reader }
+    export interface Plain { (): string }
+    export interface RestOverloads {
+        apply(...values: string[]): void;
+        apply(values: string[]): void;
+    }
+}
+
+export type SharedCode = "ready" | "closed";
+export namespace Reexports {
+    export { SharedCode };
+}
+
+// ---------------------------------------------------------------------------
+// An exported namespace's members are API whether or not a signature reaches
+// them. Each is declared once, under its namespace, as TypeScript spells it.
+// ---------------------------------------------------------------------------
+
+/** A namespace with a value beside its types. */
+export namespace Pool {
+    /** Declared though no signature reads it. */
+    export interface Idle { since: number }
+    /** A class member: the namespace object reads its constructor. */
+    export class Conn { close(): void }
+    export function size(): number;
+    /** A namespace inside a namespace. */
+    export namespace Inner {
+        /** Declared two namespaces deep. */
+        export interface Deep { depth: number }
+        /** Shares a name with the exported `Node` and with `Shapes.Node`. */
+        export interface Node { inner: boolean }
+    }
+    /** A second name for a nested member: abbreviates the first. */
+    export import Depth = Inner.Deep;
+}
+
+/** A namespace of types alone. */
+export namespace Shapes {
+    export interface Lonely { d: number }
+    /** Read by `widen` as well as harvested: declared once. */
+    export interface Reached { r: string }
+    export interface Node { shape: string }
+    /** Named like the value container, which keeps its name. */
+    export interface Exports { e: number }
+}
+
+/** Reads a namespace member that is harvested too. */
+export declare function widen(r: Shapes.Reached): void;
+
+/** An alias merged with a namespace. */
+export type Pick = { kind: "a" } | { kind: "b" };
+export namespace Pick {
+    export interface Extra { e: number }
+}
+
+/** A tagged union whose arms are its namespace's members. */
+export type Signal = Signal.Start | Signal.Stop;
+export namespace Signal {
+    export interface Start { kind: "start"; at: number }
+    export interface Stop { kind: "stop" }
+}
+export declare function send(signal: Signal): void;
+
+/** Interfaces of one namespace that refer to each other, read by a signature and not. */
+export namespace Markup {
+    export interface Element { children: Element[]; attributes: Attributes }
+    export interface Attributes { parent?: Element; ref?: (element: Element) => void }
+    export interface Fragment { items: Fragment[]; slot?: Slot }
+    export interface Slot { fill: Fragment }
+}
+
+/** Reads the DOM `Element` beside a namespace member of that name. */
+export declare function mount(host: Element): Markup.Element;
+
+export namespace Original {
+    export interface Item<T> { value: T }
+    export namespace Inner {
+        export interface Leaf<T> { item: Item<T> }
+    }
+}
+export import PublicAlias = Original;
+export namespace AliasHolder {
+    export import First = Original;
+    export import Second = Original;
+}
+export declare function readAlias(): PublicAlias.Inner.Leaf<string>;
+
+declare namespace HiddenAliasSource {
+    namespace Inner {
+        interface Item<T> { value: T }
+        namespace Deep { interface Leaf<T> { item: Item<T> } }
+    }
+}
+export import OnlyAlias = HiddenAliasSource.Inner;
+export declare function readOnlyAlias(): OnlyAlias.Deep.Leaf<string>;
+
+/** A class merged with a namespace of types. */
+export declare class Queue {
+    push(item: Queue.Item): void;
+}
+export declare namespace Queue {
+    interface Item { id: string }
+    interface Unread { pending: number }
+}
+
+/** A global namespace this module package contributes. */
+declare global {
+    namespace NestedNameLabGlobal {
+        interface Unreached { u: number }
+    }
+}

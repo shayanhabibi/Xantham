@@ -721,7 +721,7 @@ let dependencyEntrypointOrdinaryTests =
             Directory.CreateDirectory directory |> ignore
             try
                 let package = Path.GetFullPath(Path.Combine(fixture, "..", "dependency-entrypoint-lab"))
-                for name, entry, declaration in [ "plain", "plain-adapter.d.ts", "Plain"; "type-only", "type-only-adapter.d.ts", "Hidden" ] do
+                for name, entry, declaration in [ "plain", "plain-adapter.d.ts", "Plain"; "type-only", "type-only-adapter.d.ts", "TypeOnlyBody.Hidden" ] do
                     let run = Path.Combine(directory, name)
                     Directory.CreateDirectory run |> ignore
                     Pipeline.run (configured run "Root" entry [||]) package (Path.Combine(run, "root")) |> Async.RunSynchronously |> ignore

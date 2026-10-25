@@ -264,6 +264,25 @@ let exportOrderTests =
                 Pipeline.runTier ctx [ Shape.Ordering.orderDeclarations ] declarations |> Async.RunSynchronously
             shaped.Decls |> List.map Render.declName
             |> Flip.Expect.equal "emitted declarations retain the same logical source order" expected
+
+        // `globalThis.Intl.Locale` and `Intl.Locale` are one declaration at one position, and
+        // the checker enumerates the two namespace scopes in either order.
+        testTheory "a declaration's own namespace path precedes an alias path in any input order" [ false; true ] <| fun reversed ->
+            let declaring = symbolKey 50
+            let occurrence path =
+                { export "Locale" (symbol 51 "Locale" (SymbolFlags.Interface ||| SymbolFlags.Variable)) with
+                    DeclaringNamespace = Some declaring
+                    NamespacePath = Some path
+                    Order = Some { File = "/packages/entry/index.d.ts" * Measure.uom<Measure.declFile>; NodeIndex = 4 * Measure.uom<Measure.nodeId> } }
+            let occurrences = [ occurrence "globalThis.Intl"; occurrence "Intl" ]
+            let model =
+                { HarvestModel.Empty with
+                    Exports = if reversed then List.rev occurrences else occurrences
+                    Namespaces = Map.ofList [ declaring, "Intl" * Measure.uom<Measure.symbolName> ] }
+            let ctx = { context with PackageDir = "/packages/entry" * Measure.uom<Measure.dirPath> }
+            let actual, _ = Pipeline.runTier ctx [ Harvest.orderExports ] model |> Async.RunSynchronously
+            actual.Exports |> List.map _.NamespacePath
+            |> Flip.Expect.equal "the declaring namespace's occurrence is first" [ Some "Intl"; Some "globalThis.Intl" ]
     ]
 
 [<Tests>]
