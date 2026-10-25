@@ -4602,7 +4602,7 @@ let internal shapeMembers
             | None -> m.Docs
 
         FsLiteralKeyed(
-            m.Symbol.Name,
+            Naming.memberName m.Symbol.Name,
             literals |> List.mapi (fun before (index, text) -> index - before, text),
             FsMethod
                 {
@@ -4753,8 +4753,9 @@ let internal shapeMembers
                 match Map.tryFind m.Symbol.Name stringNames, shaped with
                 | Some _, FsLiteralKeyed _ -> shaped
                 | Some name, _ ->
-                    reportStringName m.Symbol.Name name
-                    FsStringKeyed(m.Symbol.Name, shaped)
+                    let key = Naming.memberName m.Symbol.Name
+                    reportStringName key name
+                    FsStringKeyed(key, shaped)
                 | None, _ -> shaped))
 
     // A well-known symbol's member is spelled from the symbol: `m.Symbol.Name` carries the

@@ -136,11 +136,15 @@ let shapeClasses: Pass<ShapeModel> =
 
                         let binding =
                             match renamed with
-                            | Some _ -> ImportKeyed(bindingOf export, m.Symbol.Name)
+                            | Some _ -> ImportKeyed(bindingOf export, Naming.memberName m.Symbol.Name)
                             | None -> staticBinding (bindingOf export) key
 
                         if renamed.IsSome then
-                            emit (Finding.make owner (Members.StringKeyedMemberAsEmit(m.Symbol.Name, key)))
+                            emit (
+                                Finding.make
+                                    owner
+                                    (Members.StringKeyedMemberAsEmit(Naming.memberName m.Symbol.Name, key))
+                            )
 
                         let asMethod =
                             if not (emitsAsMethod model m) then

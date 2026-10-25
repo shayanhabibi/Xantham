@@ -6659,6 +6659,28 @@ let literalKeyedMethodTests =
           Build.signature [ param 105 "event" 31; param 106 "listener" 1 ] 4 ]
 
     testList "literal-keyed methods" [
+        testCase "checker escaped leading underscores retain the original JavaScript key" <| fun _ ->
+            let members, _ = shape [ methodMember 100 "___promisify__" 20 ] [ callable 20 onSignatures ]
+
+            Expect.equal
+                (members |> List.map describe)
+                [ "__promisify__", None
+                  "__promisify__Close", Some("__promisify__", [ 0, "close" ])
+                  "__promisify__End", Some("__promisify__", [ 0, "end" ]) ]
+                "the checker escape belongs to neither the F# spelling nor the JavaScript target"
+
+        testCase "checker escaped backtick keys retain the original JavaScript key" <| fun _ ->
+            let members, _ = shape [ methodMember 100 "___`promisify__" 20 ] [ callable 20 onSignatures ]
+
+            let targets =
+                members
+                |> List.choose (function
+                    | FsLiteralKeyed(key, _, _) -> Some key
+                    | FsStringKeyed(key, _) -> Some key
+                    | _ -> None)
+
+            Expect.equal targets [ "__`promisify__"; "__`promisify__"; "__`promisify__" ] "decode only the compiler's underscore escape"
+
         testCase "each literal overload is a method of its own beside the generic one" <| fun _ ->
             let members, _ = shape [ methodMember 100 "on" 20 ] [ callable 20 onSignatures ]
 

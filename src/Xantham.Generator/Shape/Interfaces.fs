@@ -444,12 +444,12 @@ let shapeInterfaces: Pass<ShapeModel> =
 
                         match Map.tryFind m.Symbol.Name names with
                         | Some allocated ->
-                            FsStringKeyed(m.Symbol.Name, member_),
+                            FsStringKeyed(Naming.memberName m.Symbol.Name, member_),
                             refFindings
                             @ [
                                 Finding.make
                                     $"{owner}.{m.Symbol.Name}"
-                                    (Members.StringKeyedMemberAsEmit(m.Symbol.Name, allocated))
+                                    (Members.StringKeyedMemberAsEmit(Naming.memberName m.Symbol.Name, allocated))
                             ]
                         | None -> member_, refFindings
 
@@ -498,7 +498,8 @@ let shapeInterfaces: Pass<ShapeModel> =
                                                 shared @ arm.Own
                                                 |> List.choose (fun member_ ->
                                                     Map.tryFind member_.Symbol.Name names
-                                                    |> Option.map (fun name -> name, member_.Symbol.Name))
+                                                    |> Option.map (fun name ->
+                                                        name, Naming.memberName member_.Symbol.Name))
                                                 |> Map.ofList
                                         },
                                         List.concat sharedParamFindings @ List.concat ownParamFindings)

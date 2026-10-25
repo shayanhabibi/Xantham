@@ -2,6 +2,11 @@ export interface Legacy {
     readonly "$`": string;
 }
 
+export interface EscapedKeys {
+    "__`required": string;
+    "__`optional"?: string;
+}
+
 export interface Options {
     "`required": string;
     "required`": number;
@@ -30,6 +35,8 @@ export interface Base {
 }
 
 export interface Collision extends Base {
+    __promisify__(event: "close", value: string): string;
+    __promisify__(event: "end", value: number): number;
     "$`": string;
     "`": string;
     "`value": string;
@@ -63,6 +70,7 @@ export declare class KeyedClass {
     "`call"(value: string): string;
     static "$`": string;
     static ordinary: string;
+    static "__`property": string;
     static "`call"(value: string): string;
 }
 
@@ -71,3 +79,4 @@ export declare const collision: Collision;
 export declare const renamedDerived: RenamedDerived;
 export declare function inspectOptions(value: Options): string;
 export declare function inspectChoice(value: Choice): string;
+export declare function inspectEscapedKeys(value: EscapedKeys): string;

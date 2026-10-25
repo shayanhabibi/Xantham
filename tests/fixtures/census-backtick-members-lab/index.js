@@ -1,5 +1,6 @@
 export const legacy = { ['$`']: 'legacy' };
 export const collision = {
+    __promisify__(event, value) { if (this !== collision) throw Error('receiver'); return value; },
     Item: 'original', Value: 'original-value', ['$`']: 'dollar', ['`']: 'tick',
     ['`value']: 'first', ['value`']: 'second', Create: 'create', ['`Create']: 'key-create',
     ['`Invoke'](value) { if (this !== collision) throw Error('receiver'); return value + ':receiver'; },
@@ -15,6 +16,7 @@ export class KeyedClass {
     ['`call'](value) { return this['$`'] + ':' + value; }
     static ['$`'] = 'static';
     static ordinary = 'ordinary-static';
+    static ['__`property'] = 'escaped-static';
     static ['`call'](value) { return this['$`'] + ':' + value; }
 }
 export function inspectOptions(value) {
@@ -24,4 +26,7 @@ export function inspectOptions(value) {
 export const renamedDerived = { ['`value']: 'inherited-key', Value: 12 };
 export function inspectChoice(value) {
     return JSON.stringify([value['`tag'], Object.hasOwn(value, 'a'), value.a ?? null, Object.hasOwn(value, 'b'), value.b ?? null, Object.hasOwn(value, 'Tag')]);
+}
+export function inspectEscapedKeys(value) {
+    return JSON.stringify([value['__`required'], Object.hasOwn(value, '__`optional'), value['__`optional'] ?? null]);
 }

@@ -18,6 +18,19 @@ type Legacy =
     static member Create (Item: string) : Legacy = jsNative
 
 [<Interface>]
+type EscapedKeys =
+    [<Emit("$0['__`required']")>]
+    abstract Required: string with get
+    [<Emit("$0['__`required'] = $1")>]
+    abstract Required: string with set
+    [<Emit("$0['__`optional']")>]
+    abstract Optional: string option with get
+    [<Emit("$0['__`optional'] = $1")>]
+    abstract Optional: string option with set
+    [<Emit("({'__`required': $0, ...($1 === undefined ? {} : {'__`optional': $1})})")>]
+    static member Create (Required: string, ?Optional: string) : EscapedKeys = jsNative
+
+[<Interface>]
 type Options =
     [<Emit("$0['`required']")>]
     abstract Required: string with get
@@ -83,6 +96,20 @@ type Base =
 
 type Collision =
     inherit Base
+    /// <summary>
+    /// <code lang="ts">
+    /// __promisify__(event: "close", value: string): string
+    /// </code>
+    /// </summary>
+    [<Emit("$0.__promisify__('close', $1)")>]
+    abstract __promisify__Close: value: string -> string
+    /// <summary>
+    /// <code lang="ts">
+    /// __promisify__(event: "end", value: number): number
+    /// </code>
+    /// </summary>
+    [<Emit("$0.__promisify__('end', $1)")>]
+    abstract __promisify__End: value: float -> float
     [<Emit("$0['\\x24`']")>]
     abstract Item2: string with get
     [<Emit("$0['\\x24`'] = $1")>]
@@ -182,6 +209,9 @@ type KeyedClass =
     static member ordinary
         with get (): string = jsNative
         and set (_: string): unit = jsNative
+    static member Property
+        with [<Import("KeyedClass", "census-backtick-members-lab"); Emit("$0['__`property']")>] get (): string = jsNative
+        and [<Import("KeyedClass", "census-backtick-members-lab"); Emit("$0['__`property'] = $1")>] set (_: string): unit = jsNative
     [<Import("KeyedClass", "census-backtick-members-lab"); Emit("$0['`call']($1...)")>]
     static member Call2 (value: string) : string = jsNative
 
@@ -200,3 +230,5 @@ type Exports =
     static member inspectOptions (value: Options) : string = jsNative
     [<Import("inspectChoice", "census-backtick-members-lab")>]
     static member inspectChoice (value: Choice) : string = jsNative
+    [<Import("inspectEscapedKeys", "census-backtick-members-lab")>]
+    static member inspectEscapedKeys (value: EscapedKeys) : string = jsNative

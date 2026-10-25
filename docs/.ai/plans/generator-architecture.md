@@ -3533,6 +3533,9 @@ key and allocated F# spelling; the historical dropped-member code `MB007` remain
 
 `FsStringKeyed` carries the original key through member substitution, overload settlement,
 qualification and catalogue hashing. Literal overloads retain their original call target.
+Every JavaScript key payload passes through `Naming.memberName` to undo the checker's
+leading-underscore escape before rendering or hashing; allocation lookup identities remain
+checker names. In particular, `___promisify__` targets the real `__promisify__` member.
 Exclusive-arm folds allocate across their shared and exclusive members and carry the same
 wrapper. `FsCreateOverload.StringKeys` preserves construction mappings after inherited
 members have been removed from the declaration. Optional keys retain omission semantics.

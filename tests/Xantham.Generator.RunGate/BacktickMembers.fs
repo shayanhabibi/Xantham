@@ -8,6 +8,31 @@ let run check =
     equal "legacy dollar-backtick construction" "created" (Legacy.Create "created").Item
 
     let value = Exports.collision
+
+    equal
+        "leading double underscore literal method keeps source key and receiver"
+        "underscore"
+        (value.__promisify__Close "underscore")
+
+    equal "leading double underscore overload family keeps source key" 9.0 (value.__promisify__End 9.0)
+    let escaped = EscapedKeys.Create("required", Optional = "optional")
+
+    equal
+        "escaped compiler key construction preserves required and optional source keys"
+        "[\"required\",true,\"optional\"]"
+        (Exports.inspectEscapedKeys escaped)
+
+    equal "escaped compiler key getter preserves source key" "required" escaped.Required
+    escaped.Required <- "written"
+
+    equal
+        "escaped compiler key setter preserves source key"
+        "[\"written\",true,\"optional\"]"
+        (Exports.inspectEscapedKeys escaped)
+
+    equal "escaped compiler static getter preserves source key" "escaped-static" KeyedClass.Property
+    KeyedClass.Property <- "escaped-static-write"
+    equal "escaped compiler static setter preserves source key" "escaped-static-write" KeyedClass.Property
     equal "ordinary inherited Item remains distinct" "original" value.Item
     equal "first normalized key remains distinct" "dollar" value.Item2
     equal "second normalized key remains distinct" "tick" value.Item3
