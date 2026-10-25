@@ -85,6 +85,16 @@ generator (abbdae07), `generate --only compiler-lib` places the ten constructor 
 `Dom.WebAssembly` on some runs and in `Dom.GlobalThis.WebAssembly` on others. Regenerate more
 than once before attributing that hunk to a change.
 
+**An empty module export list can hide an `export =` variable root.**
+`getExportsOfModule` lists namespace exports, while the direct export table retains the
+`export=` assignment. Follow that assignment to its declaring value and bind the root through
+the existing default-import policy. Symbol parents are absent for variable roots, so determine
+locality from every typed declaration's ancestors. A `declare global` block keeps a value
+global even inside an ambient module; one genuine global declaration preserves the global
+binding. A scope query at file position zero can select the first ambient module's inner
+scope and expose its local variable as a global candidate. The source-file node itself has
+the global scope for a script. The ambient-root lab begins with its module to retain this trap.
+
 ## Declaration catalogs
 
 **TypeScript library ownership is logical, not a platform distribution.** Installed
@@ -572,3 +582,15 @@ the retained declarations, including ExportSpecifier aliases resolved to Functio
 A PropertySignature or PropertyDeclaration keeps the property form; required pure-callable
 guards still apply in Spec and customization Semantics. The namespace intersection lab reproduces
 the same compiler shape without importing the entire global scope.
+
+## Source-identical overloads precede emitted signature collisions (2026-10-25)
+
+Two source overloads with identical compiler parameter types and optionality select the first
+return in TypeScript. For example `readlinkSync(path, options?: EncodingOption): string`
+precedes an overload with the same inputs returning `string | Buffer`; unioning those returns
+loses precision. Compare source identities before shaping, rather than only the compiled F#
+parameter key. A receiver is separate from `getParametersOfSignature`: the compiler's
+`SignatureResponse.ThisParameter` supplies `ResolvedSignature.HasThisParameter`. Generic,
+rest and explicit-receiver signatures retain their existing collision policy. Assign expanded
+signature ordinals before filtering, so a later retained overload keeps its authenticated
+source ordinal rather than its new position.

@@ -1,0 +1,5 @@
+{
+  "name": "census-source-overloads-lab",
+  "type": "module",
+  "types": "index.d.ts"
+}

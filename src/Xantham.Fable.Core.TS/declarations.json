@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "compiler": "498f59d207e22c40f1ecc218dfa67d1db25629a231bd0948c3db92df7457afc7",
-  "generator": "adf738be7f7cb6ff743dc90ac2fc46c5404c98317def4e6ee9b8cb306b301416",
+  "generator": "618eb71fe02ae82e8f79c5d98cc308c0409193b4cb978bc8528c0ed3b1da1284",
   "inferenceProfile": "d2f99097bf8701703dbad824988206bf0800602c089c9094d2b66092c161b32f",
   "owner": "FableCoreTsInput",
   "inputs": [
@@ -1801306,11 +1801306,11 @@
     }
   ],
   "compatibility": {
-    "apiVersion": 11,
+    "apiVersion": 12,
     "contractVersion": 1,
     "customizationVersion": 1,
     "identityVersion": 7,
-    "inferenceVersion": 4,
+    "inferenceVersion": 5,
     "compiler": {
       "astProtocolVersion": 9,
       "kind": "typescript-package",

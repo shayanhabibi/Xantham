@@ -1546,6 +1546,7 @@ let private resolveSignatures (ctx: Context) (trace: Trace option) (registers: R
                     return
                         {
                             Parameters = parameterFacts |> Array.map fst |> Array.toList
+                            HasThisParameter = ValueOption.isSome signature.ThisParameter
                             HasRest = hasRest
                             TypeParameters = typeParameters |> Array.map _.TypeId |> Array.toList
                             IsAbstract = signature.Flags.HasFlag SignatureFlags.Abstract

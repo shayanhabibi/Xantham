@@ -1225,6 +1225,8 @@ type OverloadDoc =
 type ResolvedSignature =
     {
         Parameters: ResolvedMember list
+        /// The signature declares an explicit TypeScript receiver parameter.
+        HasThisParameter: bool
         /// The signature's last parameter is a rest parameter (`...args`).
         HasRest: bool
         /// The signature's own type parameters (§4.9). A generic *function* carries them here

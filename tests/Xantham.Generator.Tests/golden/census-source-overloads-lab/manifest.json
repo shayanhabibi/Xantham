@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "package": "census-source-overloads-lab",
+  "module": "CensusSourceOverloadsLab",
+  "counts": {
+    "exact": 2,
+    "ergonomic": 1,
+    "widened": 4,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SE - shape-exports",
+      "total": 2,
+      "ergonomic": 2
+    },
+    {
+      "pass": "resolve-export-collisions",
+      "total": 4,
+      "widened": 4
+    }
+  ]
+}

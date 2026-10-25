@@ -3,22 +3,21 @@
   "package": "@types/node",
   "module": "Node",
   "counts": {
-    "exact": 1010,
-    "ergonomic": 2196,
-    "widened": 590,
-    "escape": 4
+    "exact": 1015,
+    "ergonomic": 2199,
+    "widened": 589,
+    "escape": 0
   },
   "passes": [
     {
       "pass": "HG - harvest-globals",
       "total": 171,
-      "exact": 167,
-      "escape": 4
+      "exact": 171
     },
     {
       "pass": "SY - synthesize-anonymous",
-      "total": 2146,
-      "exact": 2146
+      "total": 2147,
+      "exact": 2147
     },
     {
       "pass": "LU - classify-literal-unions",
@@ -40,8 +39,8 @@
       "pass": "SI - shape-interfaces",
       "total": 26277,
       "exact": 384,
-      "ergonomic": 24187,
-      "widened": 1706
+      "ergonomic": 24188,
+      "widened": 1705
     },
     {
       "pass": "SA - shape-aliases",
@@ -58,16 +57,16 @@
     },
     {
       "pass": "SE - shape-exports",
-      "total": 1350,
+      "total": 1343,
       "exact": 8,
-      "ergonomic": 963,
-      "widened": 379
+      "ergonomic": 957,
+      "widened": 378
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 2181,
+      "total": 2182,
       "exact": 103,
-      "ergonomic": 2054,
+      "ergonomic": 2055,
       "widened": 24
     },
     {
@@ -90,9 +89,9 @@
     },
     {
       "pass": "resolve-export-collisions",
-      "total": 34,
+      "total": 30,
       "ergonomic": 4,
-      "widened": 30
+      "widened": 26
     },
     {
       "pass": "DD - drop-orphan-delegates",

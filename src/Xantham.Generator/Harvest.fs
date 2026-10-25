@@ -176,14 +176,56 @@ let harvestExports: Pass<HarvestModel> =
                 }
     }
 
-/// One ambient module declaration, harvested: its exports under the specifier they import
-/// from, the findings the declaration raises, and the symbol id of the namespace it re-exports
-/// where it is written `export = Namespace`.
-///
-/// `getExportsOfModule` resolves `export =` in place, so the exports of `cloudflare:workers` are
-/// the members of `CloudflareWorkersModule`, and `getParentOfSymbol` over any of them returns
-/// that namespace. Such a namespace is the module's body, reachable through the specifier
-/// alone; a `[<Global>]` binding to it reads `undefined`.
+let private isModuleLocal (ctx: Context) (symbol: SymbolResponse) =
+    async {
+        let! declarations =
+            symbol.Declarations
+            |> ValueOption.defaultValue [||]
+            |> Array.map (fun handle ->
+                async {
+                    match NodeHandle.parse handle with
+                    | ValueNone -> return false
+                    | ValueSome handle ->
+                        let! source = ctx.Session.getSourceFile (DocumentIdentifier.FileName handle.Path)
+
+                        match source with
+                        | ValueNone -> return false
+                        | ValueSome source ->
+                            let globalBlocks =
+                                Ast.moduleAugmentations source
+                                |> Seq.map (Node.ofIndex<AnyNode> source)
+                                |> Seq.filter (fun name ->
+                                    name.Kind = SyntaxKind.Identifier && name.Text = ValueSome "global")
+                                |> Seq.choose (Node.parent >> ValueOption.toOption)
+                                |> Seq.toArray
+
+                            let rec scope (node: Node<AnyNode>) =
+                                if globalBlocks |> Array.exists (Node.sameAs node) then
+                                    Some false
+                                elif
+                                    node.Kind = SyntaxKind.ModuleDeclaration
+                                    && ModuleDeclaration.name (Node.retag<AnyNode, ModuleDeclaration> node)
+                                       |> ValueOption.exists (fun name -> name.Kind = SyntaxKind.StringLiteral)
+                                then
+                                    Some true
+                                else
+                                    Node.parent node |> ValueOption.toOption |> Option.bind scope
+
+                            match scope (Node.ofIndex<AnyNode> source handle.Index) with
+                            | Some local -> return local
+                            | None ->
+                                let! moduleSymbol =
+                                    ctx.Session.getSymbolOfSourceFile (DocumentIdentifier.FileName handle.Path)
+
+                                return ValueOption.isSome moduleSymbol
+                })
+            |> Async.Sequential
+
+        return not (Array.isEmpty declarations) && declarations |> Array.forall id
+    }
+
+/// An ambient module's exports, findings, and optional namespace body or module-local root
+/// value omitted from the global exports.
 let private harvestAmbientModule (ctx: Context) (moduleSymbol: SymbolResponse) =
     async {
         let specifier = moduleSymbol.Name.Trim '"'
@@ -199,11 +241,41 @@ let private harvestAmbientModule (ctx: Context) (moduleSymbol: SymbolResponse) =
             let! exports = ctx.Session.getExportsOfModule moduleSymbol.Reference
             let exports = exports |> ValueOption.defaultValue [||]
 
-            if exports.Length = 0 then
+            let! resolved, rootValue =
+                async {
+                    if exports.Length > 0 then
+                        let! resolved = exports |> Array.map (followAlias ctx) |> Async.Parallel
+                        return resolved, None
+                    else
+                        let! direct = ctx.Session.Sessionless.getExportsOfSymbol moduleSymbol.Reference
+
+                        match
+                            direct
+                            |> ValueOption.defaultValue [||]
+                            |> Array.tryFind (fun symbol -> symbol.Name = "export=")
+                        with
+                        | Some assignment ->
+                            let! _, target = followAlias ctx assignment
+
+                            if
+                                hasAny SymbolFlags.Value target.Flags
+                                && target.Declarations |> ValueOption.exists (Array.isEmpty >> not)
+                            then
+                                let! localRoot = isModuleLocal ctx target
+                                return [| "default", target |], (if localRoot then Some target.SymbolId else None)
+                            else
+                                return [||], None
+                        | None -> return [||], None
+                }
+
+            if resolved.Length = 0 then
                 return [], [ Finding.make moduleSymbol.Name HarvestGlobals.AmbientModuleDropped ], None
             else
-                let! resolved = exports |> Array.map (followAlias ctx) |> Async.Parallel
-                let! parent = ctx.Session.Sessionless.getParentOfSymbol exports[0].Reference
+                let! parent =
+                    if exports.Length = 0 then
+                        async.Return ValueNone
+                    else
+                        ctx.Session.Sessionless.getParentOfSymbol exports[0].Reference
 
                 let body =
                     parent
@@ -246,7 +318,7 @@ let private harvestAmbientModule (ctx: Context) (moduleSymbol: SymbolResponse) =
                         | None -> ()
                     ]
 
-                return harvested |> Array.toList, findings, body |> Option.map fst
+                return harvested |> Array.toList, findings, rootValue |> Option.orElse (body |> Option.map fst)
     }
 
 /// The entry package's ambient global declarations, for a package that declares no module at

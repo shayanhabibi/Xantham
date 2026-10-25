@@ -1,0 +1,15 @@
+export declare function pick(value: string): string;
+export declare function pick(value: string): string | number;
+export declare function pick(value: number): number;
+export declare function reverse(value: string): string | number;
+export declare function reverse(value: string): string;
+export declare function optional(value?: string): string;
+export declare function optional(value?: string): string | number;
+export declare function literal(value: true): string;
+export declare function literal(value: false): number;
+export declare function generic<T>(value: T): string;
+export declare function generic<T>(value: T): number;
+export declare function receiver(this: { tag: string }, value: string): string;
+export declare function receiver(this: { tag: number }, value: string): number;
+export declare function rest(...values: string[]): string;
+export declare function rest(...values: string[]): string | number;

@@ -78,6 +78,7 @@
         <Compile Include="GenericCallableInterfaces.fs" />
         <Compile Include="RecursiveCallbacks.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\census-callable-provenance-lab\CensusCallableProvenanceLab.fs" Link="census-callable-provenance-lab\CensusCallableProvenanceLab.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\census-ambient-export-value-lab\CensusAmbientExportValueLab.fs" Link="census-ambient-export-value-lab\CensusAmbientExportValueLab.fs" />
         <Compile Include="Program.fs" />
         <None Include="register.mjs" />
     </ItemGroup>
