@@ -509,8 +509,36 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                         facts.Declarations
 
                 if List.isEmpty handles then
-                    match facts.NonNullableAlias with
-                    | Some alias ->
+                    let intersectionIdentity =
+                        if facts.AliasDeclarations.IsEmpty && not facts.IntersectionMembers.IsEmpty then
+                            let constituents =
+                                facts.IntersectionMembers
+                                |> List.choose (fun child -> Map.tryFind child shape.Types)
+
+                            let anchors = constituents |> List.collect _.Declarations
+
+                            let hasWrittenLiteral =
+                                anchors
+                                |> List.exists (fun handle ->
+                                    NodeHandle.parse (handle / uom<declHandle>)
+                                    |> ValueOption.exists (fun node -> node.Kind = SyntaxKind.TypeLiteral))
+
+                            if hasWrittenLiteral && constituents.Length = facts.IntersectionMembers.Length then
+                                let contracts =
+                                    facts.IntersectionMembers |> List.choose (typeIdentity (id :: visited) bindings)
+
+                                if contracts.Length = facts.IntersectionMembers.Length then
+                                    Some(identity "source-intersection" anchors (contracts |> List.map _.Key))
+                                else
+                                    None
+                            else
+                                None
+                        else
+                            None
+
+                    match intersectionIdentity, facts.NonNullableAlias with
+                    | Some identity, _ -> Some identity
+                    | None, Some alias ->
                         typeIdentity (id :: visited) bindings alias
                         |> Option.map (fun identity ->
                             // Nullable identity retains the alias used by the shaped F# reference.
@@ -526,7 +554,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                                 Key = hashText (json ("nullable-alias", identity.Key, nullish))
                                 Role = "nullable-alias"
                             })
-                    | None ->
+                    | None, None ->
                         if
                             structural
                             && facts.Response.Flags.HasFlag TypeFlags.Object

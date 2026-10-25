@@ -97,6 +97,20 @@ the global scope for a script. The ambient-root lab begins with its module to re
 
 ## Declaration catalogs
 
+**Anonymous intersections can inherit different reachable parents in different runs.**
+`BotEnterprise.botManagement: BotBase & { ja3Hash: string }` is the same checker contract
+when reached through `Combined = BotEnterprise & Other`, but a producer reaches Combined
+while a consumer can reach only Enterprise. Parent-role minimum keys then disagree and change
+Enterprise's canonical API even though the child's emitted API agrees. Declaration-less,
+alias-less intersections with an actual compiler TypeLiteral constituent use ordered,
+source-authenticated constituent contracts and their declaration handles before parent roles.
+Every constituent must authenticate directly; incomplete or recursive evidence retains the
+existing fallback. Applied arguments and independent written literal handles remain distinct.
+The source-ownership snapshot still precedes parent-role inference. The
+`census-owner-intersection-identity-lab` covers differing reachability, generic applications,
+independent source contracts, consumer compilation and stale/API rejection. Identity contract 8
+requires regenerating earlier catalogues; this change alone alters neither API nor inference policy.
+
 **TypeScript library ownership is logical, not a platform distribution.** Installed
 `lib/lib.*.d.ts` files from `typescript` and recognized `@typescript/typescript-<rid>`
 packages share package identity `typescript`, their package-relative library path and

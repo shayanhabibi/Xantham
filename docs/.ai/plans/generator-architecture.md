@@ -1319,6 +1319,14 @@ a complete substitution, preserving caller bounds and repeated or reordered argu
 In catalog mode this includes original anonymous declarations retained by Resolve whose only
 reachable occurrence is an application. The canonical declaration binds its original free
 parameters; applied method parameters and their constraints remain at the method use site.
+Declaration-less, alias-less intersections with a compiler-authenticated TypeLiteral constituent
+retain their ordered constituent contracts and declaration handles independently of reachable
+parents (2026-10-25). Constituents authenticate directly before parent-role inference; complete
+applied contracts preserve generic arguments and distinct written literals preserve source
+identity. Incomplete or recursive constituent evidence retains the existing fallback. Source
+ownership retains the earlier canonical snapshot. The owner-intersection lab compares producer
+and consumer identities with different reachable parents and compiles their shared member API.
+Identity compatibility advances to 8; API and inference policy are unchanged by this correction.
 Opaque dependency aliases retain their argument owners and applications in identity, including
 the source dependencies of concrete defaults, even when member facts are intentionally widened.
 Anonymous literal unions use their literal values for identity; named aliases and enum members
