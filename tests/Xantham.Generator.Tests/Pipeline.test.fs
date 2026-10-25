@@ -7118,6 +7118,12 @@ let censusBoundAliasNamingTests =
     ]
 
 [<Tests>]
+let dependentConstraintFixtureTests =
+    testList "dependent constraint fixture" [
+        yield! fixtureTests "zod-dependent-constraints-lab" (handFixture "zod-dependent-constraints-lab") GeneratorConfig.Default (fun _ -> [])
+    ]
+
+[<Tests>]
 let groupedDomAliasTests =
     testList "grouped DOM alias fixture" [
         yield!

@@ -152,6 +152,7 @@ module FindingCodes =
             "TR.SymbolAsLibInterface", "TR069"
             "TR.OpenIntersectionCarried", "TR072"
             "TR.RestatingIntersectionOperandReduced", "TR073"
+            "TR.CyclicDependentConstraintApplicationToObj", "TR074"
             "TP.UnnamedTypeParameter", "TP001"
             "TP.ConstraintDropped", "TP002"
             "TP.GenericFunctionHoisted", "TP003"
@@ -563,11 +564,15 @@ type TypeReference =
     /// An object operand restating a type parameter's bound reduces away, and the parameter is
     /// the type: `R & { req: Base }` over `R extends Wide` is `'R`.
     | [<Exact>] RestatingIntersectionOperandReduced
+    /// <summary>Widens an application to <c>obj</c> when corrected arguments fail its cyclic dependent bounds.</summary>
+    | [<Widened>] CyclicDependentConstraintApplicationToObj of name: string
 
     interface IFindingKind with
         member this.Message =
             match this with
             | SelfReferenceThroughUnnamed -> "type refers to itself through unnamed shapes; widened to obj"
+            | CyclicDependentConstraintApplicationToObj name ->
+                $"{name}'s cyclic dependent constraints are not satisfied after argument correction; application widened to obj"
             | TypeNotResolved reason -> $"type not resolved ({reason}); widened to obj"
             | MissingFromTypeTable -> "referenced type missing from the type table; widened to obj"
             | LoneEnumMemberToFloat -> "lone enum member widened to float"

@@ -3581,3 +3581,18 @@ branch selection, width32768, depth policy and catalogue guards are unchanged. T
 inner conditional of HonoRequest.param, which the compiler selected identically in producer and
 consumer but the consumer lost to frontier width pressure. The small nested-conditional lab is
 a positive policy/cost guard; the source-authenticated real request snapshot supplies RED.
+
+### Shape: dependent generic application constraints (2026-10-26)
+
+`appliedRefTo` substitutes supplied arguments into a target declaration's dependent bounds
+under disjoint comparison binders. Its dependency graph processes forward references before
+their users, with one correction per argument. Complete emitted nominal bases establish
+dependent subtyping; ordinary constraint checks and their existing losses remain active.
+
+Final cyclic validation retains lawful nominal self and mutual applications. A cyclic
+correction whose final bounds remain unproven widens the whole application with `TR074`.
+The Zod reduction covers defaults, explicit arguments, open generic inheritance, methods,
+nested reordered binders, forward correction and recursive positive/negative controls.
+The initial generated consumer fails FS0001 before the fix; the corrected consumer compiles
+and rejects a different nominal dependent contract. Full Zod and corpus evidence belongs to
+the follow-up integration gate.

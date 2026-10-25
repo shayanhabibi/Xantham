@@ -1,5 +1,20 @@
 # Footguns and carried-forward threads
 
+## Dependent application constraints (2026-10-26)
+
+Shape generic bounds under the target declaration's binders, then substitute the supplied
+argument references. Reading `T extends Internals<O, I>` directly in the caller's scope
+turns out-of-scope `O` and `I` into `obj` and can emit an application that violates its own
+constraint. Comparison binder names must avoid all existing `TypeVars`, including names
+introduced by nested comparison scopes. Forward-dependent arguments are corrected first.
+
+Compare complete applied nominal bases for dependent constraints; generic head equality
+does not establish F# subtyping. Validate cyclic bounds after correction. `Self<any>` for
+`T extends Box<T>` cannot be repaired as `Self<Box<obj>>`: the corrected argument would need
+to inherit `Box<Box<obj>>`. `TR074` widens the entire unproven cyclic application. Valid
+nominal self and mutual recursion retain their typed applications. Avoid a fixpoint loop
+that grows a fresh nested generic application on each iteration.
+
 Durable facts harvested from `docs/.ai/handovers/` before that directory was retired on
 2026-09-22. The handovers were lane bookkeeping for landed work; what survives here is the part
 that constrains future changes, plus the threads that were still open when their lane closed.

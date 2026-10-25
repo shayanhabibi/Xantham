@@ -2349,6 +2349,21 @@ let internal typeVarById (model: ShapeModel) (typeId: int<Measure.typeId>) =
     | Some facts -> typeVarOf model typeId facts
     | None -> Map.tryFind typeId model.TypeVars
 
+/// The type variables a rendered reference actually names.
+let rec internal typeVarsOf (reference: FsTypeRef) : Set<string> =
+    let union = List.fold (fun acc item -> Set.union acc (typeVarsOf item)) Set.empty
+
+    match reference with
+    | FsTypeVar name -> Set.singleton name
+    | FsOption inner
+    | FsArray inner -> typeVarsOf inner
+    | FsTuple items
+    | FsErasedUnion items -> union items
+    | FsDelegate(arguments, returns) -> Set.union (union arguments) (typeVarsOf returns)
+    | FsFunc(argument, returns) -> Set.union (typeVarsOf argument) (typeVarsOf returns)
+    | FsApp(_, arguments) -> union arguments
+    | _ -> Set.empty
+
 /// The F# type written at a reference position, with the findings any widening produces.
 /// `self` is the name of the declaration being shaped, so a polymorphic `this` return resolves
 /// to it. A type carries several flags at once, so the arm order below picks which finding.
@@ -3125,12 +3140,6 @@ and internal appliedRefTo
 
     let satisfies = satisfiesNominally model
 
-    // `NodeListOf<'E>` holds under `'E :> Element`, because `Element` inherits `Node` (W7.4).
-    let variableSatisfies boundId bound argument =
-        match statedConstraint argument with
-        | Some(argumentBoundId, argumentBound) -> argumentBound = bound || satisfies boundId argumentBoundId
-        | None -> false
-
     // The forms F# seals against a `:>` constraint. The arms below decide the rest by name.
     let sealedForm =
         function
@@ -3146,65 +3155,207 @@ and internal appliedRefTo
         else
             arguments |> List.map (fun _ -> None)
 
-    let mapped =
-        List.zip parameters arguments
-        |> List.map (fun (parameter, argument) ->
-            let reference, argumentFindings = typeRef ctx model self owner argument
+    // A target's bound is written in its own binders, not the caller's scope:
+    // Schema<O, I, T extends Internals<O, I>> applied to string/number must
+    // check T against Internals<string, number>. Comparison-only names avoid
+    // capturing a caller variable with the same spelling.
+    let mutable taken = model.TypeVars |> Map.toList |> List.map snd |> Set.ofList
+
+    let binderNames =
+        parameters
+        |> List.mapi (fun index parameter ->
+            parameter
+            |> Option.map (fun _ ->
+                let name =
+                    Seq.initInfinite (fun suffix -> $"\u0000argument{index}:{suffix}")
+                    |> Seq.find (fun name -> not (Set.contains name taken))
+
+                taken <- Set.add name taken
+                name))
+        |> List.toArray
+
+    let binders =
+        List.zip parameters (Array.toList binderNames)
+        |> List.choose (fun (parameter, name) -> Option.map2 (fun id name -> id, name) parameter name)
+
+    let binderIndices =
+        binderNames
+        |> Array.mapi (fun index name -> name |> Option.map (fun name -> name, index))
+        |> Array.choose id
+        |> Map.ofArray
+
+    let scoped =
+        { model with
+            TypeVars =
+                binders
+                |> List.fold (fun scope (id, name) -> Map.add id name scope) model.TypeVars
+        }
+
+    let shaped = arguments |> List.map (typeRef ctx model self owner) |> List.toArray
+    let mapped = shaped |> Array.map fst
+
+    let constraints =
+        parameters
+        |> List.map (Option.bind (statedConstraintOf ctx scoped self owner))
+        |> List.toArray
+
+    let dependencies =
+        constraints
+        |> Array.map (function
+            | Some(_, bound) ->
+                typeVarsOf bound
+                |> Set.toList
+                |> List.choose (fun name -> Map.tryFind name binderIndices)
+            | None -> [])
+
+    let rec substitute reference =
+        let go = substitute
+
+        match reference with
+        | FsTypeVar name ->
+            Map.tryFind name binderIndices
+            |> Option.map (fun index -> mapped[index])
+            |> Option.defaultValue reference
+        | FsOption inner -> FsOption(go inner)
+        | FsArray inner -> FsArray(go inner)
+        | FsTuple items -> FsTuple(List.map go items)
+        | FsErasedUnion items -> FsErasedUnion(List.map go items)
+        | FsDelegate(args, returns) -> FsDelegate(List.map go args, go returns)
+        | FsFunc(arg, returns) -> FsFunc(go arg, go returns)
+        | FsApp(name, args) -> FsApp(name, List.map go args)
+        | FsBranded(primitive, measure) -> FsBranded(go primitive, measure)
+        | _ -> reference
+
+    let appliedConstraint index =
+        constraints[index]
+        |> Option.map (fun (id, reference) -> id, substitute reference)
+
+    // For dependent bounds, compare the complete emitted base application rather than
+    // treating two different argument lists of the same generic head as subtypes.
+    let satisfiesApplied index boundId bound argument =
+        if dependencies[index].IsEmpty then
+            satisfies boundId argument
+        else
+            let rec walk seen id =
+                not (Set.contains id seen)
+                && (match Map.tryFind id model.Types with
+                    | None -> false
+                    | Some facts ->
+                        facts.BaseTypes @ facts.IntersectionMembers @ Option.toList facts.Constraint
+                        |> List.exists (fun baseId ->
+                            let reference, _ = typeRef ctx model self owner baseId
+                            reference = bound || walk (Set.add id seen) baseId))
+
+            walk Set.empty argument
+
+    let variableSatisfiesApplied index boundId bound argument =
+        match statedConstraint argument with
+        | Some(argumentBoundId, argumentBound) ->
+            argumentBound = bound || satisfiesApplied index boundId bound argumentBoundId
+        | None -> false
+
+    let states = Array.zeroCreate arguments.Length
+    let arguments = List.toArray arguments
+
+    // Resolve argument dependencies once. A back edge reads its original argument;
+    // final validation below refuses a cyclic correction whose bound then changes.
+    let rec resolve index =
+        if states[index] = 0 then
+            states[index] <- 1
+
+            for dependency in dependencies[index] do
+                resolve dependency
+
+            let reference, argumentFindings = shaped[index]
+            let argument = arguments[index]
             findings <- findings @ argumentFindings
 
-            match parameter |> Option.bind statedConstraint, reference with
-            | Some(_, bound), FsObj ->
-                findings <-
-                    findings
-                    @ [
-                        Finding.make owner (TypeReference.ConstrainedArgumentWidened(name, typeSpelling bound))
-                    ]
+            mapped[index] <-
+                match appliedConstraint index, reference with
+                | Some(_, bound), FsObj ->
+                    findings <-
+                        findings
+                        @ [
+                            Finding.make owner (TypeReference.ConstrainedArgumentWidened(name, typeSpelling bound))
+                        ]
 
-                bound
-            | Some(boundId, bound), FsTypeVar variable when
-                not (variableSatisfies boundId bound argument)
-                && keyResultBound argument <> Some bound
-                ->
-                findings <-
-                    findings
-                    @ [
-                        Finding.make
-                            owner
-                            (TypeReference.ArgumentNotBoundWithConstraint(variable, name, typeSpelling bound))
-                    ]
+                    bound
+                | Some(boundId, bound), FsTypeVar variable when
+                    not (variableSatisfiesApplied index boundId bound argument)
+                    && keyResultBound argument <> Some bound
+                    ->
+                    findings <-
+                        findings
+                        @ [
+                            Finding.make
+                                owner
+                                (TypeReference.ArgumentNotBoundWithConstraint(variable, name, typeSpelling bound))
+                        ]
 
-                bound
-            | Some(boundId, bound), (FsNamed shown | FsApp(shown, _)) when
-                reference <> bound && not (satisfies boundId argument)
-                ->
-                findings <-
-                    findings
-                    @ [
-                        Finding.make
-                            owner
-                            (TypeReference.ArgumentNotASubtypeOfConstraint(shown, name, typeSpelling bound))
-                    ]
+                    bound
+                | Some(boundId, bound), (FsNamed shown | FsApp(shown, _)) when
+                    reference <> bound && not (satisfiesApplied index boundId bound argument)
+                    ->
+                    findings <-
+                        findings
+                        @ [
+                            Finding.make
+                                owner
+                                (TypeReference.ArgumentNotASubtypeOfConstraint(shown, name, typeSpelling bound))
+                        ]
 
-                bound
-            // TypeScript admits a primitive against a structural bound - `string` has `length` -
-            // where `:>` admits it nowhere, so a sealed form is written as the constraint too.
-            | Some(boundId, bound), _ when sealedForm reference && not (satisfies boundId argument) ->
-                findings <-
-                    findings
-                    @ [
-                        Finding.make
-                            owner
-                            (TypeReference.ArgumentNotASubtypeOfConstraint(
-                                typeSpelling reference,
-                                name,
-                                typeSpelling bound
-                            ))
-                    ]
+                    bound
+                // TypeScript admits a primitive against a structural bound - `string` has `length` -
+                // where `:>` admits it nowhere, so a sealed form is written as the constraint too.
+                | Some(boundId, bound), _ when
+                    sealedForm reference && not (satisfiesApplied index boundId bound argument)
+                    ->
+                    findings <-
+                        findings
+                        @ [
+                            Finding.make
+                                owner
+                                (TypeReference.ArgumentNotASubtypeOfConstraint(
+                                    typeSpelling reference,
+                                    name,
+                                    typeSpelling bound
+                                ))
+                        ]
 
-                bound
-            | _ -> reference)
+                    bound
+                | _ -> reference
 
-    FsApp(name, mapped), findings
+            states[index] <- 2
+
+    for index in 0 .. arguments.Length - 1 do
+        resolve index
+
+    let rec reaches target seen index =
+        index = target
+        || (not (Set.contains index seen)
+            && dependencies[index] |> List.exists (reaches target (Set.add index seen)))
+
+    let unstableCycle =
+        dependencies
+        |> Array.mapi (fun index dependencies ->
+            dependencies |> List.exists (reaches index Set.empty)
+            && (match appliedConstraint index with
+                | None -> false
+                | Some(boundId, bound) ->
+                    mapped[index] <> bound
+                    && (mapped[index] <> fst shaped[index]
+                        || (not (variableSatisfiesApplied index boundId bound arguments[index])
+                            && not (satisfiesApplied index boundId bound arguments[index])))))
+        |> Array.exists id
+
+    if unstableCycle then
+        FsObj,
+        findings
+        @ [
+            Finding.make owner (TypeReference.CyclicDependentConstraintApplicationToObj name)
+        ]
+    else
+        FsApp(name, Array.toList mapped), findings
 
 /// A tuple as an F# tuple (D7, §4.12): Fable compiles the two to the same JS array, so a fixed
 /// tuple is Exact and element labels drop. `[string, number?]` arrives as `number | undefined`,
@@ -3792,21 +3943,6 @@ let internal aliasTypeParams (ctx: Context) (model: ShapeModel) (owner: string) 
             []
 
     parameters, scope, findings @ collapseFindings @ hoistFindings
-
-/// The type variables a rendered reference actually names.
-let rec internal typeVarsOf (reference: FsTypeRef) : Set<string> =
-    let union = List.fold (fun acc item -> Set.union acc (typeVarsOf item)) Set.empty
-
-    match reference with
-    | FsTypeVar name -> Set.singleton name
-    | FsOption inner
-    | FsArray inner -> typeVarsOf inner
-    | FsTuple items
-    | FsErasedUnion items -> union items
-    | FsDelegate(arguments, returns) -> Set.union (union arguments) (typeVarsOf returns)
-    | FsFunc(argument, returns) -> Set.union (typeVarsOf argument) (typeVarsOf returns)
-    | FsApp(_, arguments) -> union arguments
-    | _ -> Set.empty
 
 /// The key variables a signature binds (§4.10): each type parameter whose bound is a `keyof`,
 /// paired with the id of the operand that `keyof` was taken over.
