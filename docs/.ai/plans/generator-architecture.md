@@ -3521,4 +3521,4 @@ type id. No finding code is introduced; the batch coordinator owns the API compa
 
 ## Census batch 3 catalogue compatibility (2026-10-25)
 
-Schema 2 advances identity version 7 to 8 for compiler-anchored anonymous intersection contracts, and API version 12 to 13 for authenticated compiler NoInfer declarations. Old producers are rejected before declaration reuse. Inference version 5, customization version 1 and contract version 1 remain unchanged. The current-contract test pins this combination and separately rejects identity-7 and API-12 producers; regenerated catalogues and the full batch gate provide the integration evidence.
+Schema 2 advances identity version 7 to 8 for compiler-anchored anonymous intersection and nominal-union contracts, and API version 12 to 13 for authenticated compiler NoInfer declarations. Old producers are rejected before declaration reuse. Inference version 5, customization version 1 and contract version 1 remain unchanged. The current-contract test pins this combination and separately rejects identity-7 and API-12 producers; regenerated catalogues and the full batch gate provide the integration evidence.
