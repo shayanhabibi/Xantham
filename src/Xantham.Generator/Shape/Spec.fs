@@ -1388,8 +1388,9 @@ let internal expandTupleRest (model: ShapeModel) (signature: ResolvedSignature) 
 
 /// The overloads a signature stands for (§4.12): a rest parameter over a union of fixed tuples,
 /// `(...args: [end: number] | [start: number, end: number])`, is one overload per tuple, in
-/// ascending arity. Arms that differ only by trailing `undefined` or `void` elements are written
-/// once, at the shortest. Every other signature stands for itself, through `expandTupleRest`.
+/// ascending arity. Arms that differ only by trailing `undefined` or `void` elements, or only by
+/// which elements are optional, are written once: as the arm with the most optional elements,
+/// then the shortest. Every other signature stands for itself, through `expandTupleRest`.
 let internal restOverloads (model: ShapeModel) (signature: ResolvedSignature) : ResolvedSignature list =
     let arms =
         match signature.HasRest, List.tryLast signature.Parameters with
@@ -1415,9 +1416,15 @@ let internal restOverloads (model: ShapeModel) (signature: ResolvedSignature) : 
         let callKey (facts: TypeFacts) =
             facts.TypeArguments |> List.rev |> List.skipWhile unitLike |> List.rev
 
+        let optionalElements (facts: TypeFacts) =
+            tupleElementFlags facts
+            |> List.filter (fun element -> element.HasFlag ElementFlags.Optional)
+            |> List.length
+
         tuples
         |> List.sortBy _.TypeArguments.Length
-        |> List.distinctBy callKey
+        |> List.groupBy callKey
+        |> List.map (fun (_, arms) -> arms |> List.maxBy optionalElements)
         |> List.map (spreadTuple signature rest)
 
 /// The generic declaration an instantiation points back at, when this run declares it. A

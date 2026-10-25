@@ -864,6 +864,30 @@ let typeRefTests =
                 [ false, []; false, [ "args", 2 ]; false, [ "key", 1; "args1", 2 ] ]
                 "one overload per distinct call, a label naming its element"
 
+        testCase "arms differing only by optionality are written once, as the optional arm" <| fun _ ->
+            // `(...args: [number] | [number?])`: the optional arm admits both calls.
+            let arms =
+                { Build.facts (Build.typeResponse 14 TypeFlags.Union) with
+                    UnionMembers = [ 10<typeId>; 11<typeId> ] }
+
+            let model =
+                Build.shapeModel (
+                    tuple 10 [ 2 ] [ ElementFlags.Required ]
+                    :: tuple 11 [ 2 ] [ ElementFlags.Optional ]
+                    :: arms
+                    :: Build.primitives
+                )
+
+            let signature =
+                { Build.signature [ Build.resolvedMember (Build.symbol 30 "args" SymbolFlags.FunctionScopedVariable) 14 ] 4 with
+                    HasRest = true }
+
+            Expect.equal
+                (Spec.restOverloads model signature
+                 |> List.map (fun s -> s.Parameters |> List.map (fun p -> p.Symbol.Name, int p.TypeId, p.Optional)))
+                [ [ "args", 2, true ] ]
+                "one overload, its element optional"
+
         testCase "a union with a variadic tuple arm keeps the rest form" <| fun _ ->
             let arms =
                 { Build.facts (Build.typeResponse 14 TypeFlags.Union) with
