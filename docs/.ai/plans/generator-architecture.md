@@ -3510,3 +3510,7 @@ The census-noinfer-declaration lab checks actual compiler declaration ownership 
 orders, both resolve settings, secondary public occurrences, sibling Uppercase fallback and
 namespaced user aliases. Pure pass tests check distinct symbol identities sharing one intrinsic
 type id. No finding code is introduced; the batch coordinator owns the API compatibility bump.
+
+## Census batch 3 catalogue compatibility (2026-10-25)
+
+Schema 2 advances identity version 7 to 8 for compiler-anchored anonymous intersection contracts, and API version 12 to 13 for authenticated compiler NoInfer declarations. Old producers are rejected before declaration reuse. Inference version 5, customization version 1 and contract version 1 remain unchanged. The current-contract test pins this combination and separately rejects identity-7 and API-12 producers; regenerated catalogues and the full batch gate provide the integration evidence.
