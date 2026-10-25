@@ -6670,7 +6670,7 @@ let literalKeyedMethodTests =
                 "the checker escape belongs to neither the F# spelling nor the JavaScript target"
 
         testCase "checker escaped backtick keys retain the original JavaScript key" <| fun _ ->
-            let members, _ = shape [ methodMember 100 "___`promisify__" 20 ] [ callable 20 onSignatures ]
+            let members, findings = shape [ methodMember 100 "___`promisify__" 20 ] [ callable 20 onSignatures ]
 
             let targets =
                 members
@@ -6680,6 +6680,18 @@ let literalKeyedMethodTests =
                     | _ -> None)
 
             Expect.equal targets [ "__`promisify__"; "__`promisify__"; "__`promisify__" ] "decode only the compiler's underscore escape"
+
+            let reportedKeys =
+                findings
+                |> List.choose (fun finding ->
+                    match finding.Kind with
+                    | :? Members as kind ->
+                        match kind with
+                        | Members.StringKeyedMemberAsEmit(key, _) -> Some key
+                        | _ -> None
+                    | _ -> None)
+
+            Expect.equal reportedKeys [ "__`promisify__"; "__`promisify__"; "__`promisify__" ] "MB012 reports the original JavaScript key for every overload"
 
         testCase "each literal overload is a method of its own beside the generic one" <| fun _ ->
             let members, _ = shape [ methodMember 100 "on" 20 ] [ callable 20 onSignatures ]

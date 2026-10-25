@@ -4566,7 +4566,7 @@ let internal shapeMembers
                 name
 
         if Map.containsKey m.Symbol.Name stringNames then
-            reportStringName m.Symbol.Name name
+            reportStringName (Naming.memberName m.Symbol.Name) name
 
         let positions = literals |> List.map fst |> Set.ofList
 
