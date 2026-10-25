@@ -7673,3 +7673,28 @@ let openIntersectionFixtureTests =
                 Expect.equal (keyed "TR049") [ "Defined" ] "the empty reduction is exact"
         ])
     ]
+
+[<Tests>]
+let censusCallableProvenanceFixtureTests =
+    testList "census callable provenance" [
+        yield! fixtureTests "census-callable-provenance-lab" (handFixture "census-callable-provenance-lab") GeneratorConfig.Default (fun package -> [
+            testCase "merged function declarations retain per-call binders" <| fun _ ->
+                let rendered = Pipeline.generate GeneratorConfig.Default package |> Async.RunSynchronously
+                let source = rendered.Files |> List.head |> snd
+                Expect.stringContains source "abstract clone<'T>: value: 'T -> 'T" "the merged clone keeps its binder"
+                Expect.stringContains source "abstract echo<'T>: value: 'T -> 'T" "the declaration identity is independent of spelling"
+                Expect.stringContains source "abstract aliased<'T>: value: 'T -> 'T" "a namespace re-export keeps its method"
+                let lost = rendered.Findings |> List.filter (fun finding -> finding.Key = "TR013" && (finding.Symbol.StartsWith "CloneSelf" || finding.Symbol.StartsWith "RenamedSelf" || finding.Symbol.StartsWith "AliasSelf"))
+                Expect.isEmpty lost "merged methods have no out-of-scope type parameter"
+                Expect.stringContains source "abstract ordinary:" "a readonly callback stays a property"
+                Expect.stringContains source "abstract writable:" "a writable callback stays a property"
+                Expect.isFalse (source.Contains "abstract ordinary<'T>") "ordinary callable properties are not promoted"
+                Expect.isFalse (source.Contains "abstract writable<'T>") "writable callable properties are not promoted"
+                Expect.stringContains source "type MixedProperty =\n    inherit CloneWindow\n    abstract clone:" "a mixed method/property retains the writable value"
+                Expect.stringContains source "type FunctionProperty =\n    inherit Helpers\n    abstract clone:" "a mixed function/property retains the writable value"
+                Expect.stringContains source "abstract optional:" "an optional callback stays omittable"
+                Expect.stringContains source "abstract hybrid:" "a callable with members stays a value"
+                Expect.stringContains source "abstract indexed:" "a callable with an indexer stays a value"
+                Expect.stringContains source "abstract constructable:" "a callable constructor stays a value"
+        ])
+    ]

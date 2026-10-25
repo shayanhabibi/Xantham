@@ -950,6 +950,11 @@ Fable F# tuples *are* JS arrays — a happy exact match:
   parameters: `abstract measure<'T when 'T :> Shape>: shape: 'T -> 'T`. TypeScript rejects
   assignment to a function declaration (TS2630), so no setter is lost. A `const` of a function
   type stays a property (W7.3, 2026-10-13).
+  A transient intersection member can lose its Method/Function flags while retaining method
+  and function declaration handles. Resolve authenticates these declarations through the typed
+  AST, including a namespace re-export resolved to its function target, and preserves the same
+  method policy. A property declaration among those handles keeps the property form
+  (`census-callable-provenance-lab`, 2026-10-25).
 
 ### 4.14 Names and docs
 

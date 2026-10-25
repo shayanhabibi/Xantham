@@ -561,3 +561,14 @@ on either pre-join history counts the other copy of already released feature com
 The release markers therefore use `78de2edf` as the verified joined-history baseline. Preview
 after this correction advances only Core.TS and its Node consumer to 0.2.1 for catalogue
 packaging. Preserve release merge commits to avoid recreating this duplicated history.
+
+## Merged callable members retain declaration provenance (2026-10-25)
+
+`Window & typeof globalThis` gives structuredClone a transient Property symbol whose Method and
+Function flags are both absent. Its declarations retain MethodSignature and FunctionDeclaration;
+its single generic signature retains one binder shared by input and return. Reading flags alone
+sends that method through delegateRef and widens both positions with TR013. Resolve authenticates
+the retained declarations, including ExportSpecifier aliases resolved to Function symbols.
+A PropertySignature or PropertyDeclaration keeps the property form; required pure-callable
+guards still apply in Spec and customization Semantics. The namespace intersection lab reproduces
+the same compiler shape without importing the entire global scope.

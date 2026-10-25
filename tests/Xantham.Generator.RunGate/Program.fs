@@ -2435,6 +2435,21 @@ let main _ =
     GeneratedErasedCases.run check
     GenericCallableReferences.run check
     ExportProvenance.run check
+    let clonedNumber: float = CensusCallableProvenanceLab.Exports.cloneSelf.clone 42.0
+    let clonedText: string = CensusCallableProvenanceLab.Exports.cloneSelf.clone "clone"
+    equal "merged generic method preserves numbers" 42.0 clonedNumber
+    equal "merged generic method preserves strings" "clone" clonedText
+
+    equal
+        "renamed merged method invokes its function"
+        "echo"
+        (CensusCallableProvenanceLab.Exports.renamedSelf.echo "echo")
+
+    equal
+        "merged re-exported function invokes its target"
+        7.0
+        (CensusCallableProvenanceLab.Exports.aliasSelf.aliased 7.0)
+
     bindingExtensions ()
     globals ()
     imports ()

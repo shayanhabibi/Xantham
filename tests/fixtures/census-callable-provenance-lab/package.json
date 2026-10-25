@@ -1,0 +1,5 @@
+{
+  "name": "census-callable-provenance-lab",
+  "type": "module",
+  "types": "index.d.ts"
+}

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "package": "census-callable-provenance-lab",
+  "module": "CensusCallableProvenanceLab",
+  "counts": {
+    "exact": 6,
+    "ergonomic": 9,
+    "widened": 12,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SY - synthesize-anonymous",
+      "total": 3,
+      "exact": 3
+    },
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 23,
+      "ergonomic": 18,
+      "widened": 5
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 38,
+      "ergonomic": 29,
+      "widened": 9
+    }
+  ]
+}
