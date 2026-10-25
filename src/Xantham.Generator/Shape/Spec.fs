@@ -1895,7 +1895,6 @@ let internal isLiteralKeyed (model: ShapeModel) (m: ResolvedMember) (memberFacts
          && isPureCallback memberFacts
          && callSignaturesSeparable model memberFacts))
     && not (isSymbolKeyed m.Symbol.Name)
-    && not (m.Symbol.Name.Contains '`')
     && signatures.Length >= 2
     && signatures |> List.exists (literalKeys model >> List.isEmpty >> not)
 
@@ -2866,11 +2865,24 @@ and internal objectRef
                         | (Ship | Widen | Map _), _ when
                             facts.Members.IsEmpty && facts.IndexInfos.IsEmpty && not facts.PrivateMembers
                             ->
-                            // A member-less object type maps completely to `obj`, and the
-                            // declaration it would have taken would hold the same. An
-                            // author-written name read from somewhere else stays a declaration
-                            // this run owes the reader.
+                            let ownedInterface =
+                                GeneratorConfig.disposition ctx.Config facts.Origin = Ship
+                                && hasAny SymbolFlags.Interface facts.SymbolFlags
+                                && (model.Harvest.Exports
+                                    |> List.exists (fun export ->
+                                        hasAny SymbolFlags.Type export.Symbol.Flags
+                                        && GeneratorConfig.disposition
+                                            ctx.Config
+                                            (Grouping.classify ctx.PackageDir (ValueSome export.Symbol))
+                                            =
+                                            Ship
+                                        && (Map.tryFind export.Symbol.SymbolId model.ExportTypes
+                                            |> Option.bind _.Declared)
+                                            =
+                                            Some facts.Response.TypeId))
+
                             match facts.SymbolName with
+                            | _ when ownedInterface -> FsObj, [ Finding.make owner TypeReference.ObjectWithoutMembers ]
                             | Some shown when shown / uom<symbolName> <> owner && not (isSyntheticName shown) ->
                                 FsObj,
                                 [
@@ -4424,6 +4436,56 @@ let internal shapeHook
 
     decl, findings @ [ Finding.make owner (Members.OptionalHookAsInterface name) ]
 
+let private memberNameReservations (reserved: Set<string>) (facts: TypeFacts) =
+    let mutable taken =
+        facts.Members
+        |> List.choose (fun member_ ->
+            if member_.Symbol.Name.Contains '`' then
+                None
+            else
+                Some(Naming.memberName member_.Symbol.Name))
+        |> Set.ofList
+        |> Set.union reserved
+        |> Set.add "Create"
+
+    if not facts.IndexInfos.IsEmpty then
+        taken <- Set.add "Item" taken
+
+    if not facts.CallSignatures.IsEmpty then
+        taken <- Set.add "Invoke" taken
+
+    for member_ in facts.Members do
+        match emittedSymbol facts member_ with
+        | Some symbol -> taken <- Set.add (symbolMemberName symbol) taken
+        | None -> ()
+
+    taken
+
+/// Source string keys mapped to distinct F# member names in compiler member order.
+let internal stringMemberNames (reserved: Set<string>) (facts: TypeFacts) =
+    let mutable taken = memberNameReservations reserved facts
+
+    facts.Members
+    |> List.fold
+        (fun names member_ ->
+            let key = member_.Symbol.Name
+
+            if not (key.Contains '`') || Map.containsKey key names then
+                names
+            else
+                let proposed = Naming.identifierName key
+
+                let allocated =
+                    if not (Set.contains proposed taken) then
+                        proposed
+                    else
+                        Seq.initInfinite (fun index -> $"{proposed}{index + 2}")
+                        |> Seq.find (fun name -> not (Set.contains name taken))
+
+                taken <- Set.add allocated taken
+                Map.add key allocated names)
+        Map.empty
+
 /// The interface members of an object type: methods for method symbols and function declarations
 /// (each call signature an overload), properties otherwise, callbacks as delegate-typed
 /// properties (D5).
@@ -4440,19 +4502,41 @@ let internal shapeMembers
     let mutable findings = []
     let emit finding = findings <- findings @ [ finding ]
 
+    let entrypoint =
+        facts.Members
+        |> List.exists (fun member_ -> member_.Symbol.Name.Contains '`' && emitsAsMethod model member_)
+        && (exportedClassSides model
+            |> Map.exists (fun typeId (export, constructors) ->
+                Map.tryFind typeId model.DeclNames = Some self
+                && isEntrypoint ctx export constructors facts.BaseTypes))
+
+    let stringNames = stringMemberNames Set.empty facts
+
+    let memberName (member_: ResolvedMember) =
+        Map.tryFind member_.Symbol.Name stringNames
+        |> Option.defaultWith (fun () -> Naming.memberName member_.Symbol.Name)
+
     // W5: names a literal-keyed overload's method takes, by JavaScript key and literals. The
     // member names of the type, inherited ones included, are taken from the start.
     let mutable taken =
         facts.Members
-        |> List.map (fun m -> Naming.memberName m.Symbol.Name)
+        |> List.map memberName
         |> Set.ofList
+        |> Set.union (memberNameReservations Set.empty facts)
+
+    let mutable reportedStringNames = Set.empty
+
+    let reportStringName key name =
+        if not (Set.contains (key, name) reportedStringNames) then
+            emit (Finding.make $"{self}.{key}" (Members.StringKeyedMemberAsEmit(key, name)))
+            reportedStringNames <- Set.add (key, name) reportedStringNames
 
     let mutable literalNames = Map.empty
 
     // The method an overload keyed by `literals` reads as: `on("close", listener)` is
     // `onClose(listener)`, or `on_Close` where a member already has that name.
     let literalKeyedMethod (m: ResolvedMember) (signature: ResolvedSignature) (literals: (int * string) list) =
-        let target = Naming.memberName m.Symbol.Name
+        let target = memberName m
         let texts = literals |> List.map snd
 
         let name =
@@ -4480,6 +4564,9 @@ let internal shapeMembers
                 )
 
                 name
+
+        if Map.containsKey m.Symbol.Name stringNames then
+            reportStringName (Naming.memberName m.Symbol.Name) name
 
         let positions = literals |> List.map fst |> Set.ofList
 
@@ -4515,7 +4602,7 @@ let internal shapeMembers
             | None -> m.Docs
 
         FsLiteralKeyed(
-            target,
+            Naming.memberName m.Symbol.Name,
             literals |> List.mapi (fun before (index, text) -> index - before, text),
             FsMethod
                 {
@@ -4536,7 +4623,7 @@ let internal shapeMembers
     let members =
         facts.Members
         |> List.filter (fun m ->
-            if m.Symbol.Name.Contains '`' then
+            if entrypoint && m.Symbol.Name.Contains '`' && emitsAsMethod model m then
                 emit (Finding.make $"{self}.{m.Symbol.Name}" Members.UnspellableMemberDropped)
                 false
             elif (emittedSymbol facts m).IsSome then
@@ -4607,7 +4694,7 @@ let internal shapeMembers
 
                         FsMethod
                             {
-                                Name = Naming.memberName m.Symbol.Name
+                                Name = memberName m
                                 Docs = m.Docs
                                 Tags = signatureTags m.Tags signature
                                 TypeParameters = typeParameters
@@ -4653,7 +4740,7 @@ let internal shapeMembers
                 [
                     FsProperty
                         {
-                            Name = Naming.memberName m.Symbol.Name
+                            Name = memberName m
                             Docs = m.Docs
                             Tags = m.Tags
                             ReadOnly = m.ReadOnly
@@ -4661,7 +4748,15 @@ let internal shapeMembers
                             Literal = literal
                             NullKey = not m.Optional && requiresNullKey model effectiveTypeId
                         }
-                ])
+                ]
+            |> List.map (fun shaped ->
+                match Map.tryFind m.Symbol.Name stringNames, shaped with
+                | Some _, FsLiteralKeyed _ -> shaped
+                | Some name, _ ->
+                    let key = Naming.memberName m.Symbol.Name
+                    reportStringName key name
+                    FsStringKeyed(key, shaped)
+                | None, _ -> shaped))
 
     // A well-known symbol's member is spelled from the symbol: `m.Symbol.Name` carries the
     // session-specific checker id. `settle-symbol-members` raises its findings.

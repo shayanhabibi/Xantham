@@ -2698,6 +2698,98 @@ let internal resolveTypeTableObserved followWidth (observe: int -> int -> unit) 
                         |> Array.choose (fun (id, canonical) -> if canonical then Some id else None)
                         |> Set.ofArray
 
+                    let declaredAliasTypes =
+                        ConcurrentDictionary<SymbolKey, Lazy<System.Threading.Tasks.Task<int>>>()
+
+                    let canonicalAliases =
+                        ConcurrentDictionary<int, Lazy<System.Threading.Tasks.Task<bool>>>()
+
+                    // A catalogue can discover a non-exported generic alias after the seeds.
+                    // Its declared form owns a finite written operand closure. Signature-parameter
+                    // applications can look identical here; only the checker's exact declared ID
+                    // authenticates the form, and unavailable source evidence grants no exemption.
+                    let canonicalGenericAlias (ty: TypeResponse) =
+                        canonicalAliases
+                            .GetOrAdd(
+                                ty.Id,
+                                fun _ ->
+                                    lazy
+                                        (async {
+                                            let! result =
+                                                attempt (
+                                                    async {
+                                                        let! alias = ctx.Session.getAliasSymbolOfType ty.Id
+
+                                                        match alias with
+                                                        | ValueNone -> return false
+                                                        | ValueSome alias ->
+                                                            let! declarations =
+                                                                alias.Declarations
+                                                                |> ValueOption.defaultValue [||]
+                                                                |> Array.map (fun declaration ->
+                                                                    async {
+                                                                        match NodeHandle.parse declaration with
+                                                                        | ValueNone -> return false
+                                                                        | ValueSome handle ->
+                                                                            let! source = sourceFile ctx handle.Path
+
+                                                                            return
+                                                                                source
+                                                                                |> ValueOption.exists (fun source ->
+                                                                                    let node =
+                                                                                        Node.ofIndex<AnyNode>
+                                                                                            source
+                                                                                            handle.Index
+
+                                                                                    node.Kind =
+                                                                                        SyntaxKind
+                                                                                            .TypeAliasDeclaration
+                                                                                    && (Node.retag<
+                                                                                            AnyNode,
+                                                                                            TypeAliasDeclaration
+                                                                                         >
+                                                                                            node
+                                                                                        |> TypeAliasDeclaration
+                                                                                            .typeParameters
+                                                                                        |> Seq.isEmpty
+                                                                                        |> not))
+                                                                    })
+                                                                |> Async.Sequential
+
+                                                            if
+                                                                Array.isEmpty declarations
+                                                                || not (Array.forall id declarations)
+                                                            then
+                                                                return false
+                                                            else
+                                                                let lookup =
+                                                                    declaredAliasTypes.GetOrAdd(
+                                                                        alias.SymbolId,
+                                                                        fun _ ->
+                                                                            lazy
+                                                                                (async {
+                                                                                    let! declared =
+                                                                                        ctx.Session
+                                                                                            .getDeclaredTypeOfSymbol
+                                                                                            alias.Reference
+
+                                                                                    return declared.Id
+                                                                                 }
+                                                                                 |> Async.StartAsTask)
+                                                                    )
+
+                                                                let! declared = lookup.Value |> Async.AwaitTask
+                                                                return declared = ty.Id
+                                                    }
+                                                )
+
+                                            return result |> Result.defaultValue false
+                                         }
+                                         |> Async.StartAsTask)
+                            )
+                            .Value
+                        |> Async.AwaitTask
+
                     let sourceContractIds (table: Map<int<typeId>, TypeFacts>) =
                         async {
                             let! handles =
@@ -2709,12 +2801,32 @@ let internal resolveTypeTableObserved followWidth (observe: int -> int -> unit) 
                                     |> List.map (fun (id, facts: TypeFacts) ->
                                         async {
                                             let! handles = sourceDeclarationHandles facts.Response
-                                            return id, Set.ofList handles
+
+                                            let! canonical =
+                                                if
+                                                    facts.Response.AliasTypeArguments
+                                                    |> ValueOption.exists (Array.isEmpty >> not)
+                                                then
+                                                    canonicalGenericAlias facts.Response
+                                                else
+                                                    async.Return false
+
+                                            return id, Set.ofList handles, canonical
                                         })
                                     |> Async.Parallel)
                                 |> Async.Sequential
 
-                            let declarationsOf = handles |> Array.concat |> dict
+                            let declarationsOf =
+                                handles
+                                |> Array.concat
+                                |> Array.map (fun (id, handles, _) -> id, handles)
+                                |> dict
+
+                            let canonicalDeclaredAliases =
+                                handles
+                                |> Array.concat
+                                |> Array.choose (fun (id, _, canonical) -> if canonical then Some id else None)
+                                |> Set.ofArray
 
                             let nominalDeclaration (facts: TypeFacts) =
                                 facts.Response.ObjectFlags
@@ -2779,6 +2891,7 @@ let internal resolveTypeTableObserved followWidth (observe: int -> int -> unit) 
                                     let aliasApplication =
                                         response.AliasTypeArguments |> ValueOption.exists (Array.isEmpty >> not)
                                         && not (Set.contains id canonicalSeedAliases)
+                                        && not (Set.contains id canonicalDeclaredAliases)
 
                                     let instantiated =
                                         aliasApplication || response.Target |> ValueOption.exists ((<>) response.Id)
@@ -2836,6 +2949,16 @@ let internal resolveTypeTableObserved followWidth (observe: int -> int -> unit) 
                                             push expand operand
 
                                         if expand then
+                                            // Resolve already chose this mapping edge. Retain its
+                                            // target like a signature parameter, without opening
+                                            // either unselected conditional branch.
+                                            for branch in
+                                                facts.Conditional
+                                                |> Option.bind _.Branch
+                                                |> Option.map snd
+                                                |> Option.toList do
+                                                push true branch
+
                                             for bound in Option.toList facts.Constraint @ Option.toList facts.Default do
                                                 push true bound
 
@@ -2857,7 +2980,11 @@ let internal resolveTypeTableObserved followWidth (observe: int -> int -> unit) 
                                                         push true parameter
 
                             for KeyValue(id, facts) in table do
-                                if nominalDeclaration facts || Map.containsKey id model.Types then
+                                if
+                                    nominalDeclaration facts
+                                    || Map.containsKey id model.Types
+                                    || Set.contains id canonicalDeclaredAliases
+                                then
                                     pending.Push(Set.empty, ContractDepth, true, id)
 
                                     while pending.Count > 0 do
@@ -3164,6 +3291,16 @@ let resolveDeclarationIdentities: Pass<ResolveModel> =
                     then
                         return Advanced model
                     else
+                        let bounds =
+                            model.Types
+                            |> Map.toList
+                            |> List.collect (fun (_, facts) ->
+                                if facts.Response.Flags.HasFlag TypeFlags.TypeParameter then
+                                    Option.toList facts.Constraint @ Option.toList facts.Default
+                                else
+                                    [])
+                            |> Set.ofList
+
                         let! types =
                             model.Types
                             |> Map.toArray
@@ -3185,9 +3322,48 @@ let resolveDeclarationIdentities: Pass<ResolveModel> =
                                     let! arguments = ctx.Session.getAliasTypeArgumentsOfType (typeId / uom<_>)
                                     let! alias = ctx.Session.getAliasSymbolOfType (typeId / uom<_>)
 
+                                    let! boundAlias =
+                                        match alias with
+                                        | ValueSome alias when
+                                            Set.contains typeId bounds
+                                            && facts.Response.Flags.HasFlag TypeFlags.Object
+                                            && not declarations.IsEmpty
+                                            && declarations
+                                               |> List.forall (fun declaration ->
+                                                   NodeHandle.parse (declaration / uom<_>)
+                                                   |> ValueOption.exists (fun handle ->
+                                                       handle.Kind = SyntaxKind.TypeLiteral))
+                                            && alias.Flags.HasFlag SymbolFlags.TypeAlias
+                                            && (alias.DeclarationHandles
+                                                |> ValueOption.exists (fun handles ->
+                                                    handles.Length > 0
+                                                    && handles
+                                                       |> Array.forall (fun declaration ->
+                                                           NodeHandle.parse (declaration / uom<_>)
+                                                           |> ValueOption.exists (fun handle ->
+                                                               handle.Kind = SyntaxKind.TypeAliasDeclaration))))
+                                            ->
+                                            async {
+                                                let! declared =
+                                                    attempt (ctx.Session.getDeclaredTypeOfSymbol alias.Reference)
+
+                                                return
+                                                    match declared with
+                                                    | Ok declared when declared.TypeId = typeId -> Some alias
+                                                    | _ -> None
+                                            }
+                                        | _ -> async.Return None
+
                                     return
                                         typeId,
                                         { facts with
+                                            SymbolName =
+                                                boundAlias |> Option.map _.SymbolName |> Option.orElse facts.SymbolName
+                                            SymbolParent =
+                                                boundAlias
+                                                |> Option.bind (fun symbol ->
+                                                    symbol.ParentSymbolId |> ValueOption.toOption)
+                                                |> Option.orElse facts.SymbolParent
                                             Declarations = declarations
                                             DeclarationArguments =
                                                 arguments |> ValueOption.defaultValue [||] |> Array.toList
@@ -3204,6 +3380,46 @@ let resolveDeclarationIdentities: Pass<ResolveModel> =
                 }
     }
 
+let private compilerNoInferDeclaration (ctx: Context) (symbol: SymbolResponse) =
+    async {
+        if symbol.Name <> "NoInfer" then
+            return false
+        else
+            match symbol.Declarations |> ValueOption.defaultValue [||] |> Array.distinct with
+            | [| declaration |] ->
+                match NodeHandle.parse declaration with
+                | ValueNone -> return false
+                | ValueSome handle ->
+                    let! metadata =
+                        ctx.Session.getSourceFileMetadata (DocumentIdentifier.FileName handle.Path)
+
+                    if not (metadata |> ValueOption.exists _.IsDefaultLibrary) then
+                        return false
+                    else
+                        let! source = sourceFile ctx handle.Path
+
+                        return
+                            source
+                            |> ValueOption.exists (fun source ->
+                                SourceFile.statements (Node.root source)
+                                |> Seq.exists (fun node ->
+                                    if
+                                        Node.index node <> handle.Index
+                                        || node.Kind <> SyntaxKind.TypeAliasDeclaration
+                                    then
+                                        false
+                                    else
+                                        let alias = Node.retag<Statement, TypeAliasDeclaration> node
+
+                                        (TypeAliasDeclaration.name alias |> ValueOption.bind Identifier.text) =
+                                            ValueSome "NoInfer"
+                                        && (TypeAliasDeclaration.typeParameters alias |> Seq.length) = 1
+                                        && (TypeAliasDeclaration.``type`` alias
+                                            |> ValueOption.exists (fun body ->
+                                                body.Kind = SyntaxKind.IntrinsicKeyword))))
+            | _ -> return false
+    }
+
 /// Retains alias binders on the exported declaration rather than its possibly shared body type.
 let private resolveAliasParameters: Pass<ResolveModel> =
     {
@@ -3214,6 +3430,7 @@ let private resolveAliasParameters: Pass<ResolveModel> =
                     let mutable exports = model.ExportTypes
                     let mutable types = model.Types
                     let mutable findings = []
+                    let mutable compilerNoInferSymbols = model.CompilerNoInferSymbols
 
                     for export in model.Harvest.Exports do
                         if export.Symbol.Flags.HasFlag SymbolFlags.TypeAlias then
@@ -3293,6 +3510,12 @@ let private resolveAliasParameters: Pass<ResolveModel> =
                                             (ResolveExportTypes.FacetNotResolved("alias parameters", reason))
                                     ]
                             | Ok parameters ->
+                                if not (Set.contains export.Symbol.SymbolId compilerNoInferSymbols) then
+                                    let! authenticated = attempt (compilerNoInferDeclaration ctx export.Symbol)
+
+                                    if authenticated = Ok true then
+                                        compilerNoInferSymbols <- Set.add export.Symbol.SymbolId compilerNoInferSymbols
+
                                 exports <-
                                     exports
                                     |> Map.change
@@ -3314,6 +3537,7 @@ let private resolveAliasParameters: Pass<ResolveModel> =
                         { model with
                             ExportTypes = exports
                             Types = types
+                            CompilerNoInferSymbols = compilerNoInferSymbols
                         }
 
                     return

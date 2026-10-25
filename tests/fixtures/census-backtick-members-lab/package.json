@@ -1,0 +1,6 @@
+{
+  "name": "census-backtick-members-lab",
+  "type": "module",
+  "types": "index.d.ts",
+  "main": "index.js"
+}

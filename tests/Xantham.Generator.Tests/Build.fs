@@ -125,6 +125,7 @@ let export (name: string) (sym: SymbolResponse) : HarvestedExport =
 let shapeModel (table: TypeFacts list) : ShapeModel =
     {
         Harvest = HarvestModel.Empty
+        CompilerNoInferSymbols = Set.empty
         ExportTypes = Map.empty
         Types =
             table

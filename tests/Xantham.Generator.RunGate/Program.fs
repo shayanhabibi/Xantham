@@ -2527,6 +2527,7 @@ let main _ =
 
     GenericCallableInterfaces.run check
     RecursiveCallbacks.run check
+    BacktickMembers.run check
     Projections.run check
 
     match failures with

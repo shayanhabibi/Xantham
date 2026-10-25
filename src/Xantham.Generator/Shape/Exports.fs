@@ -156,6 +156,7 @@ let shapeExports: Pass<ShapeModel> =
                                         | GlobalName _ -> mutableValue
                                         | ImportDefault
                                         | ImportFrom _
+                                        | ImportKeyed _
                                         | ImportNamed _ -> false
 
                                     if mutableValue && not settable then

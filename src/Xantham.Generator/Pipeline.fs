@@ -82,6 +82,7 @@ let runTier (ctx: Context) (passes: Pass<'Model> list) (model: 'Model) : Async<'
 let toResolve (harvest: HarvestModel) : ResolveModel =
     {
         Harvest = harvest
+        CompilerNoInferSymbols = Set.empty
         ExportTypes = Map.empty
         Types = Map.empty
         NotFollowed = Map.empty
@@ -91,6 +92,7 @@ let toResolve (harvest: HarvestModel) : ResolveModel =
 let toShape (runtimePackage: string<importSpecifier>) (resolve: ResolveModel) : ShapeModel =
     {
         Harvest = resolve.Harvest
+        CompilerNoInferSymbols = resolve.CompilerNoInferSymbols
         ExportTypes = resolve.ExportTypes
         Types = resolve.Types
         NotFollowed = resolve.NotFollowed

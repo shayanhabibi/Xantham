@@ -12584,6 +12584,14 @@ module Es =
         abstract ``$+``: string with get, set
         /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
         abstract leftContext: string with get, set
+
+        /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
+        [<Emit("$0['\\x24`']")>]
+        abstract Item: string with get
+
+        [<Emit("$0['\\x24`'] = $1")>]
+        abstract Item: string with set
+
         /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
         abstract rightContext: string with get, set
         /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
@@ -13203,8 +13211,7 @@ module Es =
     /// <summary>
     /// Marker for non-inference type position
     /// </summary>
-    [<Erase>]
-    type NoInfer<'T> = private NoInfer__ of obj
+    type NoInfer<'T> = JS.NoInfer<'T>
 
     /// <summary>
     /// Marker for contextual 'this' type
@@ -19996,8 +20003,7 @@ module Es =
         /// <summary>
         /// Marker for non-inference type position
         /// </summary>
-        [<Erase>]
-        type NoInfer<'T> = private NoInfer__ of obj
+        type NoInfer<'T> = JS.NoInfer<'T>
 
         /// <summary>
         /// Marker for contextual 'this' type

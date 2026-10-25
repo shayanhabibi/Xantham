@@ -186,7 +186,8 @@ Format per entry: recommended mapping, tier, alternatives, and what the Wire sup
 | `any` | `obj` | Ergonomic | `TR008`. Intrinsic name `any`: a written or omitted annotation, a shorthand ambient module, or a diagnosed circular return, accessor or import-alias annotation. A circular type alias is the error type (`TR063`). |
 | `any` as the return of a callback typed directly at a property or value `anyReturnAsUnit` selects | `unit` | Ergonomic | `TR065`, in place of `TR008`. Configured per package (W2); a nested callback, a method, a named callback alias and a delegate keep `obj`. |
 | the checker's error type | `obj` | Escape | `TR063`, with the name the checker keeps (qualified through unresolved parents; empty once a union or optional position reduces it). Intrinsic name `error` or `unresolved`: a reference the program leaves unresolved or invalid, not a source `any`. |
-| `intrinsic` alias body | `obj` | Escape | `TR064`. The marker behind `Uppercase`, `Lowercase`, `Capitalize`, `Uncapitalize` and `NoInfer`. |
+| authenticated compiler `NoInfer<T>` declaration | `JS.NoInfer<'T>` (or `'T` with `resolveNoInfer`) | Exact | Preserves the declaration's binder. Resolve authenticates a top-level, single-parameter intrinsic alias in the selected compiler's default library; Shape uses its complete symbol identity, independently of the shared intrinsic type id. The support alias is an identity abbreviation. |
+| other `intrinsic` alias body | `obj` | Escape | `TR064`. Includes `Uppercase`, `Lowercase`, `Capitalize`, `Uncapitalize` and unauthenticated declarations. |
 | `void` (return) | `unit` | Exact | |
 | `undefined` / `null` in unions | hoisted to `option` | Ergonomic | See §4.3. |
 | `never` | — | — | In unions: dropped (identity). As return type: `'T` generic or `unit` + doc note; F# has no bottom type. |
@@ -963,6 +964,12 @@ Fable F# tuples *are* JS arrays — a happy exact match:
   These parameters receive a collision-free underscore prefix, reported as `GE005`.
   Object construction retains the original JavaScript keys and omits absent optional fields;
   `pattern-parameter-lab` checks this through Fable and JavaScript.
+- A string member key containing a backtick receives `Naming.identifierName` with numeric
+  suffixes allocated in source order. Original and inherited members, indexers, `Create`,
+  `Invoke`, symbol members and literal overloads reserve their names. `MB012` records the
+  exact key and allocated name. Reads, writes, receiver calls and `Create` write the original
+  JavaScript key through escaped bracket expressions; the historical `MB007` row remains.
+  Ambient entrypoint class methods keep `MB007` until exact-key abstract overrides are proven.
 - References inside nested generated modules retain their root declaration identity when a
   local name shadows it. `View.Message` can inherit the outer `Message`; its F# base is qualified
   with the generated module name. `inherited-name-lab` compiles that distinction.

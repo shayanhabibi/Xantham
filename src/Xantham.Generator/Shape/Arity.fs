@@ -63,6 +63,7 @@ let private mapDeclRefs (f: FsTypeRef -> FsTypeRef) (decl: FsDecl) : FsDecl =
                     Return = reference c.Return
                 }
         | FsSymbolKeyed(symbol, inner) -> FsSymbolKeyed(symbol, declMember inner)
+        | FsStringKeyed(key, inner) -> FsStringKeyed(key, declMember inner)
         | FsLiteralKeyed(target, literals, inner) -> FsLiteralKeyed(target, literals, declMember inner)
 
     match decl with

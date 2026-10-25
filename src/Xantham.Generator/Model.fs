@@ -1418,6 +1418,8 @@ type ExportTypeIds =
 type ResolveModel =
     {
         Harvest: HarvestModel
+        /// <summary>Complete identities of intrinsic NoInfer declarations in the selected compiler's default library.</summary>
+        CompilerNoInferSymbols: Set<SymbolKey>
         /// Export symbol id -> the type ids the checker gave for it.
         ExportTypes: Map<SymbolKey, ExportTypeIds>
         /// The type table. Closed: every id referenced by a `TypeFacts` is a key here or in
@@ -1580,6 +1582,8 @@ type FsMember =
     /// reached as `$0[Symbol.<symbol>]` through `[<Emit>]`. The inner member is an
     /// `FsProperty` or an `FsMethod`.
     | FsSymbolKeyed of symbol: string * FsMember
+    /// A member accessed through its exact JavaScript string key under an allocated F# name.
+    | FsStringKeyed of key: string * FsMember
     /// An overload keyed by string literals, declared as a method of its own and reached
     /// through `[<Emit>]` as a call to `target` with each literal written before the F#
     /// argument at its index: `onClose` is `$0.on('close', $1)`. The inner member is an
@@ -1596,6 +1600,8 @@ type ImportBinding =
     /// An export of an ambient module, under the specifier that module declares. The specifier
     /// is the declaration's own rather than the run's runtime package.
     | ImportFrom of name: string * specifier: string<importSpecifier>
+    /// A constructor object's member accessed through its exact JavaScript string key.
+    | ImportKeyed of binding: ImportBinding * key: string
 
 /// What one *bound* member is - a member whose body is not F# but a reference into JavaScript,
 /// carried by an `ImportBinding`. Two kinds of declaration hold these: the `Exports` type, whose
@@ -1673,6 +1679,8 @@ type FsCreateOverload =
         /// The parameters whose key the Emit writes as `null` when the argument is absent or
         /// `undefined` (D3), by parameter name.
         NullKeys: string list
+        /// Allocated parameter names paired with their original JavaScript string keys.
+        StringKeys: Map<string, string>
     }
 
 type FsInterfaceDecl =
@@ -1939,6 +1947,8 @@ type KeyBinding =
 type ShapeModel =
     {
         Harvest: HarvestModel
+        /// <summary>Complete identities of intrinsic NoInfer declarations in the selected compiler's default library.</summary>
+        CompilerNoInferSymbols: Set<SymbolKey>
         ExportTypes: Map<SymbolKey, ExportTypeIds>
         Types: Map<int<typeId>, TypeFacts>
         NotFollowed: Map<int<typeId>, string>

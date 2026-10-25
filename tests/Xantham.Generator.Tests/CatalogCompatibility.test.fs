@@ -44,8 +44,18 @@ let tests =
                  contract.ApiVersion,
                  contract.InferenceVersion,
                  contract.CustomizationVersion)
-                (1, 7, 12, 5, 1)
-                "identity 7 keys mapped aliases by declaration; API 12 and inference 5 preserve ambient exported values and first source overload returns"
+                (1, 8, 13, 5, 1)
+                "identity 8 authenticates written intersections independently of reachability; API 13 specializes compiler NoInfer declarations; inference 5 is unchanged"
+
+        testCase "the identity contract rejects catalogues built before source-anchored intersections" <| fun _ ->
+            rejects "identity version" (fun () ->
+                validateContract 2 expected.Compiler expected.Generator "profile"
+                    (Some { expected.Contract with IdentityVersion = 7 }))
+
+        testCase "the API contract rejects catalogues built before authenticated NoInfer declarations" <| fun _ ->
+            rejects "API version" (fun () ->
+                validateContract 2 expected.Compiler expected.Generator "profile"
+                    (Some { expected.Contract with ApiVersion = 12 }))
 
         testCase "the API contract rejects catalogues built before ambient values and source overload selection" <| fun _ ->
             rejects "API version" (fun () ->

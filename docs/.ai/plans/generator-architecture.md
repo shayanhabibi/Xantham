@@ -329,6 +329,12 @@ Phases — each ends with the compile gate green on its fixtures:
   `shape-interfaces`, `shape-aliases`, `shape-classes`, `shape-exports`,
   `synthesize-paramobjects`, `order-declarations`, `audit-coverage`); `DeclNames` is
   keyed by *type id* so exported and synthesized declarations share one naming table.
+  Empty shipped interfaces retain the `obj` ABI and `TR047` after alias shaping suppresses
+  their own name. Ownership uses an exact checker type id in the selected harvested type
+  exports, with both declaration groups shipped and the type symbol marked as an interface.
+  Qualified and renamed occurrences therefore retain the empty-object loss rather than
+  `TR023`; an unselected type, a widened or referenced group, and a private nominal instance
+  keep their existing paths. `census-empty-owned-interface-lab` pins the diagnostic correction.
   A hand-authored tracked fixture (`tests/fixtures/lab`) pins each feature under the
   live compiler alongside the `animejs` rung. Decisions the fixtures forced, recorded
   here rather than re-derived later:
@@ -1313,6 +1319,28 @@ a complete substitution, preserving caller bounds and repeated or reordered argu
 In catalog mode this includes original anonymous declarations retained by Resolve whose only
 reachable occurrence is an application. The canonical declaration binds its original free
 parameters; applied method parameters and their constraints remain at the method use site.
+Declaration-less, alias-less intersections with a compiler-authenticated TypeLiteral constituent
+retain their ordered constituent contracts and declaration handles independently of reachable
+parents (2026-10-25). Constituents authenticate directly before parent-role inference; complete
+applied contracts preserve generic arguments and distinct written literals preserve source
+identity. Incomplete or recursive constituent evidence retains the existing fallback. Source
+ownership retains the earlier canonical snapshot. The owner-intersection lab compares producer
+and consumer identities with different reachable parents and compiles their shared member API.
+Identity compatibility advances to 8; API and inference policy are unchanged by this correction.
+Anonymous unions of actual source-declared interface/class arms also use directly authenticated
+constituent contracts and normalized declaration handles before parent roles (2026-10-25).
+Sorted arm identity keys make this a union-of-nominal-contracts equivalence: repeated anonymous
+occurrences and arm order share identity, while independent nominal sources, named aliases and
+applied arguments retain their distinctions. Every direct arm must have complete source and
+contract evidence; primitive or unavailable/cyclic arms retain the earlier fallback. Existing
+source and F# API authentication rejects stale sources and incompatible union representations.
+This is part of identity compatibility 8 and is covered by the census owner-union lab.
+Catalog bound naming preserves source object aliases reached only through declaration or
+signature type parameters. Resolve authenticates the bound's TypeLiteral and alias declaration
+handles and requires exact checker-declared type equality before recovering its source name.
+Anonymous naming follows source-named constraints/defaults; inline structural constraints retain
+their existing policy. The bound-alias naming lab compares producer/consumer APIs and compiles
+valid and invalid consumers. Catalogue source, API and constraint guards remain unchanged.
 Opaque dependency aliases retain their argument owners and applications in identity, including
 the source dependencies of concrete defaults, even when member facts are intentionally widened.
 Anonymous literal unions use their literal values for identity; named aliases and enum members
@@ -2554,7 +2582,7 @@ finding cannot be withdrawn (`docs/.ai/footguns.md`). It is unconditional.
   literal key, on a method or on a required property holding a pure callback whose signatures
   `callSignaturesSeparable` tells apart. An intersection's member is such a property
   (`Element & { setAttribute(name: "draw", ...): void }`), unless `shapeMembers` reads it at a
-  type its operands agree on, where it stays unkeyed. A symbol-keyed or backtick name is
+  type its operands agree on, where it stays unkeyed. A symbol-keyed name is
   excluded. A literal key (`Spec.literalKeys`) is a required, non-rest parameter typed by one
   string literal that is not an enum member and holds no `$`, `{` or `}` (Emit macro syntax).
   Exported functions, class statics, optional callbacks, single signatures, unions of literals
@@ -3478,3 +3506,78 @@ hash in Core.TS's `declarations.json` does.
 Ambient export-equals value recovery adds imported value members, and source-identical overload selection preserves the first applicable return instead of unioning unreachable alternatives. Schema 2 advances API version 11 to 12 and inference version 4 to 5 so prior producers are rejected before reuse. Identity version 7, customization version 1 and contract version 1 remain unchanged: declaration identities, source authentication and selector semantics retain their existing rules. The Core.TS producer is regenerated with the new contract alongside the affected Node bindings.
 
 Batch measurements: Node HG001 4 to 0 and DO008 30 to 26; non-lab widened/escape finding occurrences 6708 to 6698. The new process import adds one existing SE003 read-only-import finding while its writable global stays intact. Both tier audits report zero regressions and zero unexplained removals. All 154 golden write tests, 1634 generator tests, 105 Wire tests, 664 runtime checks and the Partas source/DLL consumer gate passed (one ignored test in each Expecto suite).
+
+## Authenticated compiler NoInfer declarations (2026-10-25)
+
+`resolve-alias-parameters` records the complete symbol identities of the selected compiler's
+top-level `NoInfer<T> = intrinsic` declaration. Authentication requires default-library metadata,
+the declaration handle's top-level AST node, the written name, an intrinsic body and one binder.
+The identity set travels through Resolve into pure Shape; the shared intrinsic type id carries
+no authentication. `shape-aliases` emits each authenticated public occurrence, including
+`GlobalThis.NoInfer`, as `type NoInfer<'T> = JS.NoInfer<'T>` or `= 'T` under `resolveNoInfer`.
+This precedes first-claimant intrinsic fallback and arity repair. Other intrinsic declarations
+and user aliases retain their current mapping and findings. The support abbreviation remains
+an identity type; this adds no F# inference barrier. Compiler substitution references still
+widen through their existing path; indexed-access NoInfer references retain their toggle policy.
+
+The census-noinfer-declaration lab checks actual compiler declaration ownership in both claimant
+orders, both resolve settings, secondary public occurrences, sibling Uppercase fallback and
+namespaced user aliases. Pure pass tests check distinct symbol identities sharing one intrinsic
+type id. No finding code is introduced; the batch coordinator owns the API compatibility bump.
+
+## Census batch 3 catalogue compatibility (2026-10-25)
+
+Schema 2 advances identity version 7 to 8 for compiler-anchored anonymous intersection and nominal-union contracts, and API version 12 to 13 for authenticated compiler NoInfer declarations and exact-key member bindings. Old producers are rejected before declaration reuse. Inference version 5, customization version 1 and contract version 1 remain unchanged. The current-contract test pins this combination and separately rejects identity-7 and API-12 producers; regenerated catalogues and the full batch gate provide the integration evidence.
+
+## Backtick string member keys (2026-10-25)
+
+`shape-interfaces` allocates otherwise unspellable string member names with
+`Naming.identifierName` and stable numeric suffixes. Original and inherited spellings,
+indexers, construction/invocation members, well-known symbol members and literal overloads
+share reservations. Each source key retains its overload family. `MB012` reports its exact
+key and allocated F# spelling; the historical dropped-member code `MB007` remains reserved.
+
+`FsStringKeyed` carries the original key through member substitution, overload settlement,
+qualification and catalogue hashing. Literal overloads retain their original call target.
+Every JavaScript key payload passes through `Naming.memberName` to undo the checker's
+leading-underscore escape before rendering or hashing; allocation lookup identities remain
+checker names. In particular, `___promisify__` targets the real `__promisify__` member.
+Exclusive-arm folds allocate across their shared and exclusive members and carry the same
+wrapper. `FsCreateOverload.StringKeys` preserves construction mappings after inherited
+members have been removed from the declaration. Optional keys retain omission semantics.
+
+Class statics use `ImportKeyed` to retain the constructor binding and exact member key.
+Render emits bracket reads, writes and receiver calls through the imported constructor.
+`Render.jsString` escapes JavaScript text and Emit macro markers in each key. Catalogue API
+hashes include string member keys, keyed statics and constructor mappings. Ordinary member
+spellings retain their mapping; literal overload allocation also reserves synthetic names.
+
+An impossible-key method on an ambient entrypoint class retains `MB007`: its abstract
+override contract needs separate exact-name override evidence. A concrete forwarding member
+cannot replace that contract. The entrypoint negative fixture pins the retained loss.
+
+### Resolve: canonical generic alias contract roots (2026-10-25)
+
+The bounded source-contract walk includes canonical generic aliases discovered after the export
+seeds. Eligibility requires actual source generic TypeAliasDeclaration nodes and the exact type
+ID returned by getDeclaredTypeOfSymbol for the alias. Per-type authentication and per-symbol
+declared-type queries are memoized. These finite declared forms restart contract traversal;
+applications keep the existing ancestry and ContractDepth limits, including method applications
+whose arguments happen to be type parameters. Width 32768 and the depth cutoff remain unchanged.
+
+The Hono/Chanfana Resolve-only diagnostic fails before this change because the canonical
+JSONRespondReturn intersection's TypedResponse operand is deferred, then passes with both
+operands retained. Its body takes 44.60 seconds before and 48.52 seconds after; resolved table
+size changes 149382 to 149402. The small width-one lab covers canonical/application distinction,
+and existing source-method, diamond, mutual wrapping/computed-literal and shared-root cost tests
+remain bounded. Catalogue source/API and applied-generic ownership guards are unchanged.
+
+### Resolve: selected conditional source-contract closure (2026-10-26)
+
+The protected source-contract walk follows an already selected Conditional.Branch edge under
+its existing expand guard. It inherits the current declaration ancestry and remaining wrapping
+depth and uses the existing per-type memoization. Neither unselected raw branch is admitted;
+branch selection, width32768, depth policy and catalogue guards are unchanged. This restores the
+inner conditional of HonoRequest.param, which the compiler selected identically in producer and
+consumer but the consumer lost to frontier width pressure. The small nested-conditional lab is
+a positive policy/cost guard; the source-authenticated real request snapshot supplies RED.

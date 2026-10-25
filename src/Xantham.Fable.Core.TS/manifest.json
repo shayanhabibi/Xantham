@@ -3,10 +3,10 @@
   "package": "fable-core-ts-input",
   "module": "FableCoreTsInput",
   "counts": {
-    "exact": 3530,
-    "ergonomic": 2762,
-    "widened": 277,
-    "escape": 10
+    "exact": 3532,
+    "ergonomic": 2763,
+    "widened": 276,
+    "escape": 8
   },
   "passes": [
     {
@@ -36,16 +36,16 @@
       "pass": "SI - shape-interfaces",
       "total": 83113,
       "exact": 894,
-      "ergonomic": 81712,
-      "widened": 507
+      "ergonomic": 81713,
+      "widened": 506
     },
     {
       "pass": "SA - shape-aliases",
-      "total": 148,
+      "total": 144,
       "exact": 1,
       "ergonomic": 37,
       "widened": 92,
-      "escape": 18
+      "escape": 14
     },
     {
       "pass": "SE - shape-exports",
@@ -73,9 +73,9 @@
     },
     {
       "pass": "RA - repair-arity",
-      "total": 48,
+      "total": 46,
       "ergonomic": 38,
-      "widened": 10
+      "widened": 8
     },
     {
       "pass": "normalize-obj-unions",

@@ -7100,6 +7100,24 @@ let catalogGenericDefaultsTests =
     ]
 
 [<Tests>]
+let censusOwnerIntersectionIdentityTests =
+    testList "census owner intersection identity fixture" [
+        yield! fixtureTests "census-owner-intersection-identity-lab" (handFixture "census-owner-intersection-identity-lab") GeneratorConfig.Default (fun _ -> [])
+    ]
+
+[<Tests>]
+let censusOwnerUnionIdentityTests =
+    testList "census owner union identity fixture" [
+        yield! fixtureTests "census-owner-union-identity-lab" (handFixture "census-owner-union-identity-lab") GeneratorConfig.Default (fun _ -> [])
+    ]
+
+[<Tests>]
+let censusBoundAliasNamingTests =
+    testList "census bound alias naming fixture" [
+        yield! fixtureTests "census-bound-alias-naming-lab" (handFixture "census-bound-alias-naming-lab") GeneratorConfig.Default (fun _ -> [])
+    ]
+
+[<Tests>]
 let groupedDomAliasTests =
     testList "grouped DOM alias fixture" [
         yield!
@@ -7675,6 +7693,23 @@ let openIntersectionFixtureTests =
     ]
 
 [<Tests>]
+let censusEmptyOwnedInterfaceFixtureTests =
+    testList "census empty owned interface" [
+        yield! fixtureTests "census-empty-owned-interface-lab" (handFixture "census-empty-owned-interface-lab") GeneratorConfig.Default (fun package -> [
+            testCase "qualified owned empty declarations retain the empty-object diagnostic" <| fun _ ->
+                let rendered = Pipeline.generate GeneratorConfig.Default package |> Async.RunSynchronously
+                let source = rendered.Files |> List.head |> snd
+                Expect.stringContains source "type Empty = obj" "empty interfaces keep the existing obj policy"
+                Expect.stringContains source "type Renamed = obj" "renamed empty aliases keep the existing obj ABI"
+                Expect.isEmpty (rendered.Findings |> List.filter (fun finding -> finding.Key = "TR023")) "owned empty types are present in the selected program"
+                Expect.contains (rendered.Findings |> List.filter (fun finding -> finding.Key = "TR047") |> List.map _.Symbol) "Scope.Empty" "a qualified empty interface has the ordinary empty-object loss"
+                Expect.stringContains source "type Private =" "private class instances keep their nominal declaration"
+                Expect.isFalse (source.Contains "type Private = obj") "private nominal instances are not empty objects"
+                Expect.contains (rendered.Findings |> List.map _.Key) "TR008" "source any keeps its primitive classification"
+        ])
+    ]
+
+[<Tests>]
 let censusCallableProvenanceFixtureTests =
     testList "census callable provenance" [
         yield! fixtureTests "census-callable-provenance-lab" (handFixture "census-callable-provenance-lab") GeneratorConfig.Default (fun package -> [
@@ -7772,5 +7807,109 @@ let censusAmbientExportValueFixtureTests =
                 Expect.stringContains source "[<Global(\"sharedRoot\")>]" "export-equals preserves a genuinely global target"
                 Expect.stringContains source "[<Global(\"augmentedRoot\")>]" "a declare-global target in an external file remains global"
                 Expect.stringContains source "[<Import(\"default\", \"census-root:shared-global\")>]" "the same global is also importable through its module"
+        ])
+    ]
+
+[<Tests>]
+let censusBacktickMembersFixtureTests =
+    testList "census backtick members" [
+        yield! fixtureTests "census-backtick-members-lab" (handFixture "census-backtick-members-lab") GeneratorConfig.Default (fun package -> [
+            testCase "impossible string keys retain exact interop and distinct names" <| fun _ ->
+                let rendered = Pipeline.generate GeneratorConfig.Default package |> Async.RunSynchronously
+                let source = rendered.Files |> List.head |> snd
+                Expect.isEmpty (rendered.Findings |> List.filter (fun finding -> finding.Key = "MB007")) "all backtick keys remain callable"
+                Expect.isNonEmpty (rendered.Findings |> List.filter (fun finding -> finding.Key = "MB012")) "allocated member names report their mapping"
+                Expect.stringContains source "abstract Item2: string" "the inherited Item reserves its spelling"
+                Expect.stringContains source "abstract Item3: string" "distinct source keys keep distinct members"
+                Expect.stringContains source "abstract Value2: string" "inherited names reserve normalized spellings"
+                Expect.stringContains source "abstract Value3: string" "normalized collisions allocate in source order"
+                Expect.stringContains source "abstract Invoke2: value: string -> string" "ordinary Invoke remains reserved"
+                Expect.stringContains source "abstract Create2: string" "ordinary Create remains reserved"
+                Expect.stringContains source "Required: string" "required construction input remains typed"
+            testCase "catalogue API hashes retain original string keys" <| fun _ ->
+                use scratch = Scratch.directory "backtick-api"
+                let source = System.IO.Path.Combine(scratch.Path, "index.d.ts")
+                System.IO.File.WriteAllText(System.IO.Path.Combine(scratch.Path, "package.json"), """{"name":"backtick-api-lab","version":"1.0.0","types":"index.d.ts"}""")
+                let capture key =
+                    System.IO.File.WriteAllText(source, $"export interface Value {{ \"{key}\": string; }}\nexport interface Derived extends Value {{ extra: string; }}\nexport declare class Box {{ marker: string; static \"{key}\": string; }}\nexport interface Ordinary {{ value: string; }}")
+                    let output = System.IO.Path.Combine(scratch.Path, "out")
+                    let config = { GeneratorConfig.Default with ModuleName = Some "StringKeys"; DeclarationCatalog = true }
+                    Pipeline.run config scratch.Path output |> Async.RunSynchronously |> ignore
+                    let catalog =
+                        System.Text.Json.JsonSerializer.Deserialize<DeclarationCatalog.Catalog>(
+                            System.IO.File.ReadAllText(System.IO.Path.Combine(output, "declarations.json")),
+                            System.Text.Json.JsonSerializerOptions(PropertyNameCaseInsensitive = true))
+                    catalog.Declarations |> Array.map (fun declaration -> declaration.FSharpName, declaration.Api) |> Map.ofArray
+                let first = capture "a`b"
+                let second = capture "a``b"
+                Expect.notEqual first["StringKeys.Value"] second["StringKeys.Value"] "normalized-equal member names retain distinct exact keys"
+                Expect.notEqual first["StringKeys.Box"] second["StringKeys.Box"] "normalized-equal static names retain distinct exact keys"
+                Expect.notEqual first["StringKeys.Derived"] second["StringKeys.Derived"] "inherited construction keys remain part of the API"
+                Expect.equal first["StringKeys.Ordinary"] second["StringKeys.Ordinary"] "ordinary member API hashing stays unchanged"
+            testCase "entrypoint methods retain their unproven override loss" <| fun _ ->
+                let config = { GeneratorConfig.Default with Entry = Some "entrypoint.d.ts" }
+                let rendered = Pipeline.generate config package |> Async.RunSynchronously
+                let source = rendered.Files |> List.head |> snd
+                let methods = rendered.Findings |> List.filter (fun finding -> finding.Symbol.EndsWith(".`fetch", System.StringComparison.Ordinal))
+                Expect.equal (methods |> List.map _.Key) [ "MB007" ] "the dropped override contract keeps its existing loss"
+                Expect.isFalse (source.Contains "member _.Fetch") "a concrete method cannot replace an abstract override slot"
+        ])
+    ]
+
+[<Tests>]
+let censusNoInferDeclarationFixtureTests =
+    let package = handFixture "census-noinfer-declaration-lab"
+    testList "census NoInfer declarations" [
+        yield! fixtureTests "census-noinfer-declaration-lab" package GeneratorConfig.Default (fun package -> [
+            for resolve in [ false; true ] do
+                testCase $"references preserve their existing policy resolveNoInfer={resolve}" <| fun _ ->
+                    let rendered = Pipeline.generate { GeneratorConfig.Default with ResolveNoInfer = resolve } package |> Async.RunSynchronously
+                    let source = rendered.Files |> List.head |> snd
+                    let expected = if resolve then "abstract guard: 'T" else "abstract guard: JS.NoInfer<'T>"
+                    Expect.stringContains source expected "the indexed-access reference follows the selected policy"
+                    let aliasTarget = if resolve then "'T" else "JS.NoInfer<'T>"
+                    Expect.stringContains source $"type CompilerNoInfer<'T> = {aliasTarget}" "a re-export retains the authenticated compiler declaration"
+                    Expect.stringContains source "static member choose<'T> (value: 'T, other: obj)" "compiler substitution references retain their existing fallback"
+                    Expect.stringContains source "abstract value: 'T" "the namespaced user alias retains its object shape"
+                    Expect.isFalse (source.Contains "type User.NoInfer<'T> = JS.NoInfer") "a user alias does not acquire compiler semantics"
+            for resolve in [ false; true ] do
+              for primaryFirst in [ false; true ] do
+                testCase $"authenticated intrinsic declarations retain their binder resolveNoInfer={resolve} primaryFirst={primaryFirst}" <| fun _ ->
+                    let declarations, findings =
+                        async {
+                            let config =
+                                { GeneratorConfig.Default with
+                                    ResolveNoInfer = resolve
+                                    Lib = Some [ "es5" ]
+                                    Types = Some []
+                                    Groups = Map.ofList [ "typescript/lib" * uom<npmDependency>, Ship ] }
+                            let! mailbox, ctx = Bootstrap.start config package
+                            use _ = mailbox :> IDisposable
+                            let! harvest, _ = Pipeline.runTier ctx Harvest.passes HarvestModel.Empty
+                            let selected =
+                                harvest.Exports
+                                |> List.filter (fun export ->
+                                    (export.Symbol.Name = "NoInfer" || export.Symbol.Name = "Uppercase")
+                                    && Grouping.classify ctx.PackageDir (ValueSome export.Symbol) = CompilerLib
+                                    && export.Origin = FromGlobal
+                                    && export.NamespacePath.IsNone)
+                                |> List.sortBy (fun export -> (export.Symbol.Name = "NoInfer") <> primaryFirst)
+                            Expect.equal selected.Length 2 "the selected compiler supplies both intrinsic declarations"
+                            let noInfer = selected |> List.find (fun export -> export.Symbol.Name = "NoInfer")
+                            let duplicate = { noInfer with NamespacePath = Some "GlobalThis" }
+                            let! resolved, _ = Pipeline.runTier ctx Resolve.passes (Pipeline.toResolve { harvest with Exports = selected @ [ duplicate ] })
+                            let! shaped, findings = Pipeline.runTier ctx Shape.Passes.passes (Pipeline.toShape (GeneratorConfig.runtimePackage config ctx.PackageName) resolved)
+                            return shaped.Decls, findings
+                        }
+                        |> Async.RunSynchronously
+                    let aliases = declarations |> List.choose (function FsAbbrev alias -> Some alias | _ -> None)
+                    let matches = aliases |> List.filter (fun alias -> alias.Name.EndsWith "NoInfer")
+                    Expect.equal matches.Length 2 "both public occurrences retain an abbreviation"
+                    for alias in matches do
+                        Expect.equal (alias.TypeParameters |> List.map _.Name) [ "T" ] "the declaration binds its own T"
+                        let expected = if resolve then FsTypeVar "T" else FsApp("JS.NoInfer", [ FsTypeVar "T" ])
+                        Expect.equal alias.Target expected "authenticated declaration semantics precede the shared intrinsic claimant"
+                        Expect.isEmpty (findings |> List.filter (fun finding -> finding.Symbol = alias.Name && (finding.Key = "RA006" || finding.Key = "TR064"))) "the alias is represented without intrinsic widening"
+                    Expect.isNonEmpty (findings |> List.filter (fun finding -> finding.Key = "TR064")) "Uppercase retains the intrinsic fallback"
         ])
     ]

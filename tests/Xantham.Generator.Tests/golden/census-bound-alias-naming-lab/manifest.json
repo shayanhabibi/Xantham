@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "package": "census-bound-alias-naming-lab",
+  "module": "CensusBoundAliasNamingLab",
+  "counts": {
+    "exact": 0,
+    "ergonomic": 0,
+    "widened": 3,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 13,
+      "ergonomic": 9,
+      "widened": 4
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 7,
+      "ergonomic": 5,
+      "widened": 2
+    }
+  ]
+}

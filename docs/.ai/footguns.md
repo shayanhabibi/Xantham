@@ -40,7 +40,7 @@ constraint. For a conditional over a bounded, naked type parameter it is the con
 instantiated at the bound. Otherwise it is the union of both branches, which §4.11 rejects as a
 mapping, and over a union bound it is the union of each member's branch.
 
-**`TypeFlags.Any` is four intrinsic names.** `any` covers a written or omitted annotation, a shorthand ambient module and diagnosed circular return, accessor or import-alias annotations, so `TR008` is not proof an author wrote `any`; a circular type alias is the error type. `error` and `unresolved` stand for a reference the program leaves unresolved; `intrinsic` is the body of a compiler-implemented alias. Read `IntrinsicName`, never the flag alone. A union, an intersection or an optional position with an error constituent reduces to the nameless singleton error type, so its written name is lost; a qualified name survives only as the unresolved symbol's parent chain. Intrinsic type ids are singletons, and `shape-aliases` abbreviates every later alias of one to the first claimant: `NoInfer`, `Lowercase`, `Capitalize` and `Uncapitalize` read `= Uppercase` and carry its `TR064`.
+**`TypeFlags.Any` is four intrinsic names.** `any` covers a written or omitted annotation, a shorthand ambient module and diagnosed circular return, accessor or import-alias annotations, so `TR008` is not proof an author wrote `any`; a circular type alias is the error type. `error` and `unresolved` stand for a reference the program leaves unresolved; `intrinsic` is the body of a compiler-implemented alias. Read `IntrinsicName`, never the flag alone. A union, an intersection or an optional position with an error constituent reduces to the nameless singleton error type, so its written name is lost; a qualified name survives only as the unresolved symbol's parent chain. Intrinsic type ids are singletons. Compiler-authenticated `NoInfer` declarations specialize by complete symbol identity before the shared intrinsic fallback, preserving their own binder and the configured support-alias policy. Other intrinsic declarations retain `TR064`. Compiler `NoInfer<T>` reference substitution types still use the existing fallback; the indexed-access alias reference policy is a separate mapping.
 
 **`keyof` over a declared type reaches Shape as that type's key literals.** `K extends keyof
 TagMap` arrives with its constraint resolved to `"div" | "canvas"`; only a `keyof` over a type
@@ -96,6 +96,44 @@ scope and expose its local variable as a global candidate. The source-file node 
 the global scope for a script. The ambient-root lab begins with its module to retain this trap.
 
 ## Declaration catalogs
+
+**A complete constraint can disappear from naming without a resource omission.**
+An object alias such as `Env` has a TypeLiteral symbol; a consumer that reaches it only through
+a generic bound must retain the alias name. Catalog Resolve recovers the alias name only for
+actual Constraint/Default targets whose source TypeLiteral and TypeAlias declarations are
+authenticated and whose checker-declared alias type equals the bound type. Anonymous naming
+follows declaration and signature type parameters, then their source-named bounds/defaults.
+Inline structural bounds retain their existing constraint policy. A transformed application
+that keeps an alias symbol cannot claim the original alias name through this recovery.
+The bound-alias naming lab checks owner/consumer API agreement and imported nominal rejection.
+
+**Anonymous intersections can inherit different reachable parents in different runs.**
+`BotEnterprise.botManagement: BotBase & { ja3Hash: string }` is the same checker contract
+when reached through `Combined = BotEnterprise & Other`, but a producer reaches Combined
+while a consumer can reach only Enterprise. Parent-role minimum keys then disagree and change
+Enterprise's canonical API even though the child's emitted API agrees. Declaration-less,
+alias-less intersections with an actual compiler TypeLiteral constituent use ordered,
+source-authenticated constituent contracts and their declaration handles before parent roles.
+Every constituent must authenticate directly; incomplete or recursive evidence retains the
+existing fallback. Applied arguments and independent written literal handles remain distinct.
+The source-ownership snapshot still precedes parent-role inference. The
+`census-owner-intersection-identity-lab` covers differing reachability, generic applications,
+independent source contracts, consumer compilation and stale/API rejection. Identity contract 8
+requires regenerating earlier catalogues; this change alone alters neither API nor inference policy.
+
+**An anonymous union of nominal arms has a source contract independent of reachable parents.**
+The `tlsClientAuth: Auth | Placeholder` member can acquire Combined's parent role in a producer
+and Shield's in a consumer while both emit the same tagged union. Alias-less, declaration-less
+unions of actual source-declared interface/class arms use sorted direct arm identity contracts
+and normalized arm declaration handles. Two written anonymous unions over the same applied
+nominal arms intentionally share this contract; the compiler exposes no independent union
+occurrence handle. Distinct nominal source declarations, named aliases and concrete arguments
+retain their identities. Every arm must authenticate directly before parent-role inference;
+primitive, missing, cyclic or declaration-less arm evidence retains the existing fallback.
+API and source checks still reject incompatible representations or stale contracts. The
+`census-owner-union-identity-lab` covers reachability, order, repeated occurrences, independent
+source arms, generic applications, aliases and conservative fallback. This correction belongs
+to identity contract 8 alongside source-anchored intersections.
 
 **TypeScript library ownership is logical, not a platform distribution.** Installed
 `lib/lib.*.d.ts` files from `typescript` and recognized `@typescript/typescript-<rid>`
@@ -403,6 +441,15 @@ same arm carried by a method parameter takes a bare lambda and emits `(a, b) => 
 
 ## Fable consumption of bindings
 
+**Imported class statics need native accessor metadata.** With Fickl 0.6.2, a type-level
+`Import` bypasses an ordinary F# static member body at the call site. A property-level
+`CompiledName` also leaves its allocated getter/setter spelling in the emitted JavaScript.
+For an exact string key, attach the constructor `Import` and bracket `Emit` to each native
+getter/setter, and to the native method. The backtick member lab proves reads, writes and
+constructor receivers through both source bindings and a raw `Reference`/`HintPath` DLL.
+An ambient entrypoint's abstract method needs separate override proof; retain `MB007` for
+an impossible key until that contract is supported.
+
 **`Xantham.Fable.Core.TS` reaches Fable as a DLL, never as source.** Fable merges a NuGet
 package's sources only when the package ships `fable/*.fsproj`, and this package ships `lib/`
 alone. The run gate reproduces that with `--exclude Xantham.Fable.Core.TS`, which also cut its
@@ -594,3 +641,30 @@ parameter key. A receiver is separate from `getParametersOfSignature`: the compi
 rest and explicit-receiver signatures retain their existing collision policy. Assign expanded
 signature ordinals before filtering, so a later retained overload keeps its authenticated
 source ordinal rather than its new position.
+
+## Declared generic alias operands survive frontier pressure (2026-10-25)
+
+Catalogue discovery can add a non-exported generic alias's declared form after the initial
+Resolve seeds. That form is a source contract even when its response carries alias arguments.
+Protect its written operand closure only after authenticating actual generic TypeAliasDeclaration
+nodes and exact equality with getDeclaredTypeOfSymbol. All-type-parameter arguments alone are
+insufficient: a method's application has its own binders and is not the alias declaration.
+Cache authentication per type and declared-type lookup per alias symbol. Applications retain
+the existing ancestry/depth limits; unavailable source or compiler evidence grants no exemption.
+
+The real Hono JSONRespondReturn canonical intersection lost its TypedResponse operand at width
+32768 while complete method applications survived. Selecting a complete application as the
+canonical form would change binder provenance. Keep the canonical source form instead; do not
+raise the global width budget or relax catalogue API/source authentication. Simple reductions
+with array or conditional arguments did not reproduce the cutoff: retained real-source RED/GREEN
+evidence is required alongside the small width-one positive and bounded-expansion regressions.
+
+## Selected conditional branches are protected contract edges (2026-10-26)
+
+When Resolve has chosen Conditional.Branch for a protected source signature, the source-contract
+walk must retain that target and its selected closure. HonoRequest.param's outer sole-inhabited
+conditional was present in both producer and consumer, but the consumer's selected inner
+conditional was width-deferred. That made Spec emit TR045/obj before overload deduplication,
+while the producer followed the same branch policy to P2. Follow only the stored selected edge
+inside the existing expand guard, with the same ancestry/depth/memoization; do not crawl both
+raw branches or introduce a new conditional mapping policy to repair an incomplete closure.

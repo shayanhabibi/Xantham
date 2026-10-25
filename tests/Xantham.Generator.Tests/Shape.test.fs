@@ -11,6 +11,85 @@ open Xantham.Generator
 open Xantham.Generator.Shape
 
 [<Tests>]
+let backtickMemberTests =
+    testList "backtick members" [
+        testCase "normalization preserves each source key beside reserved ordinary names" <| fun _ ->
+            let field id name = Build.resolvedMember (Build.symbol id name SymbolFlags.Property) 1
+            let owner =
+                { Build.facts (Build.typeResponse 10 TypeFlags.Object) with
+                    Members = [ field 100 "$`"; field 101 "`"; field 102 "Item"; field 103 "Item2" ] }
+            let model = Build.shapeModel (Build.primitives @ [ owner ])
+            let members, findings = Spec.shapeMembers Build.context model Set.empty "Bag" owner
+            Expect.equal members.Length 4 "distinct JavaScript keys survive shaping"
+            Expect.isEmpty (findings |> List.filter (fun finding -> finding.Key = "MB007")) "keys are preserved"
+            Expect.equal (findings |> List.filter (fun finding -> finding.Key = "MB012") |> List.map _.Symbol) [ "Bag.$`"; "Bag.`" ] "each renamed source key reports its mapping"
+    ]
+
+[<Tests>]
+let emptyOwnedObjectReferenceTests =
+    let symbol = Build.symbol 100 "Empty" SymbolFlags.Interface
+    let facts =
+        { Build.facts { Build.typeResponse 10 TypeFlags.Object with Symbol = ValueSome(Build.compactOf symbol) } with
+            SymbolName = Some("Empty" * uom<symbolName>)
+            SymbolFlags = SymbolFlags.Interface }
+    let model =
+        { Build.shapeModel [ facts ] with
+            Harvest = { HarvestModel.Empty with Exports = [ Build.export "Renamed" symbol ] }
+            ExportTypes = Map.ofList [ symbol.SymbolId, { Declared = Some 10<typeId>; Value = None; AliasParameters = None } ] }
+    let keys context model facts =
+        let reference, findings = Spec.objectRef context model None "Scope.Renamed" facts
+        Expect.equal reference FsObj "the empty-object representation is unchanged"
+        findings |> List.map _.Key
+    testList "empty owned object references" [
+        testCase "a selected compiler type is owned independently of its spelling" <| fun _ ->
+            Expect.equal (keys Build.context model facts) [ "TR047" ] "selected empty interfaces use the empty-object diagnostic"
+        testCase "an unselected type still owes a declaration" <| fun _ ->
+            Expect.equal (keys Build.context { model with Harvest = HarvestModel.Empty } facts) [ "TR023" ] "a type-table entry does not establish ownership"
+        testCase "an unrelated selected type cannot establish ownership" <| fun _ ->
+            let unrelated = { model with ExportTypes = Map.ofList [ symbol.SymbolId, { Declared = Some 11<typeId>; Value = None; AliasParameters = None } ] }
+            Expect.equal (keys Build.context unrelated facts) [ "TR023" ] "ownership requires the exact compiler type"
+        testCase "private nominal instances retain the missing-declaration path" <| fun _ ->
+            Expect.equal (keys Build.context model { facts with PrivateMembers = true }) [ "TR023" ] "private members keep nominal identity"
+        testCase "widened groups do not acquire selected ownership" <| fun _ ->
+            Expect.equal (keys Build.context model { facts with Origin = CompilerLib }) [ "TR023" ] "the default compiler-library group is widened"
+        testCase "referenced owners retain the referenced declaration" <| fun _ ->
+            let context = { Build.context with Config = { Build.context.Config with Groups = Map.ofList [ "typescript/lib" * uom<npmDependency>, Reference ] } }
+            let reference, findings = Spec.objectRef context model None "Scope.Renamed" { facts with Origin = CompilerLib }
+            Expect.isFalse (reference = FsObj) "reference disposition retains its external name"
+            Expect.isEmpty findings "an empty reference adds no local ownership finding"
+    ]
+
+[<Tests>]
+let compilerNoInferAliasTests =
+    testList "compiler NoInfer alias shaping" [
+        for resolve in [ false; true ] do
+            testCase $"authentication belongs to the symbol rather than its shared intrinsic type resolveNoInfer={resolve}" <| fun _ ->
+                let intrinsic = Build.facts { Build.typeResponse 10 TypeFlags.Any with IntrinsicName = ValueSome "intrinsic" }
+                let parameter = { Build.facts (Build.typeResponse 20 TypeFlags.TypeParameter) with SymbolName = Some("T" * uom<symbolName>) }
+                let uppercase = Build.export "Uppercase" (Build.symbol 100 "Uppercase" SymbolFlags.TypeAlias)
+                let authenticated = Build.export "NoInfer" (Build.symbol 101 "NoInfer" SymbolFlags.TypeAlias)
+                let impostor = { Build.export "NoInfer" (Build.symbol 102 "NoInfer" SymbolFlags.TypeAlias) with NamespacePath = Some "Impostor" }
+                let model =
+                    { Build.shapeModel [ intrinsic; parameter ] with
+                        Harvest = { HarvestModel.Empty with Exports = [ uppercase; authenticated; impostor ] }
+                        CompilerNoInferSymbols = Set.singleton authenticated.Symbol.SymbolId
+                        ExportTypes =
+                            [ uppercase; authenticated; impostor ]
+                            |> List.map (fun export -> export.Symbol.SymbolId, { Declared = Some 10<typeId>; Value = None; AliasParameters = Some [ 20<typeId> ] })
+                            |> Map.ofList
+                        DeclNames = Map.ofList [ 10<typeId>, "Uppercase" ] }
+                let context = { Build.context with Config = { GeneratorConfig.Default with ResolveNoInfer = resolve } }
+                let shaped, findings = Pipeline.runTier context [ Aliases.shapeAliases ] model |> Async.RunSynchronously
+                let aliases = shaped.Decls |> List.choose (function FsAbbrev alias -> Some alias | _ -> None)
+                let actual = aliases |> List.find (fun alias -> alias.Name = "NoInfer")
+                let fake = aliases |> List.find (fun alias -> alias.Name = "Impostor.NoInfer")
+                Expect.equal (actual.TypeParameters |> List.map _.Name) [ "T" ] "the source binder is preserved"
+                Expect.equal actual.Target (if resolve then FsTypeVar "T" else FsApp("JS.NoInfer", [ FsTypeVar "T" ])) "only the authenticated symbol specializes"
+                Expect.equal fake.Target FsObj "the same name and type ID do not authenticate another symbol"
+                Expect.isNonEmpty (findings |> List.filter (fun finding -> finding.Key = "TR064" && finding.Symbol = "Impostor.NoInfer")) "the impostor retains its fallback finding"
+    ]
+
+[<Tests>]
 let inheritedCallableTests =
     let invoke variable result =
         FsInvoke { Docs = ""; Tags = []; TypeParameters = [ { Name = variable; Constraint = None } ]
@@ -2439,7 +2518,8 @@ let shapePassTests =
                      | FsConstructor _ -> "Create"
                      | FsIndexer _ -> "Item"
                      | FsInvoke _ -> "Invoke"
-                     | FsSymbolKeyed (symbol, _) -> symbol
+                     | FsSymbolKeyed (symbol, _)
+                     | FsStringKeyed (symbol, _) -> symbol
                      | FsLiteralKeyed (target, _, _) -> target))
                 [ "name"; "at" ]
                 "both member sets, in the checker's order"
@@ -2494,7 +2574,8 @@ let shapePassTests =
                      | FsIndexer _ -> "Item"
                      | FsConstructor _ -> "Create"
                      | FsInvoke _ -> "Invoke"
-                     | FsSymbolKeyed (symbol, _) -> symbol
+                     | FsSymbolKeyed (symbol, _)
+                     | FsStringKeyed (symbol, _) -> symbol
                      | FsLiteralKeyed (target, _, _) -> target))
                 [ "extra"; "name" ]
                 "and the inherited member is still declared here"
@@ -4309,7 +4390,7 @@ let shapePassTests =
                 Expect.equal
                     decl.CreateOverloads
                     [ { Parameters = []
-                        Literals = [ "NONE", LitNumber 0.0; "DONE", LitNumber 1.0 ]; NullKeys = [] } ]
+                        Literals = [ "NONE", LitNumber 0.0; "DONE", LitNumber 1.0 ]; NullKeys = []; StringKeys = Map.empty } ]
                     "every member is written"
             | decls -> failtest $"expected the interface back, got %A{decls}"
 
@@ -4485,6 +4566,7 @@ let shapePassTests =
                          | FsInvoke c -> c.Return
                          | FsIndexer i -> i.Value
                          | FsSymbolKeyed _
+                         | FsStringKeyed _
                          | FsLiteralKeyed _ -> failwith "no keyed member is expected"))
                     [ FsNamed "DOMTargets"; FsString ]
                     "first of the obj pair survives; the string overload is distinct"
@@ -6577,6 +6659,40 @@ let literalKeyedMethodTests =
           Build.signature [ param 105 "event" 31; param 106 "listener" 1 ] 4 ]
 
     testList "literal-keyed methods" [
+        testCase "checker escaped leading underscores retain the original JavaScript key" <| fun _ ->
+            let members, _ = shape [ methodMember 100 "___promisify__" 20 ] [ callable 20 onSignatures ]
+
+            Expect.equal
+                (members |> List.map describe)
+                [ "__promisify__", None
+                  "__promisify__Close", Some("__promisify__", [ 0, "close" ])
+                  "__promisify__End", Some("__promisify__", [ 0, "end" ]) ]
+                "the checker escape belongs to neither the F# spelling nor the JavaScript target"
+
+        testCase "checker escaped backtick keys retain the original JavaScript key" <| fun _ ->
+            let members, findings = shape [ methodMember 100 "___`promisify__" 20 ] [ callable 20 onSignatures ]
+
+            let targets =
+                members
+                |> List.choose (function
+                    | FsLiteralKeyed(key, _, _) -> Some key
+                    | FsStringKeyed(key, _) -> Some key
+                    | _ -> None)
+
+            Expect.equal targets [ "__`promisify__"; "__`promisify__"; "__`promisify__" ] "decode only the compiler's underscore escape"
+
+            let reportedKeys =
+                findings
+                |> List.choose (fun finding ->
+                    match finding.Kind with
+                    | :? Members as kind ->
+                        match kind with
+                        | Members.StringKeyedMemberAsEmit(key, _) -> Some key
+                        | _ -> None
+                    | _ -> None)
+
+            Expect.equal reportedKeys [ "__`promisify__"; "__`promisify__"; "__`promisify__" ] "MB012 reports the original JavaScript key for every overload"
+
         testCase "each literal overload is a method of its own beside the generic one" <| fun _ ->
             let members, _ = shape [ methodMember 100 "on" 20 ] [ callable 20 onSignatures ]
 

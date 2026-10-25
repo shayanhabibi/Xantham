@@ -138,6 +138,7 @@ let findingsTests =
                     "MB.SymbolKeyedMemberAsEmit MB009 ergonomic"
                     "MB.LiteralOverloadAsMethod MB010 ergonomic"
                     "MB.LiteralMemberAsConstant MB011 ergonomic"
+                    "MB.StringKeyedMemberAsEmit MB012 ergonomic"
                     "NE.TypeNameSuffixed NE001 exact"
                     "HG.AmbientModuleDropped HG001 escape"
                     "HG.UnwritableGlobalDropped HG002 escape"
