@@ -44,8 +44,18 @@ let tests =
                  contract.ApiVersion,
                  contract.InferenceVersion,
                  contract.CustomizationVersion)
-                (1, 7, 10, 3, 1)
-                "identity 7 keys mapped aliases by their own declaration; API 10 writes symbol as the lib Symbol interface; inference 3 preserves source contracts at the width cutoff"
+                (1, 7, 11, 4, 1)
+                "identity 7 keys mapped aliases by declaration; API 11 and inference 4 retain merged callable declaration provenance"
+
+        testCase "the API contract rejects catalogues built before merged callable methods" <| fun _ ->
+            rejects "API version" (fun () ->
+                validateContract 2 expected.Compiler expected.Generator "profile"
+                    (Some { expected.Contract with ApiVersion = 10 }))
+
+        testCase "the inference contract rejects catalogues built before callable declaration recovery" <| fun _ ->
+            rejects "inference version" (fun () ->
+                validateContract 2 expected.Compiler expected.Generator "profile"
+                    (Some { expected.Contract with InferenceVersion = 3 }))
 
         testCase "the API contract rejects catalogues built before the lib Symbol mapping" <| fun _ ->
             rejects "API version" (fun () ->

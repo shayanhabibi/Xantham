@@ -32307,7 +32307,7 @@ module Assert =
             /// </code>
             /// </summary>
             /// <remarks>@since v0.1.21</remarks>
-            abstract ok: Action<obj, U2<string, exn> option> with get, set
+            abstract ok: value: obj * ?message: U2<string, exn> -> unit
             /// <summary>
             /// <b>Strict assertion mode</b>
             /// <br /><br />
@@ -32340,7 +32340,7 @@ module Assert =
             /// error message is assigned. If the <c>message</c> parameter is an instance of an <c>Error</c> then it will be thrown instead of the <c>AssertionError</c>.
             /// </summary>
             /// <remarks>@since v0.1.21</remarks>
-            abstract equal: Action<obj, obj, U2<string, exn> option> with get, set
+            abstract equal: actual: obj * expected: obj * ?message: U2<string, exn> -> unit
             /// <summary>
             /// <b>Strict assertion mode</b>
             /// <br /><br />
@@ -32369,7 +32369,7 @@ module Assert =
             /// message is assigned. If the <c>message</c> parameter is an instance of an <c>Error</c> then it will be thrown instead of the <c>AssertionError</c>.
             /// </summary>
             /// <remarks>@since v0.1.21</remarks>
-            abstract notEqual: Action<obj, obj, U2<string, exn> option> with get, set
+            abstract notEqual: actual: obj * expected: obj * ?message: U2<string, exn> -> unit
             /// <summary>
             /// <b>Strict assertion mode</b>
             /// <br /><br />
@@ -32387,7 +32387,7 @@ module Assert =
             /// are also recursively evaluated by the following rules.
             /// </summary>
             /// <remarks>@since v0.1.21</remarks>
-            abstract deepEqual: Action<obj, obj, U2<string, exn> option> with get, set
+            abstract deepEqual: actual: obj * expected: obj * ?message: U2<string, exn> -> unit
             /// <summary>
             /// <b>Strict assertion mode</b>
             /// <br /><br />
@@ -32436,7 +32436,7 @@ module Assert =
             /// instead of the <c>AssertionError</c>.
             /// </summary>
             /// <remarks>@since v0.1.21</remarks>
-            abstract notDeepEqual: Action<obj, obj, U2<string, exn> option> with get, set
+            abstract notDeepEqual: actual: obj * expected: obj * ?message: U2<string, exn> -> unit
             /// <summary>
             /// Tests strict equality between the <c>actual</c> and <c>expected</c> parameters as
             /// determined by <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is"><c>Object.is()</c></a>.
@@ -32473,7 +32473,7 @@ module Assert =
             /// instead of the <c>AssertionError</c>.
             /// </summary>
             /// <remarks>@since v0.1.21</remarks>
-            abstract strictEqual: Action<obj, obj, U2<string, exn> option> with get, set
+            abstract strictEqual<'T> : actual: obj * expected: 'T * ?message: U2<string, exn> -> unit
             /// <summary>
             /// Tests strict inequality between the <c>actual</c> and <c>expected</c> parameters as
             /// determined by <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is"><c>Object.is()</c></a>.
@@ -32497,14 +32497,14 @@ module Assert =
             /// instead of the <c>AssertionError</c>.
             /// </summary>
             /// <remarks>@since v0.1.21</remarks>
-            abstract notStrictEqual: Action<obj, obj, U2<string, exn> option> with get, set
+            abstract notStrictEqual: actual: obj * expected: obj * ?message: U2<string, exn> -> unit
             /// <summary>
             /// Tests for deep equality between the <c>actual</c> and <c>expected</c> parameters.
             /// "Deep" equality means that the enumerable "own" properties of child objects
             /// are recursively evaluated also by the following rules.
             /// </summary>
             /// <remarks>@since v1.2.0</remarks>
-            abstract deepStrictEqual: Action<obj, obj, U2<string, exn> option> with get, set
+            abstract deepStrictEqual<'T> : actual: obj * expected: 'T * ?message: U2<string, exn> -> unit
             /// <summary>
             /// Tests for deep strict inequality. Opposite of deepStrictEqual.
             /// <code lang="js">
@@ -32521,7 +32521,7 @@ module Assert =
             /// instead of the <c>AssertionError</c>.
             /// </summary>
             /// <remarks>@since v1.2.0</remarks>
-            abstract notDeepStrictEqual: Action<obj, obj, U2<string, exn> option> with get, set
+            abstract notDeepStrictEqual: actual: obj * expected: obj * ?message: U2<string, exn> -> unit
             /// <summary>
             /// Expects the function <c>fn</c> to throw an error.
             /// <br /><br />
@@ -33041,7 +33041,7 @@ module Assert =
             /// </code>
             /// </summary>
             /// <remarks>@since v0.1.97</remarks>
-            abstract ifError: (obj -> unit) with get, set
+            abstract ifError: value: obj -> unit
 
             /// <summary>
             /// Awaits the <c>asyncFn</c> promise or, if <c>asyncFn</c> is a function, immediately
@@ -33282,7 +33282,7 @@ module Assert =
             /// instance of an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error">Error</a> then it will be thrown instead of the <c>{@link AssertionError}</c>.
             /// </summary>
             /// <remarks>@since v13.6.0, v12.16.0</remarks>
-            abstract ``match``: Action<string, Fable.Core.TS.Es.RegExp, U2<string, exn> option> with get, set
+            abstract ``match``: value: string * regExp: Fable.Core.TS.Es.RegExp * ?message: U2<string, exn> -> unit
             /// <summary>
             /// Expects the <c>string</c> input not to match the regular expression.
             /// <code lang="js">
@@ -33304,7 +33304,7 @@ module Assert =
             /// instance of an <a href="https://nodejs.org/docs/latest-v22.x/api/errors.html#class-error">Error</a> then it will be thrown instead of the <c>{@link AssertionError}</c>.
             /// </summary>
             /// <remarks>@since v13.6.0, v12.16.0</remarks>
-            abstract doesNotMatch: Action<string, Fable.Core.TS.Es.RegExp, U2<string, exn> option> with get, set
+            abstract doesNotMatch: value: string * regExp: Fable.Core.TS.Es.RegExp * ?message: U2<string, exn> -> unit
             /// <summary>
             /// Tests for partial deep equality between the <c>actual</c> and <c>expected</c> parameters.
             /// "Deep" equality means that the enumerable "own" properties of child objects
@@ -33316,7 +33316,7 @@ module Assert =
             /// behaving as a super set of it.
             /// </summary>
             /// <remarks>@since v22.13.0</remarks>
-            abstract partialDeepStrictEqual: Action<obj, obj, U2<string, exn> option> with get, set
+            abstract partialDeepStrictEqual: actual: obj * expected: obj * ?message: U2<string, exn> -> unit
 
         [<Interface>]
         type Options =
@@ -33333,9 +33333,9 @@ module Assert =
 
     module AssertStrict =
         type Base =
-            abstract deepStrictEqual: Action<obj, obj, U2<string, exn> option> with get, set
-            abstract deepEqual: Action<obj, obj, U2<string, exn> option> with get, set
-            abstract doesNotMatch: Action<string, Fable.Core.TS.Es.RegExp, U2<string, exn> option> with get, set
+            abstract deepStrictEqual<'T> : actual: obj * expected: 'T * ?message: U2<string, exn> -> unit
+            abstract deepEqual<'T> : actual: obj * expected: 'T * ?message: U2<string, exn> -> unit
+            abstract doesNotMatch: value: string * regExp: Fable.Core.TS.Es.RegExp * ?message: U2<string, exn> -> unit
 
             abstract doesNotReject:
                 block: U2<JS.Promise<obj>, (unit -> JS.Promise<obj>)> * ?message: U2<string, exn> -> JS.Promise<unit>
@@ -33361,14 +33361,14 @@ module Assert =
                 ?stackStartFn: Fable.Core.TS.Es.Function ->
                     unit
 
-            abstract ifError: (obj -> unit) with get, set
-            abstract ``match``: Action<string, Fable.Core.TS.Es.RegExp, U2<string, exn> option> with get, set
-            abstract notDeepStrictEqual: Action<obj, obj, U2<string, exn> option> with get, set
-            abstract notDeepEqual: Action<obj, obj, U2<string, exn> option> with get, set
-            abstract notStrictEqual: Action<obj, obj, U2<string, exn> option> with get, set
-            abstract notEqual: Action<obj, obj, U2<string, exn> option> with get, set
-            abstract ok: Action<obj, U2<string, exn> option> with get, set
-            abstract partialDeepStrictEqual: Action<obj, obj, U2<string, exn> option> with get, set
+            abstract ifError: value: obj -> unit
+            abstract ``match``: value: string * regExp: Fable.Core.TS.Es.RegExp * ?message: U2<string, exn> -> unit
+            abstract notDeepStrictEqual: actual: obj * expected: obj * ?message: U2<string, exn> -> unit
+            abstract notDeepEqual: actual: obj * expected: obj * ?message: U2<string, exn> -> unit
+            abstract notStrictEqual: actual: obj * expected: obj * ?message: U2<string, exn> -> unit
+            abstract notEqual: actual: obj * expected: obj * ?message: U2<string, exn> -> unit
+            abstract ok: value: obj * ?message: U2<string, exn> -> unit
+            abstract partialDeepStrictEqual: actual: obj * expected: obj * ?message: U2<string, exn> -> unit
 
             abstract rejects:
                 block: U2<JS.Promise<obj>, (unit -> JS.Promise<obj>)> * ?message: U2<string, exn> -> JS.Promise<unit>
@@ -33379,8 +33379,8 @@ module Assert =
                 ?message: U2<string, exn> ->
                     JS.Promise<unit>
 
-            abstract strictEqual: Action<obj, obj, U2<string, exn> option> with get, set
-            abstract equal: Action<obj, obj, U2<string, exn> option> with get, set
+            abstract strictEqual<'T> : actual: obj * expected: 'T * ?message: U2<string, exn> -> unit
+            abstract equal<'T> : actual: obj * expected: 'T * ?message: U2<string, exn> -> unit
             abstract throws: block: (unit -> obj) * ?message: U2<string, exn> -> unit
 
             abstract throws:

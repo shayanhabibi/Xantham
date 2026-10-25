@@ -1364,6 +1364,62 @@ let private wellKnownSymbol (ctx: Context) (property: SymbolResponse) : Async<st
                 return if declaredByLib then Some text else None
     }
 
+let private declaresMergedFunction (ctx: Context) (property: SymbolResponse) =
+    async {
+        let! declarations =
+            property.Declarations
+            |> ValueOption.defaultValue [||]
+            |> Array.map (fun declaration ->
+                async {
+                    match NodeHandle.parse declaration with
+                    | ValueNone -> return None
+                    | ValueSome handle ->
+                        let! file = sourceFile ctx handle.Path
+
+                        match file with
+                        | ValueNone -> return None
+                        | ValueSome file ->
+                            let node = Node.ofIndex<AnyNode> file handle.Index
+
+                            match node.Kind with
+                            | SyntaxKind.FunctionDeclaration -> return Some true
+                            | SyntaxKind.MethodSignature
+                            | SyntaxKind.MethodDeclaration -> return Some false
+                            | SyntaxKind.ExportSpecifier ->
+                                let name = Node.retag<AnyNode, ExportSpecifier> node |> ExportSpecifier.name
+
+                                match name with
+                                | ValueNone -> return None
+                                | ValueSome name ->
+                                    let! symbol =
+                                        ctx.Session.getSymbolAtLocation (
+                                            NodeHandle.format
+                                                {
+                                                    Index = Node.index name
+                                                    Kind = name.Kind
+                                                    Path = handle.Path
+                                                }
+                                        )
+
+                                    match symbol with
+                                    | ValueSome symbol when symbol.Flags.HasFlag SymbolFlags.Alias ->
+                                        let! target = ctx.Session.getAliasedSymbol symbol.Reference
+
+                                        return
+                                            if target.Flags.HasFlag SymbolFlags.Function then
+                                                Some true
+                                            else
+                                                None
+                                    | _ -> return None
+                            | _ -> return None
+                })
+            |> Async.Parallel
+
+        return
+            Array.contains (Some true) declarations
+            && Array.forall Option.isSome declarations
+    }
+
 let private resolveMember (ctx: Context) isProperty (property: SymbolResponse) =
     async {
         let! propertyType = ctx.Session.getTypeOfSymbol property.Reference
@@ -1407,6 +1463,8 @@ let private resolveMember (ctx: Context) isProperty (property: SymbolResponse) =
                     let! target = ctx.Session.getAliasedSymbol property.Reference
                     return target.Flags.HasFlag SymbolFlags.Function
                 }
+            elif property.Flags.HasFlag SymbolFlags.Transient then
+                declaresMergedFunction ctx property
             else
                 async.Return false
 

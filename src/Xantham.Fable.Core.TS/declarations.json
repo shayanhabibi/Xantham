@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "compiler": "498f59d207e22c40f1ecc218dfa67d1db25629a231bd0948c3db92df7457afc7",
-  "generator": "e438c6a94396312b8a9a8ddb351f68aa9c289444519b4e1d5d32c4c94d8fc752",
+  "generator": "adf738be7f7cb6ff743dc90ac2fc46c5404c98317def4e6ee9b8cb306b301416",
   "inferenceProfile": "d2f99097bf8701703dbad824988206bf0800602c089c9094d2b66092c161b32f",
   "owner": "FableCoreTsInput",
   "inputs": [
@@ -1546185,7 +1546185,7 @@
       "fSharpName": "Fable.Core.TS.Dom.Window.Self",
       "arity": 0,
       "constraints": [],
-      "api": "283c6e5fc9b4391ee2d94f2274f01649f282334330787009411be8aeeadfe152",
+      "api": "3c714a456f406c41316c4fcd4d61d2a0d9ee5cb0aa31e7e20c364a1319dc900a",
       "owner": "FableCoreTsInput"
     },
     {
@@ -1801306,11 +1801306,11 @@
     }
   ],
   "compatibility": {
-    "apiVersion": 10,
+    "apiVersion": 11,
     "contractVersion": 1,
     "customizationVersion": 1,
     "identityVersion": 7,
-    "inferenceVersion": 3,
+    "inferenceVersion": 4,
     "compiler": {
       "astProtocolVersion": 9,
       "kind": "typescript-package",
