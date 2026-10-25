@@ -3707,3 +3707,11 @@ Identity contract 9 rejects namespace aliases authenticated through generated pa
 The CoreTS audit accounts for all 65 removed GlobalThis catalogue rows as actual source aliases;
 all emitted public type paths remain present. API contract 14 covers faithful alias surface normalization.
 A stale identity-8/API-14 producer is rejected independently of its API version.
+
+Source function parent-role closure: source-authenticated exported FunctionDeclaration sets
+seed signature-role traversal only when complete structural identity is unavailable. Parent
+roots remain outside canonical byType/byName maps, and child expansion cannot republish a
+root. Existing call/construct/parameter/return role keys and full source/API guards remain.
+The ProviderUtils destructured-parameter lab pins independent function/overload/position
+identity, generic constraints, source mutation rejection and missing-anchor rejection.
+This is part of the unpublished identity-9/API-14 producer refresh batch.

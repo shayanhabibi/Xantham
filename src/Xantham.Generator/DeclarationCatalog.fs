@@ -895,6 +895,27 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
         sources |> Seq.sortBy sourceKey |> Seq.toList
 
     // Parent roles cover checker-synthesized types whose symbol has no declaration handle.
+    // A source function can have an unkeyable structural signature (for example an inline
+    // parameter containing a template-keyed Record). Its declaration still authenticates
+    // parameter/return roles. These roots are traversal anchors, not callable identities.
+    let sourceFunctionParents =
+        exportHandles
+        |> Map.toList
+        |> List.choose (fun (id, handles) ->
+            if
+                not (Map.containsKey id byType)
+                && not handles.IsEmpty
+                && handles
+                   |> List.forall (fun declaration ->
+                       NodeHandle.parse (declaration / uom<_>)
+                       |> ValueOption.exists (fun handle -> handle.Kind = SyntaxKind.FunctionDeclaration))
+                && Map.tryFind id shape.Types |> Option.exists (fun facts -> not facts.CallSignatures.IsEmpty)
+            then
+                Some(id, identity "source-function-parent" handles [])
+            else
+                None)
+        |> Map.ofList
+
     let edges (facts: TypeFacts) =
         [
             for member_ in facts.Members do
@@ -926,13 +947,16 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
 
     while changed do
         let additions =
-            byType
+            sourceFunctionParents
+            |> Map.fold (fun parents id parent ->
+                if Map.containsKey id parents then parents else Map.add id parent parents) byType
             |> Map.toList
             |> List.collect (fun (id, parent) ->
                 edges shape.Types[id]
                 |> List.choose (fun (child, role) ->
                     if
                         Map.containsKey child byType
+                        || Map.containsKey child sourceFunctionParents
                         || not (Map.containsKey child shape.Types)
                         || intrinsicArgumentKey shape.Types[child].Response <> ""
                     then

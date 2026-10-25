@@ -7949,3 +7949,9 @@ let phantomReexportIdentityFixtureTests =
     testList "phantom reexport identity fixture" [
         yield! fixtureTests "phantom-reexport-identity-lab" (handFixture "phantom-reexport-identity-lab") GeneratorConfig.Default (fun _ -> [])
     ]
+
+[<Tests>]
+let destructuredParameterIdentityFixtureTests =
+    testList "destructured parameter identity fixture" [
+        yield! fixtureTests "destructured-parameter-identity-lab" (handFixture "destructured-parameter-identity-lab") GeneratorConfig.Default (fun _ -> [])
+    ]

@@ -739,3 +739,10 @@ winner that merely forwards to another group member can become a self-alias afte
 Keep genuine harvested public namespace occurrences after deduplication, while internal helper
 arms remain governed by their existing declaration policy. Bounded consumer compilation catches
 both dropped public paths and alias cycles without stranding the build lane.
+
+**Incomplete function signatures still have source parent roles.** A template-keyed Record
+in an inline function parameter can prevent a complete structural callable identity. Actual
+exported FunctionDeclaration handles may seed parameter/return traversal in that case; the
+source-function root is never inserted into byType/byName or published as a callable contract.
+Require every handle to be an actual function declaration and preserve existing complete
+identities. Unanchored synthetic callables must still fail.
