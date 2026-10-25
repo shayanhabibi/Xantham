@@ -1243,7 +1243,11 @@ let internal isTaggedDeclaration (model: ShapeModel) (facts: TypeFacts) =
 
 /// A named object union whose declaration binds its own and captured type parameters.
 let internal isObjectUnionDeclaration model facts =
-    isTaggedDeclaration model facts || (erasedObjectUnionShape model facts).IsSome
+    isTaggedDeclaration model facts
+    || (erasedObjectUnionShape model facts).IsSome
+    || (match exclusiveArmShape model facts with
+        | ExclusiveArmsFold _ -> true
+        | _ -> false)
 
 /// The declared generic erased-union alias a union applies, with its name, parameters and the
 /// site's arguments: `FunctionMaybe<Live>` for `{ (): Live } | Live`. Every declared parameter

@@ -7919,3 +7919,9 @@ let censusNoInferDeclarationFixtureTests =
                     Expect.isNonEmpty (findings |> List.filter (fun finding -> finding.Key = "TR064")) "Uppercase retains the intrinsic fallback"
         ])
     ]
+
+[<Tests>]
+let genericExclusiveUnionFixtureTests =
+    testList "generic exclusive union fixture" [
+        yield! fixtureTests "workers-generic-exclusive-lab" (handFixture "workers-generic-exclusive-lab") GeneratorConfig.Default (fun _ -> [])
+    ]

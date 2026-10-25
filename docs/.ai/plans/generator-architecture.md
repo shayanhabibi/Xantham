@@ -3610,3 +3610,24 @@ the new Zod lab is the sole added manifest. Core.TS changes only its catalogue c
 and producer fingerprint plus the matching input stamp. Both Core.TS and Node binding text
 remain unchanged. Full latest CloudEdge consumer compilation and runtime gates follow this
 artifact milestone.
+
+### Shape: generic exclusive object unions (2026-10-26)
+
+Exclusive-arm folds participate in the generic object-alias application path. A complete,
+one-to-one arm correspondence requires compiler type identity or source declaration/symbol
+identity with the same field names, optionality and readonly flags. Applications retain the
+canonical alias and supplied arguments; the fold declares its own type parameters and shapes
+properties and Create overloads under that scope. Independently named or extracted arm
+contracts remain narrower declarations rather than aliases of the folded union.
+
+The Workers reduction covers generic calls, both Create overloads, independent arm access and
+negative cross-argument/arm consumers. This repairs missing synthetic arm references and erased
+fold binders without adding a fallback or changing the exclusive-arm mapping policy. API14 is
+the unpublished follow-up contract; every final producer must be regenerated from the same
+candidate before consumer validation.
+
+The full latest Workers declaration package (5.20261025.1) compiles after regeneration with
+the captured CloudEdge configuration and Fable.Core 5.6.0. Its sole changed symbol tier is
+WorkflowBatchCreateOptions, Widened to Ergonomic; the nested retention declaration moves from
+the method's anonymous application path to the canonical alias. The mapped BooleanArm control
+retains its boolean fields rather than being mistaken for Options<string>.

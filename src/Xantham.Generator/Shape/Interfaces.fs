@@ -85,6 +85,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                     // each arm keeps minting its own interface, as today.
                     let exclusiveUnions =
                         model.DeclNames
+                        |> Map.filter (fun typeId _ -> not (Map.containsKey typeId model.AliasApplications))
                         |> Map.toList
                         |> List.choose (fun (typeId, name) ->
                             match Map.tryFind typeId model.Types with
@@ -414,9 +415,9 @@ let shapeInterfaces: Pass<ShapeModel> =
                         Map.tryFind m.Symbol.Name names
                         |> Option.defaultWith (fun () -> Naming.memberName m.Symbol.Name)
 
-                    let buildParam names (owner: string) (m: ResolvedMember) =
+                    let buildParam scoped names (owner: string) (m: ResolvedMember) =
                         let reference, refFindings =
-                            typeRef ctx (selectAnyReturn ctx model m.Symbol.Name owner) None owner m.TypeId
+                            typeRef ctx (selectAnyReturn ctx scoped m.Symbol.Name owner) None owner m.TypeId
 
                         {
                             Name = allocatedName names m
@@ -426,9 +427,9 @@ let shapeInterfaces: Pass<ShapeModel> =
                         },
                         refFindings
 
-                    let buildMember names (owner: string) (optional: bool) (m: ResolvedMember) =
+                    let buildMember scoped names (owner: string) (optional: bool) (m: ResolvedMember) =
                         let reference, refFindings =
-                            typeRef ctx (selectAnyReturn ctx model m.Symbol.Name owner) None owner m.TypeId
+                            typeRef ctx (selectAnyReturn ctx scoped m.Symbol.Name owner) None owner m.TypeId
 
                         let member_ =
                             FsProperty
@@ -462,25 +463,33 @@ let shapeInterfaces: Pass<ShapeModel> =
                             | Choice1Of2(shared, arms) ->
                                 let all = shared @ (arms |> List.collect _.Own) |> List.distinctBy _.Symbol.Name
                                 let facts = Map.find typeId model.Types
+                                let typeParameters, scope, parameterFindings = declTypeParams ctx model name facts
+
+                                let scoped =
+                                    { model with
+                                        DeclNames = declNames
+                                        TypeVars = scope
+                                    }
+
                                 let names = stringMemberNames Set.empty { facts with Members = all }
 
                                 let sharedMembers, sharedFindings =
-                                    shared |> List.map (buildMember names name false) |> List.unzip
+                                    shared |> List.map (buildMember scoped names name false) |> List.unzip
 
                                 let exclusiveMembers, exclusiveFindings =
                                     arms
                                     |> List.collect (fun a -> a.Own)
-                                    |> List.map (buildMember names name true)
+                                    |> List.map (buildMember scoped names name true)
                                     |> List.unzip
 
                                 let overloads, overloadFindings =
                                     arms
                                     |> List.map (fun arm ->
                                         let sharedParams, sharedParamFindings =
-                                            shared |> List.map (buildParam names name) |> List.unzip
+                                            shared |> List.map (buildParam scoped names name) |> List.unzip
 
                                         let ownParams, ownParamFindings =
-                                            arm.Own |> List.map (buildParam names name) |> List.unzip
+                                            arm.Own |> List.map (buildParam scoped names name) |> List.unzip
 
                                         let required, optional =
                                             (sharedParams @ ownParams) |> List.partition (fun p -> not p.Optional)
@@ -516,7 +525,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                                             Tags = tags
                                             Order = order
                                             Callable = false
-                                            TypeParameters = []
+                                            TypeParameters = typeParameters
                                             Inherits = []
                                             Members = sharedMembers @ exclusiveMembers
                                             Entrypoint = None
@@ -524,7 +533,8 @@ let shapeInterfaces: Pass<ShapeModel> =
                                             Statics = []
                                         }
                                 ],
-                                (List.concat sharedFindings
+                                (parameterFindings
+                                 @ List.concat sharedFindings
                                  @ List.concat exclusiveFindings
                                  @ List.concat overloadFindings
                                  @ [ Finding.make name (TypeReference.ExclusiveArmsFolded arms.Length) ]))

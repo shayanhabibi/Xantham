@@ -74,9 +74,10 @@ let private aliasDeclarationForms (model: ShapeModel) : Map<SymbolKey, int<Measu
             | _ -> forms)
         Map.empty
 
-/// Whether a union carrying a generic tagged alias's symbol is an application of the alias's
+/// Whether a union carrying a generic object alias's symbol is an application of the alias's
 /// declared form, arm for arm: each instance arm is the declared arm itself, an application of
 /// the same named declaration, or an arm written inline under the same tag value and fields.
+/// Exclusive arms require the same compiler declaration or symbol as well as the same fields.
 /// Correspondence fails for a transformed union that keeps the alias symbol over another arm set.
 let private armsCorrespond (model: ShapeModel) (declared: TypeFacts) (instance: TypeFacts) =
     match taggedUnionShape model declared with
@@ -108,6 +109,42 @@ let private armsCorrespond (model: ShapeModel) (declared: TypeFacts) (instance: 
            |> List.forall (fun case -> (instanceArms |> List.filter (corresponds case)).Length = 1)
         && instanceArms
            |> List.forall (fun arm -> (cases |> List.filter (fun case -> corresponds case arm)).Length = 1)
+    | _ when
+        (match exclusiveArmShape model declared with
+         | ExclusiveArmsFold _ -> true
+         | _ -> false)
+        ->
+        let instanceArms =
+            instance.UnionMembers |> List.choose (fun id -> Map.tryFind id model.Types)
+
+        let declaredArms =
+            declared.UnionMembers |> List.choose (fun id -> Map.tryFind id model.Types)
+
+        let fields (arm: TypeFacts) =
+            arm.Members
+            |> List.map (fun member_ -> member_.Symbol.Name, member_.Optional, member_.ReadOnly)
+            |> List.sort
+
+        let corresponds (left: TypeFacts) (right: TypeFacts) =
+            left.Response.TypeId = right.Response.TypeId
+            || ((not left.Declarations.IsEmpty
+                 && Set.ofList left.Declarations = Set.ofList right.Declarations
+                 || (left.Response.SymbolId.IsSome
+                     && left.Response.SymbolId = right.Response.SymbolId))
+                && fields left = fields right)
+
+        declaredArms.Length = instanceArms.Length
+        && declaredArms.Length = declared.UnionMembers.Length
+        && instanceArms.Length = instance.UnionMembers.Length
+        && declaredArms
+           |> List.forall (fun arm -> instanceArms |> List.filter (corresponds arm) |> List.length = 1)
+        && instanceArms
+           |> List.forall (fun arm ->
+               declaredArms
+               |> List.filter (fun declared -> corresponds declared arm)
+               |> List.length
+                   =
+                   1)
     | _ ->
         match erasedObjectUnionShape model declared, erasedObjectUnionShape model instance with
         | Some declaredArms, Some instanceArms ->

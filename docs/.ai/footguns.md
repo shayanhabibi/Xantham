@@ -683,3 +683,13 @@ conditional was width-deferred. That made Spec emit TR045/obj before overload de
 while the producer followed the same branch policy to P2. Follow only the stored selected edge
 inside the existing expand guard, with the same ancestry/depth/memoization; do not crawl both
 raw branches or introduce a new conditional mapping policy to repair an incomplete closure.
+
+## Generic exclusive folds need canonical applications (2026-10-26)
+
+WorkflowBatchCreateOptions<P> in Workers is an exclusive object union. Folding its declaration
+while leaving applications as unions of anonymous arm references can emit references to arm
+declarations removed by the fold. Preserve the generic alias application and shape its folded
+properties/Create parameters in the alias's binder scope. An arm remains its own narrow
+contract when referenced independently; replacing that arm with the complete fold widens it.
+Do not authenticate an application by member spelling alone: compiler/source identity and
+complete one-to-one arm correspondence are required.
