@@ -658,3 +658,13 @@ canonical form would change binder provenance. Keep the canonical source form in
 raise the global width budget or relax catalogue API/source authentication. Simple reductions
 with array or conditional arguments did not reproduce the cutoff: retained real-source RED/GREEN
 evidence is required alongside the small width-one positive and bounded-expansion regressions.
+
+## Selected conditional branches are protected contract edges (2026-10-26)
+
+When Resolve has chosen Conditional.Branch for a protected source signature, the source-contract
+walk must retain that target and its selected closure. HonoRequest.param's outer sole-inhabited
+conditional was present in both producer and consumer, but the consumer's selected inner
+conditional was width-deferred. That made Spec emit TR045/obj before overload deduplication,
+while the producer followed the same branch policy to P2. Follow only the stored selected edge
+inside the existing expand guard, with the same ancestry/depth/memoization; do not crawl both
+raw branches or introduce a new conditional mapping policy to repair an incomplete closure.

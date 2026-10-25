@@ -3571,3 +3571,13 @@ operands retained. Its body takes 44.60 seconds before and 48.52 seconds after; 
 size changes 149382 to 149402. The small width-one lab covers canonical/application distinction,
 and existing source-method, diamond, mutual wrapping/computed-literal and shared-root cost tests
 remain bounded. Catalogue source/API and applied-generic ownership guards are unchanged.
+
+### Resolve: selected conditional source-contract closure (2026-10-26)
+
+The protected source-contract walk follows an already selected Conditional.Branch edge under
+its existing expand guard. It inherits the current declaration ancestry and remaining wrapping
+depth and uses the existing per-type memoization. Neither unselected raw branch is admitted;
+branch selection, width32768, depth policy and catalogue guards are unchanged. This restores the
+inner conditional of HonoRequest.param, which the compiler selected identically in producer and
+consumer but the consumer lost to frontier width pressure. The small nested-conditional lab is
+a positive policy/cost guard; the source-authenticated real request snapshot supplies RED.

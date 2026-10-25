@@ -2949,6 +2949,16 @@ let internal resolveTypeTableObserved followWidth (observe: int -> int -> unit) 
                                             push expand operand
 
                                         if expand then
+                                            // Resolve already chose this mapping edge. Retain its
+                                            // target like a signature parameter, without opening
+                                            // either unselected conditional branch.
+                                            for branch in
+                                                facts.Conditional
+                                                |> Option.bind _.Branch
+                                                |> Option.map snd
+                                                |> Option.toList do
+                                                push true branch
+
                                             for bound in Option.toList facts.Constraint @ Option.toList facts.Default do
                                                 push true bound
 

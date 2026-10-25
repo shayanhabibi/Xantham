@@ -321,6 +321,33 @@ let private widthKeepers =
       "export interface Wide { left: Box<string>; right: Box<number> }" ]
 
 [<Tests>]
+let frontierConditionalBranchTests =
+    testCase "resolve oversized frontier preserves selected conditional branches of source signatures" <| fun _ ->
+        let declaration = String.concat "\n" [
+            yield "export interface Api<P extends string> { read<K extends string>(key: string extends P ? never : K extends `${infer Name}?` ? never : K): string }"
+            for index in 0 .. 11 do
+                for side in [ "Left"; "Right" ] do
+                    yield $"export interface {side}{index} {{ next: {side}{index + 1} }}"
+            yield "export interface Left12 { value: string }"
+            yield "export interface Right12 { value: number }"
+        ]
+        let resolved, _, ratio = resolveAtWidthOne "frontier-conditional-branch" declaration
+        let api = resolved.Types |> Map.toList |> List.map snd |> List.find (fun facts -> facts.SymbolName |> Option.exists (fun name -> string name = "Api"))
+        let method_ = api.Members |> List.find (fun member_ -> member_.Symbol.Name = "read")
+        let signature = resolved.Types[method_.TypeId].CallSignatures |> List.exactlyOne
+        let outer = resolved.Types[signature.Parameters.Head.TypeId]
+        let side, innerId = outer.Conditional.Value.Branch.Value
+        Expect.equal side "sole inhabited" "the compiler's outer true branch is never"
+        Expect.isTrue (Map.containsKey innerId resolved.Types) "the selected inner conditional survives frontier pressure"
+        Expect.isFalse (Map.containsKey innerId resolved.NotFollowed) "the selected branch is not left deferred"
+        let inner = resolved.Types[innerId]
+        let side, parameterId = inner.Conditional.Value.Branch.Value
+        Expect.equal side "sole inhabited" "the nested conditional retains the existing mapping policy"
+        Expect.isTrue (resolved.Types[parameterId].Response.Flags.HasFlag TypeFlags.TypeParameter) "the nested selected branch retains its parameter form"
+        Expect.isLessThan resolved.Types.Count 200 "selected branch protection stays bounded"
+        Expect.isLessThan ratio 4.0 "conditional edges preserve bounded contract-walk cost"
+
+[<Tests>]
 let frontierDeclaredAliasTests =
     testCase "resolve oversized frontier preserves canonical generic alias operands" <| fun _ ->
         use scratch = Scratch.directory "frontier-declared-alias"
