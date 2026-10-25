@@ -3631,3 +3631,9 @@ the captured CloudEdge configuration and Fable.Core 5.6.0. Its sole changed symb
 WorkflowBatchCreateOptions, Widened to Ergonomic; the nested retention declaration moves from
 the method's anonymous application path to the canonical alias. The mapped BooleanArm control
 retains its boolean fields rather than being mistaken for Options<string>.
+
+After this fix, proper Core.TS and Node regeneration succeeds and all 162 golden-writing
+tests pass. Against source6bc, all 157 existing corpus/Core.TS/Node manifests retain their
+counts and per-symbol tiers; the Zod and Workers reductions are the two added manifests.
+Core.TS and Node binding text is unchanged. Core.TS refreshes only the producer fingerprint
+and its matching catalogue input stamp, keeping the unpublished API14 family coherent.
