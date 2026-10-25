@@ -1290,6 +1290,24 @@ let literalMemberRenderTests =
                 "    [<Emit(\"({kind: 'method', \\\"None\\\": $0})\")>]"
                 "the literal precedes the renamed field"
 
+        testCase "a renamed parameter writes its null key positionally" <| fun _ ->
+            let model =
+                { baseModel with
+                    Decls =
+                        [ interface'
+                              "Signal"
+                              [ literal "kind" (LitString "method"); property "None" FsString; property "count" FsFloat ]
+                              [ { Parameters = [ parameter "None" FsString; parameter "count" FsFloat ]
+                                  Literals = [ "kind", LitString "method" ]; NullKeys = [ "None" ] } ] ] }
+
+            let rendered, _ = Async.RunSynchronously(Pipeline.runTier Build.context Render.passes model)
+            let source = rendered.Files |> Map.ofList |> Map.find "TestPkg.fs"
+
+            Expect.stringContains
+                source
+                "    [<Emit(\"({kind: 'method', \\\"None\\\": ($0) ?? null, \\\"count\\\": $1})\")>]"
+                "the null key falls back to null by position, the other field is written as is"
+
         testCase "a JavaScript string escapes quotes, line breaks and Emit holes" <| fun _ ->
             Expect.equal
                 (Render.jsString "it's \"q\" \\ $0 {{x}}\n\u2028\u0001")
