@@ -38,7 +38,7 @@ type ServerResponseConstructor =
 type ConcreteListener = (IncomingMessage -> unit)
 
 [<Erase>]
-type Divergent<'T> = private Divergent__ of obj
+type Divergent<'T> = private Phantom_Divergent__ of obj
 
 [<Interface>]
 type Outgoing =
@@ -47,7 +47,7 @@ type Outgoing =
     static member Create (sent: bool) : Outgoing = jsNative
 
 [<Erase>]
-type Instance<'C> = private Instance__ of obj
+type Instance<'C> = private Phantom_Instance__ of obj
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

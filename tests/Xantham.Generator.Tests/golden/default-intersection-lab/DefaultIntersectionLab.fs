@@ -23,7 +23,7 @@ type Socket =
     static member Create (send: (string -> unit)) : Socket = jsNative
 
 [<Erase>]
-type State<'T> = private State__ of obj option
+type State<'T> = private Phantom_State__ of obj option
 
 [<Interface>]
 type Connection<'T> =

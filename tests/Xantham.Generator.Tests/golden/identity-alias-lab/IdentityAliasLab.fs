@@ -15,7 +15,7 @@ type Store<'T> = 'T
 type Plain = string
 
 [<Erase>]
-type Phantom<'T> = private Phantom__ of string
+type Phantom<'T> = private Phantom_Phantom__ of string
 
 [<Interface>]
 type Existing =
@@ -24,10 +24,10 @@ type Existing =
     static member Create (value: string) : Existing = jsNative
 
 [<Erase>]
-type ExistingPhantom<'T> = private ExistingPhantom__ of Existing
+type ExistingPhantom<'T> = private Phantom_ExistingPhantom__ of Existing
 
 [<Erase>]
-type FirstPhantom<'T> = private FirstPhantom__ of string
+type FirstPhantom<'T> = private Phantom_FirstPhantom__ of string
 
 type LaterPlain = string
 

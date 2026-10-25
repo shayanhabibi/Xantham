@@ -55,7 +55,7 @@ open Fable.Core.TS.Dom
 /// </example>
 /// <remarks>@category Numeric</remarks>
 [<Erase>]
-type Absolute<'N> = private Absolute__ of obj
+type Absolute<'N> = private Phantom_Absolute__ of obj
 
 /// <remarks>@see {@link AllExtend}</remarks>
 [<Interface>]
@@ -149,7 +149,7 @@ type AllExtendOptions =
 /// <remarks>@category Utilities</remarks>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type AllExtend<'TArray, 'Type, 'Options> = private AllExtend__ of obj
+type AllExtend<'TArray, 'Type, 'Options> = private Phantom_AllExtend__ of obj
 
 /// <summary>
 /// Create a type with all fields from a union of object types.
@@ -216,7 +216,7 @@ type AllExtend<'TArray, 'Type, 'Options> = private AllExtend__ of obj
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Union</remarks>
 [<Erase>]
-type AllUnionFields<'Union> = private AllUnionFields__ of obj
+type AllUnionFields<'Union> = private Phantom_AllUnionFields__ of obj
 
 /// <summary>
 /// Returns a boolean for whether all of the given elements are <c>true</c>.
@@ -297,7 +297,7 @@ type AllUnionFields<'Union> = private AllUnionFields__ of obj
 /// <remarks>@see {@link And}</remarks>
 /// <remarks>@see {@link OrAll}</remarks>
 [<Erase>]
-type AndAll<'T> = private AndAll__ of obj
+type AndAll<'T> = private Phantom_AndAll__ of obj
 
 /// <summary>
 /// Returns a boolean for whether two given types are both <c>true</c>.
@@ -382,7 +382,7 @@ type AndAll<'T> = private AndAll__ of obj
 /// <remarks>@see {@link Or}</remarks>
 /// <remarks>@see {@link Xor}</remarks>
 [<Erase>]
-type And<'A, 'B> = private And__ of obj
+type And<'A, 'B> = private Phantom_And__ of obj
 
 /// <summary>
 /// Extracts the element type of an array or tuple.
@@ -423,7 +423,7 @@ type And<'A, 'B> = private And__ of obj
 /// <remarks>@see {@link IterableElement} - For iterables like <c>Set</c>, <c>Map</c>, and generators (not suitable for all use cases due to different inference behavior).</remarks>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type ArrayElement<'T> = private ArrayElement__ of obj
+type ArrayElement<'T> = private Phantom_ArrayElement__ of obj
 
 /// <summary>
 /// Provides valid indices for a constant array or tuple.
@@ -447,7 +447,7 @@ type ArrayElement<'T> = private ArrayElement__ of obj
 /// <remarks>@see {@link ArrayValues}</remarks>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type ArrayIndices<'Element> = private ArrayIndices__ of float
+type ArrayIndices<'Element> = private Phantom_ArrayIndices__ of float
 
 /// <summary>
 /// Return the length of an array. Equivalent to <c>T['length']</c> where <c>T</c> extends any array.
@@ -484,7 +484,7 @@ type ArrayIndices<'Element> = private ArrayIndices__ of float
 /// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type ArrayLength<'T> = private ArrayLength__ of obj
+type ArrayLength<'T> = private Phantom_ArrayLength__ of obj
 
 /// <summary>
 /// Reverse the order of elements in a tuple type.
@@ -539,7 +539,7 @@ type ArrayLength<'T> = private ArrayLength__ of obj
 /// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type ArrayReverse<'TArray> = private ArrayReverse__ of obj
+type ArrayReverse<'TArray> = private Phantom_ArrayReverse__ of obj
 
 /// <summary>
 /// Returns an array slice of a given range, just like <c>Array#slice()</c>.
@@ -590,7 +590,7 @@ type ArrayReverse<'TArray> = private ArrayReverse__ of obj
 /// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type ArraySlice<'Array_, 'Start, 'End> = private ArraySlice__ of obj
+type ArraySlice<'Array_, 'Start, 'End> = private Phantom_ArraySlice__ of obj
 
 /// <summary>
 /// Create a new array type by adding or removing elements at a specified index range in the original array.
@@ -620,7 +620,7 @@ type ArraySlice<'Array_, 'Start, 'End> = private ArraySlice__ of obj
 /// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type ArraySplice<'T, 'Start, 'DeleteCount, 'Items> = private ArraySplice__ of obj[]
+type ArraySplice<'T, 'Start, 'DeleteCount, 'Items> = private Phantom_ArraySplice__ of obj[]
 
 /// <summary>
 /// Extract the type of an array or tuple minus the first element.
@@ -675,7 +675,7 @@ type ArraySplice<'T, 'Start, 'DeleteCount, 'Items> = private ArraySplice__ of ob
 /// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type ArrayTail<'TArray> = private ArrayTail__ of obj
+type ArrayTail<'TArray> = private Phantom_ArrayTail__ of obj
 
 /// <summary>
 /// Provides all values for a constant array or tuple.
@@ -699,7 +699,7 @@ type ArrayTail<'TArray> = private ArrayTail__ of obj
 /// <remarks>@see {@link ArrayIndices}</remarks>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type ArrayValues<'T> = private ArrayValues__ of obj
+type ArrayValues<'T> = private Phantom_ArrayValues__ of obj
 
 /// <summary>
 /// Create a type that represents either the value or an array of the value.
@@ -754,7 +754,7 @@ type Arrayable<'T> = U2<'T, 'T[]>
 /// </example>
 /// <remarks>@category Async</remarks>
 [<Erase>]
-type AsyncReturnType<'Target> = private AsyncReturnType__ of obj
+type AsyncReturnType<'Target> = private Phantom_AsyncReturnType__ of obj
 
 /// <summary>
 /// Create an async version of the given function type, by boxing the return type in <c>Promise</c> while keeping the same parameter types.
@@ -778,7 +778,7 @@ type AsyncReturnType<'Target> = private AsyncReturnType__ of obj
 /// </example>
 /// <remarks>@category Async</remarks>
 [<Erase>]
-type Asyncify<'Function_> = private Asyncify__ of obj
+type Asyncify<'Function_> = private Phantom_Asyncify__ of obj
 
 /// <summary>
 /// Matches a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes"><c>class</c></a>.
@@ -885,7 +885,7 @@ type CamelCaseOptions =
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type CamelCase<'Type, 'Options> = private CamelCase__ of obj
+type CamelCase<'Type, 'Options> = private Phantom_CamelCase__ of obj
 
 /// <summary>
 /// Convert object properties to camel case recursively.
@@ -947,7 +947,7 @@ type CamelCase<'Type, 'Options> = private CamelCase__ of obj
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type CamelCasedPropertiesDeep<'Value, 'Options> = private CamelCasedPropertiesDeep__ of obj
+type CamelCasedPropertiesDeep<'Value, 'Options> = private Phantom_CamelCasedPropertiesDeep__ of obj
 
 /// <summary>
 /// Convert top-level object properties to camel case.
@@ -985,7 +985,7 @@ type CamelCasedPropertiesDeep<'Value, 'Options> = private CamelCasedPropertiesDe
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type CamelCasedProperties<'Value, 'Options> = private CamelCasedProperties__ of obj
+type CamelCasedProperties<'Value, 'Options> = private Phantom_CamelCasedProperties__ of obj
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type UppercaseLetter =
@@ -1165,7 +1165,7 @@ type Alphanumeric =
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type ConditionalExcept<'Base, 'Condition> = private ConditionalExcept__ of obj
+type ConditionalExcept<'Base, 'Condition> = private Phantom_ConditionalExcept__ of obj
 
 /// <summary>
 /// Extract the keys from a type where the value type of the key extends the given <c>Condition</c>.
@@ -1217,7 +1217,7 @@ type ConditionalExcept<'Base, 'Condition> = private ConditionalExcept__ of obj
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type ConditionalKeys<'Base, 'Condition> = private ConditionalKeys__ of obj
+type ConditionalKeys<'Base, 'Condition> = private Phantom_ConditionalKeys__ of obj
 
 /// <summary>
 /// ConditionalPickDeep options.
@@ -1292,7 +1292,7 @@ type ConditionalPickDeepOptions =
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type ConditionalPickDeep<'Type, 'Condition, 'Options> = private ConditionalPickDeep__ of obj
+type ConditionalPickDeep<'Type, 'Condition, 'Options> = private Phantom_ConditionalPickDeep__ of obj
 
 /// <summary>
 /// Pick keys from the shape that matches the given <c>Condition</c>.
@@ -1336,7 +1336,7 @@ type ConditionalPickDeep<'Type, 'Condition, 'Options> = private ConditionalPickD
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type ConditionalPick<'Base, 'Condition> = private ConditionalPick__ of obj
+type ConditionalPick<'Base, 'Condition> = private Phantom_ConditionalPick__ of obj
 
 /// <summary>
 /// Recursively simplifies a type while including and/or excluding certain types from being simplified.
@@ -1408,7 +1408,7 @@ type ConditionalPick<'Base, 'Condition> = private ConditionalPick__ of obj
 /// <remarks>@see {@link SimplifyDeep}</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type ConditionalSimplifyDeep<'Type, 'ExcludeType, 'IncludeType> = private ConditionalSimplifyDeep__ of obj
+type ConditionalSimplifyDeep<'Type, 'ExcludeType, 'IncludeType> = private Phantom_ConditionalSimplifyDeep__ of obj
 
 /// <summary>
 /// Simplifies a type while including and/or excluding certain types from being simplified.
@@ -1457,7 +1457,7 @@ type ConditionalSimplifyDeep<'Type, 'ExcludeType, 'IncludeType> = private Condit
 /// <remarks>@see {@link ConditionalSimplifyDeep}</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type ConditionalSimplify<'Type, 'ExcludeType, 'IncludeType> = private ConditionalSimplify__ of obj
+type ConditionalSimplify<'Type, 'ExcludeType, 'IncludeType> = private Phantom_ConditionalSimplify__ of obj
 
 /// <summary>
 /// Convert a string literal to a custom string delimiter casing.
@@ -1500,7 +1500,7 @@ type ConditionalSimplify<'Type, 'ExcludeType, 'IncludeType> = private Conditiona
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type DelimiterCase<'Value, 'Delimiter, 'Options> = private DelimiterCase__ of obj
+type DelimiterCase<'Value, 'Delimiter, 'Options> = private Phantom_DelimiterCase__ of obj
 
 /// <summary>
 /// Convert object properties to a custom string delimiter casing recursively.
@@ -1564,7 +1564,7 @@ type DelimiterCase<'Value, 'Delimiter, 'Options> = private DelimiterCase__ of ob
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type DelimiterCasedPropertiesDeep<'Value, 'Delimiter, 'Options> = private DelimiterCasedPropertiesDeep__ of obj
+type DelimiterCasedPropertiesDeep<'Value, 'Delimiter, 'Options> = private Phantom_DelimiterCasedPropertiesDeep__ of obj
 
 /// <summary>
 /// Convert object properties to a custom string delimiter casing.
@@ -1602,7 +1602,7 @@ type DelimiterCasedPropertiesDeep<'Value, 'Delimiter, 'Options> = private Delimi
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type DelimiterCasedProperties<'Value, 'Delimiter, 'Options> = private DelimiterCasedProperties__ of obj
+type DelimiterCasedProperties<'Value, 'Delimiter, 'Options> = private Phantom_DelimiterCasedProperties__ of obj
 
 /// <summary>
 /// Omits keys from a type, distributing the operation over a union.
@@ -1693,7 +1693,7 @@ type DelimiterCasedProperties<'Value, 'Delimiter, 'Options> = private DelimiterC
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type DistributedOmit<'ObjectType, 'KeyType> = private DistributedOmit__ of obj
+type DistributedOmit<'ObjectType, 'KeyType> = private Phantom_DistributedOmit__ of obj
 
 /// <summary>
 /// Pick keys from a type, distributing the operation over a union.
@@ -1780,7 +1780,7 @@ type DistributedOmit<'ObjectType, 'KeyType> = private DistributedOmit__ of obj
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type DistributedPick<'ObjectType, 'KeyType> = private DistributedPick__ of obj
+type DistributedPick<'ObjectType, 'KeyType> = private Phantom_DistributedPick__ of obj
 
 /// <summary>
 /// Represents a strictly empty plain object, the <c>{}</c> value.
@@ -1832,7 +1832,7 @@ type EmptyObject =
 /// <remarks>@see {@link EmptyObject}</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type IsEmptyObject<'T> = private IsEmptyObject__ of obj
+type IsEmptyObject<'T> = private Phantom_IsEmptyObject__ of obj
 
 /// <summary>
 /// Create a type that describes the key-value pairs produced when calling a collection’s <c>entries</c> method.
@@ -1884,7 +1884,7 @@ type IsEmptyObject<'T> = private IsEmptyObject__ of obj
 /// <remarks>@category Set</remarks>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type Entries<'BaseType> = private Entries__ of obj
+type Entries<'BaseType> = private Phantom_Entries__ of obj
 
 /// <summary>
 /// Create a type that describes a single key-value pair produced when calling a collection’s <c>entries</c> method.
@@ -1938,7 +1938,7 @@ type Entries<'BaseType> = private Entries__ of obj
 /// <remarks>@category Array</remarks>
 /// <remarks>@category Set</remarks>
 [<Erase>]
-type Entry<'BaseType> = private Entry__ of obj
+type Entry<'BaseType> = private Phantom_Entry__ of obj
 
 /// <summary>
 /// Create a type that does not allow extra properties, meaning it only allows properties that are explicitly declared.
@@ -1986,7 +1986,7 @@ type Entry<'BaseType> = private Entry__ of obj
 /// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type Exact<'ParameterType, 'InputType> = private Exact__ of obj
+type Exact<'ParameterType, 'InputType> = private Phantom_Exact__ of obj
 
 [<Interface>]
 type ExceptOptions =
@@ -2057,7 +2057,7 @@ type ExceptOptions =
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type Except<'ObjectType, 'KeysType, 'Options> = private Except__ of obj
+type Except<'ObjectType, 'KeysType, 'Options> = private Phantom_Except__ of obj
 
 /// <summary>
 /// A stricter version of <c>Exclude&lt;T, U&gt;</c> that excludes types only when they are exactly identical.
@@ -2089,7 +2089,7 @@ type Except<'ObjectType, 'KeysType, 'Options> = private Except__ of obj
 /// </example>
 /// <remarks>@category Improved Built-in</remarks>
 [<Erase>]
-type ExcludeExactly<'Union, 'Delete> = private ExcludeExactly__ of obj
+type ExcludeExactly<'Union, 'Delete> = private Phantom_ExcludeExactly__ of obj
 
 /// <summary>
 /// Create a tuple with the <a href="https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types"><c>rest</c></a> element removed.
@@ -2117,7 +2117,7 @@ type ExcludeExactly<'Union, 'Delete> = private ExcludeExactly__ of obj
 /// <remarks>@see {@link SplitOnRestElement}</remarks>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type ExcludeRestElement<'Array_> = private ExcludeRestElement__ of obj
+type ExcludeRestElement<'Array_> = private Phantom_ExcludeRestElement__ of obj
 
 /// <summary>
 /// A stricter version of &lt;T, U&gt; that ensures every member of <c>U</c> can successfully exclude something from <c>T</c>.
@@ -2163,7 +2163,7 @@ type ExcludeRestElement<'Array_> = private ExcludeRestElement__ of obj
 /// </example>
 /// <remarks>@category Improved Built-in</remarks>
 [<Erase>]
-type ExcludeStrict<'T, 'U> = private ExcludeStrict__ of 'T
+type ExcludeStrict<'T, 'U> = private Phantom_ExcludeStrict__ of 'T
 
 /// <summary>
 /// Ensure mutual exclusivity in object unions by adding other members’ keys as <c>?: never</c>.
@@ -2292,7 +2292,7 @@ type ExcludeStrict<'T, 'U> = private ExcludeStrict__ of 'T
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Union</remarks>
 [<Erase>]
-type ExclusifyUnion<'Union> = private ExclusifyUnion__ of obj
+type ExclusifyUnion<'Union> = private Phantom_ExclusifyUnion__ of obj
 
 [<Interface>]
 type ExtendsStrictOptions =
@@ -2418,7 +2418,7 @@ type ExtendsStrictOptions =
 /// <remarks>@see {@link ExtendsStrictOptions}</remarks>
 /// <remarks>@category Improved Built-in</remarks>
 [<Erase>]
-type ExtendsStrict<'Left, 'Right, 'Options> = private ExtendsStrict__ of obj
+type ExtendsStrict<'Left, 'Right, 'Options> = private Phantom_ExtendsStrict__ of obj
 
 /// <summary>
 /// A stricter version of <c>Extract&lt;T, U&gt;</c> that extracts types only when they are exactly identical.
@@ -2450,7 +2450,7 @@ type ExtendsStrict<'Left, 'Right, 'Options> = private ExtendsStrict__ of obj
 /// </example>
 /// <remarks>@category Improved Built-in</remarks>
 [<Erase>]
-type ExtractExactly<'Union, 'Match> = private ExtractExactly__ of obj
+type ExtractExactly<'Union, 'Match> = private Phantom_ExtractExactly__ of obj
 
 /// <summary>
 /// Extract the <a href="https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types"><c>rest</c></a> element type from an array.
@@ -2478,7 +2478,7 @@ type ExtractExactly<'Union, 'Match> = private ExtractExactly__ of obj
 /// <remarks>@see {@link SplitOnRestElement}</remarks>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type ExtractRestElement<'T> = private ExtractRestElement__ of obj
+type ExtractRestElement<'T> = private Phantom_ExtractRestElement__ of obj
 
 /// <summary>
 /// A stricter version of &lt;T, U&gt; that ensures every member of <c>U</c> can successfully extract something from <c>T</c>.
@@ -2524,7 +2524,7 @@ type ExtractRestElement<'T> = private ExtractRestElement__ of obj
 /// </example>
 /// <remarks>@category Improved Built-in</remarks>
 [<Erase>]
-type ExtractStrict<'T, 'U> = private ExtractStrict__ of 'T
+type ExtractStrict<'T, 'U> = private Phantom_ExtractStrict__ of 'T
 
 /// <summary>
 /// Tries to find the type of a global with the given name.
@@ -2549,7 +2549,7 @@ type ExtractStrict<'T, 'U> = private ExtractStrict__ of 'T
 /// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type FindGlobalType<'Name> = private FindGlobalType__ of obj
+type FindGlobalType<'Name> = private Phantom_FindGlobalType__ of obj
 
 /// <summary>
 /// Tries to find one or more types from their globally-defined constructors.
@@ -2594,7 +2594,7 @@ type FindGlobalType<'Name> = private FindGlobalType__ of obj
 /// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type FindGlobalInstanceType<'Name> = private FindGlobalInstanceType__ of obj
+type FindGlobalInstanceType<'Name> = private Phantom_FindGlobalInstanceType__ of obj
 
 /// <summary>
 /// Create a type that represents an array of the given type and length. The <c>Array</c> prototype methods that manipulate its length are excluded from the resulting type.
@@ -2685,7 +2685,7 @@ type FindGlobalInstanceType<'Name> = private FindGlobalInstanceType__ of obj
 /// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type FixedLengthArray<'Element, 'Length> = private FixedLengthArray__ of obj
+type FixedLengthArray<'Element, 'Length> = private Phantom_FixedLengthArray__ of obj
 
 [<Interface>]
 type GetOptions =
@@ -2752,7 +2752,7 @@ type GetOptions =
 /// <remarks>@category Array</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type Get<'BaseType, 'Path, 'Options> = private Get__ of obj
+type Get<'BaseType, 'Path, 'Options> = private Phantom_Get__ of obj
 
 /// <summary>
 /// Declare locally scoped properties on <c>globalThis</c>.
@@ -2835,7 +2835,7 @@ type GlobalThis = obj
 /// </code>
 /// </example>
 [<Erase>]
-type GreaterThanOrEqual<'A, 'B> = private GreaterThanOrEqual__ of obj
+type GreaterThanOrEqual<'A, 'B> = private Phantom_GreaterThanOrEqual__ of obj
 
 /// <summary>
 /// Returns a boolean for whether a given number is greater than another number.
@@ -2894,7 +2894,7 @@ type GreaterThanOrEqual<'A, 'B> = private GreaterThanOrEqual__ of obj
 /// </code>
 /// </example>
 [<Erase>]
-type GreaterThan<'A, 'B> = private GreaterThan__ of obj
+type GreaterThan<'A, 'B> = private Phantom_GreaterThan__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type has any optional fields.
@@ -2916,7 +2916,7 @@ type GreaterThan<'A, 'B> = private GreaterThan__ of obj
 /// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type HasOptionalKeys<'BaseType> = private HasOptionalKeys__ of bool
+type HasOptionalKeys<'BaseType> = private Phantom_HasOptionalKeys__ of bool
 
 /// <summary>
 /// Returns a boolean for whether the given type has any readonly fields.
@@ -2938,7 +2938,7 @@ type HasOptionalKeys<'BaseType> = private HasOptionalKeys__ of bool
 /// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type HasReadonlyKeys<'BaseType> = private HasReadonlyKeys__ of bool
+type HasReadonlyKeys<'BaseType> = private Phantom_HasReadonlyKeys__ of bool
 
 /// <summary>
 /// Returns a boolean for whether the given type has any required fields.
@@ -2997,7 +2997,7 @@ type HasReadonlyKeys<'BaseType> = private HasReadonlyKeys__ of bool
 /// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type HasRequiredKeys<'BaseType> = private HasRequiredKeys__ of obj
+type HasRequiredKeys<'BaseType> = private Phantom_HasRequiredKeys__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type has any writable fields.
@@ -3019,7 +3019,7 @@ type HasRequiredKeys<'BaseType> = private HasRequiredKeys__ of obj
 /// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type HasWritableKeys<'BaseType> = private HasWritableKeys__ of obj
+type HasWritableKeys<'BaseType> = private Phantom_HasWritableKeys__ of obj
 
 /// <summary>
 /// An if-else-like type that resolves depending on whether the given type is <c>any</c>.
@@ -3042,7 +3042,7 @@ type HasWritableKeys<'BaseType> = private HasWritableKeys__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IfAny<'T, 'TypeIfAny, 'TypeIfNotAny> = private IfAny__ of obj
+type IfAny<'T, 'TypeIfAny, 'TypeIfNotAny> = private Phantom_IfAny__ of obj
 
 /// <summary>
 /// An if-else-like type that resolves depending on whether the given type is <c>{}</c>.
@@ -3065,7 +3065,7 @@ type IfAny<'T, 'TypeIfAny, 'TypeIfNotAny> = private IfAny__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IfEmptyObject<'T, 'TypeIfEmptyObject, 'TypeIfNotEmptyObject> = private IfEmptyObject__ of obj
+type IfEmptyObject<'T, 'TypeIfEmptyObject, 'TypeIfNotEmptyObject> = private Phantom_IfEmptyObject__ of obj
 
 /// <summary>
 /// An if-else-like type that resolves depending on whether the given type is <c>never</c>.
@@ -3088,7 +3088,7 @@ type IfEmptyObject<'T, 'TypeIfEmptyObject, 'TypeIfNotEmptyObject> = private IfEm
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IfNever<'T, 'TypeIfNever, 'TypeIfNotNever> = private IfNever__ of obj
+type IfNever<'T, 'TypeIfNever, 'TypeIfNotNever> = private Phantom_IfNever__ of obj
 
 /// <summary>
 /// An if-else-like type that resolves depending on whether the given type is <c>null</c>.
@@ -3111,7 +3111,7 @@ type IfNever<'T, 'TypeIfNever, 'TypeIfNotNever> = private IfNever__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IfNull<'T, 'TypeIfNull, 'TypeIfNotNull> = private IfNull__ of obj
+type IfNull<'T, 'TypeIfNull, 'TypeIfNotNull> = private Phantom_IfNull__ of obj
 
 /// <summary>
 /// An if-else-like type that resolves depending on whether the given type is <c>unknown</c>.
@@ -3134,7 +3134,7 @@ type IfNull<'T, 'TypeIfNull, 'TypeIfNotNull> = private IfNull__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IfUnknown<'T, 'TypeIfUnknown, 'TypeIfNotUnknown> = private IfUnknown__ of obj
+type IfUnknown<'T, 'TypeIfUnknown, 'TypeIfNotUnknown> = private Phantom_IfUnknown__ of obj
 
 /// <summary>
 /// An if-else-like type that resolves depending on whether the given <c>boolean</c> type is <c>true</c> or <c>false</c>.
@@ -3236,7 +3236,7 @@ type IfUnknown<'T, 'TypeIfUnknown, 'TypeIfNotUnknown> = private IfUnknown__ of o
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type If<'Type, 'IfBranch, 'ElseBranch> = private If__ of obj
+type If<'Type, 'IfBranch, 'ElseBranch> = private Phantom_If__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given array includes the given item.
@@ -3254,7 +3254,7 @@ type If<'Type, 'IfBranch, 'ElseBranch> = private If__ of obj
 /// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type Includes<'Value, 'Item> = private Includes__ of obj
+type Includes<'Value, 'Item> = private Phantom_Includes__ of obj
 
 /// <summary>
 /// Generate a union of numbers between a specified start and end (both inclusive), with an optional step.
@@ -3299,7 +3299,7 @@ type Includes<'Value, 'Item> = private Includes__ of obj
 /// </example>
 /// <remarks>@see {@link IntRange}</remarks>
 [<Erase>]
-type IntClosedRange<'Start, 'End, 'Skip> = private IntClosedRange__ of obj
+type IntClosedRange<'Start, 'End, 'Skip> = private Phantom_IntClosedRange__ of obj
 
 /// <summary>
 /// Generate a union of numbers between a specified start (inclusive) and end (exclusive), with an optional step.
@@ -3344,7 +3344,7 @@ type IntClosedRange<'Start, 'End, 'Skip> = private IntClosedRange__ of obj
 /// </example>
 /// <remarks>@see {@link IntClosedRange}</remarks>
 [<Erase>]
-type IntRange<'Start, 'End, 'Step> = private IntRange__ of obj
+type IntRange<'Start, 'End, 'Step> = private Phantom_IntRange__ of obj
 
 /// <summary>
 /// Create an <a href="https://basarat.gitbook.io/typescript/type-system/type-compatibility#footnote-invariance">invariant type</a>, which is a type that does not accept supertypes and subtypes.
@@ -3463,7 +3463,7 @@ type InvariantOf<'Type> = JS.Intersect<'Type, InvariantOf.Members<'Type>>
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsAny<'T> = private IsAny__ of obj
+type IsAny<'T> = private Phantom_IsAny__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type is a <c>true</c> or <c>false</c> <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types">literal type</a>.
@@ -3490,7 +3490,7 @@ type IsAny<'T> = private IsAny__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsBooleanLiteral<'T> = private IsBooleanLiteral__ of obj
+type IsBooleanLiteral<'T> = private Phantom_IsBooleanLiteral__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the two given types are equal.
@@ -3522,7 +3522,7 @@ type IsBooleanLiteral<'T> = private IsBooleanLiteral__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsEqual<'A, 'B> = private IsEqual__ of obj
+type IsEqual<'A, 'B> = private Phantom_IsEqual__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given number is a float, like <c>1.5</c> or <c>-1.5</c>.
@@ -3558,7 +3558,7 @@ type IsEqual<'A, 'B> = private IsEqual__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Numeric</remarks>
 [<Erase>]
-type IsFloat<'T> = private IsFloat__ of obj
+type IsFloat<'T> = private Phantom_IsFloat__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given number is an integer, like <c>-5</c>, <c>1.0</c>, or <c>100</c>.
@@ -3606,7 +3606,7 @@ type IsFloat<'T> = private IsFloat__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Numeric</remarks>
 [<Erase>]
-type IsInteger<'T> = private IsInteger__ of obj
+type IsInteger<'T> = private Phantom_IsInteger__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type is a <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types">literal type</a>.
@@ -3667,7 +3667,7 @@ type IsInteger<'T> = private IsInteger__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsLiteral<'T> = private IsLiteral__ of obj
+type IsLiteral<'T> = private Phantom_IsLiteral__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given string literal is lowercase.
@@ -3689,7 +3689,7 @@ type IsLiteral<'T> = private IsLiteral__ of obj
 /// </code>
 /// </example>
 [<Erase>]
-type IsLowercase<'S> = private IsLowercase__ of obj
+type IsLowercase<'S> = private Phantom_IsLowercase__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type is <c>never</c>.
@@ -3750,7 +3750,7 @@ type IsLowercase<'S> = private IsLowercase__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsNever<'T> = private IsNever__ of obj
+type IsNever<'T> = private Phantom_IsNever__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type is <c>null</c>.
@@ -3773,7 +3773,7 @@ type IsNever<'T> = private IsNever__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsNull<'T> = private IsNull__ of obj
+type IsNull<'T> = private Phantom_IsNull__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type includes <c>null</c>.
@@ -3803,7 +3803,7 @@ type IsNull<'T> = private IsNull__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsNullable<'T> = private IsNullable__ of obj
+type IsNullable<'T> = private Phantom_IsNullable__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type is a <c>number</c> or <c>bigint</c> <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types">literal type</a>.
@@ -3839,7 +3839,7 @@ type IsNullable<'T> = private IsNullable__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsNumericLiteral<'T> = private IsNumericLiteral__ of obj
+type IsNumericLiteral<'T> = private Phantom_IsNumericLiteral__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given key is an optional key of type.
@@ -3883,7 +3883,7 @@ type IsNumericLiteral<'T> = private IsNumericLiteral__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsOptionalKeyOf<'Type, 'Key> = private IsOptionalKeyOf__ of bool
+type IsOptionalKeyOf<'Type, 'Key> = private Phantom_IsOptionalKeyOf__ of bool
 
 /// <summary>
 /// Returns a boolean for whether the given type includes <c>undefined</c>.
@@ -3911,7 +3911,7 @@ type IsOptionalKeyOf<'Type, 'Key> = private IsOptionalKeyOf__ of bool
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsOptional<'T> = private IsOptional__ of obj
+type IsOptional<'T> = private Phantom_IsOptional__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given key is a readonly key of type.
@@ -3955,7 +3955,7 @@ type IsOptional<'T> = private IsOptional__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsReadonlyKeyOf<'Type, 'Key> = private IsReadonlyKeyOf__ of obj
+type IsReadonlyKeyOf<'Type, 'Key> = private Phantom_IsReadonlyKeyOf__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given key is a required key of type.
@@ -3999,7 +3999,7 @@ type IsReadonlyKeyOf<'Type, 'Key> = private IsReadonlyKeyOf__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsRequiredKeyOf<'Type, 'Key> = private IsRequiredKeyOf__ of obj
+type IsRequiredKeyOf<'Type, 'Key> = private Phantom_IsRequiredKeyOf__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type is a <c>string</c> <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types">literal type</a>.
@@ -4058,7 +4058,7 @@ type IsRequiredKeyOf<'Type, 'Key> = private IsRequiredKeyOf__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsStringLiteral<'S> = private IsStringLiteral__ of obj
+type IsStringLiteral<'S> = private Phantom_IsStringLiteral__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type is a <c>symbol</c> <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types">literal type</a>.
@@ -4085,7 +4085,7 @@ type IsStringLiteral<'S> = private IsStringLiteral__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsSymbolLiteral<'T> = private IsSymbolLiteral__ of obj
+type IsSymbolLiteral<'T> = private Phantom_IsSymbolLiteral__ of obj
 
 /// <remarks>@see {@link IsTuple}</remarks>
 [<Interface>]
@@ -4150,7 +4150,7 @@ type IsTupleOptions =
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsTuple<'TArray, 'Options> = private IsTuple__ of obj
+type IsTuple<'TArray, 'Options> = private Phantom_IsTuple__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type is <c>undefined</c>.
@@ -4173,7 +4173,7 @@ type IsTuple<'TArray, 'Options> = private IsTuple__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsUndefined<'T> = private IsUndefined__ of obj
+type IsUndefined<'T> = private Phantom_IsUndefined__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type is a union.
@@ -4192,7 +4192,7 @@ type IsUndefined<'T> = private IsUndefined__ of obj
 /// </code>
 /// </example>
 [<Erase>]
-type IsUnion<'T> = private IsUnion__ of obj
+type IsUnion<'T> = private Phantom_IsUnion__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type is <c>unknown</c>.
@@ -4230,7 +4230,7 @@ type IsUnion<'T> = private IsUnion__ of obj
 /// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsUnknown<'T> = private IsUnknown__ of obj
+type IsUnknown<'T> = private Phantom_IsUnknown__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given string literal is uppercase.
@@ -4252,7 +4252,7 @@ type IsUnknown<'T> = private IsUnknown__ of obj
 /// </code>
 /// </example>
 [<Erase>]
-type IsUppercase<'S> = private IsUppercase__ of obj
+type IsUppercase<'S> = private Phantom_IsUppercase__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given key is a writable key of type.
@@ -4296,7 +4296,7 @@ type IsUppercase<'S> = private IsUppercase__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsWritableKeyOf<'Type, 'Key> = private IsWritableKeyOf__ of obj
+type IsWritableKeyOf<'Type, 'Key> = private Phantom_IsWritableKeyOf__ of obj
 
 /// <summary>
 /// Get the element type of an <c>Iterable</c>/<c>AsyncIterable</c>. For example, <c>Array</c>, <c>Set</c>, <c>Map</c>, generator, stream, etc.
@@ -4364,7 +4364,7 @@ type IsWritableKeyOf<'Type, 'Key> = private IsWritableKeyOf__ of obj
 /// </example>
 /// <remarks>@category Iterable</remarks>
 [<Erase>]
-type IterableElement<'TargetIterable> = private IterableElement__ of obj
+type IterableElement<'TargetIterable> = private Phantom_IterableElement__ of obj
 
 /// <summary>
 /// Join an array of strings and/or numbers using the given string as a delimiter.
@@ -4417,7 +4417,7 @@ type IterableElement<'TargetIterable> = private IterableElement__ of obj
 /// <remarks>@category Array</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type Join<'Items, 'Delimiter> = private Join__ of obj
+type Join<'Items, 'Delimiter> = private Phantom_Join__ of obj
 
 /// <summary>
 /// Matches a JSON object.
@@ -4540,7 +4540,7 @@ type Jsonifiable2 =
 /// <remarks>@link https://github.com/Microsoft/TypeScript/issues/1897#issuecomment-710744173</remarks>
 /// <remarks>@category JSON</remarks>
 [<Erase>]
-type Jsonify<'T> = private Jsonify__ of obj
+type Jsonify<'T> = private Phantom_Jsonify__ of obj
 
 /// <summary>
 /// Convert a string literal to kebab-case.
@@ -4581,7 +4581,7 @@ type Jsonify<'T> = private Jsonify__ of obj
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type KebabCase<'Value, 'Options> = private KebabCase__ of obj
+type KebabCase<'Value, 'Options> = private Phantom_KebabCase__ of obj
 
 /// <summary>
 /// Convert object properties to kebab case recursively.
@@ -4645,7 +4645,7 @@ type KebabCase<'Value, 'Options> = private KebabCase__ of obj
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type KebabCasedPropertiesDeep<'Value, 'Options> = private KebabCasedPropertiesDeep__ of obj
+type KebabCasedPropertiesDeep<'Value, 'Options> = private Phantom_KebabCasedPropertiesDeep__ of obj
 
 /// <summary>
 /// Convert top-level object properties to kebab case.
@@ -4683,7 +4683,7 @@ type KebabCasedPropertiesDeep<'Value, 'Options> = private KebabCasedPropertiesDe
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type KebabCasedProperties<'Value, 'Options> = private KebabCasedProperties__ of obj
+type KebabCasedProperties<'Value, 'Options> = private Phantom_KebabCasedProperties__ of obj
 
 /// <summary>
 /// Get keys of the given type as strings.
@@ -4711,7 +4711,7 @@ type KebabCasedProperties<'Value, 'Options> = private KebabCasedProperties__ of 
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type KeyAsString<'BaseType> = private KeyAsString__ of string
+type KeyAsString<'BaseType> = private Phantom_KeyAsString__ of string
 
 /// <summary>
 /// Create a union of all keys from a given type, even those exclusive to specific union members.
@@ -4751,7 +4751,7 @@ type KeyAsString<'BaseType> = private KeyAsString__ of string
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type KeysOfUnion<'ObjectType> = private KeysOfUnion__ of obj
+type KeysOfUnion<'ObjectType> = private Phantom_KeysOfUnion__ of obj
 
 /// <summary>
 /// Extract the type of the last element of an array.
@@ -4815,7 +4815,7 @@ type KeysOfUnion<'ObjectType> = private KeysOfUnion__ of obj
 /// <remarks>@category Array</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type LastArrayElement<'TArray> = private LastArrayElement__ of obj
+type LastArrayElement<'TArray> = private Phantom_LastArrayElement__ of obj
 
 /// <summary>
 /// Returns a boolean for whether a given number is less than or equal to another number.
@@ -4874,7 +4874,7 @@ type LastArrayElement<'TArray> = private LastArrayElement__ of obj
 /// </code>
 /// </example>
 [<Erase>]
-type LessThanOrEqual<'A, 'B> = private LessThanOrEqual__ of obj
+type LessThanOrEqual<'A, 'B> = private Phantom_LessThanOrEqual__ of obj
 
 /// <summary>
 /// Returns a boolean for whether a given number is less than another number.
@@ -4933,7 +4933,7 @@ type LessThanOrEqual<'A, 'B> = private LessThanOrEqual__ of obj
 /// </code>
 /// </example>
 [<Erase>]
-type LessThan<'A, 'B> = private LessThan__ of obj
+type LessThan<'A, 'B> = private Phantom_LessThan__ of obj
 
 /// <summary>
 /// Like <c>LiteralToPrimitive</c> except it converts literal types inside an object or array deeply.
@@ -4993,7 +4993,7 @@ type LessThan<'A, 'B> = private LessThan__ of obj
 /// <remarks>@category Type</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type LiteralToPrimitiveDeep<'T> = private LiteralToPrimitiveDeep__ of obj
+type LiteralToPrimitiveDeep<'T> = private Phantom_LiteralToPrimitiveDeep__ of obj
 
 /// <summary>
 /// Given a <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types">literal type</a> return the <a href="https://developer.mozilla.org/en-US/docs/Glossary/Primitive">primitive type</a> it belongs to, or <c>never</c> if it's not a primitive.
@@ -5018,7 +5018,7 @@ type LiteralToPrimitiveDeep<'T> = private LiteralToPrimitiveDeep__ of obj
 /// </example>
 /// <remarks>@category Type</remarks>
 [<Erase>]
-type LiteralToPrimitive<'T> = private LiteralToPrimitive__ of obj
+type LiteralToPrimitive<'T> = private Phantom_LiteralToPrimitive__ of obj
 
 /// <summary>
 /// Create a union type by combining primitive types and literal types without sacrificing auto-completion in IDEs for the literal type part of the union.
@@ -5197,7 +5197,7 @@ type MergeDeepOptions =
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type MergeDeep<'Destination, 'Source, 'Options> = private MergeDeep__ of obj
+type MergeDeep<'Destination, 'Source, 'Options> = private Phantom_MergeDeep__ of obj
 
 /// <summary>
 /// Create a type that has mutually exclusive keys.
@@ -5237,7 +5237,7 @@ type MergeDeep<'Destination, 'Source, 'Options> = private MergeDeep__ of obj
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type MergeExclusive<'FirstType, 'SecondType> = private MergeExclusive__ of obj
+type MergeExclusive<'FirstType, 'SecondType> = private Phantom_MergeExclusive__ of obj
 
 /// <summary>
 /// Merge two types into a new type. Keys of the second type overrides keys of the first type.
@@ -5305,7 +5305,7 @@ type MergeExclusive<'FirstType, 'SecondType> = private MergeExclusive__ of obj
 /// <remarks>@see {@link ObjectMerge}</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type Merge<'Destination, 'Source> = private Merge__ of obj
+type Merge<'Destination, 'Source> = private Phantom_Merge__ of obj
 
 /// <summary>
 /// Create a type that represents a multidimensional array of the given type and dimension.
@@ -5335,7 +5335,7 @@ type Merge<'Destination, 'Source> = private Merge__ of obj
 /// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type MultidimensionalArray<'Element, 'Dimensions> = private MultidimensionalArray__ of obj
+type MultidimensionalArray<'Element, 'Dimensions> = private Phantom_MultidimensionalArray__ of obj
 
 /// <summary>
 /// Create a type that represents a multidimensional readonly array of the given type and dimension.
@@ -5365,7 +5365,7 @@ type MultidimensionalArray<'Element, 'Dimensions> = private MultidimensionalArra
 /// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type MultidimensionalReadonlyArray<'Element, 'Dimensions> = private MultidimensionalReadonlyArray__ of obj
+type MultidimensionalReadonlyArray<'Element, 'Dimensions> = private Phantom_MultidimensionalReadonlyArray__ of obj
 
 /// <summary>
 /// Represents an object with at least 1 non-optional key.
@@ -5400,7 +5400,7 @@ type MultidimensionalReadonlyArray<'Element, 'Dimensions> = private Multidimensi
 /// <remarks>@see Use <c>IsEmptyObject</c> to check whether an object is empty.</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type NonEmptyObject<'T> = private NonEmptyObject__ of obj
+type NonEmptyObject<'T> = private Phantom_NonEmptyObject__ of obj
 
 /// <summary>
 /// Matches any non-empty string.
@@ -5530,7 +5530,7 @@ type NonEmptyTuple<'T> = 'T[]
 /// <remarks>@category Set</remarks>
 /// <remarks>@category Map</remarks>
 [<Erase>]
-type NonNullableDeep<'T> = private NonNullableDeep__ of obj
+type NonNullableDeep<'T> = private Phantom_NonNullableDeep__ of obj
 
 /// <summary>
 /// Matches the hidden <c>Infinity</c> type.
@@ -5691,7 +5691,7 @@ type NegativeInteger<'T> = 'T
 /// </example>
 /// <remarks>@category Numeric</remarks>
 [<Erase>]
-type NonNegative<'T> = private NonNegative__ of obj
+type NonNegative<'T> = private Phantom_NonNegative__ of obj
 
 /// <summary>
 /// A non-negative (<c>0 &lt;= x &lt; ∞</c>) <c>number</c> that is an integer.
@@ -5714,7 +5714,7 @@ type NonNegative<'T> = private NonNegative__ of obj
 /// </example>
 /// <remarks>@category Numeric</remarks>
 [<Erase>]
-type NonNegativeInteger<'T> = private NonNegativeInteger__ of obj
+type NonNegativeInteger<'T> = private Phantom_NonNegativeInteger__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given number is a negative number.
@@ -5732,7 +5732,7 @@ type NonNegativeInteger<'T> = private NonNegativeInteger__ of obj
 /// </example>
 /// <remarks>@category Numeric</remarks>
 [<Erase>]
-type IsNegative<'T> = private IsNegative__ of obj
+type IsNegative<'T> = private Phantom_IsNegative__ of obj
 
 /// <summary>
 /// Merge two object types into a new object type, where keys from the second override keys from the first.
@@ -5824,7 +5824,7 @@ type IsNegative<'T> = private IsNegative__ of obj
 /// <remarks>@see {@link Merge}</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type ObjectMerge<'First, 'Second> = private ObjectMerge__ of obj
+type ObjectMerge<'First, 'Second> = private Phantom_ObjectMerge__ of obj
 
 /// <summary>
 /// Omit properties from a deeply-nested object.
@@ -5894,7 +5894,7 @@ type ObjectMerge<'First, 'Second> = private ObjectMerge__ of obj
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type OmitDeep<'T, 'PathUnion> = private OmitDeep__ of obj
+type OmitDeep<'T, 'PathUnion> = private Phantom_OmitDeep__ of obj
 
 /// <summary>
 /// Omit any index signatures from the given object type, leaving only explicitly defined properties.
@@ -5985,7 +5985,7 @@ type OmitDeep<'T, 'PathUnion> = private OmitDeep__ of obj
 /// <remarks>@see {@link PickIndexSignature}</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type OmitIndexSignature<'ObjectType> = private OmitIndexSignature__ of obj
+type OmitIndexSignature<'ObjectType> = private Phantom_OmitIndexSignature__ of obj
 
 /// <summary>
 /// Extract all optional keys from the given type.
@@ -6022,7 +6022,7 @@ type OmitIndexSignature<'ObjectType> = private OmitIndexSignature__ of obj
 /// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type OptionalKeysOf<'Type> = private OptionalKeysOf__ of obj
+type OptionalKeysOf<'Type> = private Phantom_OptionalKeysOf__ of obj
 
 /// <summary>
 /// Create a type that represents either the value or <c>undefined</c>, while stripping <c>null</c> from the type.
@@ -6131,7 +6131,7 @@ type Optional<'Value> = 'Value option
 /// <remarks>@see {@link Or}</remarks>
 /// <remarks>@see {@link AndAll}</remarks>
 [<Erase>]
-type OrAll<'T> = private OrAll__ of obj
+type OrAll<'T> = private Phantom_OrAll__ of obj
 
 /// <summary>
 /// Returns a boolean for whether either of two given types is <c>true</c>.
@@ -6216,7 +6216,7 @@ type OrAll<'T> = private OrAll__ of obj
 /// <remarks>@see {@link And}</remarks>
 /// <remarks>@see {@link Xor}</remarks>
 [<Erase>]
-type Or<'A, 'B> = private Or__ of obj
+type Or<'A, 'B> = private Phantom_Or__ of obj
 
 /// <summary>
 /// Override existing properties of the given type. Similar to <c>Merge</c>, but enforces that the original type has the properties you want to override.
@@ -6248,7 +6248,7 @@ type Or<'A, 'B> = private Or__ of obj
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type OverrideProperties<'TOriginal, 'TOverride> = private OverrideProperties__ of obj
+type OverrideProperties<'TOriginal, 'TOverride> = private Phantom_OverrideProperties__ of obj
 
 /// <summary>
 /// Type for <a href="https://docs.npmjs.com/creating-a-package-json-file">npm's <c>package.json</c> file</a>. Also includes types for fields used by other popular projects, like TypeScript and Yarn.
@@ -6353,7 +6353,7 @@ type PartialDeepOptions =
 /// <remarks>@category Set</remarks>
 /// <remarks>@category Map</remarks>
 [<Erase>]
-type PartialDeep<'T, 'Options> = private PartialDeep__ of obj
+type PartialDeep<'T, 'Options> = private Phantom_PartialDeep__ of obj
 
 /// <remarks>@see {@link PartialOnUndefinedDeep}</remarks>
 [<Interface>]
@@ -6401,7 +6401,7 @@ type PartialOnUndefinedDeepOptions =
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type PartialOnUndefinedDeep<'T, 'Options> = private PartialOnUndefinedDeep__ of obj
+type PartialOnUndefinedDeep<'T, 'Options> = private Phantom_PartialOnUndefinedDeep__ of obj
 
 /// <summary>
 /// Convert a string literal to pascal-case.
@@ -6446,7 +6446,7 @@ type PartialOnUndefinedDeep<'T, 'Options> = private PartialOnUndefinedDeep__ of 
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type PascalCase<'Value, 'Options> = private PascalCase__ of obj
+type PascalCase<'Value, 'Options> = private Phantom_PascalCase__ of obj
 
 /// <summary>
 /// Convert object properties to pascal case recursively.
@@ -6508,7 +6508,7 @@ type PascalCase<'Value, 'Options> = private PascalCase__ of obj
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type PascalCasedPropertiesDeep<'Value, 'Options> = private PascalCasedPropertiesDeep__ of obj
+type PascalCasedPropertiesDeep<'Value, 'Options> = private Phantom_PascalCasedPropertiesDeep__ of obj
 
 /// <summary>
 /// Convert top-level object properties to pascal case.
@@ -6546,7 +6546,7 @@ type PascalCasedPropertiesDeep<'Value, 'Options> = private PascalCasedProperties
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type PascalCasedProperties<'Value, 'Options> = private PascalCasedProperties__ of obj
+type PascalCasedProperties<'Value, 'Options> = private Phantom_PascalCasedProperties__ of obj
 
 /// <summary>
 /// Paths options.
@@ -6730,7 +6730,7 @@ type PathsOptions =
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type Paths<'T, 'Options> = private Paths__ of obj
+type Paths<'T, 'Options> = private Phantom_Paths__ of obj
 
 /// <summary>
 /// Pick properties from a deeply-nested object.
@@ -6791,7 +6791,7 @@ type Paths<'T, 'Options> = private Paths__ of obj
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type PickDeep<'T, 'PathUnion> = private PickDeep__ of obj
+type PickDeep<'T, 'PathUnion> = private Phantom_PickDeep__ of obj
 
 /// <summary>
 /// Pick only index signatures from the given object type, leaving out all explicitly defined properties.
@@ -6840,7 +6840,7 @@ type PickDeep<'T, 'PathUnion> = private PickDeep__ of obj
 /// <remarks>@see {@link OmitIndexSignature}</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type PickIndexSignature<'ObjectType> = private PickIndexSignature__ of obj
+type PickIndexSignature<'ObjectType> = private Phantom_PickIndexSignature__ of obj
 
 /// <summary>
 /// Matches any <a href="https://developer.mozilla.org/en-US/docs/Glossary/Primitive">primitive value</a>.
@@ -6948,7 +6948,7 @@ type Promisable<'T> = U2<'T, JS.Promise<'T>>
 /// <remarks>@category Set</remarks>
 /// <remarks>@category Map</remarks>
 [<Erase>]
-type ReadonlyDeep<'T> = private ReadonlyDeep__ of obj
+type ReadonlyDeep<'T> = private Phantom_ReadonlyDeep__ of obj
 
 /// <summary>
 /// Extract all readonly keys from the given type.
@@ -6977,7 +6977,7 @@ type ReadonlyDeep<'T> = private ReadonlyDeep__ of obj
 /// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type ReadonlyKeysOf<'Type> = private ReadonlyKeysOf__ of obj
+type ReadonlyKeysOf<'Type> = private Phantom_ReadonlyKeysOf__ of obj
 
 /// <summary>
 /// Create a type that represents a read-only tuple of the given type and length.
@@ -7009,7 +7009,7 @@ type ReadonlyKeysOf<'Type> = private ReadonlyKeysOf__ of obj
 /// <remarks>@deprecated This type will be removed in the next major version. Use the built-in <c>Readonly</c> type in combination with the {@link TupleOf} type instead, like <c>Readonly&lt;TupleOf&lt;Length, Element&gt;&gt;</c>.</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type ReadonlyTuple<'Element, 'Length> = private ReadonlyTuple__ of 'Element[]
+type ReadonlyTuple<'Element, 'Length> = private Phantom_ReadonlyTuple__ of 'Element[]
 
 /// <remarks>@see {@link RemovePrefix}</remarks>
 [<Interface>]
@@ -7099,7 +7099,7 @@ type RemovePrefixOptions =
 /// <remarks>@category String</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type RemovePrefix<'S, 'Prefix, 'Options> = private RemovePrefix__ of obj
+type RemovePrefix<'S, 'Prefix, 'Options> = private Phantom_RemovePrefix__ of obj
 
 /// <remarks>@see {@link RemoveSuffix}</remarks>
 [<Interface>]
@@ -7189,7 +7189,7 @@ type RemoveSuffixOptions =
 /// <remarks>@category String</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type RemoveSuffix<'S, 'Suffix, 'Options> = private RemoveSuffix__ of obj
+type RemoveSuffix<'S, 'Suffix, 'Options> = private Phantom_RemoveSuffix__ of obj
 
 /// <summary>
 /// Rename keys in an object type according to a map of old-to-new names.
@@ -7304,7 +7304,7 @@ type RemoveSuffix<'S, 'Suffix, 'Options> = private RemoveSuffix__ of obj
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type RenameKeys<'BaseType, 'RenameMap> = private RenameKeys__ of obj
+type RenameKeys<'BaseType, 'RenameMap> = private Phantom_RenameKeys__ of obj
 
 [<Interface>]
 type ReplaceOptions =
@@ -7367,7 +7367,7 @@ type ReplaceOptions =
 /// <remarks>@category String</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type Replace<'Input, 'Search, 'Replacement, 'Options> = private Replace__ of obj
+type Replace<'Input, 'Search, 'Replacement, 'Options> = private Phantom_Replace__ of obj
 
 /// <summary>
 /// Create a type that requires all of the given keys or none of the given keys, while keeping the remaining keys as is.
@@ -7402,7 +7402,7 @@ type Replace<'Input, 'Search, 'Replacement, 'Options> = private Replace__ of obj
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type RequireAllOrNone<'ObjectType, 'KeysType> = private RequireAllOrNone__ of obj
+type RequireAllOrNone<'ObjectType, 'KeysType> = private Phantom_RequireAllOrNone__ of obj
 
 /// <summary>
 /// Create a type that requires at least one of the given keys, while keeping the remaining keys as is.
@@ -7427,7 +7427,7 @@ type RequireAllOrNone<'ObjectType, 'KeysType> = private RequireAllOrNone__ of ob
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type RequireAtLeastOne<'ObjectType, 'KeysType> = private RequireAtLeastOne__ of obj
+type RequireAtLeastOne<'ObjectType, 'KeysType> = private Phantom_RequireAtLeastOne__ of obj
 
 /// <summary>
 /// Create a type that requires exactly one of the given keys and disallows more, while keeping the remaining keys as is.
@@ -7460,7 +7460,7 @@ type RequireAtLeastOne<'ObjectType, 'KeysType> = private RequireAtLeastOne__ of 
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type RequireExactlyOne<'ObjectType, 'KeysType> = private RequireExactlyOne__ of obj
+type RequireExactlyOne<'ObjectType, 'KeysType> = private Phantom_RequireExactlyOne__ of obj
 
 /// <summary>
 /// Create a type that requires exactly one of the given keys or none of the given keys, while keeping the remaining keys as is.
@@ -7494,7 +7494,7 @@ type RequireExactlyOne<'ObjectType, 'KeysType> = private RequireExactlyOne__ of 
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type RequireOneOrNone<'ObjectType, 'KeysType> = private RequireOneOrNone__ of obj
+type RequireOneOrNone<'ObjectType, 'KeysType> = private Phantom_RequireOneOrNone__ of obj
 
 /// <summary>
 /// Create a deeply required version of another type.
@@ -7541,7 +7541,7 @@ type RequireOneOrNone<'ObjectType, 'KeysType> = private RequireOneOrNone__ of ob
 /// <remarks>@category Set</remarks>
 /// <remarks>@category Map</remarks>
 [<Erase>]
-type RequiredDeep<'T> = private RequiredDeep__ of obj
+type RequiredDeep<'T> = private Phantom_RequiredDeep__ of obj
 
 /// <summary>
 /// Extract all required keys from the given type.
@@ -7660,7 +7660,7 @@ type SchemaOptions =
 /// <remarks>@see {@link SchemaOptions}</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type Schema<'Type, 'Value, 'Options> = private Schema__ of obj
+type Schema<'Type, 'Value, 'Options> = private Phantom_Schema__ of obj
 
 /// <summary>
 /// Convert a string literal to screaming-snake-case.
@@ -7681,7 +7681,7 @@ type Schema<'Type, 'Value, 'Options> = private Schema__ of obj
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type ScreamingSnakeCase<'Value, 'Options> = private ScreamingSnakeCase__ of obj
+type ScreamingSnakeCase<'Value, 'Options> = private Phantom_ScreamingSnakeCase__ of obj
 
 [<Interface>]
 type SetFieldTypeOptions =
@@ -7733,7 +7733,7 @@ type SetFieldTypeOptions =
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type SetFieldType<'BaseType, 'Keys, 'NewType, 'Options> = private SetFieldType__ of obj
+type SetFieldType<'BaseType, 'Keys, 'NewType, 'Options> = private Phantom_SetFieldType__ of obj
 
 /// <summary>
 /// Create a type that makes the specified keys non-nullable (removes <c>null</c> and <c>undefined</c>), supports deeply nested key paths, and leaves all other keys unchanged.
@@ -7789,7 +7789,7 @@ type SetFieldType<'BaseType, 'Keys, 'NewType, 'Options> = private SetFieldType__
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type SetNonNullableDeep<'BaseType, 'KeyPaths> = private SetNonNullableDeep__ of obj
+type SetNonNullableDeep<'BaseType, 'KeyPaths> = private Phantom_SetNonNullableDeep__ of obj
 
 /// <summary>
 /// Create a type that makes the given keys non-nullable, while keeping the remaining keys as is.
@@ -7820,7 +7820,7 @@ type SetNonNullableDeep<'BaseType, 'KeyPaths> = private SetNonNullableDeep__ of 
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type SetNonNullable<'BaseType, 'Keys> = private SetNonNullable__ of obj
+type SetNonNullable<'BaseType, 'Keys> = private Phantom_SetNonNullable__ of obj
 
 /// <summary>
 /// Create a type that makes the given keys optional, while keeping the remaining keys as is.
@@ -7845,7 +7845,7 @@ type SetNonNullable<'BaseType, 'Keys> = private SetNonNullable__ of obj
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type SetOptional<'BaseType, 'Keys> = private SetOptional__ of obj
+type SetOptional<'BaseType, 'Keys> = private Phantom_SetOptional__ of obj
 
 /// <summary>
 /// Create a function that replaces some parameters with the given parameters.
@@ -7907,7 +7907,7 @@ type SetOptional<'BaseType, 'Keys> = private SetOptional__ of obj
 /// </example>
 /// <remarks>@category Function</remarks>
 [<Erase>]
-type SetParameterType<'Function_, 'P> = private SetParameterType__ of obj
+type SetParameterType<'Function_, 'P> = private Phantom_SetParameterType__ of obj
 
 /// <summary>
 /// Create a type that makes the given keys readonly, while keeping the remaining keys as is.
@@ -7932,7 +7932,7 @@ type SetParameterType<'Function_, 'P> = private SetParameterType__ of obj
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type SetReadonly<'BaseType, 'Keys> = private SetReadonly__ of obj
+type SetReadonly<'BaseType, 'Keys> = private Phantom_SetReadonly__ of obj
 
 /// <summary>
 /// Create a type that makes the given keys required, with support for deeply nested key paths, while keeping the remaining keys as is.
@@ -7963,7 +7963,7 @@ type SetReadonly<'BaseType, 'Keys> = private SetReadonly__ of obj
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type SetRequiredDeep<'BaseType, 'KeyPaths> = private SetRequiredDeep__ of obj
+type SetRequiredDeep<'BaseType, 'KeyPaths> = private Phantom_SetRequiredDeep__ of obj
 
 /// <summary>
 /// Create a type that makes the given keys required, while keeping the remaining keys as is.
@@ -7992,7 +7992,7 @@ type SetRequiredDeep<'BaseType, 'KeyPaths> = private SetRequiredDeep__ of obj
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type SetRequired<'BaseType, 'Keys> = private SetRequired__ of obj
+type SetRequired<'BaseType, 'Keys> = private Phantom_SetRequired__ of obj
 
 /// <summary>
 /// Create a function type with a return type of your choice and the same parameters as the given function type.
@@ -8013,7 +8013,7 @@ type SetRequired<'BaseType, 'Keys> = private SetRequired__ of obj
 /// </example>
 /// <remarks>@category Function</remarks>
 [<Erase>]
-type SetReturnType<'Function_, 'TypeToReturn> = private SetReturnType__ of obj
+type SetReturnType<'Function_, 'TypeToReturn> = private Phantom_SetReturnType__ of obj
 
 /// <summary>
 /// SharedUnionFieldsDeep options.
@@ -8096,7 +8096,7 @@ type SharedUnionFieldsDeepOptions =
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Union</remarks>
 [<Erase>]
-type SharedUnionFieldsDeep<'Union, 'Options> = private SharedUnionFieldsDeep__ of obj
+type SharedUnionFieldsDeep<'Union, 'Options> = private Phantom_SharedUnionFieldsDeep__ of obj
 
 /// <summary>
 /// Create a type with shared fields from a union of object types.
@@ -8160,7 +8160,7 @@ type SharedUnionFieldsDeep<'Union, 'Options> = private SharedUnionFieldsDeep__ o
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Union</remarks>
 [<Erase>]
-type SharedUnionFields<'Union> = private SharedUnionFields__ of obj
+type SharedUnionFields<'Union> = private Phantom_SharedUnionFields__ of obj
 
 /// <summary>
 /// Deeply simplifies an object type.
@@ -8271,7 +8271,7 @@ type SharedUnionFields<'Union> = private SharedUnionFields__ of obj
 /// <remarks>@see {@link Simplify}</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type SimplifyDeep<'Type, 'ExcludeType> = private SimplifyDeep__ of obj
+type SimplifyDeep<'Type, 'ExcludeType> = private Phantom_SimplifyDeep__ of obj
 
 /// <summary>
 /// Useful to flatten the type output to improve type hints shown in editors. And also to transform an interface into a type to aide with assignability.
@@ -8335,7 +8335,7 @@ type SimplifyDeep<'Type, 'ExcludeType> = private SimplifyDeep__ of obj
 /// <remarks>@see {@link SimplifyDeep}</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type Simplify<'T> = private Simplify__ of obj
+type Simplify<'T> = private Phantom_Simplify__ of obj
 
 /// <summary>
 /// Create a type that only accepts an object with a single key.
@@ -8357,7 +8357,7 @@ type Simplify<'T> = private Simplify__ of obj
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type SingleKeyObject<'ObjectType> = private SingleKeyObject__ of obj
+type SingleKeyObject<'ObjectType> = private Phantom_SingleKeyObject__ of obj
 
 /// <summary>
 /// Convert a string literal to snake-case.
@@ -8399,7 +8399,7 @@ type SingleKeyObject<'ObjectType> = private SingleKeyObject__ of obj
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type SnakeCase<'Value, 'Options> = private SnakeCase__ of obj
+type SnakeCase<'Value, 'Options> = private Phantom_SnakeCase__ of obj
 
 /// <summary>
 /// Convert object properties to snake case recursively.
@@ -8463,7 +8463,7 @@ type SnakeCase<'Value, 'Options> = private SnakeCase__ of obj
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type SnakeCasedPropertiesDeep<'Value, 'Options> = private SnakeCasedPropertiesDeep__ of obj
+type SnakeCasedPropertiesDeep<'Value, 'Options> = private Phantom_SnakeCasedPropertiesDeep__ of obj
 
 /// <summary>
 /// Convert top-level object properties to snake case.
@@ -8501,7 +8501,7 @@ type SnakeCasedPropertiesDeep<'Value, 'Options> = private SnakeCasedPropertiesDe
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type SnakeCasedProperties<'Value, 'Options> = private SnakeCasedProperties__ of obj
+type SnakeCasedProperties<'Value, 'Options> = private Phantom_SnakeCasedProperties__ of obj
 
 /// <remarks>@see {@link SomeExtend}</remarks>
 [<Interface>]
@@ -8589,7 +8589,7 @@ type SomeExtendOptions =
 /// <remarks>@category Utilities</remarks>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type SomeExtend<'TArray, 'Type, 'Options> = private SomeExtend__ of obj
+type SomeExtend<'TArray, 'Type, 'Options> = private Phantom_SomeExtend__ of obj
 
 /// <summary>
 /// Splits an array into three parts, where the first contains all elements before the rest element, the second is the <a href="https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types"><c>rest</c></a> element itself, and the third contains all elements after the rest element.
@@ -8626,7 +8626,7 @@ type SomeExtend<'TArray, 'Type, 'Options> = private SomeExtend__ of obj
 /// <remarks>@see {@link ExcludeRestElement}</remarks>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type SplitOnRestElement<'Array_, 'Options> = private SplitOnRestElement__ of obj
+type SplitOnRestElement<'Array_, 'Options> = private Phantom_SplitOnRestElement__ of obj
 
 /// <summary>
 /// Split options.
@@ -8684,7 +8684,7 @@ type SplitOptions =
 /// <remarks>@category String</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type Split<'S, 'Delimiter, 'Options> = private Split__ of obj
+type Split<'S, 'Delimiter, 'Options> = private Phantom_Split__ of obj
 
 /// <summary>
 /// Mimic the type inferred by TypeScript when merging two objects or two arrays/tuples using the spread syntax.
@@ -8737,7 +8737,7 @@ type Split<'S, 'Delimiter, 'Options> = private Split__ of obj
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type Spread<'FirstType, 'SecondType> = private Spread__ of obj
+type Spread<'FirstType, 'SecondType> = private Phantom_Spread__ of obj
 
 /// <summary>
 /// Returns the length of the given string.
@@ -8776,7 +8776,7 @@ type Spread<'FirstType, 'SecondType> = private Spread__ of obj
 /// <remarks>@category String</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type StringLength<'S> = private StringLength__ of obj
+type StringLength<'S> = private Phantom_StringLength__ of obj
 
 /// <summary>
 /// Returns a new string which contains the specified number of copies of a given string, just like <c>String#repeat()</c>.
@@ -8816,7 +8816,7 @@ type StringLength<'S> = private StringLength__ of obj
 /// <remarks>@category String</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type StringRepeat<'S, 'Count> = private StringRepeat__ of obj
+type StringRepeat<'S, 'Count> = private Phantom_StringRepeat__ of obj
 
 /// <summary>
 /// Returns a string slice of a given range, just like <c>String#slice()</c>.
@@ -8843,7 +8843,7 @@ type StringRepeat<'S, 'Count> = private StringRepeat__ of obj
 /// </example>
 /// <remarks>@category String</remarks>
 [<Erase>]
-type StringSlice<'S, 'Start, 'End> = private StringSlice__ of obj
+type StringSlice<'S, 'Start, 'End> = private Phantom_StringSlice__ of obj
 
 /// <remarks>@see {@link StringToArray}</remarks>
 [<Interface>]
@@ -8914,7 +8914,7 @@ type StringToArrayOptions =
 /// <remarks>@see {@link StringToArrayOptions}</remarks>
 /// <remarks>@category String</remarks>
 [<Erase>]
-type StringToArray<'S, 'Options> = private StringToArray__ of obj
+type StringToArray<'S, 'Options> = private Phantom_StringToArray__ of obj
 
 /// <summary>
 /// Converts a numeric string to a number.
@@ -8966,7 +8966,7 @@ type StringToArray<'S, 'Options> = private StringToArray__ of obj
 /// <remarks>@category Numeric</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type StringToNumber<'S> = private StringToNumber__ of obj
+type StringToNumber<'S> = private Phantom_StringToNumber__ of obj
 
 /// <summary>
 /// Create a type with the keys of the given type changed to <c>string</c> type.
@@ -9065,7 +9065,7 @@ type StructuredCloneable2 =
 /// </example>
 /// <remarks>@category Numeric</remarks>
 [<Erase>]
-type Subtract<'A, 'B> = private Subtract__ of obj
+type Subtract<'A, 'B> = private Phantom_Subtract__ of obj
 
 /// <summary>
 /// Returns the sum of two numbers.
@@ -9097,7 +9097,7 @@ type Subtract<'A, 'B> = private Subtract__ of obj
 /// </example>
 /// <remarks>@category Numeric</remarks>
 [<Erase>]
-type Sum<'A, 'B> = private Sum__ of obj
+type Sum<'A, 'B> = private Phantom_Sum__ of obj
 
 /// <summary>
 /// Create a union of types that share a common discriminant property.
@@ -9146,7 +9146,7 @@ type Sum<'A, 'B> = private Sum__ of obj
 /// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type TaggedUnion<'TagKey, 'UnionMembers> = private TaggedUnion__ of obj
+type TaggedUnion<'TagKey, 'UnionMembers> = private Phantom_TaggedUnion__ of obj
 
 /// <summary>
 /// Create a <a href="https://medium.com/@KevinBGreene/surviving-the-typescript-ecosystem-branding-and-type-tagging-6cf6e516523d">tagged type</a> that can support <a href="https://github.com/sindresorhus/type-fest/issues/665">multiple tags</a> and <a href="https://medium.com/@ethanresnick/advanced-typescript-tagged-types-improved-with-type-level-metadata-5072fc125fcf">per-tag metadata</a>.
@@ -9241,7 +9241,7 @@ type Tagged<'Type, 'TagName, 'TagMetadata> = JS.Intersect<'Type, Tagged.Members<
 /// </example>
 /// <remarks>@category Type</remarks>
 [<Erase>]
-type GetTagMetadata<'Type, 'TagName> = private GetTagMetadata__ of obj
+type GetTagMetadata<'Type, 'TagName> = private Phantom_GetTagMetadata__ of obj
 
 /// <summary>
 /// Get the untagged portion of a tagged type created with <c>Tagged</c>.
@@ -9274,7 +9274,7 @@ type GetTagMetadata<'Type, 'TagName> = private GetTagMetadata__ of obj
 /// </example>
 /// <remarks>@category Type</remarks>
 [<Erase>]
-type UnwrapTagged<'TaggedType> = private UnwrapTagged__ of obj
+type UnwrapTagged<'TaggedType> = private Phantom_UnwrapTagged__ of obj
 
 /// <summary>
 /// Note: The <c>Opaque</c> type is deprecated in favor of <c>Tagged</c>.
@@ -9391,7 +9391,7 @@ type Opaque<'Type, 'Token> = JS.Intersect<'Type, Opaque.Members<'Token>>
 /// <remarks>@category Type</remarks>
 /// <remarks>@deprecated Use {@link UnwrapTagged} instead</remarks>
 [<Erase>]
-type UnwrapOpaque<'OpaqueType> = private UnwrapOpaque__ of obj
+type UnwrapOpaque<'OpaqueType> = private Phantom_UnwrapOpaque__ of obj
 
 /// <summary>
 /// Remove leading and trailing spaces from a string.
@@ -9409,7 +9409,7 @@ type UnwrapOpaque<'OpaqueType> = private UnwrapOpaque__ of obj
 /// <remarks>@category String</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type Trim<'V> = private Trim__ of obj
+type Trim<'V> = private Phantom_Trim__ of obj
 
 /// <summary>
 /// Type for <a href="https://www.typescriptlang.org/docs/handbook/tsconfig-json.html">TypeScript's <c>tsconfig.json</c> file</a>.
@@ -9546,7 +9546,7 @@ type TsConfigJson =
 /// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type TupleOf<'Length, 'Fill> = private TupleOf__ of obj
+type TupleOf<'Length, 'Fill> = private Phantom_TupleOf__ of obj
 
 /// <summary>
 /// Transforms a tuple into an object, mapping each tuple index to its corresponding type as a key-value pair.
@@ -9585,7 +9585,7 @@ type TupleOf<'Length, 'Fill> = private TupleOf__ of obj
 /// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type TupleToObject<'TArray> = private TupleToObject__ of obj
+type TupleToObject<'TArray> = private Phantom_TupleToObject__ of obj
 
 /// <summary>
 /// Convert a tuple/array into a union type of its elements.
@@ -9642,7 +9642,7 @@ type TupleToObject<'TArray> = private TupleToObject__ of obj
 /// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type TupleToUnion<'ArrayType> = private TupleToUnion__ of obj
+type TupleToUnion<'ArrayType> = private Phantom_TupleToUnion__ of obj
 
 /// <summary>
 /// Matches any <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray">typed array</a>, like <c>Uint8Array</c> or <c>Float64Array</c>.
@@ -9694,7 +9694,7 @@ type TypedArray = U12<Fable.Core.TS.Es.BigInt64Array<U2<Fable.Core.TS.Es.ArrayBu
 /// </code>
 /// </example>
 [<Erase>]
-type UndefinedOnPartialDeep<'T> = private UndefinedOnPartialDeep__ of obj
+type UndefinedOnPartialDeep<'T> = private Phantom_UndefinedOnPartialDeep__ of obj
 
 /// <summary>
 /// Returns the length of a union type.
@@ -9720,7 +9720,7 @@ type UndefinedOnPartialDeep<'T> = private UndefinedOnPartialDeep__ of obj
 /// </example>
 /// <remarks>@category Type</remarks>
 [<Erase>]
-type UnionLength<'Union> = private UnionLength__ of obj
+type UnionLength<'Union> = private Phantom_UnionLength__ of obj
 
 /// <summary>
 /// Returns an arbitrary member of a union type.
@@ -9782,7 +9782,7 @@ type UnionLength<'Union> = private UnionLength__ of obj
 /// </example>
 /// <remarks>@category Type</remarks>
 [<Erase>]
-type UnionMember<'T> = private UnionMember__ of obj
+type UnionMember<'T> = private Phantom_UnionMember__ of obj
 
 /// <summary>
 /// Convert a union type to an intersection type.
@@ -9803,7 +9803,7 @@ type UnionMember<'T> = private UnionMember__ of obj
 /// </example>
 /// <remarks>@category Type</remarks>
 [<Erase>]
-type UnionToIntersection<'Union> = private UnionToIntersection__ of obj
+type UnionToIntersection<'Union> = private Phantom_UnionToIntersection__ of obj
 
 /// <summary>
 /// Convert a union type into an unordered tuple type of its elements.
@@ -9844,7 +9844,7 @@ type UnionToIntersection<'Union> = private UnionToIntersection__ of obj
 /// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type UnionToTuple<'Union> = private UnionToTuple__ of UnknownArray
+type UnionToTuple<'Union> = private Phantom_UnionToTuple__ of UnknownArray
 
 /// <summary>
 /// Represents an array with <c>unknown</c> value.
@@ -9989,7 +9989,7 @@ type UnknownSet = Fable.Core.TS.Es.ReadonlySet<obj>
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type UnwrapPartial<'PartialObjectType> = private UnwrapPartial__ of obj
+type UnwrapPartial<'PartialObjectType> = private Phantom_UnwrapPartial__ of obj
 
 /// <summary>
 /// Revert the <c>Required</c> modifier on an object type.
@@ -10017,7 +10017,7 @@ type UnwrapPartial<'PartialObjectType> = private UnwrapPartial__ of obj
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type UnwrapRequired<'RequiredObjectType> = private UnwrapRequired__ of obj
+type UnwrapRequired<'RequiredObjectType> = private Phantom_UnwrapRequired__ of obj
 
 /// <summary>
 /// Create a union of the given object's values, and optionally specify which keys to get the values from.
@@ -10042,7 +10042,7 @@ type UnwrapRequired<'RequiredObjectType> = private UnwrapRequired__ of obj
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type ValueOf<'ObjectType, 'ValueType> = private ValueOf__ of proptypelock<'ObjectType>
+type ValueOf<'ObjectType, 'ValueType> = private Phantom_ValueOf__ of proptypelock<'ObjectType>
 
 /// <summary>
 /// Words options.
@@ -10133,7 +10133,7 @@ type WordsOptions =
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type Words<'Sentence, 'Options> = private Words__ of obj
+type Words<'Sentence, 'Options> = private Phantom_Words__ of obj
 
 /// <summary>
 /// Create a deeply mutable version of an <c>object</c>/<c>ReadonlyMap</c>/<c>ReadonlySet</c>/<c>ReadonlyArray</c> type. The inverse of <c>ReadonlyDeep&lt;T&gt;</c>. Use <c>Writable&lt;T&gt;</c> if you only need one level deep.
@@ -10166,7 +10166,7 @@ type Words<'Sentence, 'Options> = private Words__ of obj
 /// <remarks>@category Set</remarks>
 /// <remarks>@category Map</remarks>
 [<Erase>]
-type WritableDeep<'T> = private WritableDeep__ of obj
+type WritableDeep<'T> = private Phantom_WritableDeep__ of obj
 
 /// <summary>
 /// Extract all writable keys from the given type.
@@ -10237,7 +10237,7 @@ type WritableKeysOf<'Type> = keyof<'Type>
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type Writable<'BaseType, 'Keys> = private Writable__ of obj
+type Writable<'BaseType, 'Keys> = private Phantom_Writable__ of obj
 
 /// <summary>
 /// Returns a boolean for whether only one of two given types is <c>true</c>.
@@ -10321,7 +10321,7 @@ type Writable<'BaseType, 'Keys> = private Writable__ of obj
 /// <remarks>@see {@link And}</remarks>
 /// <remarks>@see {@link Or}</remarks>
 [<Erase>]
-type Xor<'A, 'B> = private Xor__ of obj
+type Xor<'A, 'B> = private Phantom_Xor__ of obj
 
 module ConditionalPickDeepOptions =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]

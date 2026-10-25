@@ -725,13 +725,13 @@ module Es =
     /// Extracts the type of the 'this' parameter of a function type, or 'unknown' if the function type has no 'this' parameter.
     /// </summary>
     [<Erase>]
-    type ThisParameterType<'T> = private ThisParameterType__ of obj
+    type ThisParameterType<'T> = private Phantom_ThisParameterType__ of obj
 
     /// <summary>
     /// Removes the 'this' parameter from a function type.
     /// </summary>
     [<Erase>]
-    type OmitThisParameter<'T> = private OmitThisParameter__ of obj
+    type OmitThisParameter<'T> = private Phantom_OmitThisParameter__ of obj
 
     type CallableFunction =
         inherit Function
@@ -1786,7 +1786,7 @@ module Es =
     /// Recursively unwraps the "awaited type" of a type. Non-promise "thenables" should resolve to <c>never</c>. This emulates the behavior of <c>await</c>.
     /// </summary>
     [<Erase>]
-    type Awaited<'T> = private Awaited__ of obj
+    type Awaited<'T> = private Phantom_Awaited__ of obj
 
     type ArrayLike<'T> =
         abstract length: float
@@ -1797,49 +1797,49 @@ module Es =
     /// Make all properties in T optional
     /// </summary>
     [<Erase>]
-    type Partial<'T> = private Partial__ of obj
+    type Partial<'T> = private Phantom_Partial__ of obj
 
     /// <summary>
     /// Make all properties in T required
     /// </summary>
     [<Erase>]
-    type Required<'T> = private Required__ of obj
+    type Required<'T> = private Phantom_Required__ of obj
 
     /// <summary>
     /// Make all properties in T readonly
     /// </summary>
     [<Erase>]
-    type Readonly<'T> = private Readonly__ of obj
+    type Readonly<'T> = private Phantom_Readonly__ of obj
 
     /// <summary>
     /// From T, pick a set of properties whose keys are in the union K
     /// </summary>
     [<Erase>]
-    type Pick<'T, 'K> = private Pick__ of obj
+    type Pick<'T, 'K> = private Phantom_Pick__ of obj
 
     /// <summary>
     /// Construct a type with a set of properties K of type T
     /// </summary>
     [<Erase>]
-    type Record<'K, 'T> = private Record__ of obj
+    type Record<'K, 'T> = private Phantom_Record__ of obj
 
     /// <summary>
     /// Exclude from T those types that are assignable to U
     /// </summary>
     [<Erase>]
-    type Exclude<'T, 'U> = private Exclude__ of 'T
+    type Exclude<'T, 'U> = private Phantom_Exclude__ of 'T
 
     /// <summary>
     /// Extract from T those types that are assignable to U
     /// </summary>
     [<Erase>]
-    type Extract<'T, 'U> = private Extract__ of 'T
+    type Extract<'T, 'U> = private Phantom_Extract__ of 'T
 
     /// <summary>
     /// Construct a type with the properties of T except for those in type K.
     /// </summary>
     [<Erase>]
-    type Omit<'T, 'K> = private Omit__ of obj
+    type Omit<'T, 'K> = private Phantom_Omit__ of obj
 
     /// <summary>
     /// Exclude null and undefined from T
@@ -1850,49 +1850,49 @@ module Es =
     /// Obtain the parameters of a function type in a tuple
     /// </summary>
     [<Erase>]
-    type Parameters<'T> = private Parameters__ of obj
+    type Parameters<'T> = private Phantom_Parameters__ of obj
 
     /// <summary>
     /// Obtain the parameters of a constructor function type in a tuple
     /// </summary>
     [<Erase>]
-    type ConstructorParameters<'T> = private ConstructorParameters__ of obj
+    type ConstructorParameters<'T> = private Phantom_ConstructorParameters__ of obj
 
     /// <summary>
     /// Obtain the return type of a function type
     /// </summary>
     [<Erase>]
-    type ReturnType<'T> = private ReturnType__ of obj
+    type ReturnType<'T> = private Phantom_ReturnType__ of obj
 
     /// <summary>
     /// Obtain the return type of a constructor function type
     /// </summary>
     [<Erase>]
-    type InstanceType<'T> = private InstanceType__ of obj
+    type InstanceType<'T> = private Phantom_InstanceType__ of obj
 
     /// <summary>
     /// Marker for non-inference type position
     /// </summary>
     [<Erase>]
-    type Uppercase<'S> = private Uppercase__ of obj
+    type Uppercase<'S> = private Phantom_Uppercase__ of obj
 
     /// <summary>
     /// Convert string literal type to lowercase
     /// </summary>
     [<Erase>]
-    type Lowercase<'S> = private Lowercase__ of obj
+    type Lowercase<'S> = private Phantom_Lowercase__ of obj
 
     /// <summary>
     /// Convert first character of string literal type to uppercase
     /// </summary>
     [<Erase>]
-    type Capitalize<'S> = private Capitalize__ of obj
+    type Capitalize<'S> = private Phantom_Capitalize__ of obj
 
     /// <summary>
     /// Convert first character of string literal type to lowercase
     /// </summary>
     [<Erase>]
-    type Uncapitalize<'S> = private Uncapitalize__ of obj
+    type Uncapitalize<'S> = private Phantom_Uncapitalize__ of obj
 
     /// <summary>
     /// Marker for non-inference type position
@@ -1903,7 +1903,7 @@ module Es =
     /// Marker for contextual 'this' type
     /// </summary>
     [<Erase>]
-    type ThisType<'T> = private ThisType__ of obj
+    type ThisType<'T> = private Phantom_ThisType__ of obj
 
     /// <summary>
     /// Stores types to be used with WeakSet, WeakMap, WeakRef, and FinalizationRegistry
@@ -6109,19 +6109,19 @@ module Es =
         /// Convert string literal type to lowercase
         /// </summary>
         [<Erase>]
-        type Lowercase<'S> = private Lowercase__ of obj
+        type Lowercase<'S> = private Phantom_Lowercase__ of obj
 
         /// <summary>
         /// Convert first character of string literal type to uppercase
         /// </summary>
         [<Erase>]
-        type Capitalize<'S> = private Capitalize__ of obj
+        type Capitalize<'S> = private Phantom_Capitalize__ of obj
 
         /// <summary>
         /// Convert first character of string literal type to lowercase
         /// </summary>
         [<Erase>]
-        type Uncapitalize<'S> = private Uncapitalize__ of obj
+        type Uncapitalize<'S> = private Phantom_Uncapitalize__ of obj
 
         /// <summary>
         /// Marker for non-inference type position

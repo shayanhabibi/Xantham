@@ -11,20 +11,20 @@ open Fable.Core.JS
 open Fable.Core.TS.Dom
 
 [<Erase>]
-type Omit<'T, 'K> = private Omit__ of obj
+type Omit<'T, 'K> = private Phantom_Omit__ of obj
 
 module Other =
     module Util =
         [<Erase>]
-        type Omit<'T, 'K> = private Omit__ of obj
+        type Omit<'T, 'K> = private Phantom_Omit__ of obj
 
 module V3 =
     module Util =
         [<Erase>]
-        type Omit<'T, 'K> = private Omit__ of obj
+        type Omit<'T, 'K> = private Phantom_Omit__ of obj
 
         [<Erase>]
-        type OmitKeys<'T, 'K> = private OmitKeys__ of obj
+        type OmitKeys<'T, 'K> = private Phantom_OmitKeys__ of obj
 
         [<Erase>]
-        type MakePartial<'T, 'K> = private MakePartial__ of obj
+        type MakePartial<'T, 'K> = private Phantom_MakePartial__ of obj

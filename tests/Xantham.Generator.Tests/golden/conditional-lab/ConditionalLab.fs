@@ -28,10 +28,10 @@ type Proven<'T when 'T :> Tagged> = 'T
 type Inhabited<'T> = 'T
 
 [<Erase>]
-type Divergent<'T> = private Divergent__ of obj
+type Divergent<'T> = private Phantom_Divergent__ of obj
 
 [<Erase>]
-type OrUndefined<'T> = private OrUndefined__ of obj
+type OrUndefined<'T> = private Phantom_OrUndefined__ of obj
 
 type Decided = float
 

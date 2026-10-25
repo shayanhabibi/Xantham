@@ -66,7 +66,7 @@ type ExtractedCount<'P> =
     static member Create (count: float, ?``params``: 'P, ?instances: unit) : ExtractedCount<'P> = jsNative
 
 [<Erase>]
-type BooleanArm<'T> = private BooleanArm__ of obj
+type BooleanArm<'T> = private Phantom_BooleanArm__ of obj
 
 [<Interface>]
 type BooleanOptions =
