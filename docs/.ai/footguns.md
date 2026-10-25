@@ -693,3 +693,12 @@ properties/Create parameters in the alias's binder scope. An arm remains its own
 contract when referenced independently; replacing that arm with the complete fold widens it.
 Do not authenticate an application by member spelling alone: compiler/source identity and
 complete one-to-one arm correspondence are required.
+
+## Source alias fallback uses the occurrence namespace (2026-10-26)
+
+A mapped result may intentionally have no reusable type identity. Its source alias still
+authenticates through the harvested export's declaration handles and order. Qualify that export
+with exportNamespacePath as well as ExportLayout.declPath, matching Shape.Aliases. Omitting
+the namespace loses V3.Util.Omit and eventually fails on a nonexistent V3 parent role. Recover
+the real source occurrence; do not derive identity from a rendered name, mapped result or
+invented namespace parent. Independent same-named namespace aliases must stay distinct.

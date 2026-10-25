@@ -998,7 +998,14 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                     let exportedName = Shape.Spec.fsName (Shape.Spec.defaultExportName ctx) export
 
                     let qualified leaf =
-                        String.concat "." (exportPath export @ [ leaf ])
+                        String.concat
+                            "."
+                            (exportPath export
+                             @ [
+                                 Shape.Spec.underNamespace
+                                     (Shape.Spec.exportNamespacePath shape.Harvest.Namespaces export)
+                                     leaf
+                             ])
 
                     export.Order.IsSome
                     && export.Order = order decl

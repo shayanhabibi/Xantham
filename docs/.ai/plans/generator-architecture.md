@@ -3637,3 +3637,14 @@ tests pass. Against source6bc, all 157 existing corpus/Core.TS/Node manifests re
 counts and per-symbol tiers; the Zod and Workers reductions are the two added manifests.
 Core.TS and Node binding text is unchanged. Core.TS refreshes only the producer fingerprint
 and its matching catalogue input stamp, keeping the unpublished API14 family coherent.
+
+### Catalogue: source namespace aliases (2026-10-26)
+
+The source-export identity fallback qualifies each occurrence with both its public module
+path and its namespace occurrence path, exactly as Shape qualifies an emitted alias. This
+lets a nested generic mapped utility such as Zod's V3.Util.Omit authenticate its actual
+TypeAliasDeclaration even when the unresolved mapped result has no reusable type identity.
+Declaration order and source declaration handles remain required; no synthetic parent or
+rendered target supplies identity. Same-shaped aliases in separate namespaces retain distinct
+identities, while multiple public occurrences of one source alias reuse the same identity.
+The namespace utility lab reproduces the original catalogue guard before the fix.

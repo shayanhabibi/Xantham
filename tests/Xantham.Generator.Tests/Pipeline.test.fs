@@ -7925,3 +7925,9 @@ let genericExclusiveUnionFixtureTests =
     testList "generic exclusive union fixture" [
         yield! fixtureTests "workers-generic-exclusive-lab" (handFixture "workers-generic-exclusive-lab") GeneratorConfig.Default (fun _ -> [])
     ]
+
+[<Tests>]
+let namespaceUtilityIdentityFixtureTests =
+    testList "namespace utility identity fixture" [
+        yield! fixtureTests "zod-namespace-utility-lab" (handFixture "zod-namespace-utility-lab") GeneratorConfig.Default (fun _ -> [])
+    ]
