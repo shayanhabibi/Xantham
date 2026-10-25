@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "package": "census-backtick-members-lab",
+  "module": "CensusBacktickMembersLab",
+  "counts": {
+    "exact": 6,
+    "ergonomic": 9,
+    "widened": 1,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 43,
+      "exact": 3,
+      "ergonomic": 39,
+      "widened": 1
+    },
+    {
+      "pass": "SC - shape-classes",
+      "total": 4,
+      "exact": 2,
+      "ergonomic": 2
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 9,
+      "ergonomic": 9
+    },
+    {
+      "pass": "settle-symbol-members",
+      "total": 1,
+      "ergonomic": 1
+    }
+  ]
+}

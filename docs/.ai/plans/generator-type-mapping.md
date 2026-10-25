@@ -964,6 +964,12 @@ Fable F# tuples *are* JS arrays — a happy exact match:
   These parameters receive a collision-free underscore prefix, reported as `GE005`.
   Object construction retains the original JavaScript keys and omits absent optional fields;
   `pattern-parameter-lab` checks this through Fable and JavaScript.
+- A string member key containing a backtick receives `Naming.identifierName` with numeric
+  suffixes allocated in source order. Original and inherited members, indexers, `Create`,
+  `Invoke`, symbol members and literal overloads reserve their names. `MB012` records the
+  exact key and allocated name. Reads, writes, receiver calls and `Create` write the original
+  JavaScript key through escaped bracket expressions; the historical `MB007` row remains.
+  Ambient entrypoint class methods keep `MB007` until exact-key abstract overrides are proven.
 - References inside nested generated modules retain their root declaration identity when a
   local name shadows it. `View.Message` can inherit the outer `Message`; its F# base is qualified
   with the generated module name. `inherited-name-lab` compiles that distinction.

@@ -7805,6 +7805,52 @@ let censusAmbientExportValueFixtureTests =
     ]
 
 [<Tests>]
+let censusBacktickMembersFixtureTests =
+    testList "census backtick members" [
+        yield! fixtureTests "census-backtick-members-lab" (handFixture "census-backtick-members-lab") GeneratorConfig.Default (fun package -> [
+            testCase "impossible string keys retain exact interop and distinct names" <| fun _ ->
+                let rendered = Pipeline.generate GeneratorConfig.Default package |> Async.RunSynchronously
+                let source = rendered.Files |> List.head |> snd
+                Expect.isEmpty (rendered.Findings |> List.filter (fun finding -> finding.Key = "MB007")) "all backtick keys remain callable"
+                Expect.isNonEmpty (rendered.Findings |> List.filter (fun finding -> finding.Key = "MB012")) "allocated member names report their mapping"
+                Expect.stringContains source "abstract Item2: string" "the inherited Item reserves its spelling"
+                Expect.stringContains source "abstract Item3: string" "distinct source keys keep distinct members"
+                Expect.stringContains source "abstract Value2: string" "inherited names reserve normalized spellings"
+                Expect.stringContains source "abstract Value3: string" "normalized collisions allocate in source order"
+                Expect.stringContains source "abstract Invoke2: value: string -> string" "ordinary Invoke remains reserved"
+                Expect.stringContains source "abstract Create2: string" "ordinary Create remains reserved"
+                Expect.stringContains source "Required: string" "required construction input remains typed"
+            testCase "catalogue API hashes retain original string keys" <| fun _ ->
+                use scratch = Scratch.directory "backtick-api"
+                let source = System.IO.Path.Combine(scratch.Path, "index.d.ts")
+                System.IO.File.WriteAllText(System.IO.Path.Combine(scratch.Path, "package.json"), """{"name":"backtick-api-lab","version":"1.0.0","types":"index.d.ts"}""")
+                let capture key =
+                    System.IO.File.WriteAllText(source, $"export interface Value {{ \"{key}\": string; }}\nexport interface Derived extends Value {{ extra: string; }}\nexport declare class Box {{ marker: string; static \"{key}\": string; }}\nexport interface Ordinary {{ value: string; }}")
+                    let output = System.IO.Path.Combine(scratch.Path, "out")
+                    let config = { GeneratorConfig.Default with ModuleName = Some "StringKeys"; DeclarationCatalog = true }
+                    Pipeline.run config scratch.Path output |> Async.RunSynchronously |> ignore
+                    let catalog =
+                        System.Text.Json.JsonSerializer.Deserialize<DeclarationCatalog.Catalog>(
+                            System.IO.File.ReadAllText(System.IO.Path.Combine(output, "declarations.json")),
+                            System.Text.Json.JsonSerializerOptions(PropertyNameCaseInsensitive = true))
+                    catalog.Declarations |> Array.map (fun declaration -> declaration.FSharpName, declaration.Api) |> Map.ofArray
+                let first = capture "a`b"
+                let second = capture "a``b"
+                Expect.notEqual first["StringKeys.Value"] second["StringKeys.Value"] "normalized-equal member names retain distinct exact keys"
+                Expect.notEqual first["StringKeys.Box"] second["StringKeys.Box"] "normalized-equal static names retain distinct exact keys"
+                Expect.notEqual first["StringKeys.Derived"] second["StringKeys.Derived"] "inherited construction keys remain part of the API"
+                Expect.equal first["StringKeys.Ordinary"] second["StringKeys.Ordinary"] "ordinary member API hashing stays unchanged"
+            testCase "entrypoint methods retain their unproven override loss" <| fun _ ->
+                let config = { GeneratorConfig.Default with Entry = Some "entrypoint.d.ts" }
+                let rendered = Pipeline.generate config package |> Async.RunSynchronously
+                let source = rendered.Files |> List.head |> snd
+                let methods = rendered.Findings |> List.filter (fun finding -> finding.Symbol.EndsWith(".`fetch", System.StringComparison.Ordinal))
+                Expect.equal (methods |> List.map _.Key) [ "MB007" ] "the dropped override contract keeps its existing loss"
+                Expect.isFalse (source.Contains "member _.Fetch") "a concrete method cannot replace an abstract override slot"
+        ])
+    ]
+
+[<Tests>]
 let censusNoInferDeclarationFixtureTests =
     let package = handFixture "census-noinfer-declaration-lab"
     testList "census NoInfer declarations" [

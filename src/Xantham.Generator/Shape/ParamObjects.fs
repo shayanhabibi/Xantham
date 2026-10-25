@@ -59,18 +59,25 @@ let private isSymbolKeyed' =
     | FsSymbolKeyed _ -> true
     | _ -> false
 
-let private isLiteralKeyed' =
+let rec private isLiteralKeyed' =
     function
     | FsLiteralKeyed _ -> true
+    | FsStringKeyed(_, inner) -> isLiteralKeyed' inner
     | _ -> false
 
 /// The JavaScript key and value of a literal member.
-let private literalMember =
+let rec private literalMember =
     function
     | FsProperty p -> p.Literal |> Option.map (fun value -> p.Name, value)
+    | FsStringKeyed(key, inner) -> literalMember inner |> Option.map (fun (_, value) -> key, value)
     | _ -> None
 
 let private isLiteralMember (m: FsMember) = (literalMember m).IsSome
+
+let rec private stringMemberBody =
+    function
+    | FsStringKeyed(_, inner) -> stringMemberBody inner
+    | member_ -> member_
 
 /// Why the declaration carries no `Create`, or `None` where one is synthesized. `members` is the
 /// property/method set the `Create` binds - a hybrid's `Invoke` reads its own call signatures
@@ -78,6 +85,7 @@ let private isLiteralMember (m: FsMember) = (literalMember m).IsSome
 let private refusal (callable: bool) (nominal: bool) (decl: FsInterfaceDecl) (members: FsMember list) =
     let methodNames =
         members
+        |> List.map stringMemberBody
         |> List.choose (function
             | FsMethod m -> Some m.Name
             | _ -> None)
@@ -110,8 +118,9 @@ let private refusal (callable: bool) (nominal: bool) (decl: FsInterfaceDecl) (me
 
 /// The `Create` parameter a member binds. A method binds the callback that a function-valued
 /// property of the same signature carries (D5), and binds it as a required parameter.
-let private parameterFor (owner: string) (m: FsMember) : FsParam * Finding list =
+let rec private parameterFor (owner: string) (m: FsMember) : FsParam * Finding list =
     match m with
+    | FsStringKeyed(_, inner) -> parameterFor owner inner
     | FsProperty p ->
         {
             Name = p.Name
@@ -224,6 +233,7 @@ let synthesizeParamObjects: Pass<ShapeModel> =
 
                                     let carried =
                                         bound
+                                        |> List.map stringMemberBody
                                         |> List.collect (function
                                             | FsMethod method' ->
                                                 let symbol = $"{decl.Name}.{method'.Name}"
@@ -259,6 +269,7 @@ let synthesizeParamObjects: Pass<ShapeModel> =
 
                                     let nullKeys =
                                         bound
+                                        |> List.map stringMemberBody
                                         |> List.choose (function
                                             | FsProperty p when p.NullKey -> Some p.Name
                                             | _ -> None)
@@ -279,6 +290,15 @@ let synthesizeParamObjects: Pass<ShapeModel> =
                                                         Parameters = required @ optional
                                                         Literals = literals
                                                         NullKeys = nullKeys
+                                                        StringKeys =
+                                                            bound
+                                                            |> List.choose (function
+                                                                | FsStringKeyed(key, FsProperty property) ->
+                                                                    Some(property.Name, key)
+                                                                | FsStringKeyed(key, FsMethod method_) ->
+                                                                    Some(method_.Name, key)
+                                                                | _ -> None)
+                                                            |> Map.ofList
                                                     }
                                                 ]
                                         }

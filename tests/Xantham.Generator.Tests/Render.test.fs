@@ -429,7 +429,7 @@ let renderTests =
                                             Type = FsTypeVar "T"
                                             Optional = false
                                             Rest = false } ]
-                                      Literals = []; NullKeys = [] } ]
+                                      Literals = []; NullKeys = []; StringKeys = Map.empty } ]
                                 Statics = [] }
                           FsAbbrev
                               { Value = None; Name = "Mapper"
@@ -573,7 +573,7 @@ let renderTests =
                                             Optional = true
                                             Rest = false
                                             Type = FsOption FsFloat } ]
-                                      Literals = []; NullKeys = [] } ]
+                                      Literals = []; NullKeys = []; StringKeys = Map.empty } ]
                                 Statics = [] }
                           FsStringEnum
                               { Name = "TimeUnit"
@@ -1205,7 +1205,7 @@ let literalMemberRenderTests =
                           "Event"
                           [ property "eventPhase" FsFloat; literal "AT_TARGET" (LitNumber 2.0) ]
                           [ { Parameters = [ parameter "eventPhase" FsFloat ]
-                              Literals = [ "AT_TARGET", LitNumber 2.0 ]; NullKeys = [] } ] ]
+                              Literals = [ "AT_TARGET", LitNumber 2.0 ]; NullKeys = []; StringKeys = Map.empty } ] ]
 
             Expect.stringContains
                 source
@@ -1228,7 +1228,7 @@ let literalMemberRenderTests =
                     [ interface'
                           "Phases"
                           [ literal "NONE" (LitNumber 0.0) ]
-                          [ { Parameters = []; Literals = [ "NONE", LitNumber 0.0 ]; NullKeys = [] } ] ]
+                          [ { Parameters = []; Literals = [ "NONE", LitNumber 0.0 ]; NullKeys = []; StringKeys = Map.empty } ] ]
 
             Expect.stringContains
                 source
@@ -1279,7 +1279,7 @@ let literalMemberRenderTests =
                               "Signal"
                               [ literal "kind" (LitString "method"); property "None" FsString ]
                               [ { Parameters = [ parameter "None" FsString ]
-                                  Literals = [ "kind", LitString "method" ]; NullKeys = [] } ] ] }
+                                  Literals = [ "kind", LitString "method" ]; NullKeys = []; StringKeys = Map.empty } ] ] }
 
             let rendered, _ = Async.RunSynchronously(Pipeline.runTier Build.context Render.passes model)
             let source = rendered.Files |> Map.ofList |> Map.find "TestPkg.fs"
@@ -1298,7 +1298,7 @@ let literalMemberRenderTests =
                               "Signal"
                               [ literal "kind" (LitString "method"); property "None" FsString; property "count" FsFloat ]
                               [ { Parameters = [ parameter "None" FsString; parameter "count" FsFloat ]
-                                  Literals = [ "kind", LitString "method" ]; NullKeys = [ "None" ] } ] ] }
+                                  Literals = [ "kind", LitString "method" ]; NullKeys = [ "None" ]; StringKeys = Map.empty } ] ] }
 
             let rendered, _ = Async.RunSynchronously(Pipeline.runTier Build.context Render.passes model)
             let source = rendered.Files |> Map.ofList |> Map.find "TestPkg.fs"

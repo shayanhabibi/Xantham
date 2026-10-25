@@ -1596,6 +1596,7 @@ let internal applyWithProducer
                 let rec member_ =
                     function
                     | FsSymbolKeyed(symbol, inner) -> Canonical.node "symbol" [ Canonical.text symbol; member_ inner ]
+                    | FsStringKeyed(key, inner) -> Canonical.node "string-key" [ Canonical.text key; member_ inner ]
                     | FsLiteralKeyed(target, literals, inner) ->
                         Canonical.node
                             "literal"
@@ -1646,11 +1647,40 @@ let internal applyWithProducer
                         Canonical.node
                             "interface"
                             [
-                                Canonical.list (typeText vars) interface_.Inherits
-                                interface_.Members |> List.map member_ |> List.sort |> Canonical.list id
-                                entrypoint
+                                yield Canonical.list (typeText vars) interface_.Inherits
+                                yield interface_.Members |> List.map member_ |> List.sort |> Canonical.list id
+                                for overload in interface_.CreateOverloads do
+                                    if not overload.StringKeys.IsEmpty then
+                                        yield
+                                            overload.StringKeys
+                                            |> Map.toList
+                                            |> Canonical.list (fun (name, key) ->
+                                                Canonical.node "key" [ Canonical.text name; Canonical.text key ])
+                                            |> List.singleton
+                                            |> Canonical.node "string-keyed-create"
+                                for static_ in interface_.Statics do
+                                    match static_.Binding with
+                                    | ImportKeyed(_, key) ->
+                                        let body =
+                                            match static_.Body with
+                                            | ExportValue reference -> typeText vars reference
+                                            | ExportFunction(args, returns)
+                                            | ExportConstructor(args, returns) ->
+                                                signature static_.TypeParameters args returns
+
+                                        yield
+                                            Canonical.node
+                                                "string-keyed-static"
+                                                [
+                                                    Canonical.text static_.Name
+                                                    Canonical.text key
+                                                    body
+                                                    string static_.Settable
+                                                ]
+                                    | _ -> ()
+                                yield entrypoint
                                 if interface_.Callable then
-                                    "callable"
+                                    yield "callable"
                             ]
                     | FsAbbrev abbrev -> Canonical.node "alias" [ typeText vars abbrev.Target ]
                     | FsDelegateType delegate_ ->

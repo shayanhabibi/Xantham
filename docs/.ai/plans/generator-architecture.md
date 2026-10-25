@@ -2576,7 +2576,7 @@ finding cannot be withdrawn (`docs/.ai/footguns.md`). It is unconditional.
   literal key, on a method or on a required property holding a pure callback whose signatures
   `callSignaturesSeparable` tells apart. An intersection's member is such a property
   (`Element & { setAttribute(name: "draw", ...): void }`), unless `shapeMembers` reads it at a
-  type its operands agree on, where it stays unkeyed. A symbol-keyed or backtick name is
+  type its operands agree on, where it stays unkeyed. A symbol-keyed name is
   excluded. A literal key (`Spec.literalKeys`) is a required, non-rest parameter typed by one
   string literal that is not an enum member and holds no `$`, `{` or `}` (Emit macro syntax).
   Exported functions, class statics, optional callbacks, single signatures, unions of literals
@@ -3521,4 +3521,28 @@ type id. No finding code is introduced; the batch coordinator owns the API compa
 
 ## Census batch 3 catalogue compatibility (2026-10-25)
 
-Schema 2 advances identity version 7 to 8 for compiler-anchored anonymous intersection and nominal-union contracts, and API version 12 to 13 for authenticated compiler NoInfer declarations. Old producers are rejected before declaration reuse. Inference version 5, customization version 1 and contract version 1 remain unchanged. The current-contract test pins this combination and separately rejects identity-7 and API-12 producers; regenerated catalogues and the full batch gate provide the integration evidence.
+Schema 2 advances identity version 7 to 8 for compiler-anchored anonymous intersection and nominal-union contracts, and API version 12 to 13 for authenticated compiler NoInfer declarations and exact-key member bindings. Old producers are rejected before declaration reuse. Inference version 5, customization version 1 and contract version 1 remain unchanged. The current-contract test pins this combination and separately rejects identity-7 and API-12 producers; regenerated catalogues and the full batch gate provide the integration evidence.
+
+## Backtick string member keys (2026-10-25)
+
+`shape-interfaces` allocates otherwise unspellable string member names with
+`Naming.identifierName` and stable numeric suffixes. Original and inherited spellings,
+indexers, construction/invocation members, well-known symbol members and literal overloads
+share reservations. Each source key retains its overload family. `MB012` reports its exact
+key and allocated F# spelling; the historical dropped-member code `MB007` remains reserved.
+
+`FsStringKeyed` carries the original key through member substitution, overload settlement,
+qualification and catalogue hashing. Literal overloads retain their original call target.
+Exclusive-arm folds allocate across their shared and exclusive members and carry the same
+wrapper. `FsCreateOverload.StringKeys` preserves construction mappings after inherited
+members have been removed from the declaration. Optional keys retain omission semantics.
+
+Class statics use `ImportKeyed` to retain the constructor binding and exact member key.
+Render emits bracket reads, writes and receiver calls through the imported constructor.
+`Render.jsString` escapes JavaScript text and Emit macro markers in each key. Catalogue API
+hashes include string member keys, keyed statics and constructor mappings. Ordinary member
+spellings retain their mapping; literal overload allocation also reserves synthetic names.
+
+An impossible-key method on an ambient entrypoint class retains `MB007`: its abstract
+override contract needs separate exact-name override evidence. A concrete forwarding member
+cannot replace that contract. The entrypoint negative fixture pins the retained loss.

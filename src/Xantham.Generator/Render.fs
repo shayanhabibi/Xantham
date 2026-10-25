@@ -596,6 +596,10 @@ let private renderParamList (parameters: FsParam list) =
 /// argument object is bound once by an arrow, so each argument is evaluated once.
 let private createAttribute (overload: FsCreateOverload) =
     let parameters = overload.Parameters
+    let keys = overload.StringKeys
+
+    let jsName name =
+        Map.tryFind name keys |> Option.defaultValue name
 
     let literals =
         overload.Literals
@@ -604,7 +608,7 @@ let private createAttribute (overload: FsCreateOverload) =
     let nullKey (parameter: FsParam) =
         List.contains parameter.Name overload.NullKeys
 
-    if bindParameters parameters = parameters then
+    if keys.IsEmpty && bindParameters parameters = parameters then
         let nulls =
             parameters
             |> List.filter nullKey
@@ -629,10 +633,16 @@ let private createAttribute (overload: FsCreateOverload) =
         let fields =
             parameters
             |> List.mapi (fun index parameter ->
-                let field = $"{stringLit parameter.Name}: ${index}"
+                let key =
+                    if keys.IsEmpty then
+                        stringLit parameter.Name
+                    else
+                        jsString (jsName parameter.Name)
+
+                let field = $"{key}: ${index}"
 
                 if nullKey parameter then
-                    $"{stringLit parameter.Name}: (${index}) ?? null"
+                    $"{key}: (${index}) ?? null"
                 elif parameter.Optional then
                     $"...(${index} === undefined ? {{}} : {{{field}}})"
                 else
@@ -730,10 +740,9 @@ let private jsIdentifier =
 /// omitted optional argument is absent: `$0.log('warn', $1...)`.
 let internal literalCallTemplate (target: string) (literals: (int * string) list) (parameters: FsParam list) =
     let receiver =
-        if jsIdentifier.IsMatch target then
-            $"$0.{target}"
-        else
-            $"$0[{jsQuote target}]"
+        if jsIdentifier.IsMatch target then $"$0.{target}"
+        elif target.Contains '`' then $"$0[{jsString target}]"
+        else $"$0[{jsQuote target}]"
 
     let last = literals |> List.map fst |> List.fold max 0
 
@@ -767,6 +776,21 @@ let rec private renderMemberWith (attributes: Map<string, (string * string) list
         let emit = $"Emit({stringLit (literalCallTemplate target literals m.Parameters)})"
         renderMemberWith (Map.add m.Name (existing @ [ "member", emit ]) attributes) inner
     | FsLiteralKeyed(_, _, inner) -> renderMemberWith attributes inner
+    | FsStringKeyed(key, inner) ->
+        let access = $"$0[{jsString key}]"
+        let emit text = $"Emit({stringLit text})"
+
+        let name, sites =
+            match inner with
+            | FsProperty property when property.ReadOnly -> property.Name, [ "member", emit access ]
+            | FsProperty property -> property.Name, [ "get", emit access; "set", emit (access + " = $1") ]
+            | FsMethod method_ ->
+                let arguments = if method_.Parameters.IsEmpty then "()" else "($1...)"
+                method_.Name, [ "member", emit (access + arguments) ]
+            | _ -> "", []
+
+        let existing = Map.tryFind name attributes |> Option.defaultValue []
+        renderMemberWith (Map.add name (existing @ sites) attributes) inner
     | FsSymbolKeyed(symbol, inner) ->
         // `$0[Symbol.<symbol>]` reaches the symbol key: a read-only property at the member site,
         // a writable one per accessor, and a method as a call.
@@ -851,7 +875,7 @@ let private renderMember m = renderMemberWith Map.empty m
 /// One binding attribute at `indent`, optionally carrying a second attribute inside the same
 /// brackets. A global names its own path off `globalThis`; an import names its specifier - the
 /// run's runtime package, or an ambient module's own quoted specifier.
-let private bindingAttribute
+let rec private bindingAttribute
     (runtimePackage: string<importSpecifier>)
     (indent: string)
     (also: string)
@@ -864,55 +888,102 @@ let private bindingAttribute
     | ImportNamed name -> $"{indent}[<Import({stringLit name}, {package}){also}>]"
     | ImportFrom(name, specifier) -> $"{indent}[<Import({stringLit name}, {stringLit specifier}){also}>]"
     | GlobalName name -> $"{indent}[<Global({stringLit name}){also}>]"
+    | ImportKeyed(binding, _) -> bindingAttribute runtimePackage indent also binding
 
 /// The binding a declaration writes at the type level, where it holds a settable member. Under a
 /// type-level attribute Fable compiles `X.y <- v` to `X.y = v`; under a per-member one it compiles
 /// the call `X.y(v)`.
 let private hoistedBinding (members: FsExportMember list) =
-    members |> List.tryPick (fun m -> if m.Settable then Some m.Binding else None)
+    members
+    |> List.tryPick (fun m ->
+        match m.Binding with
+        | ImportKeyed(binding, _) -> Some binding
+        | binding when m.Settable -> Some binding
+        | _ -> None)
 
 /// One bound member - an `Exports` member or a class static - as its attribute line and its
 /// signature. Both hold an `ImportBinding` and neither has an F# body, so they render the same.
 let private renderBound (runtimePackage: string<importSpecifier>) (publicName: string option) (m: FsExportMember) =
-    [
-        yield! docLines "    " m.Docs m.Tags
+    match m.Binding with
+    | ImportKeyed(binding, key) ->
+        let access = $"$0[{jsString key}]"
 
-        let attribute (also: string) =
-            bindingAttribute runtimePackage "    " also m.Binding
+        let attribute template =
+            let emit = $"; Emit({stringLit template})"
+            bindingAttribute runtimePackage "" emit binding
 
-        match m.Body with
-        | ExportFunction(parameters, returns) ->
-            yield attribute ""
+        [
+            yield! docLines "    " m.Docs m.Tags
+            match m.Body with
+            | ExportValue reference when m.Settable ->
+                let getter = attribute access
+                let setter = attribute (access + " = $1")
+                yield $"    static member {ident m.Name}"
+                yield $"        with {getter} get (): {printType reference} = jsNative"
+                yield $"        and {setter} set (_: {printType reference}): unit = jsNative"
+            | ExportValue reference ->
+                yield "    " + attribute access
+                yield $"    static member {ident m.Name}: {printType reference} = jsNative"
+            | ExportFunction(parameters, returns) ->
+                let call = access + (if parameters.IsEmpty then "()" else "($1...)")
+                yield "    " + attribute call
 
-            yield
-                $"    static member {declHead m.Name m.TypeParameters} {renderParamList parameters} : {printType returns} = jsNative"
-        | ExportValue reference when m.Settable ->
-            // The declaring type carries the attribute, and the member name is the JavaScript key
-            // read off whatever that names.
-            let reference = printType reference
+                yield
+                    $"    static member {declHead m.Name m.TypeParameters} {renderParamList parameters} : {printType returns} = jsNative"
+            | ExportConstructor _ -> failwith "a string-keyed static is a property or method"
+        ]
+    | _ ->
+        [
+            yield! docLines "    " m.Docs m.Tags
 
-            match publicName with
-            | Some name when name <> m.Name -> yield $"    [<CompiledName({stringLit name})>]"
-            | _ -> ()
+            let attribute (also: string) =
+                bindingAttribute runtimePackage "    " also m.Binding
 
-            yield $"    static member {ident m.Name}"
-            yield $"        with get (): {reference} = jsNative"
-            yield $"        and set (_: {reference}): unit = jsNative"
-        | ExportValue reference ->
-            yield attribute ""
-            yield $"    static member {ident m.Name}: {printType reference} = jsNative"
-        | ExportConstructor(parameters, returns) ->
-            yield attribute "; EmitConstructor"
+            match m.Body with
+            | ExportFunction(parameters, returns) ->
+                yield attribute ""
 
-            yield
-                $"    static member {declHead m.Name m.TypeParameters} {renderParamList parameters} : {printType returns} = jsNative"
-    ]
+                yield
+                    $"    static member {declHead m.Name m.TypeParameters} {renderParamList parameters} : {printType returns} = jsNative"
+            | ExportValue reference when m.Settable ->
+                // The declaring type carries the attribute, and the member name is the JavaScript key
+                // read off whatever that names.
+                let reference = printType reference
+
+                match publicName with
+                | Some name when name <> m.Name -> yield $"    [<CompiledName({stringLit name})>]"
+                | _ -> ()
+
+                yield $"    static member {ident m.Name}"
+                yield $"        with get (): {reference} = jsNative"
+                yield $"        and set (_: {reference}): unit = jsNative"
+            | ExportValue reference ->
+                yield attribute ""
+                yield $"    static member {ident m.Name}: {printType reference} = jsNative"
+            | ExportConstructor(parameters, returns) ->
+                yield attribute "; EmitConstructor"
+
+                yield
+                    $"    static member {declHead m.Name m.TypeParameters} {renderParamList parameters} : {printType returns} = jsNative"
+        ]
 
 /// One member of an entrypoint class. A method stays `abstract`, which is the slot a derived
 /// class overrides; a property is a concrete binding onto the instance, because the JavaScript
 /// constructor is what assigns it and a derived class reads it as it stands.
-let private renderClassMember attributes (m: FsMember) =
+let rec private renderClassMember attributes (m: FsMember) =
     match m with
+    | FsStringKeyed(key, (FsProperty property as inner)) ->
+        let access = $"$0[{jsString key}]"
+        let emit text = $"Emit({stringLit text})"
+
+        let sites =
+            if property.ReadOnly then
+                [ "member", emit access ]
+            else
+                [ "get", emit access; "set", emit (access + " = $1") ]
+
+        let existing = Map.tryFind property.Name attributes |> Option.defaultValue []
+        renderClassMember (Map.add property.Name (existing @ sites) attributes) inner
     | FsProperty p ->
         [
             yield! docLines "    " p.Docs p.Tags
@@ -1156,6 +1227,7 @@ let private caseCreate (decl: FsTaggedUnionDecl) (case: FsTaggedCase) : (string 
             Parameters = required @ optional
             Literals = (decl.Tag, LitString tag) :: literals
             NullKeys = nullKeys
+            StringKeys = Map.empty
         })
 
 /// A tagged union (D4, §4.5(2)). `RequireQualifiedAccess` for the same reason the StringEnum
@@ -1513,6 +1585,7 @@ let rec private qualifyMember foreign =
                 Return = qualifyRef foreign m.Return
             }
     | FsSymbolKeyed(symbol, inner) -> FsSymbolKeyed(symbol, qualifyMember foreign inner)
+    | FsStringKeyed(key, inner) -> FsStringKeyed(key, qualifyMember foreign inner)
     | FsLiteralKeyed(target, literals, inner) -> FsLiteralKeyed(target, literals, qualifyMember foreign inner)
 
 let private qualifyBound foreign (m: FsExportMember) =
@@ -1662,6 +1735,7 @@ let private declErasedArities (decl: FsDecl) : int list =
     let rec ofMember =
         function
         | FsSymbolKeyed(_, inner)
+        | FsStringKeyed(_, inner)
         | FsLiteralKeyed(_, _, inner) -> ofMember inner
         | FsProperty p -> erasedArities p.Type
         | FsIndexer i -> erasedArities i.Key @ erasedArities i.Value

@@ -329,6 +329,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                                         | FsConstructor _
                                         | FsInvoke _
                                         | FsSymbolKeyed _
+                                        | FsStringKeyed _
                                         | FsLiteralKeyed _ -> false)
 
                                 let invokes =
@@ -409,33 +410,48 @@ let shapeInterfaces: Pass<ShapeModel> =
                     // Every arm's own `Create` overload carries only its own members and the
                     // shared ones - never a `never`-typed placeholder for the other arm's
                     // exclusive member - so a folded pair's overloads carry no `unit` parameter.
-                    let buildParam (owner: string) (m: ResolvedMember) =
+                    let allocatedName names (m: ResolvedMember) =
+                        Map.tryFind m.Symbol.Name names
+                        |> Option.defaultWith (fun () -> Naming.memberName m.Symbol.Name)
+
+                    let buildParam names (owner: string) (m: ResolvedMember) =
                         let reference, refFindings =
                             typeRef ctx (selectAnyReturn ctx model m.Symbol.Name owner) None owner m.TypeId
 
                         {
-                            Name = Naming.memberName m.Symbol.Name
+                            Name = allocatedName names m
                             Optional = m.Optional
                             Rest = false
                             Type = reference
                         },
                         refFindings
 
-                    let buildMember (owner: string) (optional: bool) (m: ResolvedMember) =
+                    let buildMember names (owner: string) (optional: bool) (m: ResolvedMember) =
                         let reference, refFindings =
                             typeRef ctx (selectAnyReturn ctx model m.Symbol.Name owner) None owner m.TypeId
 
-                        FsProperty
-                            {
-                                Name = Naming.memberName m.Symbol.Name
-                                Docs = m.Docs
-                                Tags = m.Tags
-                                ReadOnly = m.ReadOnly
-                                Type = optionalRef optional reference
-                                Literal = None
-                                NullKey = not optional && requiresNullKey model m.TypeId
-                            },
-                        refFindings
+                        let member_ =
+                            FsProperty
+                                {
+                                    Name = allocatedName names m
+                                    Docs = m.Docs
+                                    Tags = m.Tags
+                                    ReadOnly = m.ReadOnly
+                                    Type = optionalRef optional reference
+                                    Literal = None
+                                    NullKey = not optional && requiresNullKey model m.TypeId
+                                }
+
+                        match Map.tryFind m.Symbol.Name names with
+                        | Some allocated ->
+                            FsStringKeyed(m.Symbol.Name, member_),
+                            refFindings
+                            @ [
+                                Finding.make
+                                    $"{owner}.{m.Symbol.Name}"
+                                    (Members.StringKeyedMemberAsEmit(m.Symbol.Name, allocated))
+                            ]
+                        | None -> member_, refFindings
 
                     let foldedDecls, foldedFindings =
                         exclusiveUnions
@@ -444,23 +460,27 @@ let shapeInterfaces: Pass<ShapeModel> =
                             | Choice2Of2 arms ->
                                 [], [ Finding.make name (TypeReference.ExclusiveArmsNotFoldable arms) ]
                             | Choice1Of2(shared, arms) ->
+                                let all = shared @ (arms |> List.collect _.Own) |> List.distinctBy _.Symbol.Name
+                                let facts = Map.find typeId model.Types
+                                let names = stringMemberNames Set.empty { facts with Members = all }
+
                                 let sharedMembers, sharedFindings =
-                                    shared |> List.map (buildMember name false) |> List.unzip
+                                    shared |> List.map (buildMember names name false) |> List.unzip
 
                                 let exclusiveMembers, exclusiveFindings =
                                     arms
                                     |> List.collect (fun a -> a.Own)
-                                    |> List.map (buildMember name true)
+                                    |> List.map (buildMember names name true)
                                     |> List.unzip
 
                                 let overloads, overloadFindings =
                                     arms
                                     |> List.map (fun arm ->
                                         let sharedParams, sharedParamFindings =
-                                            shared |> List.map (buildParam name) |> List.unzip
+                                            shared |> List.map (buildParam names name) |> List.unzip
 
                                         let ownParams, ownParamFindings =
-                                            arm.Own |> List.map (buildParam name) |> List.unzip
+                                            arm.Own |> List.map (buildParam names name) |> List.unzip
 
                                         let required, optional =
                                             (sharedParams @ ownParams) |> List.partition (fun p -> not p.Optional)
@@ -468,12 +488,18 @@ let shapeInterfaces: Pass<ShapeModel> =
                                         let nullKeys =
                                             shared @ arm.Own
                                             |> List.filter (fun m -> not m.Optional && requiresNullKey model m.TypeId)
-                                            |> List.map (fun m -> Naming.memberName m.Symbol.Name)
+                                            |> List.map (allocatedName names)
 
                                         {
                                             Parameters = required @ optional
                                             Literals = []
                                             NullKeys = nullKeys
+                                            StringKeys =
+                                                shared @ arm.Own
+                                                |> List.choose (fun member_ ->
+                                                    Map.tryFind member_.Symbol.Name names
+                                                    |> Option.map (fun name -> name, member_.Symbol.Name))
+                                                |> Map.ofList
                                         },
                                         List.concat sharedParamFindings @ List.concat ownParamFindings)
                                     |> List.unzip

@@ -73,6 +73,7 @@ let rec private substituteMember bindings member_ =
     | FsConstructor member_ -> FsConstructor(invoke member_)
     | FsInvoke member_ -> FsInvoke(invoke member_)
     | FsSymbolKeyed(symbol, inner) -> FsSymbolKeyed(symbol, substituteMember bindings inner)
+    | FsStringKeyed(key, inner) -> FsStringKeyed(key, substituteMember bindings inner)
     | FsLiteralKeyed(target, literals, inner) -> FsLiteralKeyed(target, literals, substituteMember bindings inner)
 
 // ---------------------------------------------------------------------------------------------
@@ -89,6 +90,7 @@ let rec private signature (m: FsMember) : FsMember =
     | FsConstructor c -> FsConstructor { c with Docs = ""; Tags = [] }
     | FsInvoke c -> FsInvoke { c with Docs = ""; Tags = [] }
     | FsSymbolKeyed(symbol, inner) -> FsSymbolKeyed(symbol, signature inner)
+    | FsStringKeyed(key, inner) -> FsStringKeyed(key, signature inner)
     | FsLiteralKeyed(target, literals, inner) -> FsLiteralKeyed(target, literals, signature inner)
 
 /// The declared name a base reference resolves to, where the base is one this run declares.

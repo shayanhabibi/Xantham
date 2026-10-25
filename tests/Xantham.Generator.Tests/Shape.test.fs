@@ -11,6 +11,21 @@ open Xantham.Generator
 open Xantham.Generator.Shape
 
 [<Tests>]
+let backtickMemberTests =
+    testList "backtick members" [
+        testCase "normalization preserves each source key beside reserved ordinary names" <| fun _ ->
+            let field id name = Build.resolvedMember (Build.symbol id name SymbolFlags.Property) 1
+            let owner =
+                { Build.facts (Build.typeResponse 10 TypeFlags.Object) with
+                    Members = [ field 100 "$`"; field 101 "`"; field 102 "Item"; field 103 "Item2" ] }
+            let model = Build.shapeModel (Build.primitives @ [ owner ])
+            let members, findings = Spec.shapeMembers Build.context model Set.empty "Bag" owner
+            Expect.equal members.Length 4 "distinct JavaScript keys survive shaping"
+            Expect.isEmpty (findings |> List.filter (fun finding -> finding.Key = "MB007")) "keys are preserved"
+            Expect.equal (findings |> List.filter (fun finding -> finding.Key = "MB012") |> List.map _.Symbol) [ "Bag.$`"; "Bag.`" ] "each renamed source key reports its mapping"
+    ]
+
+[<Tests>]
 let emptyOwnedObjectReferenceTests =
     let symbol = Build.symbol 100 "Empty" SymbolFlags.Interface
     let facts =
@@ -2503,7 +2518,8 @@ let shapePassTests =
                      | FsConstructor _ -> "Create"
                      | FsIndexer _ -> "Item"
                      | FsInvoke _ -> "Invoke"
-                     | FsSymbolKeyed (symbol, _) -> symbol
+                     | FsSymbolKeyed (symbol, _)
+                     | FsStringKeyed (symbol, _) -> symbol
                      | FsLiteralKeyed (target, _, _) -> target))
                 [ "name"; "at" ]
                 "both member sets, in the checker's order"
@@ -2558,7 +2574,8 @@ let shapePassTests =
                      | FsIndexer _ -> "Item"
                      | FsConstructor _ -> "Create"
                      | FsInvoke _ -> "Invoke"
-                     | FsSymbolKeyed (symbol, _) -> symbol
+                     | FsSymbolKeyed (symbol, _)
+                     | FsStringKeyed (symbol, _) -> symbol
                      | FsLiteralKeyed (target, _, _) -> target))
                 [ "extra"; "name" ]
                 "and the inherited member is still declared here"
@@ -4373,7 +4390,7 @@ let shapePassTests =
                 Expect.equal
                     decl.CreateOverloads
                     [ { Parameters = []
-                        Literals = [ "NONE", LitNumber 0.0; "DONE", LitNumber 1.0 ]; NullKeys = [] } ]
+                        Literals = [ "NONE", LitNumber 0.0; "DONE", LitNumber 1.0 ]; NullKeys = []; StringKeys = Map.empty } ]
                     "every member is written"
             | decls -> failtest $"expected the interface back, got %A{decls}"
 
@@ -4549,6 +4566,7 @@ let shapePassTests =
                          | FsInvoke c -> c.Return
                          | FsIndexer i -> i.Value
                          | FsSymbolKeyed _
+                         | FsStringKeyed _
                          | FsLiteralKeyed _ -> failwith "no keyed member is expected"))
                     [ FsNamed "DOMTargets"; FsString ]
                     "first of the obj pair survives; the string overload is distinct"

@@ -431,6 +431,15 @@ same arm carried by a method parameter takes a bare lambda and emits `(a, b) => 
 
 ## Fable consumption of bindings
 
+**Imported class statics need native accessor metadata.** With Fickl 0.6.2, a type-level
+`Import` bypasses an ordinary F# static member body at the call site. A property-level
+`CompiledName` also leaves its allocated getter/setter spelling in the emitted JavaScript.
+For an exact string key, attach the constructor `Import` and bracket `Emit` to each native
+getter/setter, and to the native method. The backtick member lab proves reads, writes and
+constructor receivers through both source bindings and a raw `Reference`/`HintPath` DLL.
+An ambient entrypoint's abstract method needs separate override proof; retain `MB007` for
+an impossible key until that contract is supported.
+
 **`Xantham.Fable.Core.TS` reaches Fable as a DLL, never as source.** Fable merges a NuGet
 package's sources only when the package ships `fable/*.fsproj`, and this package ships `lib/`
 alone. The run gate reproduces that with `--exclude Xantham.Fable.Core.TS`, which also cut its
