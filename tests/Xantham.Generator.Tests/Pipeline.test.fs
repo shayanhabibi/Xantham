@@ -7537,10 +7537,11 @@ let restTupleUnionFixtureTests =
             testCase "an instantiation collapsing two arms onto one F# signature writes it once" <| fun _ ->
                 let rendered = Pipeline.generate GeneratorConfig.Default package |> Async.RunSynchronously
                 let source = rendered.Files |> List.head |> snd
-                let start = source.IndexOf "type VoidStep ="
-                Expect.isGreaterThanOrEqual start 0 "VoidStep is declared"
-                let body = source.Substring(start, (let e = source.IndexOf("\ntype ", start + 1) in if e < 0 then source.Length - start else e - start))
-                let unitCalls = body.Split('\n') |> Array.filter (fun line -> line.Contains "next: unit -> string")
-                Expect.isLessThanOrEqual unitCalls.Length 1 "`x.next()` resolves to one overload"
+                // `[]` and `[undefined]` collapse onto one call, so `next` is one function and
+                // `Create` can take it as a lambda.
+                Expect.stringContains
+                    source
+                    "static member Create (next: (unit -> string)) : VoidStep"
+                    "`x.next()` resolves to one overload"
         ])
     ]
