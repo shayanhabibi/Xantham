@@ -1240,8 +1240,8 @@ let internal erasedAliasApplication
 
                     if
                         parameters.Length = arguments.Length
-                        && declared.Response.AliasArgumentTypeIds
-                           |> ValueOption.map Array.toList = ValueSome parameters
+                        && declared.Response.AliasArgumentTypeIds |> ValueOption.map Array.toList =
+                            ValueSome parameters
                         && parameters
                            |> List.forall (fun parameter -> List.contains parameter declared.UnionMembers)
                     then
@@ -1260,11 +1260,13 @@ let internal erasedAliasApplication
                 | Some facts when flag TypeFlags.Union facts && not facts.UnionMembers.IsEmpty -> facts.UnionMembers
                 | Some facts when flag TypeFlags.Boolean facts ->
                     instanceArms
-                    |> List.filter (fun id -> Map.tryFind id model.Types |> Option.exists (flag TypeFlags.BooleanLiteral))
+                    |> List.filter (fun id ->
+                        Map.tryFind id model.Types |> Option.exists (flag TypeFlags.BooleanLiteral))
                 | _ -> [ argument ]
 
             let substituted =
-                parameters |> List.collect (fun parameter -> constituents substitution[parameter])
+                parameters
+                |> List.collect (fun parameter -> constituents substitution[parameter])
 
             let corresponds (declaredArm: TypeFacts) (instanceArm: TypeFacts) =
                 declaredArm.Response.TypeId = instanceArm.Response.TypeId
@@ -1285,7 +1287,8 @@ let internal erasedAliasApplication
                     match Map.tryFind arm model.Types with
                     | Some declaredArm ->
                         others
-                        |> List.filter (fun id -> Map.tryFind id model.Types |> Option.exists (corresponds declaredArm))
+                        |> List.filter (fun id ->
+                            Map.tryFind id model.Types |> Option.exists (corresponds declaredArm))
                     | None -> [])
 
             let corresponding =
@@ -3255,7 +3258,8 @@ and internal unionRef
                                 not twins.IsEmpty
                                 && (let unnamed =
                                         { model with
-                                            DeclNames = model.DeclNames |> Map.filter (fun id _ -> not (twins.ContainsKey id))
+                                            DeclNames =
+                                                model.DeclNames |> Map.filter (fun id _ -> not (twins.ContainsKey id))
                                         }
 
                                     erased (fst (typeRef ctx unnamed self owner argument)))
@@ -3287,25 +3291,28 @@ and internal unionRef
                     let reference, findings =
                         appliedRefTo ctx model self owner name parameters arguments
 
-                    if wrapped then wrap reference findings else reference, findings
+                    if wrapped then
+                        wrap reference findings
+                    else
+                        reference, findings
                 | None ->
 
-                match
-                    facts.NonNullableApplication
-                    |> Option.filter (fun application -> Map.containsKey application model.DeclNames)
-                with
-                | Some application ->
-                    let reference, findings = typeRef ctx model self owner application
-                    wrap reference findings
-                | None ->
                     match
-                        namedUnionByMembers ctx model remaining
-                        |> Option.bind (fun (typeId, name) -> matchedUnionRef typeId name)
+                        facts.NonNullableApplication
+                        |> Option.filter (fun application -> Map.containsKey application model.DeclNames)
                     with
-                    | Some(reference, findings) -> wrap reference findings
-                    | None ->
-                        let reference, findings = erasedUnionRef ctx model self owner remaining in
+                    | Some application ->
+                        let reference, findings = typeRef ctx model self owner application
                         wrap reference findings
+                    | None ->
+                        match
+                            namedUnionByMembers ctx model remaining
+                            |> Option.bind (fun (typeId, name) -> matchedUnionRef typeId name)
+                        with
+                        | Some(reference, findings) -> wrap reference findings
+                        | None ->
+                            let reference, findings = erasedUnionRef ctx model self owner remaining in
+                            wrap reference findings
 
 /// An unnamed heterogeneous union as Fable's `U2`-`U4` (D4, §4.5(4)). Arms are the members' own
 /// F# types, deduplicated after mapping, so an unnamed literal union collapses to `string`.
