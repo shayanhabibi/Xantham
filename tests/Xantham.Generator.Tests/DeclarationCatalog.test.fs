@@ -1090,6 +1090,29 @@ let json (value: Identity.Root.Value) : Identity.Root.Output = Identity.Root.Out
                 finally
                     if Directory.Exists directory then Directory.Delete(directory, true)
 
+            testCase "a literal key into an instantiated bound renders alike in producer and consumer" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-indexed-bound-" + Guid.NewGuid().ToString "N")
+                Directory.CreateDirectory directory |> ignore
+                try
+                    let package = Path.GetFullPath(Path.Combine(fixture, "..", "catalog-indexed-bound-lab"))
+                    let dependency = Path.Combine(package, "node_modules", "indexed-bound-owner-lab")
+                    let config =
+                        { GeneratorConfig.loadFile (Path.Combine(package, "xantham.json")) with
+                            ModuleName = Some "Identity.Root" }
+                    let root = Path.Combine(directory, "root")
+                    run config dependency root |> Async.RunSynchronously |> ignore
+                    let producer = File.ReadAllText(Path.Combine(root, "Identity.Root.fs"))
+                    Expect.stringContains producer "abstract def: Def" "the producer selects the bound's member"
+                    let adapter =
+                        { config with
+                            ModuleName = Some "Identity.Adapter"
+                            DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
+                    run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    let consumer = File.ReadAllText(Path.Combine(directory, "adapter", "Identity.Adapter.fs"))
+                    Expect.stringContains consumer "Identity.Root.Wrapped" "the consumer reuses the producer's declaration"
+                finally
+                    if Directory.Exists directory then Directory.Delete(directory, true)
+
             testCase "producer source closure is authenticated against the consumer program" <| fun _ ->
                 let directory = Path.Combine(temporaryRoot, "xantham-catalog-source-closure-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore

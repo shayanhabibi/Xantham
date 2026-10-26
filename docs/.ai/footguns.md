@@ -771,3 +771,10 @@ of that application. A nominal check that compares type ids, or declaration name
 bound written as the target against a bound written as the alias; and since only a program that
 declares the alias renders it by name, the answer differs between producer and consumer. Compare
 target and type arguments (`satisfiesNominally`).
+
+**A type the shape tier reads for its structure must be registered `Structural`.** Resolve
+derives an instantiation as identity alone (no members) unless a seed, a union or intersection
+operand, or another explicit reader registers it. Whether some unrelated reader registered it
+depends on the program, so a pass that reads an instantiation's members without registering it
+works in one producer and fails in its consumer: the bound of an indexed-access operand was
+the case paid for (`I["def"]` with `I extends Internals<unknown>`).

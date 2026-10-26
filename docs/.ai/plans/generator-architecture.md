@@ -3784,3 +3784,15 @@ alias as its own type, so before this a method bound written as the target
 `ZodFunction<'Args, ZodFunctionOut>`. A consumer that never declares the alias renders both bounds
 as the same application and kept `'NewReturns`, so the catalogue API diverged (`ai` against Zod's
 `V4.Core.ZodFunction`). Both now keep the argument. Lab: alias-bound-lab.
+
+### Resolve: indexed-access bounds are structural (2026-10-26)
+
+`T[K]` over a type parameter selects from the parameter's bound (`operandShape`), so the bound
+is a type the shape tier reads for its structure. Resolve now registers it `Structural` from the
+indexed-access branch, walking a chain of type parameter bounds to the first other type. An
+instantiation bound (`I extends Internals`, which the checker applies as `Internals<unknown>`)
+was otherwise derived as identity alone unless some union or intersection happened to read it,
+so `I["def"]` widened to `obj` in one program and selected `Def` in another: Zod's own run kept
+`_ZodType.def: ZodTypeDef`, while `ai` dropped `def`/`_def` and the reused API diverged. Both
+now select the bound's member. Keeping the access generic rather than bound-typed is tracked in
+issue #178 (inline SRTP accessor). Lab: catalog-indexed-bound-lab.

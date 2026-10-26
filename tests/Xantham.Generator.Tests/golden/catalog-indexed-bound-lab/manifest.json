@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "package": "catalog-indexed-bound-lab",
+  "module": "CatalogIndexedBoundLab",
+  "counts": {
+    "exact": 0,
+    "ergonomic": 2,
+    "widened": 3,
+    "escape": 1
+  },
+  "passes": [
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 7,
+      "exact": 1,
+      "ergonomic": 4,
+      "widened": 2
+    },
+    {
+      "pass": "SE - shape-exports",
+      "total": 1,
+      "widened": 1
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 6,
+      "ergonomic": 6
+    },
+    {
+      "pass": "",
+      "total": 1,
+      "escape": 1
+    },
+    {
+      "pass": "render-source",
+      "total": 1,
+      "exact": 1
+    }
+  ]
+}

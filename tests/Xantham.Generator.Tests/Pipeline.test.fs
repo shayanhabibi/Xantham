@@ -7147,6 +7147,21 @@ let catalogAliasApiTests =
     ]
 
 [<Tests>]
+let catalogIndexedBoundTests =
+    let package = handFixture "catalog-indexed-bound-lab"
+    let config = { handConfig package with DeclarationCatalog = false }
+    testList "catalog indexed bound fixture" [
+        yield!
+            fixtureTests "catalog-indexed-bound-lab" package config (fun package ->
+                [ testCase "a literal key into an instantiated bound selects the bound's member" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate config package)
+                    let source = rendered.Files |> List.map snd |> String.concat "\n"
+
+                    for expected in [ "abstract def: Def"; "abstract clone: ?def: Def -> Schema<'I>" ] do
+                        source.Contains expected |> Flip.Expect.equal expected true ])
+    ]
+
+[<Tests>]
 let catalogMappedOptionsTests =
     testList "catalog mapped options fixture" [
         yield!

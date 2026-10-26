@@ -2355,6 +2355,28 @@ let private deriveFacts
             let! objectType = ctx.Session.getObjectTypeOfType ty.Id
             let! indexType = ctx.Session.getIndexTypeOfType ty.Id
 
+            // A type parameter operand stands for its bound, whose members the shape tier
+            // selects from (`operandShape`), so a bound that is an instantiation
+            // (`I extends Internals<unknown>`) is derived for its structure.
+            let rec boundOf depth (operand: TypeResponse) =
+                async {
+                    if depth > 4 || not (operand.Flags.HasFlag TypeFlags.TypeParameter) then
+                        return []
+                    else
+                        let! bound = ctx.Session.getConstraintOfTypeParameter operand.Id
+
+                        match bound with
+                        | ValueSome bound when bound.Id <> operand.Id ->
+                            if bound.Flags.HasFlag TypeFlags.TypeParameter then
+                                return! boundOf (depth + 1) bound
+                            else
+                                return [ bound ]
+                        | _ -> return []
+                }
+
+            let! bound = boundOf 0 objectType
+            let bound = Registers.structural registers bound
+
             // The alias a single-argument reference is written through (§4.11's `NoInfer`):
             // the checker expands it to an indexed access before the shaper ever sees the
             // flags, so only the alias identity says which reference it was.
@@ -2371,7 +2393,7 @@ let private deriveFacts
                 { TypeFacts.shallow ty with
                     AliasIdentity = identity
                 },
-                channel trace "indexed-access" ([ objectType; indexType ] @ Array.toList aliasArguments)
+                channel trace "indexed-access" ([ objectType; indexType ] @ bound @ Array.toList aliasArguments)
         else
             // A conditional, a template literal or an intrinsic string mapping. None of these
             // has a structure to read - each is a type-level computation over an argument the
