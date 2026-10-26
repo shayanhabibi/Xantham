@@ -3752,3 +3752,23 @@ applications of that declaration and keep their type arguments. Standalone gener
 The callable interface owner lab checks the transitive standalone output and producer reuse.
 ProviderUtils advances to a `ParsePayload` mismatch: the producer elects the exported classic
 alias `IssueData` for `$ZodRawIssue<$ZodIssue>`, which the consumer never reaches.
+
+### Declaration catalog: export-independent union identities (2026-10-26)
+
+A union without declarations of its own is one interned checker type wherever it is reached,
+so its key inside another type's key no longer depends on whether the program exports a name
+for it: an unaliased literal union keys members by its values (`ZodParsedType` under
+`OmitKeys<ZodInvalidTypeIssue, "path">`). Its own declaration row keeps the export's identity.
+An unaliased union whose arms are anchored in their declarations, alias declarations or
+intersection composition is keyed `union` by its sorted arm keys; an arm known only through an
+export handle keeps the parent-role fallback. Two rows answer for those value keys in an
+optional `equivalents` array (omitted when empty; older readers ignore it): the declared union
+an unaliased union's member set elects (`namedUnionByMembers`, here Zod's classic
+`IssueData`), and a declared literal union identified only by its export (`keyof typeof Kind`).
+A row's own identity always wins over another row's equivalent.
+A consumer whose own union matches an equivalent reuses the row: its references canonicalise to
+the row's primary identity, and the alias's own file, which the consumer may never load, is the
+only producer source allowed to be absent. Every loaded source still authenticates exactly,
+and the alias row keeps its alias identity for consumers that name `IssueData` directly. The
+identity change stays within the unpublished identity 9 batch; every producer regenerates.
+Labs: alias-election-owner-lab (transitive and direct consumers), keyof-member-key-lab.

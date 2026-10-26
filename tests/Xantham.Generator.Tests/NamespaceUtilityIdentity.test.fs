@@ -221,3 +221,40 @@ let callableInterfaceOwners =
         |> Async.RunSynchronously |> ignore
         let consumer = File.ReadAllText(Path.Combine(scratch.Path, "consumer", "Mini.Consumer.fs"))
         Expect.stringContains consumer "Mini.Owner.Schema" "the consumer reuses the producer's declarations"
+
+[<Tests>]
+let electedAliasOwners =
+    testCase "an unaliased union reuses the producer's alias elected for its member set" <| fun _ ->
+        use scratch = Scratch.directory "alias-election-owner"
+        let fixture = Path.Combine(__SOURCE_DIRECTORY__, "..", "fixtures", "alias-election-owner-lab")
+        let owner = Path.Combine(scratch.Path, "owner")
+        let config = { GeneratorConfig.Default with ModuleName = Some "Mini.Owner"; DeclarationCatalog = true }
+        Pipeline.run config fixture owner |> Async.RunSynchronously |> ignore
+        let catalog = JsonSerializer.Deserialize<DeclarationCatalog.Catalog>(File.ReadAllText(Path.Combine(owner, "declarations.json")), JsonSerializerOptions(PropertyNameCaseInsensitive = true))
+        let issueData = catalog.Declarations |> Array.find (fun declaration -> declaration.FSharpName = "Mini.Owner.IssueData")
+        Expect.equal issueData.Equivalents.Length 1 "the elected alias records the unaliased union it names"
+        Expect.notEqual issueData.Equivalents[0] issueData.Identity "the alias keeps its own declaration identity"
+        let consume name entry =
+            let output = Path.Combine(scratch.Path, name)
+            Pipeline.run { config with ModuleName = Some("Mini." + name); Entry = Some entry; DeclarationReferences = [ Path.Combine(owner, "declarations.json") ] } fixture output
+            |> Async.RunSynchronously |> ignore
+            File.ReadAllText(Path.Combine(output, $"Mini.{name}.fs"))
+        let transitive = consume "Transitive" "consumer.d.ts"
+        Expect.stringContains transitive "Mini.Owner.Schema" "a consumer reaching the union through a member reuses the producer's declarations"
+        Expect.isFalse (transitive.Contains "Issues.Item") "the union is not declared a second time"
+        let direct = consume "Direct" "direct.d.ts"
+        Expect.stringContains direct "issue: Mini.Owner.IssueData" "a consumer naming the alias reuses the same declaration"
+
+[<Tests>]
+let keyofMemberKeys =
+    testCase "an exported keyof literal union keys structural members by its values" <| fun _ ->
+        use scratch = Scratch.directory "keyof-member-key"
+        let fixture = Path.Combine(__SOURCE_DIRECTORY__, "..", "fixtures", "keyof-member-key-lab")
+        let owner = Path.Combine(scratch.Path, "owner")
+        let config = { GeneratorConfig.Default with ModuleName = Some "Mini.Owner"; DeclarationCatalog = true }
+        Pipeline.run config fixture owner |> Async.RunSynchronously |> ignore
+        let output = Path.Combine(scratch.Path, "consumer")
+        Pipeline.run { config with ModuleName = Some "Mini.Consumer"; Entry = Some "consumer.d.ts"; DeclarationReferences = [ Path.Combine(owner, "declarations.json") ] } fixture output
+        |> Async.RunSynchronously |> ignore
+        let consumer = File.ReadAllText(Path.Combine(output, "Mini.Consumer.fs"))
+        Expect.stringContains consumer "holder: Mini.Owner.Holder" "a consumer reaching the union only through members reuses the producer's declarations"

@@ -753,3 +753,14 @@ its nominal owner only at a source-authenticated property annotation, with the r
 merged symbol and exact declared type. Keep inline literals anonymous, keep faithful alias
 chains abbreviations, and assign actual alias origin/family only to the nominal source alias.
 A merged const helper may need a fresh F# type name; its original JS import key must survive.
+
+**Export reach must not reach a catalogue identity.** A type without declarations of its own
+(an unaliased union, `keyof typeof X`) borrows nothing from whichever export happens to name it
+in one program: a producer that exports it and a consumer that only reaches it through a member
+must compute the same key, or every structural type keying a member by it diverges
+(`OmitKeys<ZodInvalidTypeIssue, "path">` through `ZodParsedType`). Inside other keys, literal
+unions are keyed by their values and unaliased unions by their anchored member contracts. A
+declaration row keyed by an export, or elected for a union by member set
+(`namedUnionByMembers`), records those value keys as `equivalents`; the row keeps its own
+identity for consumers that name it. Do not key a declared literal alias row by its values:
+Core.TS's `keyof` registries (`Intl.NumberFormatOptionsStyle`) lose their declaration identity.

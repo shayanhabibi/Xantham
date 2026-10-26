@@ -32,6 +32,9 @@ type Declaration =
         Constraints: string array
         Api: string
         Owner: string
+        /// Structural identities of unaliased unions written under this declaration's name.
+        [<Serialization.JsonIgnore(Condition = Serialization.JsonIgnoreCondition.WhenWritingNull)>]
+        Equivalents: string array
     }
 
 [<CLIMutable>]
@@ -338,6 +341,7 @@ type private Identity =
         Handles: string list
         Sources: Source list
         Role: string
+        Equivalents: string list
     }
 
 let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<string, Source>) =
@@ -359,6 +363,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
             Handles = handles
             Sources = sources
             Role = role
+            Equivalents = []
         }
 
     let exportHandles =
@@ -503,10 +508,19 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                     && (flags.HasFlag ObjectFlags.Anonymous || flags.HasFlag ObjectFlags.Mapped)
 
                 let handles =
-                    if List.isEmpty facts.Declarations then
-                        Map.tryFind id exportHandles |> Option.defaultValue []
-                    else
+                    if not (List.isEmpty facts.Declarations) then
                         facts.Declarations
+                    elif
+                        not (List.isEmpty visited)
+                        && facts.AliasDeclarations.IsEmpty
+                        && (literalUnionIdentity true facts).IsSome
+                    then
+                        // Inside another type's key, an unaliased literal union (`keyof typeof
+                        // Kind`) is one interned type whether or not this program exports a name
+                        // for it. Its own declaration row keeps the export's identity.
+                        []
+                    else
+                        Map.tryFind id exportHandles |> Option.defaultValue []
 
                 if List.isEmpty handles then
                     let unionIdentity =
@@ -616,6 +630,31 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                             Some(identity "empty-object" [] [])
                         else
                             literalUnionIdentity true facts
+                            |> Option.orElseWith (fun () ->
+                                // An unaliased union is one interned checker type wherever it is
+                                // reached; its member contracts define it.
+                                if facts.AliasDeclarations.IsEmpty && facts.UnionMembers.Length >= 2 then
+                                    // Each arm's own key must rest on its declarations or its
+                                    // composition, never on an export handle.
+                                    let anchored member_ =
+                                        Map.tryFind member_ shape.Types
+                                        |> Option.exists (fun (arm: TypeFacts) ->
+                                            not arm.Declarations.IsEmpty
+                                            || not arm.AliasDeclarations.IsEmpty
+                                            || not arm.IntersectionMembers.IsEmpty)
+
+                                    let contracts =
+                                        facts.UnionMembers |> List.choose (typeIdentity (id :: visited) bindings)
+
+                                    if
+                                        contracts.Length = facts.UnionMembers.Length
+                                        && List.forall anchored facts.UnionMembers
+                                    then
+                                        Some(identity "union" [] (contracts |> List.map _.Key |> List.sort))
+                                    else
+                                        None
+                                else
+                                    None)
                 else
                     let role =
                         if List.isEmpty facts.ConstructSignatures then
@@ -973,6 +1012,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                             { parent with
                                 Key = hashText (parent.Key + "/" + role)
                                 Role = role
+                                Equivalents = []
                             }
                         )))
             |> List.groupBy fst
@@ -987,6 +1027,41 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
             | FsStringEnum enum -> Some enum.Name
             | _ -> None)
         |> Set.ofList
+
+    // A reference to an unaliased union resolves by member set to a declared union
+    // (`namedUnionByMembers`), so that declaration also answers for the union's own identity.
+    // A declared literal union identified only by its export's handles (`type Kind = keyof typeof
+    // Kind`) answers for its value key too, which a program without that export computes.
+    let equivalents =
+        [
+            yield!
+                byType
+                |> Map.toList
+                |> List.choose (fun (id, identity) ->
+                    if identity.Role = "union" && not (Map.containsKey id shape.DeclNames) then
+                        Shape.Spec.namedUnionByMembers
+                            ctx
+                            shape
+                            (Shape.Spec.nonNullishMemberSet shape shape.Types[id])
+                        |> Option.map (fun (_, name) -> name, identity.Key)
+                    else
+                        None)
+            yield!
+                shape.DeclNames
+                |> Map.toList
+                |> List.choose (fun (id, name) ->
+                    match Map.tryFind id shape.Types with
+                    | Some facts when
+                        facts.Declarations.IsEmpty
+                        && facts.AliasDeclarations.IsEmpty
+                        && Map.containsKey id exportHandles
+                        ->
+                        literalUnionIdentity true facts |> Option.map (fun literal -> name, literal.Key)
+                    | _ -> None)
+        ]
+        |> List.groupBy fst
+        |> List.map (fun (name, keys) -> name, keys |> List.map snd |> List.distinct |> List.sort)
+        |> Map.ofList
 
     let byName =
         shape.DeclNames
@@ -1005,6 +1080,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                 name,
                 { identity with
                     Sources = identity.Sources @ closure id |> List.distinct |> List.sortBy sourceKey
+                    Equivalents = Map.tryFind name equivalents |> Option.defaultValue []
                 }))
         |> List.groupBy fst
         |> List.map (fun (name, entries) ->
@@ -1093,6 +1169,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                     { origin with
                         Key = hashText (origin.Key + "/" + role)
                         Role = role
+                        Equivalents = []
                     }
 
     reusableDeclarations shape.Decls
@@ -1444,6 +1521,23 @@ let internal applyWithProducer
                     | _ -> fail $"references disagree on declaration {key}")
                 |> Map.ofList
 
+            let inheritedEquivalents =
+                inherited
+                |> Map.toList
+                |> List.collect (fun (_, entry) ->
+                    entry.Equivalents
+                    |> Option.ofObj
+                    |> Option.map Array.toList
+                    |> Option.defaultValue []
+                    |> List.map (fun key -> key, entry))
+                |> List.filter (fun (key, _) -> not (Map.containsKey key inherited))
+                |> List.groupBy fst
+                |> List.map (fun (key, entries) ->
+                    match entries |> List.map snd |> List.distinct with
+                    | [ entry ] -> key, entry
+                    | _ -> fail $"references disagree on union equivalent {key}")
+                |> Map.ofList
+
             let inheritedVariants =
                 loaded
                 |> List.collect _.Variants
@@ -1522,18 +1616,29 @@ let internal applyWithProducer
                 identities
                 |> Map.toList
                 |> List.choose (fun (name, identity) ->
-                    match Map.tryFind identity.Key inherited with
+                    match
+                        Map.tryFind identity.Key inherited
+                        |> Option.orElseWith (fun () -> Map.tryFind identity.Key inheritedEquivalents)
+                    with
                     | Some producer ->
                         // Closure traversal depends on which types the checker reached in this
                         // program. Authenticate the producer's required sources against actual
                         // inputs, including every installed copy of a source key. A matching
                         // copy must not conceal a conflicting same-version installation.
+                        // A union reused through an equivalent is defined by its own members; the
+                        // alias naming it may sit in a file this program never loads.
+                        let aliasAnchor (source: Source) =
+                            producer.Identity <> identity.Key
+                            && producer.Handles
+                               |> Array.exists (fun handle ->
+                                   handle.StartsWith(sourceKey source + "#", StringComparison.Ordinal))
+
                         let authenticated =
                             producer.Sources
                             |> Array.forall (fun source ->
                                 match Map.tryFind (sourceKey source) currentInputs with
                                 | Some candidates -> candidates |> List.forall ((=) source)
-                                | None -> false)
+                                | None -> aliasAnchor source)
 
                         // A catalog cannot discard the sources anchoring its own handles.
                         // Literal-union identities intentionally have no declaration handles.
@@ -1572,7 +1677,11 @@ let internal applyWithProducer
                     yield!
                         identities
                         |> Map.toList
-                        |> List.map (fun (name, identity) -> name, identity.Key)
+                        |> List.map (fun (name, identity) ->
+                            name,
+                            Map.tryFind name reused
+                            |> Option.map _.Identity
+                            |> Option.defaultValue identity.Key)
                     yield!
                         inherited
                         |> Map.toList
@@ -1964,6 +2073,10 @@ let internal applyWithProducer
                                     Constraints = constraints
                                     Api = api
                                     Owner = owner
+                                    Equivalents =
+                                        match identity.Equivalents with
+                                        | [] -> null
+                                        | keys -> List.toArray keys
                                 }))
 
             let exportedNames =
