@@ -3840,3 +3840,15 @@ each owner's copy (`HttpChatTransport<UI_MESSAGE>`'s, `DefaultChatTransport<UI_M
 keyed its constituents by its own `UI_MESSAGE` declaration, the copies of
 `PrepareSendMessagesRequest`'s options object diverged, and the declarations naming them
 disagreed on API. Lab: catalog-anonymous-owner-lab.
+
+### Declaration catalog: reuse past the consumer's follow frontier (2026-10-27)
+
+Resolve follows twenty generations from the seeds (`FollowDepth`); types beyond are left in
+`NotFollowed`. A producer seeds its own declarations, while a consumer may reach the same
+declaration twenty generations deep: `agents` reached Zod's `$ZodCheckStringFormatDef<Format>`
+with `Format` past its frontier, rendered it without parameters, and failed the reuse check on
+arity. The consumer's rendering of a reused declaration is replaced by the producer's row, and the
+row's identity and authenticated sources already fix the declaration, so a reused declaration
+whose own structure reaches a `NotFollowed` type, or which names a declaration that does, is
+reused without the arity, bound and API comparison. A complete mismatch still fails.
+Lab: catalog-generic-base-lab (a 21-link chain ending at a generic base).

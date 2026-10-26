@@ -2018,6 +2018,72 @@ let internal applyWithProducer
 
             let mutable ownedVariants = []
 
+            let declarationIds =
+                shape.DeclNames
+                |> Map.toList
+                |> List.groupBy snd
+                |> List.map (fun (name, ids) -> name, ids |> List.map fst)
+                |> Map.ofList
+
+            let references (facts: TypeFacts) =
+                [
+                    yield! facts.Members |> List.map _.TypeId
+                    for index in facts.IndexInfos do
+                        yield index.KeyTypeId
+                        yield index.ValueTypeId
+                    for signature in facts.CallSignatures @ facts.ConstructSignatures do
+                        yield! signature.TypeParameters
+                        yield! signature.Parameters |> List.map _.TypeId
+                        yield signature.ReturnTypeId
+                    yield! facts.BaseTypes
+                    yield! facts.TypeArguments
+                    yield! facts.AliasTypeArguments
+                    yield! facts.IntersectionMembers
+                    yield! facts.UnionMembers
+                    yield! Option.toList facts.Constraint
+                    yield! Option.toList facts.Default
+                    match facts.Response.TargetTypeId with
+                    | ValueSome target when target <> facts.Response.TypeId -> yield target
+                    | _ -> ()
+                ]
+
+            // Whether a declaration's own structure reaches past the frontier, and the
+            // declarations it names.
+            let direct =
+                let memo = System.Collections.Generic.Dictionary<string, bool * Set<string>>()
+
+                fun name ->
+                    match memo.TryGetValue name with
+                    | true, result -> result
+                    | false, _ ->
+                        let rec walk visited cut named ids =
+                            match ids with
+                            | [] -> cut, named
+                            | id :: rest when Set.contains id visited -> walk visited cut named rest
+                            | id :: rest when Map.containsKey id shape.NotFollowed ->
+                                walk (Set.add id visited) true named rest
+                            | id :: rest ->
+                                match Map.tryFind id shape.Types, Map.tryFind id shape.DeclNames with
+                                | Some facts, declared when declared |> Option.forall ((=) name) ->
+                                    walk (Set.add id visited) cut named (references facts @ rest)
+                                | _, Some declared -> walk (Set.add id visited) cut (Set.add declared named) rest
+                                | None, None -> walk (Set.add id visited) cut named rest
+
+                        let result =
+                            walk Set.empty false Set.empty (Map.tryFind name declarationIds |> Option.defaultValue [])
+
+                        memo[name] <- result
+                        result
+
+            // A consumer resolves a reused declaration only as far as its follow frontier. Past it
+            // the consumer's rendering is incomplete; the identity and the authenticated sources
+            // fix the declaration, so the producer's row stands unverified. A declaration naming
+            // a partly resolved one renders that reference at the wrong arity and is partial too;
+            // a name further away carries only its identity.
+            let partial name =
+                let cut, named = direct name
+                cut || named |> Set.exists (fun other -> fst (direct other))
+
             let owned =
                 reusableDeclarations shape.Decls
                 |> List.choose (fun decl ->
@@ -2026,6 +2092,7 @@ let internal applyWithProducer
                         let constraints = constraints decl
 
                         match Map.tryFind name reused with
+                        | Some _ when partial name -> None
                         | Some producer ->
                             if producer.Arity <> List.length (parameters decl) then
                                 fail $"arity mismatch for {name} ({producer.FSharpName})"

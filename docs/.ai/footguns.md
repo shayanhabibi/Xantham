@@ -791,3 +791,9 @@ unions, so `Tool<any, any, any>` has eight arms where its body has four.
 parameter through an unbound path keys per owner. Every key computed for a declaration that
 Shape emits generically must bind that declaration's parameters positionally first
 (`boundParameters`), including hoisted anonymous intersections.
+
+**A consumer sees a reused declaration only to its own follow frontier.** The producer seeds the
+declaration; the consumer may reach it twenty generations deep, past `FollowDepth`, and render
+it with unbound parameters or `obj` members. Comparing that rendering against the producer row
+reports a mismatch that is only the frontier. `partial` in the reuse check skips the comparison
+for declarations reaching `NotFollowed`; do not tighten it back to a hard failure.

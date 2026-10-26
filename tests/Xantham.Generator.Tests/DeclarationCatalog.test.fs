@@ -1090,6 +1090,29 @@ let json (value: Identity.Root.Value) : Identity.Root.Output = Identity.Root.Out
                 finally
                     if Directory.Exists directory then Directory.Delete(directory, true)
 
+            testCase "a consumer reuses a declaration it resolves only to its follow frontier" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-generic-base-" + Guid.NewGuid().ToString "N")
+                Directory.CreateDirectory directory |> ignore
+                try
+                    let package = Path.GetFullPath(Path.Combine(fixture, "..", "catalog-generic-base-lab"))
+                    let dependency = Path.Combine(package, "node_modules", "generic-base-owner-lab")
+                    let config =
+                        { GeneratorConfig.loadFile (Path.Combine(package, "xantham.json")) with
+                            ModuleName = Some "Identity.Root" }
+                    let root = Path.Combine(directory, "root")
+                    run config dependency root |> Async.RunSynchronously |> ignore
+                    let producer = File.ReadAllText(Path.Combine(root, "Identity.Root.fs"))
+                    Expect.stringContains producer "type StringFormatDef<'Format" "the producer declares the generic base"
+                    let adapter =
+                        { config with
+                            ModuleName = Some "Identity.Adapter"
+                            DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
+                    run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    let consumer = File.ReadAllText(Path.Combine(directory, "adapter", "Identity.Adapter.fs"))
+                    Expect.stringContains consumer "link: Identity.Root.Link0" "the consumer reuses the chain past its frontier"
+                finally
+                    if Directory.Exists directory then Directory.Delete(directory, true)
+
             testCase "an anonymous intersection over each owner's parameter keys alike" <| fun _ ->
                 let directory = Path.Combine(temporaryRoot, "xantham-anonymous-owner-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore
