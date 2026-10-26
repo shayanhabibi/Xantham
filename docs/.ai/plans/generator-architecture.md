@@ -3852,3 +3852,10 @@ row's identity and authenticated sources already fix the declaration, so a reuse
 whose own structure reaches a `NotFollowed` type, or which names a declaration that does, is
 reused without the arity, bound and API comparison. A complete mismatch still fails.
 Lab: catalog-generic-base-lab (a 21-link chain ending at a generic base).
+
+A consumer export naming a producer's anonymous union reuses the producer's row through the
+consumer row's equivalents: `agents` writes `type WorkflowStatus = InstanceStatus["status"]`
+over Workers' anonymous status union, keys it by that export, and records the value key as an
+equivalent; Workers keyed the union by those values (`InstanceStatus.Status`). Reuse now also
+looks up the consumer row's equivalents among producer primary identities, so the export
+abbreviates the producer row and `InstanceStatus` compares equal. Lab: catalog-consumer-alias-lab.

@@ -1648,6 +1648,10 @@ let internal applyWithProducer
                     match
                         Map.tryFind identity.Key inherited
                         |> Option.orElseWith (fun () -> Map.tryFind identity.Key inheritedEquivalents)
+                        // A union this program names by an export of its own is the producer's
+                        // anonymous union when an equivalent of its row is that union's key.
+                        |> Option.orElseWith (fun () ->
+                            identity.Equivalents |> List.tryPick (fun key -> Map.tryFind key inherited))
                     with
                     | Some producer ->
                         // Closure traversal depends on which types the checker reached in this
@@ -2067,7 +2071,7 @@ let internal applyWithProducer
                                 | Some facts, declared when declared |> Option.forall ((=) name) ->
                                     walk (Set.add id visited) cut named (references facts @ rest)
                                 | _, Some declared -> walk (Set.add id visited) cut (Set.add declared named) rest
-                                | None, None -> walk (Set.add id visited) cut named rest
+                                | _ -> walk (Set.add id visited) cut named rest
 
                         let result =
                             walk Set.empty false Set.empty (Map.tryFind name declarationIds |> Option.defaultValue [])

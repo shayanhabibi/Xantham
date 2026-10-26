@@ -1090,6 +1090,28 @@ let json (value: Identity.Root.Value) : Identity.Root.Output = Identity.Root.Out
                 finally
                     if Directory.Exists directory then Directory.Delete(directory, true)
 
+            testCase "a consumer export naming a producer's anonymous union reuses its row" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-consumer-alias-" + Guid.NewGuid().ToString "N")
+                Directory.CreateDirectory directory |> ignore
+                try
+                    let package = Path.GetFullPath(Path.Combine(fixture, "..", "catalog-consumer-alias-lab"))
+                    let dependency = Path.Combine(package, "node_modules", "consumer-alias-owner-lab")
+                    let config =
+                        { GeneratorConfig.loadFile (Path.Combine(package, "xantham.json")) with
+                            ModuleName = Some "Identity.Root" }
+                    let root = Path.Combine(directory, "root")
+                    run config dependency root |> Async.RunSynchronously |> ignore
+                    let adapter =
+                        { config with
+                            ModuleName = Some "Identity.Adapter"
+                            DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
+                    run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    let consumer = File.ReadAllText(Path.Combine(directory, "adapter", "Identity.Adapter.fs"))
+                    Expect.stringContains consumer "type WorkflowStatus = Identity.Root.InstanceStatus.Status" "the export abbreviates the producer's union"
+                    Expect.stringContains consumer "status () : Identity.Root.InstanceStatus" "the record is reused"
+                finally
+                    if Directory.Exists directory then Directory.Delete(directory, true)
+
             testCase "a consumer reuses a declaration it resolves only to its follow frontier" <| fun _ ->
                 let directory = Path.Combine(temporaryRoot, "xantham-generic-base-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore
