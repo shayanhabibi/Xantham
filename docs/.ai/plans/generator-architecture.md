@@ -3796,3 +3796,17 @@ so `I["def"]` widened to `obj` in one program and selected `Def` in another: Zod
 `_ZodType.def: ZodTypeDef`, while `ai` dropped `def`/`_def` and the reused API diverged. Both
 now select the bound's member. Keeping the access generic rather than bound-typed is tracked in
 issue #178 (inline SRTP accessor). Lab: catalog-indexed-bound-lab.
+
+### Declaration catalog: default arguments of bare alias references (2026-10-26)
+
+The checker can intern a bare reference to a generic alias as its own copy carrying the alias
+and no arguments: `T extends Tool`, with `type Tool<I = any, O = any> = FunctionTool<I, O> |
+DynamicTool<I, O>`, sits beside the ordinary `Tool<any, any>`. Which copy a later bare reference
+resolves to depends on the program, so `ToolCallerDefinition`'s `bind` returned `Tool<any, any,
+any>` in ProviderUtils and the argument-free copy in `ai`, and every anonymous arm keyed under it
+diverged. `resolve-declaration-identities` now records the alias's defaults as
+`DeclarationArguments` when the checker reports none, after verifying the type against the alias
+body with each parameter replaced by its default (unions and intersections member for member,
+references by target and arguments, other types by id). An unverified type keeps no arguments.
+Only catalogue keys read `DeclarationArguments`; rendering is unchanged.
+Lab: catalog-alias-defaults-lab.

@@ -3455,6 +3455,84 @@ let private sourceStringAliasOf (ctx: Context) typeId (property: SymbolResponse)
                 | _ -> None
     }
 
+/// The default arguments of a generic alias the checker reports without any. A bare reference in
+/// a constraint (`T extends Tool`) interns its own copy of `Tool<any, any>` carrying the alias but
+/// no arguments, so the copy and the ordinary application would key apart. The defaults are
+/// returned only where the type matches the alias body with each parameter replaced by its
+/// default: unions and intersections member for member, references by target and arguments,
+/// anything else by id.
+let private defaultAliasArguments (ctx: Context) (alias: SymbolResponse) (ty: TypeResponse) =
+    async {
+        let! declared = attempt (ctx.Session.getDeclaredTypeOfSymbol alias.Reference)
+
+        match declared with
+        | Ok declared when declared.Id <> ty.Id ->
+            let! parameters = ctx.Session.getAliasTypeArgumentsOfType declared.Id
+            let parameters = parameters |> ValueOption.defaultValue [||]
+
+            let! defaults =
+                parameters
+                |> Array.map (fun parameter -> ctx.Session.getDefaultFromTypeParameter parameter.Id)
+                |> Async.Sequential
+
+            if parameters.Length = 0 || defaults |> Array.exists ValueOption.isNone then
+                return None
+            else
+                let defaults = defaults |> Array.map ValueOption.get
+                let substitution = Array.zip (parameters |> Array.map _.Id) defaults |> Map.ofArray
+
+                let rec matches depth (body: TypeResponse) (actual: TypeResponse) =
+                    async {
+                        match Map.tryFind body.Id substitution with
+                        | Some value -> return value.Id = actual.Id
+                        | None when body.Id = actual.Id -> return true
+                        | None when depth > 4 -> return false
+                        | None ->
+                            let composite (flags: TypeFlags) =
+                                flags &&& (TypeFlags.Union ||| TypeFlags.Intersection)
+
+                            if composite body.Flags <> TypeFlags.None && composite body.Flags = composite actual.Flags then
+                                let! expected = ctx.Session.getTypesOfType body.Id
+                                let! found = ctx.Session.getTypesOfType actual.Id
+                                let expected = expected |> ValueOption.defaultValue [||]
+                                let found = found |> ValueOption.defaultValue [||]
+
+                                if expected.Length <> found.Length then
+                                    return false
+                                else
+                                    let! paired =
+                                        expected
+                                        |> Array.map (fun item ->
+                                            async {
+                                                let! hits = found |> Array.map (matches (depth + 1) item) |> Async.Sequential
+                                                return hits |> Array.filter id |> Array.length = 1
+                                            })
+                                        |> Async.Sequential
+
+                                    return Array.forall id paired
+                            else
+                                match body.Target, actual.Target with
+                                | ValueSome expected, ValueSome found when expected = found ->
+                                    let! expected = ctx.Session.getTypeArguments body.Id
+                                    let! found = ctx.Session.getTypeArguments actual.Id
+                                    let expected = expected |> ValueOption.defaultValue [||]
+                                    let found = found |> ValueOption.defaultValue [||]
+
+                                    if expected.Length <> found.Length then
+                                        return false
+                                    else
+                                        let! paired =
+                                            Array.map2 (matches (depth + 1)) expected found |> Async.Sequential
+
+                                        return Array.forall id paired
+                                | _ -> return false
+                    }
+
+                let! verified = matches 0 declared ty
+                return if verified then Some(Array.toList defaults) else None
+        | _ -> return None
+    }
+
 let resolveDeclarationIdentities: Pass<ResolveModel> =
     {
         Name = "resolve-declaration-identities"
@@ -3497,6 +3575,20 @@ let resolveDeclarationIdentities: Pass<ResolveModel> =
 
                                     let! arguments = ctx.Session.getAliasTypeArgumentsOfType (typeId / uom<_>)
                                     let! alias = ctx.Session.getAliasSymbolOfType (typeId / uom<_>)
+
+                                    let! arguments =
+                                        match alias, arguments with
+                                        | ValueSome alias, (ValueNone | ValueSome [||]) ->
+                                            async {
+                                                let! defaults = defaultAliasArguments ctx alias facts.Response
+
+                                                return
+                                                    defaults
+                                                    |> Option.map List.toArray
+                                                    |> Option.map ValueSome
+                                                    |> Option.defaultValue arguments
+                                            }
+                                        | _ -> async.Return arguments
 
                                     let! boundAlias =
                                         match alias with

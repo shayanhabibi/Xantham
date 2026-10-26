@@ -28,6 +28,7 @@
         <Compile Include="DependentConstraints.test.fs" />
         <Compile Include="GenericExclusiveUnion.test.fs" />
         <Compile Include="NamespaceUtilityIdentity.test.fs" />
+        <Compile Include="AliasDefaultArguments.test.fs" />
         <Compile Include="CompositeHandleIdentity.test.fs" />
         <Compile Include="PhantomCaseNames.test.fs" />
         <Compile Include="PhantomReexportIdentity.test.fs" />

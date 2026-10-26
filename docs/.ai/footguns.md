@@ -778,3 +778,8 @@ operand, or another explicit reader registers it. Whether some unrelated reader 
 depends on the program, so a pass that reads an instantiation's members without registering it
 works in one producer and fails in its consumer: the bound of an indexed-access operand was
 the case paid for (`I["def"]` with `I extends Internals<unknown>`).
+
+**A bare generic alias reference can come back without its arguments.** `T extends Tool` interns
+a copy of `Tool<any, any>` whose `getAliasTypeArgumentsOfType` is empty, and a later bare `Tool`
+may resolve to either copy depending on the program. Never key on the checker's alias arguments
+alone; `defaultAliasArguments` restores the defaults after checking the body matches them.
