@@ -1,0 +1,8 @@
+{
+  "module": "CatalogUseSiteBoundLab",
+  "lib": [
+    "esnext"
+  ],
+  "types": [],
+  "declarationCatalog": true
+}

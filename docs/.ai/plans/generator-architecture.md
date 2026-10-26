@@ -3818,3 +3818,22 @@ Declarations that share an identity merge into one row when arity, bounds and AP
 copies of one type can be resolved to different depths, so their source closures may differ
 (`ai`'s `ToolChoice2` closed over 2 files, its use-site copy over 55); the row records the union
 of the closures instead of refusing the merge.
+
+### Declaration catalog: use-site bounds and hoisted intersection scope (2026-10-26)
+
+A type parameter argument is keyed by its name, so an alias applied over a use site's own `M`
+keyed exactly like the declaration over its `M`, whatever either bound. Where the bounds agree
+or the use site only adds one, the copy merges into the declaration as an abbreviation; where
+the use site's bound differs (`createAgentUIStream`'s `UI_MESSAGE extends UIMessage<META, never,
+…>` against `UIMessageStreamOptions<UI_MESSAGE extends UIMessage>`), F# cannot abbreviate it,
+Shape emits it separately, and the merge refused the shared identity. Resolve now records, per
+alias argument, the bound of a type parameter whose bound differs by checker identity from the
+alias's declared bound at that position (`DeclarationArgumentBounds`), and the catalogue keys it
+beside the argument, structural keys included. Lab: catalog-use-site-bound-lab.
+
+A hoisted anonymous intersection binds the parameters it reads from its scope (`DeclParams`)
+positionally in its `source-intersection` key, as a declared type binds its own. Without that
+each owner's copy (`HttpChatTransport<UI_MESSAGE>`'s, `DefaultChatTransport<UI_MESSAGE>`'s)
+keyed its constituents by its own `UI_MESSAGE` declaration, the copies of
+`PrepareSendMessagesRequest`'s options object diverged, and the declarations naming them
+disagreed on API. Lab: catalog-anonymous-owner-lab.

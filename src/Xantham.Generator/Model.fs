@@ -1291,6 +1291,9 @@ type TypeFacts =
         Declarations: string<declHandle> list
         /// Alias arguments retain concrete substitutions for declaration catalog specialization keys.
         DeclarationArguments: TypeResponse list
+        /// Per `DeclarationArguments` position, the bound of a type-parameter argument whose bound
+        /// differs from the bound the alias declares there; empty when no argument differs.
+        DeclarationArgumentBounds: int<typeId> option list
         /// Declaration handles of the alias applied at this type occurrence.
         AliasDeclarations: string<declHandle> list
         /// Symbol id of the declaration the type's own symbol is written inside - a namespace,
@@ -1383,6 +1386,7 @@ module TypeFacts =
             DeclFile = None
             Declarations = []
             DeclarationArguments = []
+            DeclarationArgumentBounds = []
             AliasDeclarations = []
             SymbolParent = None
             NamespacePath = []

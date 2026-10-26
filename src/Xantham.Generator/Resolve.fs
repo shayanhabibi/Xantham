@@ -2262,6 +2262,7 @@ let private deriveFacts
                             PrivateMembers = structure.PrivateMembers
                             Declarations = []
                             DeclarationArguments = []
+                            DeclarationArgumentBounds = []
                             AliasDeclarations = []
                             IndexInfos = structure.IndexInfos
                             CallSignatures = structure.CallSignatures
@@ -3580,6 +3581,73 @@ let resolveDeclarationIdentities: Pass<ResolveModel> =
                                             }
                                         | _ -> async.Return arguments
 
+                                    // A type parameter argument is keyed by name; where its bound
+                                    // differs from the bound the alias declares at that position,
+                                    // the application cannot abbreviate the declaration, and the
+                                    // bound joins its key.
+                                    let! argumentBounds =
+                                        match alias, arguments with
+                                        | ValueSome alias, ValueSome applied when
+                                            applied
+                                            |> Array.exists (fun argument ->
+                                                argument.Flags.HasFlag TypeFlags.TypeParameter)
+                                            ->
+                                            async {
+                                                let! declared =
+                                                    attempt (ctx.Session.getDeclaredTypeOfSymbol alias.Reference)
+
+                                                match declared with
+                                                | Ok declared ->
+                                                    let! parameters =
+                                                        ctx.Session.getAliasTypeArgumentsOfType declared.Id
+
+                                                    let parameters = parameters |> ValueOption.defaultValue [||]
+
+                                                    if parameters.Length <> applied.Length then
+                                                        return []
+                                                    else
+                                                        let! bounds =
+                                                            Array.map2
+                                                                (fun (argument: TypeResponse) (parameter: TypeResponse) ->
+                                                                    async {
+                                                                        if
+                                                                            argument.Id = parameter.Id
+                                                                            || not (
+                                                                                argument.Flags.HasFlag
+                                                                                    TypeFlags.TypeParameter
+                                                                            )
+                                                                        then
+                                                                            return None
+                                                                        else
+                                                                            let! bound =
+                                                                                ctx.Session.getConstraintOfTypeParameter
+                                                                                    argument.Id
+
+                                                                            let! declaredBound =
+                                                                                ctx.Session.getConstraintOfTypeParameter
+                                                                                    parameter.Id
+
+                                                                            return
+                                                                                match bound, declaredBound with
+                                                                                | ValueSome bound, ValueSome declaredBound when
+                                                                                    bound.Id <> declaredBound.Id
+                                                                                    ->
+                                                                                    Some bound.TypeId
+                                                                                | _ -> None
+                                                                    })
+                                                                applied
+                                                                parameters
+                                                            |> Async.Sequential
+
+                                                        return
+                                                            if Array.forall Option.isNone bounds then
+                                                                []
+                                                            else
+                                                                Array.toList bounds
+                                                | Error _ -> return []
+                                            }
+                                        | _ -> async.Return []
+
                                     let! boundAlias =
                                         match alias with
                                         | ValueSome alias when
@@ -3625,6 +3693,7 @@ let resolveDeclarationIdentities: Pass<ResolveModel> =
                                             Declarations = declarations
                                             DeclarationArguments =
                                                 arguments |> ValueOption.defaultValue [||] |> Array.toList
+                                            DeclarationArgumentBounds = argumentBounds
                                             AliasDeclarations =
                                                 alias
                                                 |> ValueOption.bind _.DeclarationHandles

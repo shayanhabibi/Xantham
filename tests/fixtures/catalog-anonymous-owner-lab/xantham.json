@@ -1,0 +1,8 @@
+{
+  "module": "CatalogAnonymousOwnerLab",
+  "lib": [
+    "esnext"
+  ],
+  "types": [],
+  "declarationCatalog": true
+}

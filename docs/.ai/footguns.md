@@ -785,3 +785,9 @@ may resolve to either copy depending on the program. Never key on the checker's 
 alone; `defaultAliasArguments` restores the defaults for a closed application. Do not verify by
 matching the alias body under the defaults: instantiation distributes intersections over
 unions, so `Tool<any, any, any>` has eight arms where its body has four.
+
+**A type parameter's own identity is its declaration.** Keyed outside a binding, `M` in
+`HttpTransport<M>` and `M` in `DefaultTransport<M>` are two keys, so anything reaching a
+parameter through an unbound path keys per owner. Every key computed for a declaration that
+Shape emits generically must bind that declaration's parameters positionally first
+(`boundParameters`), including hoisted anonymous intersections.

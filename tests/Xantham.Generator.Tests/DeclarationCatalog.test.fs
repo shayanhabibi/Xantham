@@ -1090,6 +1090,42 @@ let json (value: Identity.Root.Value) : Identity.Root.Output = Identity.Root.Out
                 finally
                     if Directory.Exists directory then Directory.Delete(directory, true)
 
+            testCase "an anonymous intersection over each owner's parameter keys alike" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-anonymous-owner-" + Guid.NewGuid().ToString "N")
+                Directory.CreateDirectory directory |> ignore
+                try
+                    let package = Path.GetFullPath(Path.Combine(fixture, "..", "catalog-anonymous-owner-lab"))
+                    let config = GeneratorConfig.loadFile (Path.Combine(package, "xantham.json"))
+                    run config package directory |> Async.RunSynchronously |> ignore
+                    let binding = File.ReadAllText(Path.Combine(directory, "CatalogAnonymousOwnerLab.fs"))
+                    Expect.isFalse (binding.Contains "Prepare.Options") "no owner keeps a copy of the parameter object"
+                    Expect.stringContains
+                        binding
+                        "abstract prepare: (CatalogAnonymousOwnerLab.PrepareRequest.Options<'M> -> PrepareRequest.Result) option"
+                        "every owner names the alias's parameter object"
+                finally
+                    if Directory.Exists directory then Directory.Delete(directory, true)
+
+            testCase "an alias applied over a differently bounded parameter keeps its own identity" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-use-site-bound-" + Guid.NewGuid().ToString "N")
+                Directory.CreateDirectory directory |> ignore
+                try
+                    let package = Path.GetFullPath(Path.Combine(fixture, "..", "catalog-use-site-bound-lab"))
+                    let config = GeneratorConfig.loadFile (Path.Combine(package, "xantham.json"))
+                    run config package directory |> Async.RunSynchronously |> ignore
+                    let binding = File.ReadAllText(Path.Combine(directory, "CatalogUseSiteBoundLab.fs"))
+                    Expect.stringContains binding "type Base<'M when 'M :> Message<obj, unit>>" "the use site keeps its own bound"
+                    Expect.stringContains binding "inherit CatalogUseSiteBoundLab.StreamOptions<'M>" "a use site repeating the declared bound reuses the declaration"
+                    let catalog = JsonSerializer.Deserialize<DeclarationCatalog.Catalog>(File.ReadAllText(Path.Combine(directory, "declarations.json")),
+                        JsonSerializerOptions(PropertyNameCaseInsensitive = true))
+                    let identity name = (catalog.Declarations |> Array.find (fun declaration -> declaration.FSharpName = name)).Identity
+                    Expect.notEqual
+                        (identity "CatalogUseSiteBoundLab.CreateStream.Options.Base")
+                        (identity "CatalogUseSiteBoundLab.StreamOptions")
+                        "the differently bounded application is a different declaration"
+                finally
+                    if Directory.Exists directory then Directory.Delete(directory, true)
+
             testCase "a literal key into an instantiated bound renders alike in producer and consumer" <| fun _ ->
                 let directory = Path.Combine(temporaryRoot, "xantham-indexed-bound-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore

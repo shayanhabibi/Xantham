@@ -573,6 +573,14 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                                     |> ValueOption.exists (fun node -> node.Kind = SyntaxKind.TypeLiteral))
 
                             if hasWrittenLiteral && constituents.Length = facts.IntersectionMembers.Length then
+                                // The hoisted declaration binds the parameters it reads from its
+                                // scope positionally, so copies over each owner's own parameter
+                                // key alike.
+                                let bindings =
+                                    boundParameters id facts
+                                    |> List.mapi (fun index parameter -> parameter, "parameter:" + string index)
+                                    |> List.fold (fun bindings (parameter, key) -> Map.add parameter key bindings) bindings
+
                                 let contracts =
                                     facts.IntersectionMembers |> List.choose (typeIdentity (id :: visited) bindings)
 
@@ -722,6 +730,23 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
 
                     let argumentKey = argumentKeyWith (id :: visited) bindings
 
+                    // An argument whose bound differs from the alias's declared bound carries it.
+                    let declarationArgumentKeys (key: int<typeId> -> string) (facts: TypeFacts) =
+                        facts.DeclarationArguments
+                        |> List.mapi (fun index argument ->
+                            let argumentKey =
+                                if Map.containsKey argument.TypeId shape.Types then
+                                    key argument.TypeId
+                                else
+                                    intrinsicArgumentKey argument
+
+                            match List.tryItem index facts.DeclarationArgumentBounds |> Option.flatten with
+                            | Some bound when argumentKey <> "" ->
+                                match key bound with
+                                | "" -> ""
+                                | boundKey -> json ("bounded", argumentKey, boundKey)
+                            | _ -> argumentKey)
+
                     let arguments =
                         match facts.Response.TargetTypeId with
                         | ValueSome target when target <> id -> facts.TypeArguments |> List.map argumentKey
@@ -809,15 +834,13 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                         if structural && not (List.isEmpty arguments) then
                             // Populated structural keys already describe the applied members,
                             // including transparent aliases that carry different alias arguments.
-                            arguments
+                            // Members name a type parameter only by its name, so a bound that
+                            // differs from the alias's declared one is keyed beside them.
+                            match facts.DeclarationArgumentBounds |> List.choose (fun bound -> bound) with
+                            | [] -> arguments
+                            | bounds -> arguments @ [ json ("argument-bounds", bounds |> List.map partKey) ]
                         else
-                            let declarationArguments =
-                                facts.DeclarationArguments
-                                |> List.map (fun argument ->
-                                    if Map.containsKey argument.TypeId shape.Types then
-                                        partKey argument.TypeId
-                                    else
-                                        intrinsicArgumentKey argument)
+                            let declarationArguments = declarationArgumentKeys partKey facts
 
                             if not structural then
                                 arguments @ declarationArguments
@@ -842,13 +865,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                     if not boundsComplete then
                         None
                     elif not complete || List.contains "" arguments then
-                        let aliasArguments =
-                            facts.DeclarationArguments
-                            |> List.map (fun argument ->
-                                if Map.containsKey argument.TypeId shape.Types then
-                                    argumentKey argument.TypeId
-                                else
-                                    intrinsicArgumentKey argument)
+                        let aliasArguments = declarationArgumentKeys argumentKey facts
 
                         if List.isEmpty facts.AliasDeclarations || List.contains "" aliasArguments then
                             if role = "constructor" && not (List.contains "" aliasArguments) then
