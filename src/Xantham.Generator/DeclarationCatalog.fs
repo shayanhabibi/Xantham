@@ -2156,7 +2156,17 @@ let internal applyWithProducer
                             name.Split('.').Length,
                             name)
 
-                    let canonical = List.head entries
+                    // Copies of one type may be resolved to different depths, so their source
+                    // closures differ; the row authenticates every file either copy depends on.
+                    let canonical =
+                        { List.head entries with
+                            Sources =
+                                entries
+                                |> Seq.collect _.Sources
+                                |> Seq.distinct
+                                |> Seq.sortBy sourceKey
+                                |> Seq.toArray
+                        }
 
                     // Every bound the canonical declares, the entry declares too.
                     let narrows (entry: Declaration) =
@@ -2171,7 +2181,6 @@ let internal applyWithProducer
                         if
                             entry.Arity <> canonical.Arity
                             || not (narrows entry)
-                            || entry.Sources <> canonical.Sources
                             || entry.Api <> canonical.Api
                         then
                             fail

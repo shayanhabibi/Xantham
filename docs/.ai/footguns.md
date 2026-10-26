@@ -782,4 +782,6 @@ the case paid for (`I["def"]` with `I extends Internals<unknown>`).
 **A bare generic alias reference can come back without its arguments.** `T extends Tool` interns
 a copy of `Tool<any, any>` whose `getAliasTypeArgumentsOfType` is empty, and a later bare `Tool`
 may resolve to either copy depending on the program. Never key on the checker's alias arguments
-alone; `defaultAliasArguments` restores the defaults after checking the body matches them.
+alone; `defaultAliasArguments` restores the defaults for a closed application. Do not verify by
+matching the alias body under the defaults: instantiation distributes intersections over
+unions, so `Tool<any, any, any>` has eight arms where its body has four.

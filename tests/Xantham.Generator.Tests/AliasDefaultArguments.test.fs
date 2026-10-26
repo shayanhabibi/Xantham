@@ -24,7 +24,7 @@ let tests =
                 |> Option.map string
 
             // `Tool<any, any>`, however many copies the checker interned: the alias body is the
-            // union of the two tool interfaces.
+            // union of `FunctionTool<any, any>` and the intersection alias `DynamicTool<any, any>`.
             let tools =
                 resolve.Types
                 |> Map.toList
@@ -32,15 +32,14 @@ let tests =
                 |> List.filter (fun facts ->
                     facts.Response.Flags.HasFlag TypeFlags.Union
                     && not facts.AliasDeclarations.IsEmpty
-                    && (facts.UnionMembers |> List.map named |> List.choose id |> List.sort) = [ "DynamicTool"; "FunctionTool" ]
+                    && facts.UnionMembers.Length = 2
                     && facts.UnionMembers
-                       |> List.forall (fun id ->
-                           Map.tryFind id resolve.Types
-                           |> Option.exists (fun item ->
-                               item.TypeArguments
-                               |> List.forall (fun argument ->
-                                   Map.tryFind argument resolve.Types
-                                   |> Option.exists (fun facts -> facts.Response.Flags.HasFlag TypeFlags.Any)))))
+                       |> List.exists (fun id ->
+                           named id = Some "FunctionTool"
+                           && resolve.Types[id].TypeArguments
+                              |> List.forall (fun argument ->
+                                  Map.tryFind argument resolve.Types
+                                  |> Option.exists (fun facts -> facts.Response.Flags.HasFlag TypeFlags.Any))))
 
             Expect.isGreaterThanOrEqual tools.Length 2 "the constraint `T extends Tool` interns its own copy of the default application"
 

@@ -3805,8 +3805,16 @@ DynamicTool<I, O>`, sits beside the ordinary `Tool<any, any>`. Which copy a late
 resolves to depends on the program, so `ToolCallerDefinition`'s `bind` returned `Tool<any, any,
 any>` in ProviderUtils and the argument-free copy in `ai`, and every anonymous arm keyed under it
 diverged. `resolve-declaration-identities` now records the alias's defaults as
-`DeclarationArguments` when the checker reports none, after verifying the type against the alias
-body with each parameter replaced by its default (unions and intersections member for member,
-references by target and arguments, other types by id). An unverified type keeps no arguments.
+`DeclarationArguments` when the checker reports none. A bare reference to a generic alias is its
+default application, so the defaults are recorded where every parameter has one and the type is
+a closed application: not the alias's declared body, and free of the alias's own parameters
+through four levels of members, type arguments and alias arguments. Matching the type against
+the body under the defaults does not work: `Tool<any, any, any>` distributes its intersection
+arms over member unions and arrives with eight arms against the body's four.
 Only catalogue keys read `DeclarationArguments`; rendering is unchanged.
 Lab: catalog-alias-defaults-lab.
+
+Declarations that share an identity merge into one row when arity, bounds and API agree. Two
+copies of one type can be resolved to different depths, so their source closures may differ
+(`ai`'s `ToolChoice2` closed over 2 files, its use-site copy over 55); the row records the union
+of the closures instead of refusing the merge.
