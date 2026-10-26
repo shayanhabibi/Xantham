@@ -764,3 +764,10 @@ declaration row keyed by an export, or elected for a union by member set
 (`namedUnionByMembers`), records those value keys as `equivalents`; the row keeps its own
 identity for consumers that name it. Do not key a declared literal alias row by its values:
 Core.TS's `keyof` registries (`Intl.NumberFormatOptionsStyle`) lose their declaration identity.
+
+**An alias of an instantiation is a distinct checker type.** `type AnySchema = Schema` interns a
+new type id with the same target and arguments as `Schema`, and F# renders it as an abbreviation
+of that application. A nominal check that compares type ids, or declaration names, rejects a
+bound written as the target against a bound written as the alias; and since only a program that
+declares the alias renders it by name, the answer differs between producer and consumer. Compare
+target and type arguments (`satisfiesNominally`).

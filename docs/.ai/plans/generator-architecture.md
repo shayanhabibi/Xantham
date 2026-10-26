@@ -3772,3 +3772,15 @@ only producer source allowed to be absent. Every loaded source still authenticat
 and the alias row keeps its alias identity for consumers that name `IssueData` directly. The
 identity change stays within the unpublished identity 9 batch; every producer regenerates.
 Labs: alias-election-owner-lab (transitive and direct consumers), keyof-member-key-lab.
+
+### Constraint satisfaction: alias-transparent bounds (2026-10-26)
+
+`satisfiesNominally` treats an alias of an instantiation (`type AnySchema = Schema`) as the
+instantiation it renders an abbreviation of: two type ids sharing a target other than themselves
+and the same type arguments satisfy each other, in either direction. The checker interns the
+alias as its own type, so before this a method bound written as the target
+(`output<NewReturns extends $ZodType>`) failed against a parameter bound written as the alias
+(`Returns extends $ZodFunctionOut`), and `TR` widened `$ZodFunction<Args, NewReturns>` to
+`ZodFunction<'Args, ZodFunctionOut>`. A consumer that never declares the alias renders both bounds
+as the same application and kept `'NewReturns`, so the catalogue API diverged (`ai` against Zod's
+`V4.Core.ZodFunction`). Both now keep the argument. Lab: alias-bound-lab.

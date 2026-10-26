@@ -7961,3 +7961,20 @@ let keyofEnumOwnerFixtureTests =
     testList "keyof enum owner fixture" [
         yield! fixtureTests "keyof-enum-owner-lab" (handFixture "keyof-enum-owner-lab") GeneratorConfig.Default (fun _ -> [])
     ]
+
+[<Tests>]
+let aliasBoundFixtureTests =
+    testList "alias bound fixture" [
+        yield!
+            fixtureTests "alias-bound-lab" (handFixture "alias-bound-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a bound written as an alias's target satisfies the alias" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    for expected in
+                        [ "abstract output<'NewReturns when 'NewReturns :> Schema<obj>> : output: 'NewReturns -> Fn<'NewReturns>"
+                          "abstract aliased<'NewReturns when 'NewReturns :> AnySchema>: output: 'NewReturns -> Fn<'NewReturns>"
+                          "abstract shaped<'NewReturns>: output: 'NewReturns -> Fn<AnySchema>"
+                          "abstract output<'NewReturns when 'NewReturns :> Schema<float>> : output: 'NewReturns -> NumberFn<'NewReturns>" ] do
+                        source.Contains expected |> Flip.Expect.equal expected true ])
+    ]

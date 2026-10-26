@@ -1650,12 +1650,25 @@ let internal openOperands (model: ShapeModel) (facts: TypeFacts) =
 /// the declaration carrying the heritage. This is F# subtyping, not TypeScript's: it is the
 /// question `:>` asks, and it is asked in two places - of an argument at a reference, and of a
 /// parameter's own default when the head is written.
+/// An alias of an instantiation (`type AnySchema = Schema`) is a distinct checker type and an F#
+/// abbreviation, so it satisfies exactly what the instantiation satisfies.
 let internal satisfiesNominally (model: ShapeModel) (boundId: int<Measure.typeId>) (argument: int<Measure.typeId>) =
     let boundName = Map.tryFind boundId model.DeclNames
+
+    let instantiation typeId =
+        Map.tryFind typeId model.Types
+        |> Option.bind (fun facts ->
+            facts.Response.TargetTypeId
+            |> ValueOption.toOption
+            |> Option.filter (fun target -> target <> typeId)
+            |> Option.map (fun target -> target, facts.TypeArguments))
+
+    let boundInstantiation = instantiation boundId
 
     let rec walk seen typeId =
         typeId = boundId
         || (boundName.IsSome && Map.tryFind typeId model.DeclNames = boundName)
+        || (boundInstantiation.IsSome && instantiation typeId = boundInstantiation)
         || (not (Set.contains typeId seen)
             && (match Map.tryFind typeId model.Types with
                 | Some facts ->
