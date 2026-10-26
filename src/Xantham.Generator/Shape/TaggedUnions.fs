@@ -140,12 +140,12 @@ let detectTaggedUnions: Pass<ShapeModel> =
                                                                 taggedCaseFields tag arm
                                                                 |> List.map (fun m ->
                                                                     let reference, refFindings =
-                                                                        typeRef
+                                                                        memberTypeRef
                                                                             ctx
                                                                             scoped
                                                                             None
                                                                             $"{name}.{caseName}.{m.Symbol.Name}"
-                                                                            m.TypeId
+                                                                            m
 
                                                                     findings <- findings @ refFindings
 

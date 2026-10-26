@@ -3715,3 +3715,27 @@ root. Existing call/construct/parameter/return role keys and full source/API gua
 The ProviderUtils destructured-parameter lab pins independent function/overload/position
 identity, generic constraints, source mutation rejection and missing-anchor rejection.
 This is part of the unpublished identity-9/API-14 producer refresh batch.
+
+### Shape: source-annotated closed string aliases (2026-10-26)
+
+TypeScript interns equal literal unions, so a shared TypeId or equal case set does not identify
+a nominal F# string enum. Resolve records per-property evidence only for actual source
+PropertySignature annotations: a direct, nongeneric TypeReference resolving to a closed
+string alias, with the exact declared TypeId and complete resolved symbol declaration set.
+Import renames resolve to their actual symbol. Direct string-literal unions carry separate
+inline evidence; unsupported generic or nullable annotations retain their existing mapping.
+
+Shape allocates a source enum for each authenticated alias occurrence, preserving transparent
+type-only alias chains as abbreviations. Per-member shaping uses that source name; raw literal
+occurrences retain a separate anonymous enum and their occurrence ownership. An unexported
+alias (a compiler-lib global such as `RequestCache`) keeps the name its type already carries,
+so its group placement is unchanged; a second alias of the same type claims a fresh name. Only the nominal
+source alias receives its actual source origin/compiler family. A merged const value helper
+is renamed when necessary to avoid the restored source type name, while its JS import stays
+unchanged. Complete symbol handles and source bytes still guard catalogue reuse; no value-set
+matching or global interned-TypeId ownership replacement is introduced.
+
+The keyof enum owner lab checks producer/consumer context stability, equal-valued distinct
+aliases, raw literals, transparent aliases, import renames and merged const value consumers.
+Fresh real Zod generation passes, and ProviderUtils advances its IssueData guard to a distinct
+ParseContext API mismatch. Full-family acceptance remains pending that separate reduction.

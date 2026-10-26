@@ -3747,6 +3747,27 @@ and internal isOptionalParam (p: ResolvedMember) (reference: FsTypeRef) =
 // Generics (§4.9).
 // ---------------------------------------------------------------------------------------------
 
+/// <summary>Preserves direct source string-alias annotations without capturing unannotated interned unions.</summary>
+let memberTypeRef ctx (model: ShapeModel) self owner (member_: ResolvedMember) =
+    let named =
+        match member_.SourceStringAnnotation with
+        | Some(NamedStringAlias(symbol :: _)) ->
+            model.SourceStringAliases |> Map.tryFind symbol.SymbolId |> Option.map _.Name
+        | Some InlineStringLiterals ->
+            model.SourceStringAliases
+            |> Map.toList
+            |> List.map snd
+            |> List.tryPick (fun alias ->
+                if alias.DeclaredTypeId = member_.TypeId then
+                    alias.LiteralName
+                else
+                    None)
+        | _ -> None
+
+    match named with
+    | Some name -> FsNamed name, []
+    | None -> typeRef ctx model self owner member_.TypeId
+
 /// A declaration's own type parameters, and the scope its members must be shaped under. Both
 /// come from one walk so they agree: a member may reference exactly the parameters that earn a
 /// name. A constraint survives only where it maps to a named type; `extends keyof T` drops.
@@ -4852,7 +4873,12 @@ let internal shapeMembers
                 overloads agreed.IsNone memberFacts
             | None, None ->
                 let reference, refFindings =
-                    typeRef ctx (selectAnyReturn ctx model m.Symbol.Name owner) (Some self) owner effectiveTypeId
+                    let selected = selectAnyReturn ctx model m.Symbol.Name owner
+
+                    if effectiveTypeId = m.TypeId then
+                        memberTypeRef ctx selected (Some self) owner m
+                    else
+                        typeRef ctx selected (Some self) owner effectiveTypeId
 
                 let literal =
                     literalMemberValue model m effectiveTypeId

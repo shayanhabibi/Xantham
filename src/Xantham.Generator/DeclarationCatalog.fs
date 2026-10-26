@@ -909,7 +909,8 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                    |> List.forall (fun declaration ->
                        NodeHandle.parse (declaration / uom<_>)
                        |> ValueOption.exists (fun handle -> handle.Kind = SyntaxKind.FunctionDeclaration))
-                && Map.tryFind id shape.Types |> Option.exists (fun facts -> not facts.CallSignatures.IsEmpty)
+                && Map.tryFind id shape.Types
+                   |> Option.exists (fun facts -> not facts.CallSignatures.IsEmpty)
             then
                 Some(id, identity "source-function-parent" handles [])
             else
@@ -948,8 +949,13 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
     while changed do
         let additions =
             sourceFunctionParents
-            |> Map.fold (fun parents id parent ->
-                if Map.containsKey id parents then parents else Map.add id parent parents) byType
+            |> Map.fold
+                (fun parents id parent ->
+                    if Map.containsKey id parents then
+                        parents
+                    else
+                        Map.add id parent parents)
+                byType
             |> Map.toList
             |> List.collect (fun (id, parent) ->
                 edges shape.Types[id]
@@ -1012,8 +1018,39 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
     let exportPath =
         Shape.ExportLayout.declPath (Shape.ExportLayout.modulePaths shape) shape
 
+    let sourceStringAliases =
+        shape.SourceStringAliases
+        |> Map.toList
+        |> List.map (fun (_, alias) ->
+            alias.Name,
+            identity
+                (if alias.ForwardTo.IsSome then "alias" else "type")
+                (alias.AliasSymbol.DeclarationHandles
+                 |> ValueOption.defaultValue [||]
+                 |> Array.toList)
+                [])
+        |> Map.ofList
+
+    let sourceLiteralEnums =
+        shape.SourceStringAliases
+        |> Map.toList
+        |> List.choose (fun (_, alias) ->
+            alias.LiteralName
+            |> Option.bind (fun name ->
+                literalUnionIdentity
+                    false
+                    { shape.Types[alias.DeclaredTypeId] with
+                        AliasDeclarations = []
+                    }
+                |> Option.map (fun identity -> name, identity)))
+        |> Map.ofList
+
     let rec forDecl name decl =
-        match Map.tryFind name byName with
+        match
+            Map.tryFind name sourceStringAliases
+            |> Option.orElseWith (fun () -> Map.tryFind name sourceLiteralEnums)
+            |> Option.orElseWith (fun () -> Map.tryFind name byName)
+        with
         | Some identity -> identity
         | None ->
             let exported =
@@ -1435,6 +1472,8 @@ let internal applyWithProducer
                     yield! shape.Types |> Map.toList |> List.collect (snd >> _.Declarations)
                     for export in shape.Harvest.Exports do
                         yield! export.Symbol.DeclarationHandles |> ValueOption.defaultValue [||]
+                    for KeyValue(_, alias) in shape.SourceStringAliases do
+                        yield! alias.AliasSymbol.DeclarationHandles |> ValueOption.defaultValue [||]
                 ]
                 |> List.distinct
 

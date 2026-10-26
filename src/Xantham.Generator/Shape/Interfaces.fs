@@ -417,7 +417,7 @@ let shapeInterfaces: Pass<ShapeModel> =
 
                     let buildParam scoped names (owner: string) (m: ResolvedMember) =
                         let reference, refFindings =
-                            typeRef ctx (selectAnyReturn ctx scoped m.Symbol.Name owner) None owner m.TypeId
+                            memberTypeRef ctx (selectAnyReturn ctx scoped m.Symbol.Name owner) None owner m
 
                         {
                             Name = allocatedName names m
@@ -429,7 +429,7 @@ let shapeInterfaces: Pass<ShapeModel> =
 
                     let buildMember scoped names (owner: string) (optional: bool) (m: ResolvedMember) =
                         let reference, refFindings =
-                            typeRef ctx (selectAnyReturn ctx scoped m.Symbol.Name owner) None owner m.TypeId
+                            memberTypeRef ctx (selectAnyReturn ctx scoped m.Symbol.Name owner) None owner m
 
                         let member_ =
                             FsProperty

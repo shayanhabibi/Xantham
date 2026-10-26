@@ -1481,6 +1481,7 @@ let private resolveMember (ctx: Context) isProperty (property: SymbolResponse) =
                 TypeId = propertyType.TypeId
                 WellKnownSymbol = symbol
                 ResolvesToFunction = resolvesToFunction
+                SourceStringAnnotation = None
             },
             propertyType
     }
@@ -3279,6 +3280,159 @@ let internal resolveTypeTableWithWidth followWidth =
 let resolveTypeTable = resolveTypeTableWithWidth FollowWidth
 
 /// The tier's pass list, in execution order.
+let private sourceStringAliasOf (ctx: Context) typeId (property: SymbolResponse) =
+    async {
+        let literalUnion (node: Node<TypeNode>) =
+            node.Kind = SyntaxKind.UnionType
+            && (Node.retag<TypeNode, UnionTypeNode> node
+                |> UnionTypeNode.types
+                |> Seq.forall (fun item ->
+                    item.Kind = SyntaxKind.LiteralType
+                    && (Node.retag<TypeNode, LiteralTypeNode> item
+                        |> LiteralTypeNode.literal
+                        |> ValueOption.exists (fun literal -> literal.Kind = SyntaxKind.StringLiteral))))
+
+        let referencedSymbol path reference =
+            async {
+                match TypeReferenceNode.typeName reference with
+                | ValueSome name when TypeReferenceNode.typeArguments reference |> Seq.isEmpty ->
+                    let! symbol =
+                        ctx.Session.getSymbolAtLocation (
+                            NodeHandle.format
+                                {
+                                    Index = Node.index name
+                                    Kind = name.Kind
+                                    Path = path
+                                }
+                        )
+
+                    match symbol with
+                    | ValueSome symbol when symbol.Flags.HasFlag SymbolFlags.Alias ->
+                        let! actual = ctx.Session.getAliasedSymbol symbol.Reference
+                        return ValueSome actual
+                    | other -> return other
+                | _ -> return ValueNone
+            }
+
+        let rec aliasChain visited (symbol: SymbolResponse) =
+            async {
+                if
+                    Set.contains symbol.SymbolId visited
+                    || not (symbol.Flags.HasFlag SymbolFlags.TypeAlias)
+                then
+                    return None
+                else
+                    let! declared = ctx.Session.getDeclaredTypeOfSymbol symbol.Reference
+
+                    if declared.TypeId <> typeId then
+                        return None
+                    else
+                        let! forms =
+                            symbol.DeclarationHandles
+                            |> ValueOption.defaultValue [||]
+                            |> Array.map (fun raw ->
+                                async {
+                                    match NodeHandle.parse (raw / uom<_>) with
+                                    | ValueSome source when source.Kind = SyntaxKind.TypeAliasDeclaration ->
+                                        let! file = sourceFile ctx source.Path
+
+                                        return
+                                            file
+                                            |> ValueOption.toOption
+                                            |> Option.bind (fun file ->
+                                                let alias = Node.ofIndex<TypeAliasDeclaration> file source.Index
+
+                                                if TypeAliasDeclaration.typeParameters alias |> Seq.isEmpty then
+                                                    TypeAliasDeclaration.``type`` alias
+                                                    |> ValueOption.toOption
+                                                    |> Option.map (fun body -> source.Path, body)
+                                                else
+                                                    None)
+                                    | _ -> return None
+                                })
+                            |> Async.Parallel
+
+                        match Array.choose id forms with
+                        | [| path, body |] when literalUnion body -> return Some [ symbol ]
+                        | [| path, body |] when body.Kind = SyntaxKind.TypeOperator ->
+                            let operation = Node.retag<TypeNode, TypeOperatorNode> body
+
+                            return
+                                if
+                                    TypeOperatorNode.operator operation = ValueSome SyntaxKind.KeyOfKeyword
+                                    && (TypeOperatorNode.``type`` operation
+                                        |> ValueOption.exists (fun operand -> operand.Kind = SyntaxKind.TypeQuery))
+                                then
+                                    Some [ symbol ]
+                                else
+                                    None
+                        | [| path, body |] when
+                            body.Kind = SyntaxKind.TypeReference
+                            && uint32 (symbol.Flags &&& SymbolFlags.Value) = 0u
+                            ->
+                            let! target = referencedSymbol path (Node.retag<TypeNode, TypeReferenceNode> body)
+
+                            match target with
+                            | ValueSome target ->
+                                let! remaining = aliasChain (Set.add symbol.SymbolId visited) target
+                                return remaining |> Option.map (fun remaining -> symbol :: remaining)
+                            | _ -> return None
+                        | _ -> return None
+            }
+
+        let! aliases =
+            property.DeclarationHandles
+            |> ValueOption.defaultValue [||]
+            |> Array.map (fun declaration ->
+                async {
+                    match NodeHandle.parse (declaration / uom<_>) with
+                    | ValueNone -> return None
+                    | ValueSome handle ->
+                        let! file = sourceFile ctx handle.Path
+
+                        match file with
+                        | ValueNone -> return None
+                        | ValueSome file ->
+                            let node = Node.ofIndex<AnyNode> file handle.Index
+
+                            let annotation =
+                                if node.Kind = SyntaxKind.PropertySignature then
+                                    Node.retag<AnyNode, PropertySignatureDeclaration> node
+                                    |> PropertySignatureDeclaration.``type``
+                                else
+                                    ValueNone
+
+                            match annotation with
+                            | ValueSome annotation when literalUnion annotation -> return Some InlineStringLiterals
+                            | ValueSome annotation when annotation.Kind = SyntaxKind.TypeReference ->
+                                let reference = Node.retag<TypeNode, TypeReferenceNode> annotation
+                                let! symbol = referencedSymbol handle.Path reference
+
+                                match symbol with
+                                | ValueSome symbol ->
+                                    let! chain = aliasChain Set.empty symbol
+                                    return chain |> Option.map NamedStringAlias
+                                | _ -> return None
+                            | _ -> return None
+                })
+            |> Async.Parallel
+
+        return
+            if aliases.Length = 0 || Array.exists Option.isNone aliases then
+                None
+            else
+                match
+                    aliases
+                    |> Array.choose id
+                    |> Array.distinctBy (function
+                        | NamedStringAlias symbols ->
+                            Some(List.map (fun (symbol: SymbolResponse) -> symbol.SymbolId) symbols)
+                        | InlineStringLiterals -> None)
+                with
+                | [| alias |] -> Some alias
+                | _ -> None
+    }
+
 let resolveDeclarationIdentities: Pass<ResolveModel> =
     {
         Name = "resolve-declaration-identities"
@@ -3376,7 +3530,49 @@ let resolveDeclarationIdentities: Pass<ResolveModel> =
                                 })
                             |> Async.Parallel
 
-                        return Advanced { model with Types = Map.ofArray types }
+                        let types = Map.ofArray types
+
+                        let closedStrings id =
+                            match Map.tryFind id types with
+                            | Some facts when
+                                facts.Response.Flags.HasFlag TypeFlags.Union && facts.UnionMembers.Length >= 2
+                                ->
+                                facts.UnionMembers
+                                |> List.forall (fun id ->
+                                    Map.tryFind id types
+                                    |> Option.exists (fun item -> item.Response.Flags.HasFlag TypeFlags.StringLiteral))
+                            | _ -> false
+
+                        let! annotations =
+                            types
+                            |> Map.toArray
+                            |> Array.collect (snd >> _.Members >> List.toArray)
+                            |> Array.filter (fun member_ -> closedStrings member_.TypeId)
+                            |> Array.distinctBy (fun member_ -> member_.Symbol.SymbolId, member_.TypeId)
+                            |> Array.map (fun member_ ->
+                                async {
+                                    let! alias = sourceStringAliasOf ctx member_.TypeId member_.Symbol
+                                    return (member_.Symbol.SymbolId, member_.TypeId), alias
+                                })
+                            |> Async.Parallel
+
+                        let annotations = Map.ofArray annotations
+
+                        let types =
+                            types
+                            |> Map.map (fun _ facts ->
+                                let members =
+                                    facts.Members
+                                    |> List.map (fun member_ ->
+                                        { member_ with
+                                            SourceStringAnnotation =
+                                                Map.tryFind (member_.Symbol.SymbolId, member_.TypeId) annotations
+                                                |> Option.flatten
+                                        })
+
+                                { facts with Members = members })
+
+                        return Advanced { model with Types = types }
                 }
     }
 

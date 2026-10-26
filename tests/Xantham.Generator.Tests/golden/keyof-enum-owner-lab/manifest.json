@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "package": "keyof-enum-owner-lab",
+  "module": "KeyofEnumOwnerLab",
+  "counts": {
+    "exact": 6,
+    "ergonomic": 5,
+    "widened": 1,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SY - synthesize-anonymous",
+      "total": 1,
+      "ergonomic": 1
+    },
+    {
+      "pass": "DT - detect-tagged-unions",
+      "total": 3,
+      "exact": 3
+    },
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 9,
+      "ergonomic": 9
+    },
+    {
+      "pass": "SA - shape-aliases",
+      "total": 1,
+      "widened": 1
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 11,
+      "exact": 5,
+      "ergonomic": 6
+    }
+  ]
+}

@@ -106,6 +106,7 @@ let resolvedMember (sym: SymbolResponse) (typeId: int) : ResolvedMember =
         TypeId = typeId * Measure.uom<Measure.typeId>
         WellKnownSymbol = None
         ResolvesToFunction = false
+        SourceStringAnnotation = None
     }
 
 let export (name: string) (sym: SymbolResponse) : HarvestedExport =
@@ -136,6 +137,7 @@ let shapeModel (table: TypeFacts list) : ShapeModel =
         DeclOrders = Map.empty
         DeclParams = Map.empty
         AliasApplications = Map.empty
+        SourceStringAliases = Map.empty
         MintedNames = Set.empty
         ExportMembers = []
         TypeVars = Map.empty

@@ -100,6 +100,7 @@ let toShape (runtimePackage: string<importSpecifier>) (resolve: ResolveModel) : 
         DeclOrders = Map.empty
         DeclParams = Map.empty
         AliasApplications = Map.empty
+        SourceStringAliases = Map.empty
         MintedNames = Set.empty
         ExportMembers = []
         TypeVars = Map.empty
@@ -185,9 +186,16 @@ let private declOrigins compilerOnly (ctx: Context) (shape: ShapeModel) : Map<st
                 Map.add name origin origins
             | _ -> origins)
         Map.empty
+    |> fun origins ->
+        shape.SourceStringAliases
+        |> Map.fold
+            (fun origins _ alias ->
+                let origin = Grouping.classify ctx.PackageDir (ValueSome alias.AliasSymbol)
+                Map.add alias.Name origin origins)
+            origins
 
 /// The compiler-lib family of each declared name, read off the file of the type it declares.
-let private declFamilies (shape: ShapeModel) : Map<string, string> =
+let private declFamilies (ctx: Context) (shape: ShapeModel) : Map<string, string> =
     shape.DeclNames
     |> Map.toList
     |> List.sortBy fst
@@ -201,6 +209,17 @@ let private declFamilies (shape: ShapeModel) : Map<string, string> =
                    } -> Map.add name (Grouping.libFamily (file / uom<_>)) families
             | _ -> families)
         Map.empty
+    |> fun families ->
+        shape.SourceStringAliases
+        |> Map.fold
+            (fun families _ alias ->
+                match
+                    Grouping.classify ctx.PackageDir (ValueSome alias.AliasSymbol),
+                    Grouping.declOrder alias.AliasSymbol.Declarations
+                with
+                | CompilerLib, Some order -> Map.add alias.Name (Grouping.libFamily (order.File / uom<_>)) families
+                | _ -> families)
+            families
 
 /// The group a declaration is written into: its own where that group ships, the entry package's
 /// otherwise. An anonymous shape belongs to the entry package whatever file its node sits in
@@ -309,7 +328,7 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
     // The compiler lib ships as two modules under one `namespace rec`: the ECMAScript libs and
     // the DOM libs. A declaration's family is its own symbol's file; a hoisted name takes its
     // root's.
-    let families = declFamilies shape
+    let families = declFamilies ctx shape
 
     let rec familyOf (name: string) =
         match Map.tryFind name families with

@@ -10,6 +10,7 @@ let passes: Pass<ShapeModel> list =
     [
         ExportNames.nameExports
         Anonymous.synthesizeAnonymous
+        SourceStringAliases.nameAliases
         ConstructorObjects.nameConstructorObjects
         FreeTypeParams.bindFreeTypeParams
         MixedUnionCensus.countMixedUnions
@@ -19,6 +20,7 @@ let passes: Pass<ShapeModel> list =
         Callbacks.shapeCallbacks
         Interfaces.shapeInterfaces
         Aliases.shapeAliases
+        SourceStringAliases.reifyAliases
         Classes.shapeClasses
         Exports.shapeExports
         ParamObjects.synthesizeParamObjects

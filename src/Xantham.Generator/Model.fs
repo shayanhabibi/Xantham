@@ -1178,6 +1178,13 @@ type HarvestModel =
 // Tier 2 - Resolve: what the checker says everything is. A type table keyed by TypeResponse.Id.
 // ---------------------------------------------------------------------------------------------
 
+/// <summary>Source annotation evidence for a direct closed string-union property occurrence.</summary>
+type SourceStringAnnotation =
+    /// <summary>The actual source alias chain, annotation first and enum declaration last.</summary>
+    | NamedStringAlias of SymbolResponse list
+    /// <summary>A direct anonymous union of string literals written at this occurrence.</summary>
+    | InlineStringLiterals
+
 /// A property or parameter, resolved: the symbol plus the derived facts every shape pass
 /// would otherwise re-ask the wire for.
 type ResolvedMember =
@@ -1194,6 +1201,8 @@ type ResolvedMember =
         /// <summary>Function-declaration provenance, including namespace export aliases and
         /// transient intersections of method and function declarations.</summary>
         ResolvesToFunction: bool
+        /// <summary>The actual source alias explicitly annotating this direct closed string-union property.</summary>
+        SourceStringAnnotation: SourceStringAnnotation option
     }
 
 /// One index signature (`[key: string]: V`) as the resolve tier records it. These are
@@ -1944,6 +1953,21 @@ type KeyBinding =
     /// constraint of the generic parameter the access is applied at.
     | TypedKeyOf of operand: FsTypeRef * operandId: int<typeId> * result: string * bound: FsTypeRef option
 
+/// <summary>A source-authenticated string alias and the separate anonymous literal representation.</summary>
+type SourceStringAliasDecl =
+    {
+        /// <summary>The allocated declaration name for this source symbol.</summary>
+        Name: string
+        /// <summary>The anonymous enum name used by unannotated occurrences of the same checker union.</summary>
+        LiteralName: string option
+        /// <summary>The complete resolved source symbol, including merged declaration handles.</summary>
+        AliasSymbol: SymbolResponse
+        /// <summary>The exact declared checker type authenticated at the annotation.</summary>
+        DeclaredTypeId: int<typeId>
+        /// <summary>A transparent, source-authenticated zero-argument alias target.</summary>
+        ForwardTo: SymbolKey option
+    }
+
 type ShapeModel =
     {
         Harvest: HarvestModel
@@ -1966,6 +1990,8 @@ type ShapeModel =
         DeclParams: Map<int<typeId>, int<typeId> list>
         /// Recognized generic application id -> the declaration id whose name it references.
         AliasApplications: Map<int<typeId>, int<typeId>>
+        /// <summary>Explicit source string-alias occurrences, keyed by full source symbol identity.</summary>
+        SourceStringAliases: Map<SymbolKey, SourceStringAliasDecl>
         /// Names claimed from derived member, argument or arm positions. Source export roots,
         /// including namespace members, are excluded even when their types are anonymous.
         MintedNames: Set<string>

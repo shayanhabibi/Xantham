@@ -34,6 +34,7 @@
     <Compile Include="Shape\Spec.fs" />
     <Compile Include="Shape\ExportNames.fs" />
     <Compile Include="Shape\Anonymous.fs" />
+    <Compile Include="Shape\SourceStringAliases.fs" />
     <Compile Include="Shape\ConstructorObjects.fs" />
     <Compile Include="Shape\FreeTypeParams.fs" />
     <Compile Include="Shape\MixedUnionCensus.fs" />

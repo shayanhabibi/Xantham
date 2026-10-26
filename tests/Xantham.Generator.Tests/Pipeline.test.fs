@@ -7955,3 +7955,9 @@ let destructuredParameterIdentityFixtureTests =
     testList "destructured parameter identity fixture" [
         yield! fixtureTests "destructured-parameter-identity-lab" (handFixture "destructured-parameter-identity-lab") GeneratorConfig.Default (fun _ -> [])
     ]
+
+[<Tests>]
+let keyofEnumOwnerFixtureTests =
+    testList "keyof enum owner fixture" [
+        yield! fixtureTests "keyof-enum-owner-lab" (handFixture "keyof-enum-owner-lab") GeneratorConfig.Default (fun _ -> [])
+    ]

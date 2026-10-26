@@ -746,3 +746,10 @@ exported FunctionDeclaration handles may seed parameter/return traversal in that
 source-function root is never inserted into byType/byName or published as a callable contract.
 Require every handle to be an actual function declaration and preserve existing complete
 identities. Unanchored synthetic callables must still fail.
+
+**Equal literal unions do not establish source enum ownership.** A declared keyof typeof
+string alias can share a compiler TypeId with unrelated aliases and inline literals. Preserve
+its nominal owner only at a source-authenticated property annotation, with the resolved full
+merged symbol and exact declared type. Keep inline literals anonymous, keep faithful alias
+chains abbreviations, and assign actual alias origin/family only to the nominal source alias.
+A merged const helper may need a fresh F# type name; its original JS import key must survive.
