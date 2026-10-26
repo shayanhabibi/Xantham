@@ -585,7 +585,14 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
             // under the name the alias itself already carries.
             && declParamIds facts = ownArguments facts
             && (hasInterfaceCallSignatures model facts
-                || callbackRetainedAsDelegate model names facts)
+                || callbackRetainedAsDelegate model names facts
+                // A catalogued generic callable interface keeps its declaration and parameters
+                // wherever it is reached, so its applications read the same in every consumer.
+                || ((ctx.Config.DeclarationCatalog
+                     || not (List.isEmpty ctx.Config.DeclarationReferences))
+                    && hasAny SymbolFlags.Interface facts.SymbolFlags
+                    && (facts.SymbolName |> Option.exists (isSyntheticName >> not))
+                    && not (List.isEmpty (declParamIds facts))))
             && (instantiationOf { model with DeclNames = names } facts).IsNone
         elif flag TypeFlags.Object facts then
             // Entry-group object shapes with members become interfaces; arrays stay arrays and

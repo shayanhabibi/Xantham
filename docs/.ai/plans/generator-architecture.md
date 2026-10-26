@@ -3739,3 +3739,16 @@ The keyof enum owner lab checks producer/consumer context stability, equal-value
 aliases, raw literals, transparent aliases, import renames and merged const value consumers.
 Fresh real Zod generation passes, and ProviderUtils advances its IssueData guard to a distinct
 ParseContext API mismatch. Full-family acceptance remains pending that separate reduction.
+
+### Shape: catalogued generic callable interfaces (2026-10-26)
+
+A function-shaped callback (D5) is written inline as an F# function unless something names it,
+and an export names it. A generic callable interface (`$ZodErrorMap<T>`) therefore read as
+`ZodErrorMap<'T>` in the package exporting it and as an expanded `obj -> ...` function in a
+consumer reaching it through a member, so the catalogue API of every declaration referencing it
+depended on export reach. In catalogue or reference mode, a named generic interface whose
+content is call signatures is declared wherever it is reached; its applications are written as
+applications of that declaration and keep their type arguments. Standalone generation keeps D5.
+The callable interface owner lab checks the transitive standalone output and producer reuse.
+ProviderUtils advances to a `ParsePayload` mismatch: the producer elects the exported classic
+alias `IssueData` for `$ZodRawIssue<$ZodIssue>`, which the consumer never reaches.

@@ -202,3 +202,22 @@ let sourceEnumDependencyOwnership =
         Expect.notEqual named.FSharpName raw.FSharpName "an interned compiler type cannot merge source and anonymous names"
         Expect.isEmpty raw.Handles "the entry literal does not acquire dependency source handles"
         Expect.notEqual raw.Identity named.Identity "interned literal values do not confer nominal ownership"
+
+[<Tests>]
+let callableInterfaceOwners =
+    testCase "generic callable interfaces keep their declaration in consumers that reach them transitively" <| fun _ ->
+        use scratch = Scratch.directory "callable-interface-owner"
+        let fixture = Path.Combine(__SOURCE_DIRECTORY__, "..", "fixtures", "callable-interface-owner-lab")
+        let owner = Path.Combine(scratch.Path, "owner")
+        let config = { GeneratorConfig.Default with ModuleName = Some "Mini.Owner"; DeclarationCatalog = true }
+        Pipeline.run config fixture owner |> Async.RunSynchronously |> ignore
+        let standalone = Path.Combine(scratch.Path, "standalone")
+        Pipeline.run { config with ModuleName = Some "Mini.Standalone"; Entry = Some "consumer.d.ts" } fixture standalone
+        |> Async.RunSynchronously |> ignore
+        let standaloneText = File.ReadAllText(Path.Combine(standalone, "Mini.Standalone.fs"))
+        Expect.stringContains standaloneText "type ErrorMap<'T when 'T :> IssueBase>" "the transitively reached callable interface keeps its parameter"
+        Expect.stringContains standaloneText "abstract error: ErrorMap<'T> option" "its application reads as the declaration, not an expanded function"
+        Pipeline.run { config with ModuleName = Some "Mini.Consumer"; Entry = Some "consumer.d.ts"; DeclarationReferences = [ Path.Combine(owner, "declarations.json") ] } fixture (Path.Combine(scratch.Path, "consumer"))
+        |> Async.RunSynchronously |> ignore
+        let consumer = File.ReadAllText(Path.Combine(scratch.Path, "consumer", "Mini.Consumer.fs"))
+        Expect.stringContains consumer "Mini.Owner.Schema" "the consumer reuses the producer's declarations"
