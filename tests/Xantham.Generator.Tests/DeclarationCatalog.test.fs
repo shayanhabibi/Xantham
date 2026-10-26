@@ -1098,11 +1098,16 @@ let json (value: Identity.Root.Value) : Identity.Root.Output = Identity.Root.Out
                     let config = GeneratorConfig.loadFile (Path.Combine(package, "xantham.json"))
                     run config package directory |> Async.RunSynchronously |> ignore
                     let binding = File.ReadAllText(Path.Combine(directory, "CatalogAnonymousOwnerLab.fs"))
-                    Expect.isFalse (binding.Contains "Prepare.Options") "no owner keeps a copy of the parameter object"
+                    Expect.isFalse (binding.Contains "HttpTransport.Prepare.Options") "an equally bounded owner keeps no copy"
+                    Expect.isFalse (binding.Contains "DefaultTransport.Prepare.Options") "an equally bounded owner keeps no copy"
                     Expect.stringContains
                         binding
                         "abstract prepare: (CatalogAnonymousOwnerLab.PrepareRequest.Options<'M> -> PrepareRequest.Result) option"
-                        "every owner names the alias's parameter object"
+                        "equally bounded owners name the alias's parameter object"
+                    Expect.stringContains
+                        binding
+                        "abstract prepare: (DirectTransport.Prepare.Options<'M> -> PrepareRequest.Result) option"
+                        "a differently bounded owner keeps its own copy"
                 finally
                     if Directory.Exists directory then Directory.Delete(directory, true)
 

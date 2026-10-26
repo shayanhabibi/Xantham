@@ -22,3 +22,7 @@ export declare abstract class HttpTransport<M extends Message> {
 export declare class DefaultTransport<M extends Message> extends HttpTransport<M> {
     constructor(options?: InitOptions<M>);
 }
+/** An owner whose parameter has a different bound keeps its own copy. */
+export declare class DirectTransport<M extends Message<string> = Message<string>> {
+    protected prepare?: PrepareRequest<M>;
+}

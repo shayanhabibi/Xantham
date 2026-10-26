@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "compiler": "498f59d207e22c40f1ecc218dfa67d1db25629a231bd0948c3db92df7457afc7",
-  "generator": "99a4dd596aa832cadd8a11cf90a4675c163676d5f0ffecdfbef4865f61d1ac29",
+  "generator": "02578413fd3f76ce1e583a00cbd0a0ecdfc67ab3808200425a0180c0bf53d712",
   "inferenceProfile": "d2f99097bf8701703dbad824988206bf0800602c089c9094d2b66092c161b32f",
   "owner": "FableCoreTsInput",
   "inputs": [
@@ -607311,7 +607311,7 @@
       "fSharpName": "Fable.Core.TS.Es.IteratorConstructor",
       "arity": 0,
       "constraints": [],
-      "api": "cd7cb05dc56607424c85892bdd0e7a0211d6cc8fa7d36d9127b56af18707c3a3",
+      "api": "98dac740dac5bda57d9285ac3ddb907468d0e36612f7533be2fabc48959707a4",
       "owner": "FableCoreTsInput"
     },
     {
@@ -607469,7 +607469,7 @@
       "owner": "FableCoreTsInput"
     },
     {
-      "identity": "460abc0e0c52476fddde8c43c6a2c2aeb9abef54a4d88763d554bf2fbf7a49ab",
+      "identity": "0e92d7727a607c62a06ada235a729c327f630213ae6a7ae8877c3c12fd9dd574",
       "handles": [
         "typescript@7.1.0-beta/lib/lib.esnext.iterator.d.ts#26.189",
         "typescript@7.1.0-beta/lib/lib.esnext.iterator.d.ts#704.189"

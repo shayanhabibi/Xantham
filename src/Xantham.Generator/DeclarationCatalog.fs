@@ -574,11 +574,23 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
 
                             if hasWrittenLiteral && constituents.Length = facts.IntersectionMembers.Length then
                                 // The hoisted declaration binds the parameters it reads from its
-                                // scope positionally, so copies over each owner's own parameter
-                                // key alike.
+                                // scope positionally, with their bounds, so copies over each
+                                // owner's own equally bounded parameter key alike.
                                 let bindings =
                                     boundParameters id facts
-                                    |> List.mapi (fun index parameter -> parameter, "parameter:" + string index)
+                                    |> List.mapi (fun index parameter ->
+                                        let bound =
+                                            Map.tryFind parameter shape.Types
+                                            |> Option.bind _.Constraint
+                                            |> Option.map (fun bound ->
+                                                typeIdentity (id :: visited) bindings bound
+                                                |> Option.map _.Key
+                                                |> Option.defaultValue "")
+
+                                        parameter,
+                                        match bound with
+                                        | None -> "parameter:" + string index
+                                        | Some bound -> json ("parameter", index, bound))
                                     |> List.fold (fun bindings (parameter, key) -> Map.add parameter key bindings) bindings
 
                                 let contracts =

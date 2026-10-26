@@ -3832,7 +3832,10 @@ alias's declared bound at that position (`DeclarationArgumentBounds`), and the c
 beside the argument, structural keys included. Lab: catalog-use-site-bound-lab.
 
 A hoisted anonymous intersection binds the parameters it reads from its scope (`DeclParams`)
-positionally in its `source-intersection` key, as a declared type binds its own. Without that
+positionally in its `source-intersection` key, with each parameter's bound, as a declared type
+binds its own. Copies over equally bounded owner parameters merge; an owner whose parameter is
+bounded differently (`DirectChatTransport`'s `UI_MESSAGE extends UIMessage<unknown, never, ...>`)
+keeps its own copy, which F# needs for the different constraint. Without that
 each owner's copy (`HttpChatTransport<UI_MESSAGE>`'s, `DefaultChatTransport<UI_MESSAGE>`'s)
 keyed its constituents by its own `UI_MESSAGE` declaration, the copies of
 `PrepareSendMessagesRequest`'s options object diverged, and the declarations naming them
