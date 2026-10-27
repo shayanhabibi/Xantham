@@ -16,13 +16,13 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 2,
-      "ergonomic": 2
+      "total": 4,
+      "ergonomic": 4
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 4,
-      "ergonomic": 4
+      "total": 5,
+      "ergonomic": 5
     },
     {
       "pass": "resolve-module-suffixes",

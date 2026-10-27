@@ -11,13 +11,16 @@ open Fable.Core.JS
 open Fable.Core.TS.Dom
 
 /// <summary>
-/// Its hoisted <c>options</c> shape is written under a module <c>Workspace</c>, which F# compiles as <c>WorkspaceModule</c>.
+/// Its hoisted shape is written under a module <c>Workspace</c>, which F# compiles as <c>WorkspaceModule</c>.
 /// </summary>
 [<Interface>]
 type Workspace =
-    abstract options: Workspace.Options option with get, set
+    /// <summary>
+    /// Hoisted two levels down, as <c>Workspace.Ready.Options</c>.
+    /// </summary>
+    abstract ready: ?options: Workspace.Ready.Options -> JS.Promise<unit>
     [<ParamObject; Emit("$0")>]
-    static member Create (?options: Workspace.Options) : Workspace = jsNative
+    static member Create (ready: (Workspace.Ready.Options option -> JS.Promise<unit>)) : Workspace = jsNative
 
 [<Interface>]
 type WorkspaceModuleFunctions =
@@ -34,8 +37,9 @@ type Exports =
     static member load (``module``: WorkspaceModule2, workspace: Workspace) : unit = jsNative
 
 module Workspace =
-    [<Interface>]
-    type Options =
-        abstract cwd: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (cwd: string) : Options = jsNative
+    module Ready =
+        [<Interface>]
+        type Options =
+            abstract all: bool option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?all: bool) : Options = jsNative

@@ -709,16 +709,19 @@ let resolveModuleSuffixes: Pass<ShapeModel> =
                 async {
                     let names = model.Decls |> List.choose declName |> Set.ofList
 
-                    let parentOf (name: string) =
-                        match name.LastIndexOf '.' with
-                        | -1 -> None
-                        | at -> Some(name.Substring(0, at))
+                    let prefixes (name: string) =
+                        let segments = name.Split '.'
 
-                    // Every type that is also a module: some declaration is nested under it.
+                        [
+                            for count in 1 .. segments.Length - 1 -> String.concat "." segments[.. count - 1]
+                        ]
+
+                    // Every type that is also a module: some declaration is nested under it, at
+                    // any depth (`Workspace.Ready.Options`).
                     let modules =
                         names
-                        |> Seq.choose parentOf
-                        |> Seq.filter (fun parent -> Set.contains parent names)
+                        |> Seq.collect prefixes
+                        |> Seq.filter (fun prefix -> Set.contains prefix names)
                         |> Set.ofSeq
 
                     let nestedUnder (root: string) (name: string) =
