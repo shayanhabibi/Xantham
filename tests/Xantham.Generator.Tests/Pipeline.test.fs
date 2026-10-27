@@ -1805,7 +1805,7 @@ let pipelineTests =
                     // which FS0035 forbids in an abbreviation and a union admits.
                     Expect.stringContains
                         source
-                        "type SurplusParameter<'T, 'Reserved> = private SurplusParameter__ of"
+                        "type SurplusParameter<'T, 'Reserved> = private Phantom_SurplusParameter__ of"
                         "the head keeps both parameters behind an erased private case"
 
                     Expect.stringContains source "[<Erase>]" "erased, so the phantom costs nothing at runtime"
@@ -1917,19 +1917,19 @@ let pipelineTests =
                     // survive as a phantom with a private case - a cast is the only use of it.
                     Expect.stringContains
                         source
-                        "type DeepPartial<'T> = private DeepPartial__ of obj"
+                        "type DeepPartial<'T> = private Phantom_DeepPartial__ of obj"
                         "a mapped type over an open operand"
 
                     Expect.stringContains
                         source
-                        "type Unwrap<'T> = private Unwrap__ of obj"
+                        "type Unwrap<'T> = private Phantom_Unwrap__ of obj"
                         "a conditional over an open operand"
 
                     // A template literal is still a string at runtime whatever it interpolates,
                     // so the phantom carries one.
                     Expect.stringContains
                         source
-                        "type Prefixed<'T> = private Prefixed__ of string"
+                        "type Prefixed<'T> = private Phantom_Prefixed__ of string"
                         "a template literal over an open operand"
 
                     Expect.stringContains source "[<Erase>]" "and each is erased"
@@ -2499,7 +2499,7 @@ let pipelineTests =
                       // stays the phantom, which keeps the arity `string` would have lost.
                       Expect.stringContains source "type ModeEvent =" "a closed template literal is a StringEnum"
                       Expect.stringContains source "[<CompiledName(\"onRead\")>] OnRead" "expanded, not widened"
-                      Expect.stringContains source "type Tagged<'T> = private Tagged__ of string" "open operand: phantom"
+                      Expect.stringContains source "type Tagged<'T> = private Phantom_Tagged__ of string" "open operand: phantom"
 
                       // bigint is exact, and an exact mapping is reported nowhere at all.
                       Expect.stringContains source "abstract balance: bigint" "a bigint member"
@@ -2889,7 +2889,7 @@ let pipelineTests =
 
                       // The declaration binds Element even though the deferred tuple loses
                       // its length computation. Preserve both arity and the known carrier.
-                      Expect.stringContains source "type ReadonlyTuple<'Element, 'Length> = private ReadonlyTuple__ of 'Element[]" "the element binder and array carrier survive"
+                      Expect.stringContains source "type ReadonlyTuple<'Element, 'Length> = private Phantom_ReadonlyTuple__ of 'Element[]" "the element binder and array carrier survive"
 
                   testCase "an indexable shape with none of Array's members stays a shape" <| fun _ ->
                       let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
@@ -4552,6 +4552,61 @@ let pipelineTests =
                                |> List.map _.Symbol)
                               [ "Panel.widget"; "Panel.boxed"; "Panel.pair"; "Exports.mount(widget)"; "Exports.mount()" ]
                               "every reference into the dependency is a widening with a name" ])
+
+        // A shipped group's declaration reads a shape hoisted under an entry alias. The golden
+        // compiles only with the shape beside the group, whose file precedes the entry module.
+        yield!
+            fixtureTests
+                "group-reader-lab"
+                (handInstalledFixture "group-reader-lab")
+                (handConfig (handInstalledFixture "group-reader-lab"))
+                (fun _ -> [])
+
+        // Shapes hoisted under an entry value whose type instantiates a shipped dependency's
+        // generic over entry types. They read entry declarations, so they stay in the entry.
+        yield!
+            fixtureTests
+                "entry-reader-lab"
+                (handInstalledFixture "entry-reader-lab")
+                (handConfig (handInstalledFixture "entry-reader-lab"))
+                (fun _ -> [])
+
+        // A method parameter whose default is a conditional over the other parameters keeps its
+        // bound, which the declaration it returns requires.
+        yield!
+            fixtureTests
+                "conditional-default-bound-lab"
+                (handInstalledFixture "conditional-default-bound-lab")
+                (handConfig (handInstalledFixture "conditional-default-bound-lab"))
+                (fun _ -> [])
+
+        // Bounds F#'s invariant generics cannot meet: a parameter object binding a variable whose
+        // bound reads a signature parameter, and a callback bound by a bare generic applied to a
+        // variable bounded by another instantiation of it.
+        yield!
+            fixtureTests
+                "covariant-bound-lab"
+                (handInstalledFixture "covariant-bound-lab")
+                (handConfig (handInstalledFixture "covariant-bound-lab"))
+                (fun _ -> [])
+
+        // A type whose nested names make it a module too, beside a declaration spelled like the
+        // module's compiled `XModule` name.
+        yield!
+            fixtureTests
+                "module-suffix-lab"
+                (handInstalledFixture "module-suffix-lab")
+                (handConfig (handInstalledFixture "module-suffix-lab"))
+                (fun _ -> [])
+
+        // An entry subpath module spelled like a shipped group's global type. The catalogue's
+        // constructor value, named under the subpath, stays in the entry module.
+        yield!
+            fixtureTests
+                "subpath-owner-lab"
+                (handInstalledFixture "subpath-owner-lab")
+                (handConfig (handInstalledFixture "subpath-owner-lab"))
+                (fun _ -> [])
 
         // Wave five lane S (O7's `ship` disposition). Two dependencies are installed beside the
         // entry package and both configured `ship`. `dep-lab` is emitted as its own module and
@@ -6728,7 +6783,7 @@ let pipelineTests =
                   testCase "tag-map-lab: T[keyof T] reads as proptypelock" <| fun _ ->
                       let source = generate () |> sourceOf
 
-                      Expect.stringContains source "type ValueOf<'ObjectType, 'ValueType> = private ValueOf__ of proptypelock<'ObjectType>" "the defaulted key binder survives with the known carrier"
+                      Expect.stringContains source "type ValueOf<'ObjectType, 'ValueType> = private Phantom_ValueOf__ of proptypelock<'ObjectType>" "the defaulted key binder survives with the known carrier"
                       Expect.stringContains source "type ValuesOf<'T> = proptypelock<'T>" "a written keyof"
 
                       Expect.stringContains
@@ -6736,7 +6791,7 @@ let pipelineTests =
                           "static member valuesOf<'T> (source: 'T) : proptypelock<'T>[] = jsNative"
                           "a signature's own parameter"
 
-                      Expect.stringContains source "type Picked<'T, 'K> = private Picked__ of obj" "a key with no default stays widened without losing its binders"
+                      Expect.stringContains source "type Picked<'T, 'K> = private Phantom_Picked__ of obj" "a key with no default stays widened without losing its binders"
 
                   testCase "tag-map-lab: a key-independent mapped type reads as PropertyRecord" <| fun _ ->
                       let rendered = generate ()
@@ -6749,7 +6804,7 @@ let pipelineTests =
 
                       Expect.stringContains
                           source
-                          "type Mirrored<'T> = private Mirrored__ of obj"
+                          "type Mirrored<'T> = private Phantom_Mirrored__ of obj"
                           "a value that reads the key stays a phantom"
 
                       Expect.equal (symbolsOf rendered "TR067") [ "Stringified" ] "one finding per PropertyRecord"
@@ -7118,6 +7173,12 @@ let censusBoundAliasNamingTests =
     ]
 
 [<Tests>]
+let dependentConstraintFixtureTests =
+    testList "dependent constraint fixture" [
+        yield! fixtureTests "zod-dependent-constraints-lab" (handFixture "zod-dependent-constraints-lab") GeneratorConfig.Default (fun _ -> [])
+    ]
+
+[<Tests>]
 let groupedDomAliasTests =
     testList "grouped DOM alias fixture" [
         yield!
@@ -7138,6 +7199,21 @@ let catalogAliasApiTests =
     testList "catalog alias API fixture" [
         yield!
             fixtureTests "catalog-alias-api-lab" package config (fun _ -> [])
+    ]
+
+[<Tests>]
+let catalogIndexedBoundTests =
+    let package = handFixture "catalog-indexed-bound-lab"
+    let config = { handConfig package with DeclarationCatalog = false }
+    testList "catalog indexed bound fixture" [
+        yield!
+            fixtureTests "catalog-indexed-bound-lab" package config (fun package ->
+                [ testCase "a literal key into an instantiated bound selects the bound's member" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate config package)
+                    let source = rendered.Files |> List.map snd |> String.concat "\n"
+
+                    for expected in [ "abstract def: Def"; "abstract clone: ?def: Def -> Schema<'I>" ] do
+                        source.Contains expected |> Flip.Expect.equal expected true ])
     ]
 
 [<Tests>]
@@ -7685,7 +7761,7 @@ let openIntersectionFixtureTests =
                 Expect.stringContains source "static member listen (handler: (Listen.Handler.E -> unit)) : unit" "a closed application flattens its intersection"
 
                 let keyed key = rendered.Findings |> List.filter (fun finding -> finding.Key = key) |> List.map _.Symbol
-                Expect.stringContains source "type Exclusive<'T, 'U> = private Exclusive__ of obj" "a mapped operand is not read as restating the bound"
+                Expect.stringContains source "type Exclusive<'T, 'U> = private Phantom_Exclusive__ of obj" "a mapped operand is not read as restating the bound"
                 Expect.equal (keyed "TR018") [ "Exclusive"; "Tally" ] "an operand with no reference of its own, and a primitive operand, widen"
                 Expect.equal (keyed "TR073") [ "Listener(res)" ] "the restating reduction is exact"
                 Expect.equal (keyed "TR049") [ "Defined" ] "the empty reduction is exact"
@@ -7912,4 +7988,63 @@ let censusNoInferDeclarationFixtureTests =
                         Expect.isEmpty (findings |> List.filter (fun finding -> finding.Symbol = alias.Name && (finding.Key = "RA006" || finding.Key = "TR064"))) "the alias is represented without intrinsic widening"
                     Expect.isNonEmpty (findings |> List.filter (fun finding -> finding.Key = "TR064")) "Uppercase retains the intrinsic fallback"
         ])
+    ]
+
+[<Tests>]
+let genericExclusiveUnionFixtureTests =
+    testList "generic exclusive union fixture" [
+        yield! fixtureTests "workers-generic-exclusive-lab" (handFixture "workers-generic-exclusive-lab") GeneratorConfig.Default (fun _ -> [])
+    ]
+
+[<Tests>]
+let namespaceUtilityIdentityFixtureTests =
+    testList "namespace utility identity fixture" [
+        yield! fixtureTests "zod-namespace-utility-lab" (handFixture "zod-namespace-utility-lab") GeneratorConfig.Default (fun _ -> [])
+    ]
+
+[<Tests>]
+let compositeHandleIdentityFixtureTests =
+    testList "composite handle identity fixture" [
+        yield! fixtureTests "composite-handle-identity-lab" (handFixture "composite-handle-identity-lab") GeneratorConfig.Default (fun _ -> [])
+    ]
+
+[<Tests>]
+let phantomCaseNameFixtureTests =
+    testList "phantom case name fixture" [
+        yield! fixtureTests "phantom-case-name-lab" (handFixture "phantom-case-name-lab") GeneratorConfig.Default (fun _ -> [])
+    ]
+
+[<Tests>]
+let phantomReexportIdentityFixtureTests =
+    testList "phantom reexport identity fixture" [
+        yield! fixtureTests "phantom-reexport-identity-lab" (handFixture "phantom-reexport-identity-lab") GeneratorConfig.Default (fun _ -> [])
+    ]
+
+[<Tests>]
+let destructuredParameterIdentityFixtureTests =
+    testList "destructured parameter identity fixture" [
+        yield! fixtureTests "destructured-parameter-identity-lab" (handFixture "destructured-parameter-identity-lab") GeneratorConfig.Default (fun _ -> [])
+    ]
+
+[<Tests>]
+let keyofEnumOwnerFixtureTests =
+    testList "keyof enum owner fixture" [
+        yield! fixtureTests "keyof-enum-owner-lab" (handFixture "keyof-enum-owner-lab") GeneratorConfig.Default (fun _ -> [])
+    ]
+
+[<Tests>]
+let aliasBoundFixtureTests =
+    testList "alias bound fixture" [
+        yield!
+            fixtureTests "alias-bound-lab" (handFixture "alias-bound-lab") GeneratorConfig.Default (fun package ->
+                [ testCase "a bound written as an alias's target satisfies the alias" <| fun _ ->
+                    let rendered = Async.RunSynchronously(Pipeline.generate GeneratorConfig.Default package)
+                    let source = rendered.Files |> List.head |> snd
+
+                    for expected in
+                        [ "abstract output<'NewReturns when 'NewReturns :> Schema<obj>> : output: 'NewReturns -> Fn<'NewReturns>"
+                          "abstract aliased<'NewReturns when 'NewReturns :> AnySchema>: output: 'NewReturns -> Fn<'NewReturns>"
+                          "abstract shaped<'NewReturns>: output: 'NewReturns -> Fn<AnySchema>"
+                          "abstract output<'NewReturns when 'NewReturns :> Schema<float>> : output: 'NewReturns -> NumberFn<'NewReturns>" ] do
+                        source.Contains expected |> Flip.Expect.equal expected true ])
     ]

@@ -48,7 +48,7 @@ type ModeEvent =
 /// than collapsing to a bare <c>string</c> and losing its arity.
 /// </summary>
 [<Erase>]
-type Tagged<'T> = private Tagged__ of string
+type Tagged<'T> = private Phantom_Tagged__ of string
 
 [<Interface>]
 type Ledger =

@@ -8499,7 +8499,7 @@ module Es =
         abstract SymbolAsyncIterator: unit -> AsyncIteratorObject<'T, 'TReturn, 'TNext>
 
     [<Erase>]
-    type FlatArray<'Arr, 'Depth> = private FlatArray__ of obj
+    type FlatArray<'Arr, 'Depth> = private Phantom_FlatArray__ of obj
 
     [<Interface>]
     type BigIntToLocaleStringOptions =
@@ -11016,13 +11016,13 @@ module Es =
     /// Extracts the type of the 'this' parameter of a function type, or 'unknown' if the function type has no 'this' parameter.
     /// </summary>
     [<Erase>]
-    type ThisParameterType<'T> = private ThisParameterType__ of obj
+    type ThisParameterType<'T> = private Phantom_ThisParameterType__ of obj
 
     /// <summary>
     /// Removes the 'this' parameter from a function type.
     /// </summary>
     [<Erase>]
-    type OmitThisParameter<'T> = private OmitThisParameter__ of obj
+    type OmitThisParameter<'T> = private Phantom_OmitThisParameter__ of obj
 
     type CallableFunction =
         inherit Function
@@ -13099,7 +13099,7 @@ module Es =
     /// Recursively unwraps the "awaited type" of a type. Non-promise "thenables" should resolve to <c>never</c>. This emulates the behavior of <c>await</c>.
     /// </summary>
     [<Erase>]
-    type Awaited<'T> = private Awaited__ of obj
+    type Awaited<'T> = private Phantom_Awaited__ of obj
 
     type ArrayLike<'T> =
         abstract length: float
@@ -13111,49 +13111,49 @@ module Es =
     /// Make all properties in T optional
     /// </summary>
     [<Erase>]
-    type Partial<'T> = private Partial__ of obj
+    type Partial<'T> = private Phantom_Partial__ of obj
 
     /// <summary>
     /// Make all properties in T required
     /// </summary>
     [<Erase>]
-    type Required<'T> = private Required__ of obj
+    type Required<'T> = private Phantom_Required__ of obj
 
     /// <summary>
     /// Make all properties in T readonly
     /// </summary>
     [<Erase>]
-    type Readonly<'T> = private Readonly__ of obj
+    type Readonly<'T> = private Phantom_Readonly__ of obj
 
     /// <summary>
     /// From T, pick a set of properties whose keys are in the union K
     /// </summary>
     [<Erase>]
-    type Pick<'T, 'K> = private Pick__ of obj
+    type Pick<'T, 'K> = private Phantom_Pick__ of obj
 
     /// <summary>
     /// Construct a type with a set of properties K of type T
     /// </summary>
     [<Erase>]
-    type Record<'K, 'T> = private Record__ of obj
+    type Record<'K, 'T> = private Phantom_Record__ of obj
 
     /// <summary>
     /// Exclude from T those types that are assignable to U
     /// </summary>
     [<Erase>]
-    type Exclude<'T, 'U> = private Exclude__ of 'T
+    type Exclude<'T, 'U> = private Phantom_Exclude__ of 'T
 
     /// <summary>
     /// Extract from T those types that are assignable to U
     /// </summary>
     [<Erase>]
-    type Extract<'T, 'U> = private Extract__ of 'T
+    type Extract<'T, 'U> = private Phantom_Extract__ of 'T
 
     /// <summary>
     /// Construct a type with the properties of T except for those in type K.
     /// </summary>
     [<Erase>]
-    type Omit<'T, 'K> = private Omit__ of obj
+    type Omit<'T, 'K> = private Phantom_Omit__ of obj
 
     /// <summary>
     /// Exclude null and undefined from T
@@ -13164,49 +13164,49 @@ module Es =
     /// Obtain the parameters of a function type in a tuple
     /// </summary>
     [<Erase>]
-    type Parameters<'T> = private Parameters__ of obj
+    type Parameters<'T> = private Phantom_Parameters__ of obj
 
     /// <summary>
     /// Obtain the parameters of a constructor function type in a tuple
     /// </summary>
     [<Erase>]
-    type ConstructorParameters<'T> = private ConstructorParameters__ of obj
+    type ConstructorParameters<'T> = private Phantom_ConstructorParameters__ of obj
 
     /// <summary>
     /// Obtain the return type of a function type
     /// </summary>
     [<Erase>]
-    type ReturnType<'T> = private ReturnType__ of obj
+    type ReturnType<'T> = private Phantom_ReturnType__ of obj
 
     /// <summary>
     /// Obtain the return type of a constructor function type
     /// </summary>
     [<Erase>]
-    type InstanceType<'T> = private InstanceType__ of obj
+    type InstanceType<'T> = private Phantom_InstanceType__ of obj
 
     /// <summary>
     /// Marker for non-inference type position
     /// </summary>
     [<Erase>]
-    type Uppercase<'S> = private Uppercase__ of obj
+    type Uppercase<'S> = private Phantom_Uppercase__ of obj
 
     /// <summary>
     /// Convert string literal type to lowercase
     /// </summary>
     [<Erase>]
-    type Lowercase<'S> = private Lowercase__ of obj
+    type Lowercase<'S> = private Phantom_Lowercase__ of obj
 
     /// <summary>
     /// Convert first character of string literal type to uppercase
     /// </summary>
     [<Erase>]
-    type Capitalize<'S> = private Capitalize__ of obj
+    type Capitalize<'S> = private Phantom_Capitalize__ of obj
 
     /// <summary>
     /// Convert first character of string literal type to lowercase
     /// </summary>
     [<Erase>]
-    type Uncapitalize<'S> = private Uncapitalize__ of obj
+    type Uncapitalize<'S> = private Phantom_Uncapitalize__ of obj
 
     /// <summary>
     /// Marker for non-inference type position
@@ -13217,7 +13217,7 @@ module Es =
     /// Marker for contextual 'this' type
     /// </summary>
     [<Erase>]
-    type ThisType<'T> = private ThisType__ of obj
+    type ThisType<'T> = private Phantom_ThisType__ of obj
 
     /// <summary>
     /// Stores types to be used with WeakSet, WeakMap, WeakRef, and FinalizationRegistry
@@ -19498,7 +19498,7 @@ module Es =
 
         type DecoratorMetadataObject = Fable.Core.TS.Es.DecoratorMetadataObject
 
-        type DecoratorMetadata = obj
+        type DecoratorMetadata = Fable.Core.TS.Es.DecoratorMetadata
 
         /// <summary>
         /// Context provided to a class decorator.
@@ -19632,10 +19632,6 @@ module Es =
         /// </summary>
         type IteratorObject<'T, 'TReturn, 'TNext> = Fable.Core.TS.Es.IteratorObject<'T, 'TReturn, 'TNext>
 
-        /// <summary>
-        /// Defines the <c>TReturn</c> type used for built-in iterators produced by <c>Array</c>, <c>Map</c>, <c>Set</c>, and others.
-        /// This is <c>undefined</c> when <c>strictBuiltInIteratorReturn</c> is <c>true</c>; otherwise, this is <c>any</c>.
-        /// </summary>
         type BuiltinIteratorReturn = Fable.Core.TS.Es.BuiltinIteratorReturn
 
         type ArrayIterator<'T> = Fable.Core.TS.Es.ArrayIterator<'T>
@@ -19947,9 +19943,6 @@ module Es =
         /// </summary>
         type Extract<'T, 'U> = Fable.Core.TS.Es.Extract<'T, 'U>
 
-        /// <summary>
-        /// Construct a type with the properties of T except for those in type K.
-        /// </summary>
         type Omit<'T, 'K> = Fable.Core.TS.Es.Omit<'T, 'K>
 
         /// <summary>
@@ -19977,33 +19970,15 @@ module Es =
         /// </summary>
         type InstanceType<'T> = Fable.Core.TS.Es.InstanceType<'T>
 
-        /// <summary>
-        /// Convert string literal type to uppercase
-        /// </summary>
         type Uppercase<'S> = Fable.Core.TS.Es.Uppercase<'S>
 
-        /// <summary>
-        /// Convert string literal type to lowercase
-        /// </summary>
-        [<Erase>]
-        type Lowercase<'S> = private Lowercase__ of obj
+        type Lowercase<'S> = Fable.Core.TS.Es.Lowercase<'S>
 
-        /// <summary>
-        /// Convert first character of string literal type to uppercase
-        /// </summary>
-        [<Erase>]
-        type Capitalize<'S> = private Capitalize__ of obj
+        type Capitalize<'S> = Fable.Core.TS.Es.Capitalize<'S>
 
-        /// <summary>
-        /// Convert first character of string literal type to lowercase
-        /// </summary>
-        [<Erase>]
-        type Uncapitalize<'S> = private Uncapitalize__ of obj
+        type Uncapitalize<'S> = Fable.Core.TS.Es.Uncapitalize<'S>
 
-        /// <summary>
-        /// Marker for non-inference type position
-        /// </summary>
-        type NoInfer<'T> = JS.NoInfer<'T>
+        type NoInfer<'T> = Fable.Core.TS.Es.NoInfer<'T>
 
         /// <summary>
         /// Marker for contextual 'this' type
@@ -20155,14 +20130,7 @@ module Es =
 
             type NumberFormatPart = Fable.Core.TS.Es.Intl.NumberFormatPart
 
-            /// <summary>
-            /// A string that is a valid <a href="https://unicode.org/reports/tr35/#Unicode_locale_identifier">Unicode BCP 47 Locale Identifier</a>.
-            /// <br /><br />
-            /// For example: "fa", "es-MX", "zh-Hant-TW".
-            /// <br /><br />
-            /// See <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Intl#locales_argument">MDN - Intl - locales argument</a>.
-            /// </summary>
-            type UnicodeBCP47LocaleIdentifier = string
+            type UnicodeBCP47LocaleIdentifier = Fable.Core.TS.Es.Intl.UnicodeBCP47LocaleIdentifier
 
             /// <summary>
             /// Unit to use in the relative time internationalized message.
@@ -23690,7 +23658,7 @@ module Es =
             U3<string, Fable.Core.TS.Es.Temporal.ZonedDateTime, Fable.Core.TS.Es.Temporal.ZonedDateTimeLikeObject>
 
         [<Erase>]
-        type PartialTemporalLike<'T> = private PartialTemporalLike__ of obj
+        type PartialTemporalLike<'T> = private Phantom_PartialTemporalLike__ of obj
 
         [<Interface>]
         type DateLikeObject =
@@ -96562,10 +96530,10 @@ module Dom =
     type OnErrorEventHandler = OnErrorEventHandlerNonNull option
 
     [<Erase>]
-    type OptionalPostfixToken<'T> = private OptionalPostfixToken__ of string
+    type OptionalPostfixToken<'T> = private Phantom_OptionalPostfixToken__ of string
 
     [<Erase>]
-    type OptionalPrefixToken<'T> = private OptionalPrefixToken__ of string
+    type OptionalPrefixToken<'T> = private Phantom_OptionalPrefixToken__ of string
 
     type PerformanceEntryList = PerformanceEntry[]
 
@@ -101172,9 +101140,9 @@ module Dom =
         /// </summary>
         type DOMMatrix = Fable.Core.TS.Dom.DOMMatrix
 
-        type SVGMatrix = Fable.Core.TS.Dom.DOMMatrix
+        type SVGMatrix = Fable.Core.TS.Dom.SVGMatrix
 
-        type WebKitCSSMatrix = Fable.Core.TS.Dom.DOMMatrix
+        type WebKitCSSMatrix = Fable.Core.TS.Dom.WebKitCSSMatrix
 
         /// <summary>
         /// The <b><c>DOMMatrixReadOnly</c></b> interface represents a read-only 4×4 matrix, suitable for 2D and 3D operations. The DOMMatrix interface — which is based upon DOMMatrixReadOnly—adds mutability, allowing you to alter the matrix after creating it.
@@ -101197,7 +101165,7 @@ module Dom =
         /// </summary>
         type DOMPoint = Fable.Core.TS.Dom.DOMPoint
 
-        type SVGPoint = Fable.Core.TS.Dom.DOMPoint
+        type SVGPoint = Fable.Core.TS.Dom.SVGPoint
 
         /// <summary>
         /// The <b><c>DOMPointReadOnly</c></b> interface specifies the coordinate and perspective fields used by DOMPoint to define a 2D or 3D point in a coordinate system.
@@ -101220,7 +101188,7 @@ module Dom =
         /// </summary>
         type DOMRect = Fable.Core.TS.Dom.DOMRect
 
-        type SVGRect = Fable.Core.TS.Dom.DOMRect
+        type SVGRect = Fable.Core.TS.Dom.SVGRect
 
         /// <summary>
         /// The <b><c>DOMRectList</c></b> interface represents a collection of DOMRect objects, typically used to hold the rectangles associated with a particular element, like bounding boxes returned by methods such as getClientRects(). It provides access to each rectangle in the list via its index, along with a length property that indicates the total number of rectangles in the list.
@@ -105255,7 +105223,7 @@ module Dom =
         /// </summary>
         type URL = Fable.Core.TS.Dom.URL
 
-        type webkitURL = Fable.Core.TS.Dom.URL
+        type webkitURL = Fable.Core.TS.Dom.webkitURL
 
         /// <summary>
         /// The <b><c>URLPattern</c></b> interface of the URL Pattern API matches URLs or parts of URLs against a pattern. The pattern can contain capturing groups that extract parts of the matched URL.
@@ -105952,7 +105920,7 @@ module Dom =
 
         type BufferSource = Fable.Core.TS.Dom.BufferSource
 
-        type COSEAlgorithmIdentifier = float
+        type COSEAlgorithmIdentifier = Fable.Core.TS.Dom.COSEAlgorithmIdentifier
 
         type CSSKeywordish = Fable.Core.TS.Dom.CSSKeywordish
 
@@ -105980,9 +105948,9 @@ module Dom =
 
         type CookieList = Fable.Core.TS.Dom.CookieList
 
-        type DOMHighResTimeStamp = float
+        type DOMHighResTimeStamp = Fable.Core.TS.Dom.DOMHighResTimeStamp
 
-        type EpochTimeStamp = float
+        type EpochTimeStamp = Fable.Core.TS.Dom.EpochTimeStamp
 
         type EventListenerOrEventListenerObject = Fable.Core.TS.Dom.EventListenerOrEventListenerObject
 
@@ -105992,85 +105960,85 @@ module Dom =
 
         type FormDataEntryValue = Fable.Core.TS.Dom.FormDataEntryValue
 
-        type GLbitfield = float
+        type GLbitfield = Fable.Core.TS.Dom.GLbitfield
 
         type GLboolean = Fable.Core.TS.Dom.GLboolean
 
-        type GLclampf = float
+        type GLclampf = Fable.Core.TS.Dom.GLclampf
 
-        type GLenum = float
+        type GLenum = Fable.Core.TS.Dom.GLenum
 
-        type GLfloat = float
+        type GLfloat = Fable.Core.TS.Dom.GLfloat
 
-        type GLint = float
+        type GLint = Fable.Core.TS.Dom.GLint
 
-        type GLint64 = float
+        type GLint64 = Fable.Core.TS.Dom.GLint64
 
-        type GLintptr = float
+        type GLintptr = Fable.Core.TS.Dom.GLintptr
 
-        type GLsizei = float
+        type GLsizei = Fable.Core.TS.Dom.GLsizei
 
-        type GLsizeiptr = float
+        type GLsizeiptr = Fable.Core.TS.Dom.GLsizeiptr
 
-        type GLuint = float
+        type GLuint = Fable.Core.TS.Dom.GLuint
 
-        type GLuint64 = float
+        type GLuint64 = Fable.Core.TS.Dom.GLuint64
 
         type GPUBindingResource = Fable.Core.TS.Dom.GPUBindingResource
 
-        type GPUBufferDynamicOffset = float
+        type GPUBufferDynamicOffset = Fable.Core.TS.Dom.GPUBufferDynamicOffset
 
-        type GPUBufferUsageFlags = float
+        type GPUBufferUsageFlags = Fable.Core.TS.Dom.GPUBufferUsageFlags
 
         type GPUColor = Fable.Core.TS.Dom.GPUColor
 
-        type GPUColorWriteFlags = float
+        type GPUColorWriteFlags = Fable.Core.TS.Dom.GPUColorWriteFlags
 
         type GPUCopyExternalImageSource = Fable.Core.TS.Dom.GPUCopyExternalImageSource
 
-        type GPUDepthBias = float
+        type GPUDepthBias = Fable.Core.TS.Dom.GPUDepthBias
 
         type GPUExtent3D = Fable.Core.TS.Dom.GPUExtent3D
 
-        type GPUFlagsConstant = float
+        type GPUFlagsConstant = Fable.Core.TS.Dom.GPUFlagsConstant
 
-        type GPUIndex32 = float
+        type GPUIndex32 = Fable.Core.TS.Dom.GPUIndex32
 
-        type GPUIntegerCoordinate = float
+        type GPUIntegerCoordinate = Fable.Core.TS.Dom.GPUIntegerCoordinate
 
-        type GPUIntegerCoordinateOut = float
+        type GPUIntegerCoordinateOut = Fable.Core.TS.Dom.GPUIntegerCoordinateOut
 
-        type GPUMapModeFlags = float
+        type GPUMapModeFlags = Fable.Core.TS.Dom.GPUMapModeFlags
 
         type GPUOrigin2D = Fable.Core.TS.Dom.GPUOrigin2D
 
         type GPUOrigin3D = Fable.Core.TS.Dom.GPUOrigin3D
 
-        type GPUPipelineConstantValue = float
+        type GPUPipelineConstantValue = Fable.Core.TS.Dom.GPUPipelineConstantValue
 
-        type GPUSampleMask = float
+        type GPUSampleMask = Fable.Core.TS.Dom.GPUSampleMask
 
-        type GPUShaderStageFlags = float
+        type GPUShaderStageFlags = Fable.Core.TS.Dom.GPUShaderStageFlags
 
-        type GPUSignedOffset32 = float
+        type GPUSignedOffset32 = Fable.Core.TS.Dom.GPUSignedOffset32
 
-        type GPUSize32 = float
+        type GPUSize32 = Fable.Core.TS.Dom.GPUSize32
 
-        type GPUSize32Out = float
+        type GPUSize32Out = Fable.Core.TS.Dom.GPUSize32Out
 
-        type GPUSize64 = float
+        type GPUSize64 = Fable.Core.TS.Dom.GPUSize64
 
-        type GPUSize64Out = float
+        type GPUSize64Out = Fable.Core.TS.Dom.GPUSize64Out
 
-        type GPUStencilValue = float
+        type GPUStencilValue = Fable.Core.TS.Dom.GPUStencilValue
 
-        type GPUTextureUsageFlags = float
+        type GPUTextureUsageFlags = Fable.Core.TS.Dom.GPUTextureUsageFlags
 
         type HTMLOrSVGImageElement = Fable.Core.TS.Dom.HTMLOrSVGImageElement
 
         type HTMLOrSVGScriptElement = Fable.Core.TS.Dom.HTMLOrSVGScriptElement
 
-        type HashAlgorithmIdentifier = U2<string, Fable.Core.TS.Dom.Algorithm>
+        type HashAlgorithmIdentifier = Fable.Core.TS.Dom.HashAlgorithmIdentifier
 
         type HeadersInit = Fable.Core.TS.Dom.HeadersInit
 
@@ -106092,7 +106060,7 @@ module Dom =
 
         type MutationRecordType = Fable.Core.TS.Dom.MutationRecordType
 
-        type NamedCurve = string
+        type NamedCurve = Fable.Core.TS.Dom.NamedCurve
 
         type OffscreenRenderingContext = Fable.Core.TS.Dom.OffscreenRenderingContext
 
@@ -106108,9 +106076,9 @@ module Dom =
 
         type PublicKeyCredentialClientCapabilities = Fable.Core.TS.Dom.PublicKeyCredentialClientCapabilities
 
-        type RTCRtpReceiverTransform = obj
+        type RTCRtpReceiverTransform = Fable.Core.TS.Dom.RTCRtpReceiverTransform
 
-        type RTCRtpSenderTransform = obj
+        type RTCRtpSenderTransform = Fable.Core.TS.Dom.RTCRtpSenderTransform
 
         type ReadableStreamController<'T> = Fable.Core.TS.Dom.ReadableStreamController<'T>
 
@@ -106146,7 +106114,7 @@ module Dom =
 
         type VibratePattern = Fable.Core.TS.Dom.VibratePattern
 
-        type WindowProxy = Fable.Core.TS.Dom.Window
+        type WindowProxy = Fable.Core.TS.Dom.WindowProxy
 
         type XMLHttpRequestBodyInit = Fable.Core.TS.Dom.XMLHttpRequestBodyInit
 
@@ -106288,7 +106256,7 @@ module Dom =
 
         type GPUAddressMode = Fable.Core.TS.Dom.GPUAddressMode
 
-        type GPUAutoLayoutMode = string
+        type GPUAutoLayoutMode = Fable.Core.TS.Dom.GPUAutoLayoutMode
 
         type GPUBlendFactor = Fable.Core.TS.Dom.GPUBlendFactor
 

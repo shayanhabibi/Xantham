@@ -44,8 +44,18 @@ let tests =
                  contract.ApiVersion,
                  contract.InferenceVersion,
                  contract.CustomizationVersion)
-                (1, 8, 13, 5, 1)
-                "identity 8 authenticates written intersections independently of reachability; API 13 specializes compiler NoInfer declarations; inference 5 is unchanged"
+                (1, 9, 14, 5, 1)
+                "Identity 9 authenticates namespace alias occurrences; API 14 normalizes faithful aliases and dependent applications"
+
+        testCase "the identity contract rejects namespace aliases with global parent identity even at API fourteen" <| fun _ ->
+            rejects "identity version" (fun () ->
+                validateContract 2 expected.Compiler expected.Generator "profile"
+                    (Some { expected.Contract with IdentityVersion = 8; ApiVersion = 14 }))
+
+        testCase "the API contract rejects catalogues built before dependent generic argument constraints" <| fun _ ->
+            rejects "API version" (fun () ->
+                validateContract 2 expected.Compiler expected.Generator "profile"
+                    (Some { expected.Contract with ApiVersion = 13 }))
 
         testCase "the identity contract rejects catalogues built before source-anchored intersections" <| fun _ ->
             rejects "identity version" (fun () ->

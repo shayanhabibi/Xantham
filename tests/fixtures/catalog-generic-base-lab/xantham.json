@@ -1,0 +1,12 @@
+{
+  "module": "CatalogGenericBaseLab",
+  "namespace": "Identity.Support",
+  "lib": [
+    "esnext"
+  ],
+  "types": [],
+  "groups": {
+    "generic-base-owner-lab": "ship"
+  },
+  "declarationCatalog": true
+}

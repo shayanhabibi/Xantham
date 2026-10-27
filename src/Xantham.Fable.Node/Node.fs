@@ -35365,7 +35365,7 @@ module BigUint64Array =
 /// <summary>node:buffer</summary>
 module Buffer =
     [<Erase>]
-    type ImplicitArrayBuffer<'T> = private ImplicitArrayBuffer__ of obj
+    type ImplicitArrayBuffer<'T> = private Phantom_ImplicitArrayBuffer__ of obj
 
     [<Interface>]
     type Constants =
@@ -35428,7 +35428,7 @@ module Buffer =
             jsNative
 
     [<Erase>]
-    type WithImplicitCoercion<'T> = private WithImplicitCoercion__ of obj
+    type WithImplicitCoercion<'T> = private Phantom_WithImplicitCoercion__ of obj
 
     [<Interface>]
     type WithImplicitCoercion2<'T> =
@@ -144467,7 +144467,7 @@ module NodeJS =
         abstract Item: string -> 'T option
 
     [<Erase>]
-    type PartialOptions<'T> = private PartialOptions__ of obj
+    type PartialOptions<'T> = private Phantom_PartialOptions__ of obj
 
     type GCFunction = (bool option -> unit)
 
@@ -177939,7 +177939,7 @@ module Stream =
 
     [<Erase>]
     type PipelineTransform<'S, 'U> =
-        private | PipelineTransform__ of
+        private | Phantom_PipelineTransform__ of
             U2<NodeJS.ReadWriteStream, (obj -> Fable.Core.TS.Es.AsyncIterable<'U, obj, obj>)>
 
     type PipelineTransformSource<'T> =
@@ -177959,7 +177959,7 @@ module Stream =
 
     [<Erase>]
     type PipelineDestination<'S, 'P> =
-        private | PipelineDestination__ of
+        private | Phantom_PipelineDestination__ of
             U3<
                 (Fable.Core.TS.Es.AsyncIterable<obj, obj, obj> -> Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>),
                 (Fable.Core.TS.Es.AsyncIterable<obj, obj, obj> -> JS.Promise<'P>),
@@ -177967,10 +177967,10 @@ module Stream =
              >
 
     [<Erase>]
-    type PipelineCallback<'S> = private PipelineCallback__ of obj
+    type PipelineCallback<'S> = private Phantom_PipelineCallback__ of obj
 
     [<Erase>]
-    type PipelinePromise<'S> = private PipelinePromise__ of obj
+    type PipelinePromise<'S> = private Phantom_PipelinePromise__ of obj
 
     [<Interface>]
     type PipelineOptions =

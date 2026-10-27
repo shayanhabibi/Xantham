@@ -3581,3 +3581,370 @@ branch selection, width32768, depth policy and catalogue guards are unchanged. T
 inner conditional of HonoRequest.param, which the compiler selected identically in producer and
 consumer but the consumer lost to frontier width pressure. The small nested-conditional lab is
 a positive policy/cost guard; the source-authenticated real request snapshot supplies RED.
+
+### Shape: dependent generic application constraints (2026-10-26)
+
+`appliedRefTo` substitutes supplied arguments into a target declaration's dependent bounds
+under disjoint comparison binders. Its dependency graph processes forward references before
+their users, with one correction per argument. Complete emitted nominal bases establish
+dependent subtyping; ordinary constraint checks and their existing losses remain active.
+
+Final cyclic validation retains lawful nominal self and mutual applications. A cyclic
+correction whose final bounds remain unproven widens the whole application with `TR074`.
+The Zod reduction covers defaults, explicit arguments, open generic inheritance, methods,
+nested reordered binders, forward correction and recursive positive/negative controls.
+The initial generated consumer fails FS0001 before the fix; the corrected consumer compiles
+and rejects a different nominal dependent contract. Full Zod and corpus evidence belongs to
+the follow-up integration gate.
+
+The follow-up catalogue contract advances API version 13 to 14 for the specialized dependent
+constraints and cyclic-application fallback. Identity version 8, inference version 5,
+customization version 1 and contract version 1 remain unchanged: source identity, inference
+profile normalization and metadata interpretation retain their existing meanings. API-13
+producers are rejected before traversal, and the complete owner family must be regenerated
+with the same API-14 candidate.
+
+The API-14 regeneration passes all 161 golden-writing tests. All 157 existing corpus/Core.TS/
+Node manifests retain their tiers, symbol counts and per-symbol tiers against source6bc;
+the new Zod lab is the sole added manifest. Core.TS changes only its catalogue compatibility
+and producer fingerprint plus the matching input stamp. Both Core.TS and Node binding text
+remain unchanged. Full latest CloudEdge consumer compilation and runtime gates follow this
+artifact milestone.
+
+### Shape: generic exclusive object unions (2026-10-26)
+
+Exclusive-arm folds participate in the generic object-alias application path. A complete,
+one-to-one arm correspondence requires compiler type identity or source declaration/symbol
+identity with the same field names, optionality and readonly flags. Applications retain the
+canonical alias and supplied arguments; the fold declares its own type parameters and shapes
+properties and Create overloads under that scope. Independently named or extracted arm
+contracts remain narrower declarations rather than aliases of the folded union.
+
+The Workers reduction covers generic calls, both Create overloads, independent arm access and
+negative cross-argument/arm consumers. This repairs missing synthetic arm references and erased
+fold binders without adding a fallback or changing the exclusive-arm mapping policy. API14 is
+the unpublished follow-up contract; every final producer must be regenerated from the same
+candidate before consumer validation.
+
+The full latest Workers declaration package (5.20261025.1) compiles after regeneration with
+the captured CloudEdge configuration and Fable.Core 5.6.0. Its sole changed symbol tier is
+WorkflowBatchCreateOptions, Widened to Ergonomic; the nested retention declaration moves from
+the method's anonymous application path to the canonical alias. The mapped BooleanArm control
+retains its boolean fields rather than being mistaken for Options<string>.
+
+After this fix, proper Core.TS and Node regeneration succeeds and all 162 golden-writing
+tests pass. Against source6bc, all 157 existing corpus/Core.TS/Node manifests retain their
+counts and per-symbol tiers; the Zod and Workers reductions are the two added manifests.
+Core.TS and Node binding text is unchanged. Core.TS refreshes only the producer fingerprint
+and its matching catalogue input stamp, keeping the unpublished API14 family coherent.
+
+### Catalogue: source namespace aliases (2026-10-26)
+
+The source-export identity fallback qualifies each occurrence with both its public module
+path and its namespace occurrence path, exactly as Shape qualifies an emitted alias. This
+lets a nested generic mapped utility such as Zod's V3.Util.Omit authenticate its actual
+TypeAliasDeclaration even when the unresolved mapped result has no reusable type identity.
+Declaration order and source declaration handles remain required; no synthetic parent or
+rendered target supplies identity. Same-shaped aliases in separate namespaces retain distinct
+identities, while multiple public occurrences of one source alias reuse the same identity.
+The namespace utility lab reproduces the original catalogue guard before the fix.
+
+### Catalogue: overlapping source compositions (2026-10-26)
+
+Source-intersection and source-union identities already contain the complete authenticated
+handle set plus every constituent contract key. Two distinct compositions can share an operand
+without representing inconsistent declarations of one nominal source type. On a complete-key
+miss, the overlapping-handle merge guard therefore applies to ordinary declaration roles,
+not pairs of source-composition identities of the same role. Only complete-key equality grants
+producer reuse; handles, source authentication and subsequent API/arity/constraint checks are
+unchanged. A composite/nominal role mismatch retains its existing treatment.
+
+The composite handle lab reproduces two unrelated Omit intersections sharing the library's
+mapped declaration, and also covers overlapping nominal unions. Their complete identities
+and owners remain distinct. Nominal augmentation inside either composition must still fail.
+This fixes conflict classification without changing stored identities, hashing or valid-match
+semantics; identity8 and the unpublished API14 contract retain their meanings.
+
+### Render: private phantom case identifiers (2026-10-26)
+
+Phantom declarations retain the exact public type name, generic parameters, private carrier
+and Erase attribute. Their implementation case uses a fixed uppercase Phantom_ prefix before
+the complete original spelling. This is injective across lower/Upper spellings and legal when
+the public alias begins lowercase, with an underscore, or is an escaped F# keyword. Changing
+only that private implementation identifier preserves the canonical public API and erasure.
+The phantom case lab compiles those aliases and a source alias already beginning Phantom_,
+and rejects generic/nominal substitutions and external access to the private representation.
+
+With the namespace and composite-identity corrections, exact latest Zod4.6.7 owner generation
+succeeds against the captured Workers catalogue. The complete fresh Zod source and current
+matching Workers source compile together against net8.0/Fable.Core5.6.0 with zero errors.
+The phantom-only diff is 81 private case prefixes; all 4214 catalogue contracts (identity,
+canonical API, arity and constraints) and manifest tiers remain unchanged. Final packaged
+consumer-family validation and the consolidated runtime gate follow producer regeneration.
+
+### Catalogue: authenticated transparent declaration occurrences (2026-10-26)
+
+Canonical API normalization follows a type-only abbreviation to its actual local defining
+declaration only when their complete source identities match, every binder forwards in order,
+arity and canonical constraints agree, and the chain is acyclic. Unrelated source aliases,
+transformed arguments and value bindings retain their own surfaces. Original and current
+declaration/abbreviation maps remain separate when computing customization base APIs.
+
+Within one identity group, an authenticated defining declaration precedes its forwarding
+wrappers in canonical ownership selection; all unrelated ordering stays unchanged. Otherwise
+same-depth lexical ordering can choose Mirror.Compute before Original.Compute and redirect the
+definition back to its own alias. Harvested Type export occurrence paths are retained using
+the exact shaping qualification, preserving the public Mirror.Compute alias after deduplication.
+
+The mapped phantom namespace reexport lab reproduces Core.TS Omit's API conflict. It checks
+the public alias with a bounded consumer build, alpha-renamed forwarding, transformed/partial/
+permuted arguments, changed constraints, value bindings, unrelated structural/opaque targets,
+cycles, carrier changes and customization base API isolation. This changes the canonical API
+normal form for authenticated transparent occurrences within the unpublished API14 batch;
+all final producer catalogues and packaged consumers require regeneration together.
+
+Identity contract 9 rejects namespace aliases authenticated through generated parent roles.
+The CoreTS audit accounts for all 65 removed GlobalThis catalogue rows as actual source aliases;
+all emitted public type paths remain present. API contract 14 covers faithful alias surface normalization.
+A stale identity-8/API-14 producer is rejected independently of its API version.
+
+Source function parent-role closure: source-authenticated exported FunctionDeclaration sets
+seed signature-role traversal only when complete structural identity is unavailable. Parent
+roots remain outside canonical byType/byName maps, and child expansion cannot republish a
+root. Existing call/construct/parameter/return role keys and full source/API guards remain.
+The ProviderUtils destructured-parameter lab pins independent function/overload/position
+identity, generic constraints, source mutation rejection and missing-anchor rejection.
+This is part of the unpublished identity-9/API-14 producer refresh batch.
+
+### Shape: source-annotated closed string aliases (2026-10-26)
+
+TypeScript interns equal literal unions, so a shared TypeId or equal case set does not identify
+a nominal F# string enum. Resolve records per-property evidence only for actual source
+PropertySignature annotations: a direct, nongeneric TypeReference resolving to a closed
+string alias, with the exact declared TypeId and complete resolved symbol declaration set.
+Import renames resolve to their actual symbol. Direct string-literal unions carry separate
+inline evidence; unsupported generic or nullable annotations retain their existing mapping.
+
+Shape allocates a source enum for each authenticated alias occurrence, preserving transparent
+type-only alias chains as abbreviations. Per-member shaping uses that source name; raw literal
+occurrences retain a separate anonymous enum and their occurrence ownership. An unexported
+alias (a compiler-lib global such as `RequestCache`) keeps the name its type already carries,
+so its group placement is unchanged; a second alias of the same type claims a fresh name. Only the nominal
+source alias receives its actual source origin/compiler family. A merged const value helper
+is renamed when necessary to avoid the restored source type name, while its JS import stays
+unchanged. Complete symbol handles and source bytes still guard catalogue reuse; no value-set
+matching or global interned-TypeId ownership replacement is introduced.
+
+The keyof enum owner lab checks producer/consumer context stability, equal-valued distinct
+aliases, raw literals, transparent aliases, import renames and merged const value consumers.
+Fresh real Zod generation passes, and ProviderUtils advances its IssueData guard to a distinct
+ParseContext API mismatch. Full-family acceptance remains pending that separate reduction.
+
+### Shape: catalogued generic callable interfaces (2026-10-26)
+
+A function-shaped callback (D5) is written inline as an F# function unless something names it,
+and an export names it. A generic callable interface (`$ZodErrorMap<T>`) therefore read as
+`ZodErrorMap<'T>` in the package exporting it and as an expanded `obj -> ...` function in a
+consumer reaching it through a member, so the catalogue API of every declaration referencing it
+depended on export reach. In catalogue or reference mode, a named generic interface whose
+content is call signatures is declared wherever it is reached; its applications are written as
+applications of that declaration and keep their type arguments. Standalone generation keeps D5.
+The callable interface owner lab checks the transitive standalone output and producer reuse.
+ProviderUtils advances to a `ParsePayload` mismatch: the producer elects the exported classic
+alias `IssueData` for `$ZodRawIssue<$ZodIssue>`, which the consumer never reaches.
+
+### Declaration catalog: export-independent union identities (2026-10-26)
+
+A union without declarations of its own is one interned checker type wherever it is reached,
+so its key inside another type's key no longer depends on whether the program exports a name
+for it: an unaliased literal union keys members by its values (`ZodParsedType` under
+`OmitKeys<ZodInvalidTypeIssue, "path">`). Its own declaration row keeps the export's identity.
+An unaliased union whose arms are anchored in their declarations, alias declarations or
+intersection composition is keyed `union` by its sorted arm keys; an arm known only through an
+export handle keeps the parent-role fallback. Two rows answer for those value keys in an
+optional `equivalents` array (omitted when empty; older readers ignore it): the declared union
+an unaliased union's member set elects (`namedUnionByMembers`, here Zod's classic
+`IssueData`), and a declared literal union identified only by its export (`keyof typeof Kind`).
+A row's own identity always wins over another row's equivalent.
+A consumer whose own union matches an equivalent reuses the row: its references canonicalise to
+the row's primary identity, and the alias's own file, which the consumer may never load, is the
+only producer source allowed to be absent. Every loaded source still authenticates exactly,
+and the alias row keeps its alias identity for consumers that name `IssueData` directly. The
+identity change stays within the unpublished identity 9 batch; every producer regenerates.
+Labs: alias-election-owner-lab (transitive and direct consumers), keyof-member-key-lab.
+
+### Constraint satisfaction: alias-transparent bounds (2026-10-26)
+
+`satisfiesNominally` treats an alias of an instantiation (`type AnySchema = Schema`) as the
+instantiation it renders an abbreviation of: two type ids sharing a target other than themselves
+and the same type arguments satisfy each other, in either direction. The checker interns the
+alias as its own type, so before this a method bound written as the target
+(`output<NewReturns extends $ZodType>`) failed against a parameter bound written as the alias
+(`Returns extends $ZodFunctionOut`), and `TR` widened `$ZodFunction<Args, NewReturns>` to
+`ZodFunction<'Args, ZodFunctionOut>`. A consumer that never declares the alias renders both bounds
+as the same application and kept `'NewReturns`, so the catalogue API diverged (`ai` against Zod's
+`V4.Core.ZodFunction`). Both now keep the argument. Lab: alias-bound-lab.
+
+### Resolve: indexed-access bounds are structural (2026-10-26)
+
+`T[K]` over a type parameter selects from the parameter's bound (`operandShape`), so the bound
+is a type the shape tier reads for its structure. Resolve now registers it `Structural` from the
+indexed-access branch, walking a chain of type parameter bounds to the first other type. An
+instantiation bound (`I extends Internals`, which the checker applies as `Internals<unknown>`)
+was otherwise derived as identity alone unless some union or intersection happened to read it,
+so `I["def"]` widened to `obj` in one program and selected `Def` in another: Zod's own run kept
+`_ZodType.def: ZodTypeDef`, while `ai` dropped `def`/`_def` and the reused API diverged. Both
+now select the bound's member. Keeping the access generic rather than bound-typed is tracked in
+issue #178 (inline SRTP accessor). Lab: catalog-indexed-bound-lab.
+
+### Declaration catalog: default arguments of bare alias references (2026-10-26)
+
+The checker can intern a bare reference to a generic alias as its own copy carrying the alias
+and no arguments: `T extends Tool`, with `type Tool<I = any, O = any> = FunctionTool<I, O> |
+DynamicTool<I, O>`, sits beside the ordinary `Tool<any, any>`. Which copy a later bare reference
+resolves to depends on the program, so `ToolCallerDefinition`'s `bind` returned `Tool<any, any,
+any>` in ProviderUtils and the argument-free copy in `ai`, and every anonymous arm keyed under it
+diverged. `resolve-declaration-identities` now records the alias's defaults as
+`DeclarationArguments` when the checker reports none. A bare reference to a generic alias is its
+default application, so the defaults are recorded where every parameter has one and the type is
+a closed application: not the alias's declared body, and free of the alias's own parameters
+through four levels of members, type arguments and alias arguments. Matching the type against
+the body under the defaults does not work: `Tool<any, any, any>` distributes its intersection
+arms over member unions and arrives with eight arms against the body's four.
+Only catalogue keys read `DeclarationArguments`; rendering is unchanged.
+Lab: catalog-alias-defaults-lab.
+
+Declarations that share an identity merge into one row when arity, bounds and API agree. Two
+copies of one type can be resolved to different depths, so their source closures may differ
+(`ai`'s `ToolChoice2` closed over 2 files, its use-site copy over 55); the row records the union
+of the closures instead of refusing the merge.
+
+### Declaration catalog: use-site bounds and hoisted intersection scope (2026-10-26)
+
+A type parameter argument is keyed by its name, so an alias applied over a use site's own `M`
+keyed exactly like the declaration over its `M`, whatever either bound. Where the bounds agree
+or the use site only adds one, the copy merges into the declaration as an abbreviation; where
+the use site's bound differs (`createAgentUIStream`'s `UI_MESSAGE extends UIMessage<META, never,
+…>` against `UIMessageStreamOptions<UI_MESSAGE extends UIMessage>`), F# cannot abbreviate it,
+Shape emits it separately, and the merge refused the shared identity. Resolve now records, per
+alias argument, the bound of a type parameter whose bound differs by checker identity from the
+alias's declared bound at that position (`DeclarationArgumentBounds`), and the catalogue keys it
+beside the argument, structural keys included. Lab: catalog-use-site-bound-lab.
+
+A hoisted anonymous intersection binds the parameters it reads from its scope (`DeclParams`)
+positionally in its `source-intersection` key, with each parameter's bound, as a declared type
+binds its own. Copies over equally bounded owner parameters merge; an owner whose parameter is
+bounded differently (`DirectChatTransport`'s `UI_MESSAGE extends UIMessage<unknown, never, ...>`)
+keeps its own copy, which F# needs for the different constraint. Without that
+each owner's copy (`HttpChatTransport<UI_MESSAGE>`'s, `DefaultChatTransport<UI_MESSAGE>`'s)
+keyed its constituents by its own `UI_MESSAGE` declaration, the copies of
+`PrepareSendMessagesRequest`'s options object diverged, and the declarations naming them
+disagreed on API. Lab: catalog-anonymous-owner-lab.
+
+### Declaration catalog: reuse past the consumer's follow frontier (2026-10-27)
+
+Resolve follows twenty generations from the seeds (`FollowDepth`); types beyond are left in
+`NotFollowed`. A producer seeds its own declarations, while a consumer may reach the same
+declaration twenty generations deep: `agents` reached Zod's `$ZodCheckStringFormatDef<Format>`
+with `Format` past its frontier, rendered it without parameters, and failed the reuse check on
+arity. The consumer's rendering of a reused declaration is replaced by the producer's row, and the
+row's identity and authenticated sources already fix the declaration, so a reused declaration
+whose own structure reaches a `NotFollowed` type, or which names a declaration that does, is
+reused without the arity, bound and API comparison. A complete mismatch still fails.
+Lab: catalog-generic-base-lab (a 21-link chain ending at a generic base).
+
+A consumer export naming a producer's anonymous union reuses the producer's row through the
+consumer row's equivalents: `agents` writes `type WorkflowStatus = InstanceStatus["status"]`
+over Workers' anonymous status union, keys it by that export, and records the value key as an
+equivalent; Workers keyed the union by those values (`InstanceStatus.Status`). Reuse now also
+looks up the consumer row's equivalents among producer primary identities, so the export
+abbreviates the producer row and `InstanceStatus` compares equal. Lab: catalog-consumer-alias-lab.
+
+### Shape and catalogue: the shared empty object (2026-10-27)
+
+Every bare `{}` resolves to one checker type. An alias resolving to it - Workers'
+`type MainModule = GlobalProp<"mainModule", {}>` - claimed it through its export, so Workers
+wrote every `logprobs?: {} | null` as `MainModule` and keyed it by `MainModule`'s handle, while
+`aigatewayprovider`, which never loads `MainModule`, keyed the same `{}` as an empty object.
+`isSharedEmptyObject` treats the type as intrinsic, as `string` is: `typeRefOnPath` renders it
+`obj` with `ObjectWithoutMembers` before consulting `DeclNames`, the alias still declares
+`type MainModule = obj`, and the catalogue keys it `empty-object` ahead of export and alias
+handles. Accepted tier movement (user decision): five Workers AI symbols that reached `{}`
+through `MainModule` move from ergonomic to widened; their F# type is unchanged.
+Lab: catalog-empty-object-lab.
+
+
+### Resolve: concrete alias arguments under a catalogue (2026-10-27)
+
+An alias application is keyed by its declaration and its arguments. `deriveFacts` keeps only the
+type-parameter alias arguments of a union or intersection, so a consumer reaching
+`InferTelemetryEvent<LanguageModelCallStartEvent>` only through the intersection's flattened arms
+(`think` against ai-v7's `Telemetry`) never resolved `LanguageModelCallStartEvent`; the
+application lost its key and took a parent-role key, and `Telemetry` failed reuse. With
+`DeclarationCatalog` or `DeclarationReferences` set, each walk generation now adds every fresh
+aliased type's alias arguments to the frontier, beside the alias declarations it already adds.
+`AliasTypeArguments` is unchanged. The shared-empty-object identity also defers to `NotFollowed`:
+a locally failed derivation is not certified as `{}`. No golden moves.
+Lab: catalog-alias-argument-lab.
+
+### Shape: picked methods keep their delegates (2026-10-27)
+
+`signatureShaped` lists the function types read only through call signatures, which get no
+delegate name. It took every method member's type in the table. Following alias arguments put
+Workers' `Container` into sandbox's table, so `Pick<Container, "exec" | "interceptOutboundHttp">`
+lost its `Exec` and `InterceptOutboundHttp` delegates and read `Func<...>`. A method's type that
+any member reads as a property now keeps its delegate; the same rule names `Fetch` for a picked
+`Fetcher.fetch` that previously read `Func`. No golden moves.
+
+### Emit: groups never read the entry module (2026-10-27)
+
+A shipped group's file compiles before the entry module. The first CloudEdge binding compile
+found four group files reading their own entry module. `groupModulesForScope` now settles
+placement in three steps, all skipped under `recursiveGroups`:
+
+- A hoisted name's dotted prefix that is an entry subpath module (`Artifacts` for
+  `@cloudflare/computer/artifacts`) owns nothing, even where a shipped group declares a type
+  spelled the same (Workers' global `Artifacts`). Lab: subpath-owner-lab.
+- A group declaration with no export of its own that reads an entry declaration moves to the
+  entry, to a fixpoint (`UiMessageChunkSchema.Result`, hoisted under ai's `LazySchema<...>`
+  value and reading ai's `FinishReason`). Lab: entry-reader-lab.
+- An entry declaration with no export of its own that exactly one shipped group reads moves to
+  that group, to a fixpoint (`AiTextGenerationToolInputWithFunction.Parameters`, hoisted under an
+  aiutils alias over Workers' anonymous tool shape). Lab: group-reader-lab.
+
+No existing golden moves.
+
+### Shape: bounds F# cannot meet are dropped, not lowered (2026-10-27)
+
+User decision: where a constraint cannot be determined safely, deterministically and without
+recursion, the head drops it and records a finding; a binding passing types through type
+parameters is preferred over one lowering them to `obj` or a fixed bound.
+
+- A parameter whose default is a conditional over the other parameters (`E extends Env = M
+  extends Hono<infer E> ? E : never`) keeps its bound, like a `never` default: the default is
+  inferred and never written at a bare use. Chanfana's `fromHono` keeps `'E :> Env`, which its
+  return `HonoOpenAPIRouterType<'E, ...>` requires. Lab: conditional-default-bound-lab.
+- A bound reading a type parameter its declaration does not bind - ai's hoisted
+  `CreateAgentUIStream0` over the signature's `UI_MESSAGE extends UIMessage<MESSAGE_METADATA>` -
+  is dropped at the head and at every reference check (`TP013`). Lab: covariant-bound-lab.
+- `repair-constraints` (before `repair-arity`) reads every rendered application against the
+  rendered head it applies. A slot supplied with an unbounded variable, or with one bounded by
+  another instantiation of the same generic, drops its bound (`TP012`), to a fixpoint. ai's
+  shared `UIMessageStreamOnEndCallback.Event` drops `'UI_MESSAGE :> UIMessage<obj, ...>`.
+  Catalogue test: "declaration catalog drops a bound a shared hoisted shape cannot meet".
+
+The existing `TR027` rewrite of an unbound variable to the slot's bound still lowers where the
+type-id check sees the mismatch first; it is unchanged here. No existing golden moves.
+
+### Shape and catalogue: two F# name collisions (2026-10-27)
+
+- `resolve-module-suffixes` (before `repair-constraints`): a declaration named `XModule`, beside
+  a type `X` that is also a module because names nest under it, takes the first free numeric
+  suffix, with every name nested under it; references and `DeclNames` follow (`NE001`).
+  `@cloudflare/computer`'s `WorkspaceModule`. Lab: module-suffix-lab.
+- Catalogue reuse omits the alias for a reused export whose qualified name in its group equals
+  the producer's name. think's `agents` group shares the agents producer's module and wrote
+  `type FiberContext = FSharp.CloudEdge.Runtime.Agents.FiberContext`. Verified on think; no
+  reduced lab reproduces the re-export path yet.
+
+No existing golden moves.

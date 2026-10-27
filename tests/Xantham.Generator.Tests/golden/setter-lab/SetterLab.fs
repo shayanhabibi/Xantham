@@ -11,10 +11,10 @@ open Fable.Core.JS
 open Fable.Core.TS.Dom
 
 [<Erase>]
-type Setter<'T, 'U> = private Setter__ of (obj -> obj)
+type Setter<'T, 'U> = private Phantom_Setter__ of (obj -> obj)
 
 [<Erase>]
-type Distinct<'T, 'A, 'B> = private Distinct__ of ('A -> 'A)
+type Distinct<'T, 'A, 'B> = private Phantom_Distinct__ of ('A -> 'A)
 
 /// <summary>
 /// Negative: a single signature has nothing to collapse.

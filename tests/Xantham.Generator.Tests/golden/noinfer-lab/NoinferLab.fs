@@ -19,7 +19,7 @@ type Options<'T> =
     static member Create (value: 'T) : Options<'T> = jsNative
 
 [<Erase>]
-type FirstOf<'T> = private FirstOf__ of obj
+type FirstOf<'T> = private Phantom_FirstOf__ of obj
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

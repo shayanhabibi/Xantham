@@ -11,7 +11,7 @@ open Fable.Core.JS
 open Fable.Core.TS.Dom
 
 [<Erase>]
-type Context<'P> = private Context__ of obj
+type Context<'P> = private Phantom_Context__ of obj
 
 type Handler<'E, 'P> = delegate of env: 'E * ctx: obj -> unit
 

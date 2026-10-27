@@ -325,6 +325,66 @@ let id (value: Identity.Root.Result) : float = (Identity.Adapter.Exports.``use``
         finally
             if Directory.Exists directory then Directory.Delete(directory, true)
 
+[<Tests>]
+let covariantBoundTests =
+    testCase "declaration catalog drops a bound a shared hoisted shape cannot meet" <| fun _ ->
+        let directory = Path.Combine(temporaryRoot, "xantham-covariant-bound-" + Guid.NewGuid().ToString "N")
+        let package = Path.Combine(directory, "package")
+        try
+            writePackageFile package "package.json" """{"name":"covariant-bound-lab","version":"1.0.0","types":"index.d.ts"}"""
+            // `OnEnd.Event` is hoisted once and applied both under `StreamOptions`' bare `Message`
+            // bound and under `TransportOptions`' `Message<unknown, never>`.
+            writePackageFile package "index.d.ts" """export type DataTypes = Record<string, unknown>;
+export interface Message<METADATA = unknown, DATA extends DataTypes = DataTypes> { id: string; metadata?: METADATA; data?: DATA; }
+export type OnEnd<M extends Message> = (event: { message: M; isAborted: boolean }) => PromiseLike<void> | void;
+export type StreamOptions<M extends Message> = { onEnd?: OnEnd<M>; onFinish?: OnEnd<M>; };
+export type TransportOptions<M extends Message<unknown, never>> = { api: string; } & Omit<StreamOptions<M>, "onFinish">;
+export declare class Transport<M extends Message<unknown, never>> { constructor(options: TransportOptions<M>); }"""
+            let path = Path.Combine(directory, "Root.json")
+            File.WriteAllText(path,
+                JsonSerializer.Serialize {| ``module`` = "Identity.Root"; ``namespace`` = "Identity.Support"
+                                            lib = [| "esnext" |]; types = ([||] : string array); declarationCatalog = true |})
+            Pipeline.run (GeneratorConfig.loadFile path) package (Path.Combine(directory, "root"))
+            |> Async.RunSynchronously |> ignore
+            let consumer = """module Identity.Consumer
+let api (options: Identity.Root.TransportOptions<Identity.Root.Message<obj, unit>>) : string = options.api
+"""
+            let code, output = compileConsumer directory [ "root/Identity.Root.fs" ] consumer
+            Expect.equal code 0 output
+        finally
+            if Directory.Exists directory then Directory.Delete(directory, true)
+
+[<Tests>]
+let pickedMethodTests =
+    testCase "declaration catalog picked methods keep their delegates" <| fun _ ->
+        let directory = Path.Combine(temporaryRoot, "xantham-picked-method-" + Guid.NewGuid().ToString "N")
+        let package = Path.Combine(directory, "package")
+        let dependency = Path.Combine(package, "node_modules", "picked-method-owner-lab")
+        try
+            writePackageFile package "package.json" """{"name":"picked-method-consumer-lab","version":"1.0.0","types":"index.d.ts"}"""
+            writePackageFile package "index.d.ts" """import { Container } from 'picked-method-owner-lab'; type Picked = Pick<Container, "exec">; export function attach(container: Picked): void; export function container(): Container;"""
+            writePackageFile dependency "package.json" """{"name":"picked-method-owner-lab","version":"1.0.0","types":"index.d.ts"}"""
+            writePackageFile dependency "index.d.ts" """export interface Container { exec(cmd: string[], options?: { cwd: string }): Promise<void>; }"""
+            let configure name references =
+                let path = Path.Combine(directory, name + ".json")
+                File.WriteAllText(path,
+                    JsonSerializer.Serialize {| ``module`` = "Identity." + name; ``namespace`` = "Identity.Support"
+                                                lib = [| "esnext" |]; types = ([||] : string array)
+                                                groups = Map.ofList [ "picked-method-owner-lab", "ship" ]
+                                                declarationCatalog = true; declarationReferences = references |})
+                GeneratorConfig.loadFile path
+            let producer = Path.Combine(directory, "root")
+            Pipeline.run (configure "Root" [||]) dependency producer |> Async.RunSynchronously |> ignore
+            let reference = Path.Combine(producer, "declarations.json")
+            let adapter = Path.Combine(directory, "adapter")
+            Pipeline.run (configure "Adapter" [| reference |]) package adapter |> Async.RunSynchronously |> ignore
+            let consumer =
+                Directory.GetFiles(adapter, "*.fs", SearchOption.AllDirectories) |> Array.map File.ReadAllText |> String.concat "\n"
+            Expect.stringContains consumer "delegate of cmd: string[]" "the picked method is a named delegate"
+            Expect.isFalse (consumer.Contains "exec: Func<") "the picked method is not a Func"
+        finally
+            if Directory.Exists directory then Directory.Delete(directory, true)
+
 /// The trailing syntax kind of a normalized catalog handle (`<source>#<index>.<kind>`).
 let private handleKind (handle: string) =
     handle.Substring(handle.LastIndexOf '.' + 1) |> UInt32.Parse |> LanguagePrimitives.EnumOfValue<uint32, SyntaxKind>
@@ -1087,6 +1147,160 @@ let json (value: Identity.Root.Value) : Identity.Root.Output = Identity.Root.Out
 """
                     let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
                     Expect.equal code 0 output
+                finally
+                    if Directory.Exists directory then Directory.Delete(directory, true)
+
+            testCase "the shared empty object keys alike whether or not an alias names it" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-empty-object-" + Guid.NewGuid().ToString "N")
+                Directory.CreateDirectory directory |> ignore
+                try
+                    let package = Path.GetFullPath(Path.Combine(fixture, "..", "catalog-empty-object-lab"))
+                    let dependency = Path.Combine(package, "node_modules", "empty-object-owner-lab")
+                    let config =
+                        { GeneratorConfig.loadFile (Path.Combine(package, "xantham.json")) with
+                            ModuleName = Some "Identity.Root" }
+                    let root = Path.Combine(directory, "root")
+                    run config dependency root |> Async.RunSynchronously |> ignore
+                    let producer = File.ReadAllText(Path.Combine(root, "Identity.Root.fs"))
+                    Expect.stringContains producer "abstract logprobs: obj option" "a bare {} is not written as the alias resolving to it"
+                    Expect.stringContains producer "type MainModule = obj" "the alias is still declared"
+                    let adapter =
+                        { config with
+                            ModuleName = Some "Identity.Adapter"
+                            DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
+                    run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    let consumer = File.ReadAllText(Path.Combine(directory, "adapter", "Identity.Adapter.fs"))
+                    Expect.stringContains consumer "complete () : Identity.Root.Completion" "the consumer reuses the record"
+                finally
+                    if Directory.Exists directory then Directory.Delete(directory, true)
+
+            testCase "an alias application keys alike where the consumer reaches only its arms" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-alias-argument-" + Guid.NewGuid().ToString "N")
+                Directory.CreateDirectory directory |> ignore
+                try
+                    let package = Path.GetFullPath(Path.Combine(fixture, "..", "catalog-alias-argument-lab"))
+                    let dependency = Path.Combine(package, "node_modules", "alias-argument-owner-lab")
+                    let config =
+                        { GeneratorConfig.loadFile (Path.Combine(package, "xantham.json")) with
+                            ModuleName = Some "Identity.Root" }
+                    let root = Path.Combine(directory, "root")
+                    run config dependency root |> Async.RunSynchronously |> ignore
+                    let adapter =
+                        { config with
+                            ModuleName = Some "Identity.Adapter"
+                            DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
+                    run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    let consumer = File.ReadAllText(Path.Combine(directory, "adapter", "Identity.Adapter.fs"))
+                    Expect.stringContains consumer "telemetry () : Identity.Root.Telemetry" "the consumer reuses the interface"
+                finally
+                    if Directory.Exists directory then Directory.Delete(directory, true)
+
+            testCase "a consumer export naming a producer's anonymous union reuses its row" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-consumer-alias-" + Guid.NewGuid().ToString "N")
+                Directory.CreateDirectory directory |> ignore
+                try
+                    let package = Path.GetFullPath(Path.Combine(fixture, "..", "catalog-consumer-alias-lab"))
+                    let dependency = Path.Combine(package, "node_modules", "consumer-alias-owner-lab")
+                    let config =
+                        { GeneratorConfig.loadFile (Path.Combine(package, "xantham.json")) with
+                            ModuleName = Some "Identity.Root" }
+                    let root = Path.Combine(directory, "root")
+                    run config dependency root |> Async.RunSynchronously |> ignore
+                    let adapter =
+                        { config with
+                            ModuleName = Some "Identity.Adapter"
+                            DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
+                    run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    let consumer = File.ReadAllText(Path.Combine(directory, "adapter", "Identity.Adapter.fs"))
+                    Expect.stringContains consumer "type WorkflowStatus = Identity.Root.InstanceStatus.Status" "the export abbreviates the producer's union"
+                    Expect.stringContains consumer "status () : Identity.Root.InstanceStatus" "the record is reused"
+                finally
+                    if Directory.Exists directory then Directory.Delete(directory, true)
+
+            testCase "a consumer reuses a declaration it resolves only to its follow frontier" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-generic-base-" + Guid.NewGuid().ToString "N")
+                Directory.CreateDirectory directory |> ignore
+                try
+                    let package = Path.GetFullPath(Path.Combine(fixture, "..", "catalog-generic-base-lab"))
+                    let dependency = Path.Combine(package, "node_modules", "generic-base-owner-lab")
+                    let config =
+                        { GeneratorConfig.loadFile (Path.Combine(package, "xantham.json")) with
+                            ModuleName = Some "Identity.Root" }
+                    let root = Path.Combine(directory, "root")
+                    run config dependency root |> Async.RunSynchronously |> ignore
+                    let producer = File.ReadAllText(Path.Combine(root, "Identity.Root.fs"))
+                    Expect.stringContains producer "type StringFormatDef<'Format" "the producer declares the generic base"
+                    let adapter =
+                        { config with
+                            ModuleName = Some "Identity.Adapter"
+                            DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
+                    run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    let consumer = File.ReadAllText(Path.Combine(directory, "adapter", "Identity.Adapter.fs"))
+                    Expect.stringContains consumer "link: Identity.Root.Link0" "the consumer reuses the chain past its frontier"
+                finally
+                    if Directory.Exists directory then Directory.Delete(directory, true)
+
+            testCase "an anonymous intersection over each owner's parameter keys alike" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-anonymous-owner-" + Guid.NewGuid().ToString "N")
+                Directory.CreateDirectory directory |> ignore
+                try
+                    let package = Path.GetFullPath(Path.Combine(fixture, "..", "catalog-anonymous-owner-lab"))
+                    let config = GeneratorConfig.loadFile (Path.Combine(package, "xantham.json"))
+                    run config package directory |> Async.RunSynchronously |> ignore
+                    let binding = File.ReadAllText(Path.Combine(directory, "CatalogAnonymousOwnerLab.fs"))
+                    Expect.isFalse (binding.Contains "HttpTransport.Prepare.Options") "an equally bounded owner keeps no copy"
+                    Expect.isFalse (binding.Contains "DefaultTransport.Prepare.Options") "an equally bounded owner keeps no copy"
+                    Expect.stringContains
+                        binding
+                        "abstract prepare: (CatalogAnonymousOwnerLab.PrepareRequest.Options<'M> -> PrepareRequest.Result) option"
+                        "equally bounded owners name the alias's parameter object"
+                    Expect.stringContains
+                        binding
+                        "abstract prepare: (DirectTransport.Prepare.Options<'M> -> PrepareRequest.Result) option"
+                        "a differently bounded owner keeps its own copy"
+                finally
+                    if Directory.Exists directory then Directory.Delete(directory, true)
+
+            testCase "an alias applied over a differently bounded parameter keeps its own identity" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-use-site-bound-" + Guid.NewGuid().ToString "N")
+                Directory.CreateDirectory directory |> ignore
+                try
+                    let package = Path.GetFullPath(Path.Combine(fixture, "..", "catalog-use-site-bound-lab"))
+                    let config = GeneratorConfig.loadFile (Path.Combine(package, "xantham.json"))
+                    run config package directory |> Async.RunSynchronously |> ignore
+                    let binding = File.ReadAllText(Path.Combine(directory, "CatalogUseSiteBoundLab.fs"))
+                    Expect.stringContains binding "type Base<'M> =" "the use site's bound reads `Meta`, which the shape does not bind, and is dropped"
+                    Expect.stringContains binding "inherit CatalogUseSiteBoundLab.StreamOptions<'M>" "a use site repeating the declared bound reuses the declaration"
+                    let catalog = JsonSerializer.Deserialize<DeclarationCatalog.Catalog>(File.ReadAllText(Path.Combine(directory, "declarations.json")),
+                        JsonSerializerOptions(PropertyNameCaseInsensitive = true))
+                    let identity name = (catalog.Declarations |> Array.find (fun declaration -> declaration.FSharpName = name)).Identity
+                    Expect.notEqual
+                        (identity "CatalogUseSiteBoundLab.CreateStream.Options.Base")
+                        (identity "CatalogUseSiteBoundLab.StreamOptions")
+                        "the differently bounded application is a different declaration"
+                finally
+                    if Directory.Exists directory then Directory.Delete(directory, true)
+
+            testCase "a literal key into an instantiated bound renders alike in producer and consumer" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-indexed-bound-" + Guid.NewGuid().ToString "N")
+                Directory.CreateDirectory directory |> ignore
+                try
+                    let package = Path.GetFullPath(Path.Combine(fixture, "..", "catalog-indexed-bound-lab"))
+                    let dependency = Path.Combine(package, "node_modules", "indexed-bound-owner-lab")
+                    let config =
+                        { GeneratorConfig.loadFile (Path.Combine(package, "xantham.json")) with
+                            ModuleName = Some "Identity.Root" }
+                    let root = Path.Combine(directory, "root")
+                    run config dependency root |> Async.RunSynchronously |> ignore
+                    let producer = File.ReadAllText(Path.Combine(root, "Identity.Root.fs"))
+                    Expect.stringContains producer "abstract def: Def" "the producer selects the bound's member"
+                    let adapter =
+                        { config with
+                            ModuleName = Some "Identity.Adapter"
+                            DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
+                    run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    let consumer = File.ReadAllText(Path.Combine(directory, "adapter", "Identity.Adapter.fs"))
+                    Expect.stringContains consumer "Identity.Root.Wrapped" "the consumer reuses the producer's declaration"
                 finally
                     if Directory.Exists directory then Directory.Delete(directory, true)
 

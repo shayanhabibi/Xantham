@@ -431,3 +431,405 @@ let internal normalizeObjUnions: Pass<ShapeModel> =
                             Degraded(model, List.distinct findings)
                 }
     }
+
+/// The type parameters each named declaration writes on its head.
+let private heads (decls: FsDecl list) =
+    decls
+    |> List.choose (fun decl ->
+        match decl with
+        | FsInterface d -> Some(d.Name, d.TypeParameters)
+        | FsAbbrev d -> Some(d.Name, d.TypeParameters)
+        | FsPhantom d -> Some(d.Name, d.TypeParameters)
+        | FsDelegateType d -> Some(d.Name, d.TypeParameters)
+        | FsTaggedUnion d -> Some(d.Name, d.TypeParameters)
+        | FsErasedObjectUnion d -> Some(d.Name, d.TypeParameters)
+        | _ -> None)
+    |> Map.ofList
+
+/// Every application in a declaration, each with the type parameters in scope where it is
+/// written: the declaration's own, and a generic member's on top of them.
+let private applications (decl: FsDecl) : (Map<string, FsTypeRef option> * string * FsTypeRef list) list =
+    let bind (scope: Map<string, FsTypeRef option>) (parameters: FsTypeParam list) =
+        parameters
+        |> List.fold (fun scope parameter -> Map.add parameter.Name parameter.Constraint scope) scope
+
+    let rec walk scope reference =
+        [
+            match reference with
+            | FsApp(name, arguments) ->
+                yield scope, name, arguments
+                yield! arguments |> List.collect (walk scope)
+            | FsOption inner
+            | FsArray inner -> yield! walk scope inner
+            | FsTuple items
+            | FsErasedUnion items -> yield! items |> List.collect (walk scope)
+            | FsDelegate(arguments, returns) -> yield! (returns :: arguments) |> List.collect (walk scope)
+            | FsFunc(argument, returns) -> yield! [ argument; returns ] |> List.collect (walk scope)
+            | _ -> ()
+        ]
+
+    let parameters scope (items: FsParam list) =
+        items |> List.collect (fun parameter -> walk scope parameter.Type)
+
+    let bounds scope (items: FsTypeParam list) =
+        items
+        |> List.collect (fun parameter -> parameter.Constraint |> Option.toList |> List.collect (walk scope))
+
+    let rec declMember scope =
+        function
+        | FsProperty p -> walk scope p.Type
+        | FsIndexer i -> walk scope i.Key @ walk scope i.Value
+        | FsMethod m ->
+            let scope = bind scope m.TypeParameters
+
+            bounds scope m.TypeParameters
+            @ parameters scope m.Parameters
+            @ walk scope m.Return
+        | FsConstructor c
+        | FsInvoke c ->
+            let scope = bind scope c.TypeParameters
+
+            bounds scope c.TypeParameters
+            @ parameters scope c.Parameters
+            @ walk scope c.Return
+        | FsSymbolKeyed(_, inner)
+        | FsStringKeyed(_, inner)
+        | FsLiteralKeyed(_, _, inner) -> declMember scope inner
+
+    let exportMember scope (m: FsExportMember) =
+        let scope = bind scope m.TypeParameters
+
+        bounds scope m.TypeParameters
+        @ match m.Body with
+          | ExportFunction(items, returns)
+          | ExportConstructor(items, returns) -> parameters scope items @ walk scope returns
+          | ExportValue returns -> walk scope returns
+
+    match decl with
+    | FsInterface d ->
+        let scope = bind Map.empty d.TypeParameters
+
+        bounds scope d.TypeParameters
+        @ (d.Inherits |> List.collect (walk scope))
+        @ (d.Members |> List.collect (declMember scope))
+        @ (d.Statics |> List.collect (exportMember scope))
+        @ (d.CreateOverloads
+           |> List.collect (fun overload -> parameters scope overload.Parameters))
+        @ (d.Entrypoint
+           |> Option.toList
+           |> List.collect (fun entrypoint -> parameters scope entrypoint.Parameters))
+    | FsAbbrev d ->
+        let scope = bind Map.empty d.TypeParameters
+        bounds scope d.TypeParameters @ walk scope d.Target
+    | FsPhantom d ->
+        let scope = bind Map.empty d.TypeParameters
+        bounds scope d.TypeParameters @ walk scope d.Carrier
+    | FsDelegateType d ->
+        let scope = bind Map.empty d.TypeParameters
+
+        bounds scope d.TypeParameters
+        @ (d.Parameters |> List.collect (fun parameter -> walk scope parameter.Type))
+        @ walk scope d.Return
+    | FsErasedObjectUnion d ->
+        let scope = bind Map.empty d.TypeParameters
+
+        bounds scope d.TypeParameters
+        @ (d.Cases |> List.collect (fun case -> walk scope case.Payload))
+        @ (d.Invokes |> List.collect (FsInvoke >> declMember scope))
+    | FsTaggedUnion d ->
+        let scope = bind Map.empty d.TypeParameters
+
+        bounds scope d.TypeParameters
+        @ (d.Cases
+           |> List.collect (fun case -> case.Fields |> List.collect (fun field -> walk scope field.Type)))
+    | FsExports container ->
+        container.Members
+        |> List.collect (fun owned -> exportMember Map.empty owned.Member)
+    | FsMeasure _
+    | FsStringEnum _
+    | FsEnum _ -> []
+
+/// A head's bound with the head's own variables replaced by an application's arguments.
+let rec private substituted (bindings: Map<string, FsTypeRef>) (reference: FsTypeRef) =
+    let recur = substituted bindings
+
+    match reference with
+    | FsTypeVar name -> Map.tryFind name bindings |> Option.defaultValue reference
+    | FsOption inner -> FsOption(recur inner)
+    | FsArray inner -> FsArray(recur inner)
+    | FsTuple items -> FsTuple(List.map recur items)
+    | FsErasedUnion items -> FsErasedUnion(List.map recur items)
+    | FsDelegate(arguments, returns) -> FsDelegate(List.map recur arguments, recur returns)
+    | FsFunc(argument, returns) -> FsFunc(recur argument, recur returns)
+    | FsApp(name, arguments) -> FsApp(name, List.map recur arguments)
+    | other -> other
+
+/// TypeScript admits a variable at a bounded slot by covariance; F# admits it only where the
+/// variable's own bound is the slot's. A head whose bound some application supplies with an
+/// unbounded variable, or with one bounded by another instantiation of the same generic, drops
+/// the bound (`TP012`), until every application in the run meets the heads it applies.
+let repairConstraints: Pass<ShapeModel> =
+    {
+        Name = "repair-constraints"
+        Run =
+            fun _ model ->
+                async {
+                    let applied =
+                        model.Decls
+                        |> List.collect (fun decl ->
+                            let owner = declName decl |> Option.defaultValue "Exports"
+                            applications decl |> List.map (fun application -> owner, application))
+
+                    let unmet (heads: Map<string, FsTypeParam list>) =
+                        applied
+                        |> List.collect (fun (owner, (scope, name, arguments)) ->
+                            match Map.tryFind name heads with
+                            | Some parameters when parameters.Length = arguments.Length ->
+                                let bindings = List.zip (parameters |> List.map _.Name) arguments |> Map.ofList
+
+                                List.zip parameters arguments
+                                |> List.indexed
+                                |> List.choose (fun (index, (parameter, argument)) ->
+                                    match parameter.Constraint, argument with
+                                    | Some bound, FsTypeVar variable when Map.containsKey variable scope ->
+                                        match scope[variable], substituted bindings bound with
+                                        | None, _ -> Some(name, index, bound, owner)
+                                        | Some(FsApp(head, stated)), FsApp(target, required) when
+                                            head = target && stated <> required
+                                            ->
+                                            Some(name, index, bound, owner)
+                                        | _ -> None
+                                    | _ -> None)
+                            | _ -> [])
+
+                    let rec settle (heads: Map<string, FsTypeParam list>) dropped =
+                        match unmet heads |> List.distinctBy (fun (name, index, _, _) -> name, index) with
+                        | [] -> heads, dropped
+                        | found ->
+                            let heads =
+                                found
+                                |> List.fold
+                                    (fun (heads: Map<string, FsTypeParam list>) (name, index, _, _) ->
+                                        heads
+                                        |> Map.add
+                                            name
+                                            (heads[name]
+                                             |> List.mapi (fun at parameter ->
+                                                 if at = index then
+                                                     { parameter with Constraint = None }
+                                                 else
+                                                     parameter)))
+                                    heads
+
+                            settle heads (dropped @ found)
+
+                    let heads, dropped = settle (heads model.Decls) []
+
+                    if List.isEmpty dropped then
+                        return Advanced model
+                    else
+                        let retyped (name: string) (parameters: FsTypeParam list) =
+                            Map.tryFind name heads |> Option.defaultValue parameters
+
+                        let decls =
+                            model.Decls
+                            |> List.map (fun decl ->
+                                match decl with
+                                | FsInterface d ->
+                                    FsInterface
+                                        { d with
+                                            TypeParameters = retyped d.Name d.TypeParameters
+                                        }
+                                | FsAbbrev d ->
+                                    FsAbbrev
+                                        { d with
+                                            TypeParameters = retyped d.Name d.TypeParameters
+                                        }
+                                | FsPhantom d ->
+                                    FsPhantom
+                                        { d with
+                                            TypeParameters = retyped d.Name d.TypeParameters
+                                        }
+                                | FsDelegateType d ->
+                                    FsDelegateType
+                                        { d with
+                                            TypeParameters = retyped d.Name d.TypeParameters
+                                        }
+                                | FsTaggedUnion d ->
+                                    FsTaggedUnion
+                                        { d with
+                                            TypeParameters = retyped d.Name d.TypeParameters
+                                        }
+                                | FsErasedObjectUnion d ->
+                                    FsErasedObjectUnion
+                                        { d with
+                                            TypeParameters = retyped d.Name d.TypeParameters
+                                        }
+                                | other -> other)
+
+                        let findings =
+                            dropped
+                            |> List.map (fun (name, index, bound, owner) ->
+                                let parameter = heads[name][index]
+
+                                Finding.make
+                                    name
+                                    (TypeParameters.ConstraintUnmetByReference(
+                                        parameter.Name,
+                                        typeSpelling bound,
+                                        owner
+                                    )))
+
+                        return Degraded({ model with Decls = decls }, findings)
+                }
+    }
+
+/// The declaration under a new name.
+let private renamed (name: string) =
+    function
+    | FsInterface d -> FsInterface { d with Name = name }
+    | FsAbbrev d -> FsAbbrev { d with Name = name }
+    | FsPhantom d -> FsPhantom { d with Name = name }
+    | FsDelegateType d -> FsDelegateType { d with Name = name }
+    | FsMeasure d -> FsMeasure { d with Name = name }
+    | FsTaggedUnion d -> FsTaggedUnion { d with Name = name }
+    | FsErasedObjectUnion d -> FsErasedObjectUnion { d with Name = name }
+    | FsStringEnum d -> FsStringEnum { d with Name = name }
+    | FsEnum d -> FsEnum { d with Name = name }
+    | FsExports _ as decl -> decl
+
+/// FS0037: a type `X` beside the module `X` its nested names render under compiles the module as
+/// `XModule`, which a declaration of that name then duplicates. The declaration, and every name
+/// nested under it, takes the first free numeric suffix (`NE001`).
+let resolveModuleSuffixes: Pass<ShapeModel> =
+    {
+        Name = "resolve-module-suffixes"
+        Run =
+            fun _ model ->
+                async {
+                    let names = model.Decls |> List.choose declName |> Set.ofList
+
+                    let prefixes (name: string) =
+                        let segments = name.Split '.'
+
+                        [
+                            for count in 1 .. segments.Length - 1 -> String.concat "." segments[.. count - 1]
+                        ]
+
+                    // Every type that is also a module: some declaration is nested under it, at
+                    // any depth (`Workspace.Ready.Options`).
+                    let modules =
+                        names
+                        |> Seq.collect prefixes
+                        |> Seq.filter (fun prefix -> Set.contains prefix names)
+                        |> Set.ofSeq
+
+                    let nestedUnder (root: string) (name: string) =
+                        name = root || name.StartsWith(root + ".")
+
+                    let roots =
+                        modules
+                        |> Set.toList
+                        |> List.map (fun name -> name + "Module")
+                        |> List.filter (fun root -> names |> Set.exists (nestedUnder root))
+
+                    if List.isEmpty roots then
+                        return Advanced model
+                    else
+                        let taken = names |> Set.map (fun name -> name.Split('.') |> Array.last)
+
+                        let replacement (root: string) =
+                            Seq.initInfinite (fun index -> $"{root}{index + 2}")
+                            |> Seq.find (fun candidate ->
+                                not (names |> Set.exists (nestedUnder candidate))
+                                && not (Set.contains candidate taken))
+
+                        let renames =
+                            roots
+                            |> List.collect (fun root ->
+                                let suffixed = replacement root
+
+                                names
+                                |> Set.toList
+                                |> List.filter (nestedUnder root)
+                                |> List.map (fun name -> name, suffixed + name.Substring root.Length))
+                            |> Map.ofList
+
+                        let rename =
+                            function
+                            | FsNamed name when Map.containsKey name renames -> FsNamed renames[name]
+                            | FsApp(name, arguments) when Map.containsKey name renames ->
+                                FsApp(renames[name], arguments)
+                            | other -> other
+
+                        let reference = mapRef rename
+
+                        let retarget decl =
+                            match mapDeclRefs rename decl with
+                            | FsInterface d ->
+                                FsInterface
+                                    { d with
+                                        Statics =
+                                            d.Statics
+                                            |> List.map (fun m ->
+                                                { m with
+                                                    Body =
+                                                        match m.Body with
+                                                        | ExportFunction(parameters, returns) ->
+                                                            ExportFunction(
+                                                                parameters
+                                                                |> List.map (fun p ->
+                                                                    { p with Type = reference p.Type }),
+                                                                reference returns
+                                                            )
+                                                        | ExportConstructor(parameters, returns) ->
+                                                            ExportConstructor(
+                                                                parameters
+                                                                |> List.map (fun p ->
+                                                                    { p with Type = reference p.Type }),
+                                                                reference returns
+                                                            )
+                                                        | ExportValue returns -> ExportValue(reference returns)
+                                                })
+                                        Entrypoint =
+                                            d.Entrypoint
+                                            |> Option.map (fun entrypoint ->
+                                                { entrypoint with
+                                                    Inherits = entrypoint.Inherits |> Option.map reference
+                                                })
+                                    }
+                            | FsAbbrev d ->
+                                FsAbbrev
+                                    { d with
+                                        Value = d.Value |> Option.map (fun (binding, value) -> binding, reference value)
+                                    }
+                            | other -> other
+
+                        let decls =
+                            model.Decls
+                            |> List.map (fun decl ->
+                                let decl = retarget decl
+
+                                match declName decl |> Option.bind (fun name -> Map.tryFind name renames) with
+                                | Some name -> renamed name decl
+                                | None -> decl)
+
+                        let findings =
+                            roots
+                            |> List.map (fun root ->
+                                Finding.make
+                                    renames[root]
+                                    (NameExports.TypeNameSuffixed(root, renames[root], "an F# module suffix")))
+
+                        return
+                            Degraded(
+                                { model with
+                                    Decls = decls
+                                    DeclNames =
+                                        model.DeclNames
+                                        |> Map.map (fun _ name -> Map.tryFind name renames |> Option.defaultValue name)
+                                },
+                                findings
+                            )
+                }
+    }

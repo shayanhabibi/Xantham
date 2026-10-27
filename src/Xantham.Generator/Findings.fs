@@ -152,6 +152,7 @@ module FindingCodes =
             "TR.SymbolAsLibInterface", "TR069"
             "TR.OpenIntersectionCarried", "TR072"
             "TR.RestatingIntersectionOperandReduced", "TR073"
+            "TR.CyclicDependentConstraintApplicationToObj", "TR074"
             "TP.UnnamedTypeParameter", "TP001"
             "TP.ConstraintDropped", "TP002"
             "TP.GenericFunctionHoisted", "TP003"
@@ -163,6 +164,8 @@ module FindingCodes =
             "TP.DuplicateTypeParameterCollapsed", "TP009"
             "TP.FunctionConstraintDropped", "TP010"
             "TP.KeyOverDeclaredMap", "TP011"
+            "TP.ConstraintUnmetByReference", "TP012"
+            "TP.ConstraintOutOfScope", "TP013"
             "MB.OptionalParameterAsOption", "MB001"
             "MB.SymbolKeyedMemberDropped", "MB002"
             "MB.OptionalMemberAsOption", "MB003"
@@ -563,11 +566,15 @@ type TypeReference =
     /// An object operand restating a type parameter's bound reduces away, and the parameter is
     /// the type: `R & { req: Base }` over `R extends Wide` is `'R`.
     | [<Exact>] RestatingIntersectionOperandReduced
+    /// <summary>Widens an application to <c>obj</c> when corrected arguments fail its cyclic dependent bounds.</summary>
+    | [<Widened>] CyclicDependentConstraintApplicationToObj of name: string
 
     interface IFindingKind with
         member this.Message =
             match this with
             | SelfReferenceThroughUnnamed -> "type refers to itself through unnamed shapes; widened to obj"
+            | CyclicDependentConstraintApplicationToObj name ->
+                $"{name}'s cyclic dependent constraints are not satisfied after argument correction; application widened to obj"
             | TypeNotResolved reason -> $"type not resolved ({reason}); widened to obj"
             | MissingFromTypeTable -> "referenced type missing from the type table; widened to obj"
             | LoneEnumMemberToFloat -> "lone enum member widened to float"
@@ -722,6 +729,15 @@ type TypeParameters =
     /// `keyof<Map>`, or as `typekeyof<Map,'E>` with `'E` at `Map[K]` when the signature reads
     /// the value the key selects.
     | [<Ergonomic>] KeyOverDeclaredMap of map: string * result: string option
+    /// A reference applies the declaration to a variable whose own bound is absent or another
+    /// instantiation of the same generic: TypeScript's covariance admits it, F#'s invariant
+    /// generics do not (`Event<'UI_MESSAGE>` under `'UI_MESSAGE :> UIMessage<'M, ...>` against
+    /// `UIMessage<obj, ...>`). The head writes no constraint.
+    | [<Ergonomic>] ConstraintUnmetByReference of name: string * bound: string * reference: string
+    /// A bound reading a type parameter its declaration does not bind - a hoisted parameter
+    /// object over the signature's `UI_MESSAGE extends UIMessage<MESSAGE_METADATA>` - is
+    /// dropped rather than written with that parameter widened to `obj`.
+    | [<Ergonomic>] ConstraintOutOfScope of name: string
 
     interface IFindingKind with
         member this.Message =
@@ -745,6 +761,10 @@ type TypeParameters =
             | KeyOverDeclaredMap(map, Some result) ->
                 $"key over {map} with its indexed access reads as typekeyof<{map},'{result}> (§4.10)"
             | KeyOverDeclaredMap(map, None) -> $"key over {map} reads as keyof<{map}> (§4.10)"
+            | ConstraintUnmetByReference(name, bound, reference) ->
+                $"constraint {bound} on '{name}' is not met where {reference} applies it in F#; dropped from the head (§4.9)"
+            | ConstraintOutOfScope name ->
+                $"constraint on '{name}' reads a type parameter the declaration does not bind; dropped from the head (§4.9)"
 
 /// Member and parameter shaping: `Shape.parametersOf` and `membersOf`.
 [<Prefix "MB">]

@@ -1351,9 +1351,9 @@ let private renderMeasure (decl: FsMeasureDecl) =
 /// (§4.10, §4.11). The name and the arity survive, so uses of it stay distinct from one another
 /// and from `obj`; the single private case means a cast is the only way in or out.
 let private renderPhantom (decl: FsPhantomDecl) =
-    // Named after the type it carries, so the cases of two phantoms never collide in the one
-    // module a package generates into.
-    let case = ident (decl.Name + "__")
+    // Preserve the complete spelling, including case, behind an uppercase prefix: a legal
+    // type name may start lowercase, but an unqualified union case may not.
+    let case = ident ("Phantom_" + decl.Name + "__")
 
     [
         yield! docLines "" decl.Docs decl.Tags

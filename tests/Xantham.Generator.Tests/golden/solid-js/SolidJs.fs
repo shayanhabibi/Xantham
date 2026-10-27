@@ -144,7 +144,7 @@ type TransitionState =
 type Accessor<'T> = (unit -> 'T)
 
 [<Erase>]
-type Setter<'T, 'U> = private Setter__ of (obj -> obj)
+type Setter<'T, 'U> = private Phantom_Setter__ of (obj -> obj)
 
 type Signal<'T> = (unit -> 'T) * (obj -> obj)
 
@@ -305,10 +305,10 @@ type DeferredOptions<'T> =
 
 /// <remarks>@deprecated</remarks>
 [<Erase>]
-type ReturnTypes<'T> = private ReturnTypes__ of obj
+type ReturnTypes<'T> = private Phantom_ReturnTypes__ of obj
 
 [<Erase>]
-type AccessorArray<'T> = private AccessorArray__ of obj[]
+type AccessorArray<'T> = private Phantom_AccessorArray__ of obj[]
 
 type OnEffectFunction<'S, 'Prev, 'Next> = delegate of input: 'S * prevInput: 'S option * prev: 'Prev -> 'Next
 
@@ -389,7 +389,7 @@ type ValidComponent = U2<string, (obj -> JSXElement)>
 /// </code>
 /// </example>
 [<Erase>]
-type ComponentProps<'T> = private ComponentProps__ of obj
+type ComponentProps<'T> = private Phantom_ComponentProps__ of obj
 
 /// <summary>
 /// Type of <c>props.ref</c>, for use in <c>Component</c> or <c>props</c> typing.
@@ -398,10 +398,10 @@ type ComponentProps<'T> = private ComponentProps__ of obj
 type Ref<'T> = U2<'T, ('T -> unit)>
 
 [<Erase>]
-type MergeProps<'T> = private MergeProps__ of obj
+type MergeProps<'T> = private Phantom_MergeProps__ of obj
 
 [<Erase>]
-type SplitProps<'T, 'K> = private SplitProps__ of obj[]
+type SplitProps<'T, 'K> = private Phantom_SplitProps__ of obj[]
 
 [<Interface>]
 type MatchProps<'T> =
@@ -1963,7 +1963,7 @@ module H =
             type DirectiveAttributes = obj
 
             [<Erase>]
-            type DirectiveFunctionAttributes<'T> = private DirectiveFunctionAttributes__ of obj
+            type DirectiveFunctionAttributes<'T> = private Phantom_DirectiveFunctionAttributes__ of obj
 
             type PropAttributes = obj
 
@@ -1972,10 +1972,10 @@ module H =
             type BoolAttributes = obj
 
             [<Erase>]
-            type OnAttributes<'T> = private OnAttributes__ of obj
+            type OnAttributes<'T> = private Phantom_OnAttributes__ of obj
 
             [<Erase>]
-            type OnCaptureAttributes<'T> = private OnCaptureAttributes__ of obj
+            type OnCaptureAttributes<'T> = private Phantom_OnCaptureAttributes__ of obj
 
             /// <summary>
             /// <c>Window</c> events, defined for <c>&lt;body&gt;</c>, <c>&lt;svg&gt;</c>, <c>&lt;frameset&gt;</c> tags.
@@ -18821,7 +18821,7 @@ module JSX =
     type DirectiveAttributes = obj
 
     [<Erase>]
-    type DirectiveFunctionAttributes<'T> = private DirectiveFunctionAttributes__ of obj
+    type DirectiveFunctionAttributes<'T> = private Phantom_DirectiveFunctionAttributes__ of obj
 
     type PropAttributes = obj
 
@@ -18830,10 +18830,10 @@ module JSX =
     type BoolAttributes = obj
 
     [<Erase>]
-    type OnAttributes<'T> = private OnAttributes__ of obj
+    type OnAttributes<'T> = private Phantom_OnAttributes__ of obj
 
     [<Erase>]
-    type OnCaptureAttributes<'T> = private OnCaptureAttributes__ of obj
+    type OnCaptureAttributes<'T> = private Phantom_OnCaptureAttributes__ of obj
 
     /// <summary>
     /// <c>Window</c> events, defined for <c>&lt;body&gt;</c>, <c>&lt;svg&gt;</c>, <c>&lt;frameset&gt;</c> tags.
@@ -32380,11 +32380,11 @@ module Store =
 
     /// <remarks>@deprecated</remarks>
     [<Erase>]
-    type DeepReadonly<'T> = private DeepReadonly__ of obj
+    type DeepReadonly<'T> = private Phantom_DeepReadonly__ of obj
 
     /// <remarks>@deprecated</remarks>
     [<Erase>]
-    type DeepMutable<'T> = private DeepMutable__ of obj
+    type DeepMutable<'T> = private Phantom_DeepMutable__ of obj
 
     [<Interface>]
     type StorePathRange =
@@ -32397,10 +32397,10 @@ module Store =
     type ArrayFilterFn<'T> = delegate of item: 'T * index: float -> bool
 
     [<Erase>]
-    type StoreSetter<'T, 'U> = private StoreSetter__ of obj
+    type StoreSetter<'T, 'U> = private Phantom_StoreSetter__ of obj
 
     [<Erase>]
-    type Part<'T, 'K> = private Part__ of U3<'K, 'K[], U2<Func<obj, float, bool>, StorePathRange>>
+    type Part<'T, 'K> = private Phantom_Part__ of U3<'K, 'K[], U2<Func<obj, float, bool>, StorePathRange>>
 
     type SetStoreFunction<'T> =
         [<Emit("$0($1...)")>]

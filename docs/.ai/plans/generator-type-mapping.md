@@ -695,6 +695,12 @@ absence under the live compiler.
   whose written constraint inherits the bound is applied as written:
   `querySelectorAll<'E when 'E :> Element>: selectors: string -> NodeListOf<'E>` under
   `NodeListOf<'TNode when 'TNode :> Node>` (W7.4, 2026-10-13).
+  Dependent bounds substitute the application's supplied arguments before checking nominal
+  inheritance. `Schema<O, I, T extends Internals<O, I>>` applied to `string` and `number`
+  checks `T` against `Internals<string, float>`. Forward dependencies are processed before
+  their users; recursive bounds retain arguments with matching complete nominal bases.
+  A correction that fails the final cyclic bounds widens the whole application to `obj`
+  (`TR074`), rather than emitting an invalid finite approximation of an F-bound.
   A constraint the run can see is unsatisfiable is not written at all. TypeScript's `extends`
   is structural and `:>` is nominal, so `class Geometry<Attributes extends Wide = Narrow>` -
   where `Narrow` and `Wide` are two `Record<string, …>` aliases with no `inherit` between them -

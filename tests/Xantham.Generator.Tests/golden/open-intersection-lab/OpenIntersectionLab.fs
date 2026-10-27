@@ -46,10 +46,10 @@ type Defined<'T> = 'T
 /// Negative: a mapped operand fills its members in at each use, so it is never read as restating the bound.
 /// </summary>
 [<Erase>]
-type Without<'T, 'U> = private Without__ of obj
+type Without<'T, 'U> = private Phantom_Without__ of obj
 
 [<Erase>]
-type Exclusive<'T, 'U> = private Exclusive__ of obj
+type Exclusive<'T, 'U> = private Phantom_Exclusive__ of obj
 
 /// <summary>
 /// A primitive beside a type parameter keeps the parameter.

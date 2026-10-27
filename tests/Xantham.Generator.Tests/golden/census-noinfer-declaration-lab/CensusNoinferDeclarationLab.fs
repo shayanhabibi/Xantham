@@ -11,7 +11,7 @@ open Fable.Core.JS
 open Fable.Core.TS.Dom
 
 [<Erase>]
-type Mask<'T> = private Mask__ of obj
+type Mask<'T> = private Phantom_Mask__ of obj
 
 /// <summary>
 /// Marker for non-inference type position

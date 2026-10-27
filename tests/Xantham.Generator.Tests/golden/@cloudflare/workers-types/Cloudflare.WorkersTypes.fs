@@ -864,7 +864,7 @@ type WebSocketError = delegate of ws: WebSocket * error: obj -> JS.Promise<unit>
 type WebSocketMessage = delegate of ws: WebSocket * message: U2<string, Fable.Core.TS.Es.ArrayBuffer> -> JS.Promise<unit> option
 
 [<Erase>]
-type DurableObjectStub<'T> = private DurableObjectStub__ of obj
+type DurableObjectStub<'T> = private Phantom_DurableObjectStub__ of obj
 
 [<Interface>]
 type DurableObjectId =
@@ -923,7 +923,7 @@ type DurableObjectNamespaceGetDurableObjectOptions =
     static member Create (?locationHint: DurableObjectLocationHint, ?routingMode: string) : DurableObjectNamespaceGetDurableObjectOptions = jsNative
 
 [<Erase>]
-type DurableObjectClass<'_T> = private DurableObjectClass__ of obj
+type DurableObjectClass<'_T> = private Phantom_DurableObjectClass__ of obj
 
 [<Interface>]
 type ContainerDirectorySnapshotRestoreParams2 =
@@ -2517,10 +2517,10 @@ type RequestInit<'Cf> =
     static member Create (?``method``: string, ?headers: HeadersInit, ?body: BodyInit, ?redirect: string, ?fetcher: Request.Fetcher, ?cf: 'Cf, ?cache: RequestInit.Cache, ?integrity: string, ?signal: AbortSignal, ?encodeResponseBody: RequestInit.EncodeResponseBody) : RequestInit<'Cf> = jsNative
 
 [<Erase>]
-type Service<'T> = private Service__ of obj
+type Service<'T> = private Phantom_Service__ of obj
 
 [<Erase>]
-type Fetcher<'T, 'Reserved> = private Fetcher__ of obj
+type Fetcher<'T, 'Reserved> = private Phantom_Fetcher__ of obj
 
 [<Interface>]
 type KVNamespaceListKey<'Metadata, 'Key> =
@@ -4643,13 +4643,13 @@ type MessagePortPostMessageOptions =
     static member Create (?transfer: obj[]) : MessagePortPostMessageOptions = jsNative
 
 [<Erase>]
-type LoopbackForExport<'T> = private LoopbackForExport__ of obj
+type LoopbackForExport<'T> = private Phantom_LoopbackForExport__ of obj
 
 [<Erase>]
-type LoopbackServiceStub<'T> = private LoopbackServiceStub__ of obj
+type LoopbackServiceStub<'T> = private Phantom_LoopbackServiceStub__ of obj
 
 [<Erase>]
-type LoopbackDurableObjectClass<'T> = private LoopbackDurableObjectClass__ of obj
+type LoopbackDurableObjectClass<'T> = private Phantom_LoopbackDurableObjectClass__ of obj
 
 [<Interface>]
 type LoopbackDurableObjectNamespace =
@@ -8421,13 +8421,13 @@ type StreamOptions =
 /// Marks keys from T that aren't in U as optional never
 /// </summary>
 [<Erase>]
-type Without<'T, 'U> = private Without__ of obj
+type Without<'T, 'U> = private Phantom_Without__ of obj
 
 /// <summary>
 /// Either T or U, but not both (mutually exclusive)
 /// </summary>
 [<Erase>]
-type XOR<'T, 'U> = private XOR__ of obj
+type XOR<'T, 'U> = private Phantom_XOR__ of obj
 
 type Ai_Cf_Baai_Bge_Base_En_V1_5_Input = U2<Ai_Cf_Baai_Bge_Base_En_V1_5_Input2, Ai_Cf_Baai_Bge_Base_En_V1_5_Input3>
 
@@ -10453,9 +10453,9 @@ type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response =
     /// <summary>
     /// Log probabilities for the prompt (if requested)
     /// </summary>
-    abstract prompt_logprobs: Cloudflare.MainModule option with get, set
+    abstract prompt_logprobs: obj option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?id: string, ?``object``: string, ?created: float, ?model: string, ?choices: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Choices.Item[], ?usage: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Usage, ?prompt_logprobs: Cloudflare.MainModule) : Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response = jsNative
+    static member Create (?id: string, ?``object``: string, ?created: float, ?model: string, ?choices: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Choices.Item[], ?usage: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Usage, ?prompt_logprobs: obj) : Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response = jsNative
 
 [<Interface>]
 type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Text_Completion_Response =
@@ -11192,9 +11192,9 @@ type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response =
     /// <summary>
     /// Log probabilities for the prompt (if requested)
     /// </summary>
-    abstract prompt_logprobs: Cloudflare.MainModule option with get, set
+    abstract prompt_logprobs: obj option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?id: string, ?``object``: string, ?created: float, ?model: string, ?choices: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Choices.Item[], ?usage: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Usage, ?prompt_logprobs: Cloudflare.MainModule) : Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response = jsNative
+    static member Create (?id: string, ?``object``: string, ?created: float, ?model: string, ?choices: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Choices.Item[], ?usage: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Usage, ?prompt_logprobs: obj) : Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response = jsNative
 
 [<Interface>]
 type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Text_Completion_Response =
@@ -16975,7 +16975,7 @@ type MediaError =
     static member Create (code: float, message: string, name: string, ?stack: string, ?cause: obj) : MediaError = jsNative
 
 [<Erase>]
-type Params<'P> = private Params__ of obj
+type Params<'P> = private Phantom_Params__ of obj
 
 [<Interface>]
 type EventContext<'Env, 'P, 'Data> =
@@ -17113,7 +17113,7 @@ module Rpc =
     type Stubable = U2<Cloudflare.WorkersTypes.Rpc.RpcTargetBranded, (obj[] -> obj)>
 
     [<Erase>]
-    type Serializable<'T> = private Serializable__ of obj option
+    type Serializable<'T> = private Phantom_Serializable__ of obj option
 
     type StubBase<'T> =
         inherit Disposable
@@ -17121,36 +17121,36 @@ module Rpc =
         abstract dup: unit -> Cloudflare.WorkersTypes.Rpc.StubBase<'T>
 
     [<Erase>]
-    type Stub<'T> = private Stub__ of obj
+    type Stub<'T> = private Phantom_Stub__ of obj
 
     type BaseType = U25<string, float, bigint, bool, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.BigInt64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.BigUint64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.DataView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Date, exn, Fable.Core.TS.Es.Float32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Float64Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Headers, Fable.Core.TS.Es.Int16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Int32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Int8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, ReadableStream<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, Fable.Core.TS.Es.RegExp, Request<obj, U2<RequestInitCfProperties, IncomingRequestCfProperties<obj>>>, Response, Fable.Core.TS.Es.Uint16Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Uint32Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, Fable.Core.TS.Es.Uint8ClampedArray<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, WritableStream<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>> option
 
     [<Erase>]
-    type Stubify<'T> = private Stubify__ of obj
+    type Stubify<'T> = private Phantom_Stubify__ of obj
 
     [<Erase>]
-    type Unstubify<'T> = private Unstubify__ of obj
+    type Unstubify<'T> = private Phantom_Unstubify__ of obj
 
     [<Erase>]
-    type UnstubifyAll<'A> = private UnstubifyAll__ of obj[]
+    type UnstubifyAll<'A> = private Phantom_UnstubifyAll__ of obj[]
 
     [<Erase>]
-    type MaybeProvider<'T> = private MaybeProvider__ of obj
+    type MaybeProvider<'T> = private Phantom_MaybeProvider__ of obj
 
     [<Erase>]
-    type MaybeDisposable<'T> = private MaybeDisposable__ of obj
+    type MaybeDisposable<'T> = private Phantom_MaybeDisposable__ of obj
 
     [<Erase>]
-    type Result<'R> = private Result__ of obj
+    type Result<'R> = private Phantom_Result__ of obj
 
     [<Erase>]
-    type MethodOrProperty<'V> = private MethodOrProperty__ of obj
+    type MethodOrProperty<'V> = private Phantom_MethodOrProperty__ of obj
 
     [<Erase>]
-    type MaybeCallableProvider<'T> = private MaybeCallableProvider__ of obj
+    type MaybeCallableProvider<'T> = private Phantom_MaybeCallableProvider__ of obj
 
     [<Erase>]
-    type Provider<'T, 'Reserved> = private Provider__ of obj
+    type Provider<'T, 'Reserved> = private Phantom_Provider__ of obj
 
 type RpcStubConstructor =
     [<EmitConstructor>]
@@ -20488,9 +20488,9 @@ module Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response =
             /// <summary>
             /// Log probabilities (if requested)
             /// </summary>
-            abstract logprobs: Cloudflare.MainModule option with get, set
+            abstract logprobs: obj option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?index: float, ?message: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Choices.Item.Message, ?finish_reason: string, ?stop_reason: string, ?logprobs: Cloudflare.MainModule) : Item = jsNative
+            static member Create (?index: float, ?message: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Choices.Item.Message, ?finish_reason: string, ?stop_reason: string, ?logprobs: obj) : Item = jsNative
 
         module Item =
             [<Interface>]
@@ -20892,13 +20892,13 @@ module Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Text_Completion_Response =
             /// <summary>
             /// Log probabilities (if requested)
             /// </summary>
-            abstract logprobs: Cloudflare.MainModule option with get, set
+            abstract logprobs: obj option with get, set
             /// <summary>
             /// Log probabilities for the prompt (if requested)
             /// </summary>
-            abstract prompt_logprobs: Cloudflare.MainModule option with get, set
+            abstract prompt_logprobs: obj option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (index: float, text: string, finish_reason: string, ?stop_reason: string, ?logprobs: Cloudflare.MainModule, ?prompt_logprobs: Cloudflare.MainModule) : Item = jsNative
+            static member Create (index: float, text: string, finish_reason: string, ?stop_reason: string, ?logprobs: obj, ?prompt_logprobs: obj) : Item = jsNative
 
 module Ai_Cf_Baai_Bge_Base_En_V1_5_Input2 =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -22623,9 +22623,9 @@ module Ai_Cf_Moondream_Moondream3_1_9B_A2B_Output =
         /// <summary>
         /// Grounding information.
         /// </summary>
-        abstract grounding: Cloudflare.MainModule[] option with get, set
+        abstract grounding: obj[] option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (text: string, ?grounding: Cloudflare.MainModule[]) : Reasoning = jsNative
+        static member Create (text: string, ?grounding: obj[]) : Reasoning = jsNative
 
     module Objects =
         [<Interface>]
@@ -23003,9 +23003,9 @@ module Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response =
             /// <summary>
             /// Log probabilities (if requested)
             /// </summary>
-            abstract logprobs: Cloudflare.MainModule option with get, set
+            abstract logprobs: obj option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?index: float, ?message: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Choices.Item.Message, ?finish_reason: string, ?stop_reason: string, ?logprobs: Cloudflare.MainModule) : Item = jsNative
+            static member Create (?index: float, ?message: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Choices.Item.Message, ?finish_reason: string, ?stop_reason: string, ?logprobs: obj) : Item = jsNative
 
         module Item =
             [<Interface>]
@@ -23407,13 +23407,13 @@ module Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Text_Completion_Response =
             /// <summary>
             /// Log probabilities (if requested)
             /// </summary>
-            abstract logprobs: Cloudflare.MainModule option with get, set
+            abstract logprobs: obj option with get, set
             /// <summary>
             /// Log probabilities for the prompt (if requested)
             /// </summary>
-            abstract prompt_logprobs: Cloudflare.MainModule option with get, set
+            abstract prompt_logprobs: obj option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (index: float, text: string, finish_reason: string, ?stop_reason: string, ?logprobs: Cloudflare.MainModule, ?prompt_logprobs: Cloudflare.MainModule) : Item = jsNative
+            static member Create (index: float, text: string, finish_reason: string, ?stop_reason: string, ?logprobs: obj, ?prompt_logprobs: obj) : Item = jsNative
 
 module Ai_Cf_Qwen_Qwq_32B_Messages =
     module Functions =
@@ -24247,7 +24247,7 @@ module Cloudflare =
     type GlobalProps = obj
 
     [<Erase>]
-    type GlobalProp<'K, 'Default> = private GlobalProp__ of obj
+    type GlobalProp<'K, 'Default> = private Phantom_GlobalProp__ of obj
 
     type MainModule = obj
 
@@ -24350,7 +24350,7 @@ module Cloudflare =
     /// <summary>cloudflare:workers</summary>
     module Workers =
         [<Erase>]
-        type RpcStub<'T> = private RpcStub__ of obj
+        type RpcStub<'T> = private Phantom_RpcStub__ of obj
 
         [<Import("RpcTarget", "cloudflare:workers"); AbstractClass>]
         type RpcTarget () =
