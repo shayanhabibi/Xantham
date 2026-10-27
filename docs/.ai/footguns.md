@@ -801,3 +801,10 @@ for declarations reaching `NotFollowed`; do not tighten it back to a hard failur
 **The checker shares one empty object type and hangs aliases on it.** `type X = Cond<..., {}>`
 resolving to `{}` attaches `X` to the type every bare `{}` in the program uses. Naming or keying
 `{}` by that alias is program-dependent; `isSharedEmptyObject` keeps it intrinsic.
+
+
+**An alias application is keyed by arguments the walk may never reach.** `deriveFacts` follows
+only the type-parameter alias arguments of a union or intersection. A consumer reaching
+`InferEvent<CallStartEvent>` through its flattened arms has no facts for `CallStartEvent`, the
+application loses its key, and the declaration falls back to a parent-role key the producer
+never wrote. With a catalogue in use, the type-table walk also follows every alias argument.

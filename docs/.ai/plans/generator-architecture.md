@@ -3872,3 +3872,17 @@ wrote every `logprobs?: {} | null` as `MainModule` and keyed it by `MainModule`'
 handles. Accepted tier movement (user decision): five Workers AI symbols that reached `{}`
 through `MainModule` move from ergonomic to widened; their F# type is unchanged.
 Lab: catalog-empty-object-lab.
+
+
+### Resolve: concrete alias arguments under a catalogue (2026-10-27)
+
+An alias application is keyed by its declaration and its arguments. `deriveFacts` keeps only the
+type-parameter alias arguments of a union or intersection, so a consumer reaching
+`InferTelemetryEvent<LanguageModelCallStartEvent>` only through the intersection's flattened arms
+(`think` against ai-v7's `Telemetry`) never resolved `LanguageModelCallStartEvent`; the
+application lost its key and took a parent-role key, and `Telemetry` failed reuse. With
+`DeclarationCatalog` or `DeclarationReferences` set, each walk generation now adds every fresh
+aliased type's alias arguments to the frontier, beside the alias declarations it already adds.
+`AliasTypeArguments` is unchanged. The shared-empty-object identity also defers to `NotFollowed`:
+a locally failed derivation is not certified as `{}`. No golden moves.
+Lab: catalog-alias-argument-lab.

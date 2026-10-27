@@ -470,7 +470,10 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                 // Intrinsic checker types are shared by unrelated exports. Their aliases
                 // belong to the individual declaration, never the aggregate export handles.
                 None
-            | Some facts when Shape.Spec.isSharedEmptyObject facts ->
+            | Some facts when
+                Shape.Spec.isSharedEmptyObject facts
+                && not (Map.containsKey id shape.NotFollowed)
+                ->
                 // Every bare `{}` is this one type; an alias the checker hangs on it in one
                 // program (`MainModule`) is absent from another.
                 Some(identity "empty-object" [] [])

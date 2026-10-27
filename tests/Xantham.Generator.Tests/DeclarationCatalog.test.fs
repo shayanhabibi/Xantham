@@ -1114,6 +1114,27 @@ let json (value: Identity.Root.Value) : Identity.Root.Output = Identity.Root.Out
                 finally
                     if Directory.Exists directory then Directory.Delete(directory, true)
 
+            testCase "an alias application keys alike where the consumer reaches only its arms" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-alias-argument-" + Guid.NewGuid().ToString "N")
+                Directory.CreateDirectory directory |> ignore
+                try
+                    let package = Path.GetFullPath(Path.Combine(fixture, "..", "catalog-alias-argument-lab"))
+                    let dependency = Path.Combine(package, "node_modules", "alias-argument-owner-lab")
+                    let config =
+                        { GeneratorConfig.loadFile (Path.Combine(package, "xantham.json")) with
+                            ModuleName = Some "Identity.Root" }
+                    let root = Path.Combine(directory, "root")
+                    run config dependency root |> Async.RunSynchronously |> ignore
+                    let adapter =
+                        { config with
+                            ModuleName = Some "Identity.Adapter"
+                            DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
+                    run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    let consumer = File.ReadAllText(Path.Combine(directory, "adapter", "Identity.Adapter.fs"))
+                    Expect.stringContains consumer "telemetry () : Identity.Root.Telemetry" "the consumer reuses the interface"
+                finally
+                    if Directory.Exists directory then Directory.Delete(directory, true)
+
             testCase "a consumer export naming a producer's anonymous union reuses its row" <| fun _ ->
                 let directory = Path.Combine(temporaryRoot, "xantham-consumer-alias-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore

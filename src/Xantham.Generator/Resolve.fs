@@ -3210,6 +3210,29 @@ let internal resolveTypeTableObserved followWidth (observe: int -> int -> unit) 
                                     else
                                         async.Return [||]
 
+                                // An alias application is keyed by its arguments, concrete ones
+                                // included. A consumer reaching `InferEvent<CallStartEvent>` only
+                                // through its flattened arms reaches `CallStartEvent` here.
+                                let! aliasArguments =
+                                    if
+                                        ctx.Config.DeclarationCatalog
+                                        || not (List.isEmpty ctx.Config.DeclarationReferences)
+                                    then
+                                        async {
+                                            let! arguments =
+                                                fresh
+                                                |> List.filter (fun ty -> ty.AliasSymbol.IsSome)
+                                                |> List.map (fun ty -> ctx.Session.getAliasTypeArgumentsOfType ty.Id)
+                                                |> Async.Parallel
+
+                                            return
+                                                arguments
+                                                |> Array.collect (ValueOption.defaultValue [||])
+                                                |> Array.distinctBy _.Id
+                                        }
+                                    else
+                                        async.Return [||]
+
                                 let! results =
                                     fresh
                                     |> List.map (fun ty ->
@@ -3262,6 +3285,7 @@ let internal resolveTypeTableObserved followWidth (observe: int -> int -> unit) 
                                             | Ok(_, discovered) -> yield! discovered
                                             | Error _ -> ()
                                         yield! aliasDeclarations
+                                        yield! aliasArguments
                                     ]
 
                                 return! walk table derived notFollowed findings discovered (depth + 1)
