@@ -325,6 +325,37 @@ let id (value: Identity.Root.Result) : float = (Identity.Adapter.Exports.``use``
         finally
             if Directory.Exists directory then Directory.Delete(directory, true)
 
+[<Tests>]
+let covariantBoundTests =
+    testCase "declaration catalog drops a bound a shared hoisted shape cannot meet" <| fun _ ->
+        let directory = Path.Combine(temporaryRoot, "xantham-covariant-bound-" + Guid.NewGuid().ToString "N")
+        let package = Path.Combine(directory, "package")
+        try
+            writePackageFile package "package.json" """{"name":"covariant-bound-lab","version":"1.0.0","types":"index.d.ts"}"""
+            // `OnEnd.Event` is hoisted once and applied both under `StreamOptions`' bare `Message`
+            // bound and under `TransportOptions`' `Message<unknown, never>`.
+            writePackageFile package "index.d.ts" """export type DataTypes = Record<string, unknown>;
+export interface Message<METADATA = unknown, DATA extends DataTypes = DataTypes> { id: string; metadata?: METADATA; data?: DATA; }
+export type OnEnd<M extends Message> = (event: { message: M; isAborted: boolean }) => PromiseLike<void> | void;
+export type StreamOptions<M extends Message> = { onEnd?: OnEnd<M>; onFinish?: OnEnd<M>; };
+export type TransportOptions<M extends Message<unknown, never>> = { api: string; } & Omit<StreamOptions<M>, "onFinish">;
+export declare class Transport<M extends Message<unknown, never>> { constructor(options: TransportOptions<M>); }"""
+            let path = Path.Combine(directory, "Root.json")
+            File.WriteAllText(path,
+                JsonSerializer.Serialize {| ``module`` = "Identity.Root"; ``namespace`` = "Identity.Support"
+                                            lib = [| "esnext" |]; types = ([||] : string array); declarationCatalog = true |})
+            Pipeline.run (GeneratorConfig.loadFile path) package (Path.Combine(directory, "root"))
+            |> Async.RunSynchronously |> ignore
+            let consumer = """module Identity.Consumer
+let api (options: Identity.Root.TransportOptions<Identity.Root.Message<obj, unit>>) : string = options.api
+"""
+            let code, output = compileConsumer directory [ "root/Identity.Root.fs" ] consumer
+            Expect.equal code 0 output
+        finally
+            if Directory.Exists directory then Directory.Delete(directory, true)
+
+[<Tests>]
+let pickedMethodTests =
     testCase "declaration catalog picked methods keep their delegates" <| fun _ ->
         let directory = Path.Combine(temporaryRoot, "xantham-picked-method-" + Guid.NewGuid().ToString "N")
         let package = Path.Combine(directory, "package")
@@ -1238,7 +1269,7 @@ let json (value: Identity.Root.Value) : Identity.Root.Output = Identity.Root.Out
                     let config = GeneratorConfig.loadFile (Path.Combine(package, "xantham.json"))
                     run config package directory |> Async.RunSynchronously |> ignore
                     let binding = File.ReadAllText(Path.Combine(directory, "CatalogUseSiteBoundLab.fs"))
-                    Expect.stringContains binding "type Base<'M when 'M :> Message<obj, unit>>" "the use site keeps its own bound"
+                    Expect.stringContains binding "type Base<'M> =" "the use site's bound reads `Meta`, which the shape does not bind, and is dropped"
                     Expect.stringContains binding "inherit CatalogUseSiteBoundLab.StreamOptions<'M>" "a use site repeating the declared bound reuses the declaration"
                     let catalog = JsonSerializer.Deserialize<DeclarationCatalog.Catalog>(File.ReadAllText(Path.Combine(directory, "declarations.json")),
                         JsonSerializerOptions(PropertyNameCaseInsensitive = true))

@@ -3913,3 +3913,25 @@ placement in three steps, all skipped under `recursiveGroups`:
   aiutils alias over Workers' anonymous tool shape). Lab: group-reader-lab.
 
 No existing golden moves.
+
+### Shape: bounds F# cannot meet are dropped, not lowered (2026-10-27)
+
+User decision: where a constraint cannot be determined safely, deterministically and without
+recursion, the head drops it and records a finding; a binding passing types through type
+parameters is preferred over one lowering them to `obj` or a fixed bound.
+
+- A parameter whose default is a conditional over the other parameters (`E extends Env = M
+  extends Hono<infer E> ? E : never`) keeps its bound, like a `never` default: the default is
+  inferred and never written at a bare use. Chanfana's `fromHono` keeps `'E :> Env`, which its
+  return `HonoOpenAPIRouterType<'E, ...>` requires. Lab: conditional-default-bound-lab.
+- A bound reading a type parameter its declaration does not bind - ai's hoisted
+  `CreateAgentUIStream0` over the signature's `UI_MESSAGE extends UIMessage<MESSAGE_METADATA>` -
+  is dropped at the head and at every reference check (`TP013`). Lab: covariant-bound-lab.
+- `repair-constraints` (before `repair-arity`) reads every rendered application against the
+  rendered head it applies. A slot supplied with an unbounded variable, or with one bounded by
+  another instantiation of the same generic, drops its bound (`TP012`), to a fixpoint. ai's
+  shared `UIMessageStreamOnEndCallback.Event` drops `'UI_MESSAGE :> UIMessage<obj, ...>`.
+  Catalogue test: "declaration catalog drops a bound a shared hoisted shape cannot meet".
+
+The existing `TR027` rewrite of an unbound variable to the slot's bound still lowers where the
+type-id check sees the mismatch first; it is unchanged here. No existing golden moves.

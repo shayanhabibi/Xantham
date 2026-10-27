@@ -1714,7 +1714,9 @@ let internal satisfiesNominally (model: ShapeModel) (boundId: int<Measure.typeId
 /// (`TP008`) *and* the reference stops rewriting arguments to it (`TR044` falls silent), so
 /// the argument TypeScript resolved survives. Where it is true the head keeps `:>` and
 /// `TR044` still widens whatever cannot satisfy it.
-/// A `never` default retains the bound; concrete uses apply the normal argument check.
+/// A `never` default retains the bound; concrete uses apply the normal argument check. So does
+/// a conditional default (`E extends Env = M extends Router<infer E> ? E : never`): it is
+/// inferred from the other arguments and is never written as a bare use's argument.
 let internal constraintProvenNominal
     (model: ShapeModel)
     (parameterId: int<Measure.typeId>)
@@ -1722,9 +1724,22 @@ let internal constraintProvenNominal
     =
     match Map.tryFind parameterId model.Types |> Option.bind _.Default with
     | Some fallback when fallback <> parameterId ->
-        (Map.tryFind fallback model.Types |> Option.exists (flag TypeFlags.Never))
+        (Map.tryFind fallback model.Types
+         |> Option.exists (fun facts -> flag TypeFlags.Never facts || flag TypeFlags.Conditional facts))
         || satisfiesNominally model boundId fallback
     | _ -> true
+
+/// Whether a shaped bound read a type parameter outside the scope it was written in.
+let internal boundOutOfScope (findings: Finding list) =
+    findings
+    |> List.exists (fun finding ->
+        match finding.Kind with
+        | :? TypeReference as kind ->
+            match kind with
+            | TypeReference.TypeParameterOutOfScope
+            | TypeReference.TypeParameterOutOfScopeToConstraint _ -> true
+            | _ -> false
+        | _ -> false)
 
 /// A reference as the phrase a finding message names it by. Source-file spelling - module
 /// qualification, line breaks, the tick on a variable - belongs to the renderer.
@@ -3147,6 +3162,7 @@ and internal statedConstraintOf
             |> Option.map FsNamed
             |> Option.orElseWith (fun () ->
                 match typeRef ctx model self owner boundId with
+                | FsApp _, boundFindings when boundOutOfScope boundFindings -> None
                 | FsApp _ as reference, _ -> Some reference
                 | FsNamed name, [] when name <> Naming.LibBindings.FunctionBinding -> Some(FsNamed name)
                 | _ -> None)
@@ -3932,6 +3948,10 @@ let typeParamsOf
                 findings <-
                     findings
                     @ [ Finding.make owner (TypeParameters.ConstraintNotProvenNominal(name, shown)) ]
+
+                { Name = name; Constraint = None }
+            | Some((FsNamed _ | FsApp _), boundFindings) when boundOutOfScope boundFindings ->
+                findings <- findings @ [ Finding.make owner (TypeParameters.ConstraintOutOfScope name) ]
 
                 { Name = name; Constraint = None }
             | Some((FsNamed _ | FsApp _) as reference, boundFindings) ->

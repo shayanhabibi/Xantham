@@ -128,6 +128,8 @@ let findingsTests =
                     "TP.DuplicateTypeParameterCollapsed TP009 ergonomic"
                     "TP.FunctionConstraintDropped TP010 widened"
                     "TP.KeyOverDeclaredMap TP011 ergonomic"
+                    "TP.ConstraintUnmetByReference TP012 ergonomic"
+                    "TP.ConstraintOutOfScope TP013 ergonomic"
                     "MB.OptionalParameterAsOption MB001 ergonomic"
                     "MB.SymbolKeyedMemberDropped MB002 widened"
                     "MB.OptionalMemberAsOption MB003 ergonomic"

@@ -4571,6 +4571,25 @@ let pipelineTests =
                 (handConfig (handInstalledFixture "entry-reader-lab"))
                 (fun _ -> [])
 
+        // A method parameter whose default is a conditional over the other parameters keeps its
+        // bound, which the declaration it returns requires.
+        yield!
+            fixtureTests
+                "conditional-default-bound-lab"
+                (handInstalledFixture "conditional-default-bound-lab")
+                (handConfig (handInstalledFixture "conditional-default-bound-lab"))
+                (fun _ -> [])
+
+        // Bounds F#'s invariant generics cannot meet: a parameter object binding a variable whose
+        // bound reads a signature parameter, and a callback bound by a bare generic applied to a
+        // variable bounded by another instantiation of it.
+        yield!
+            fixtureTests
+                "covariant-bound-lab"
+                (handInstalledFixture "covariant-bound-lab")
+                (handConfig (handInstalledFixture "covariant-bound-lab"))
+                (fun _ -> [])
+
         // An entry subpath module spelled like a shipped group's global type. The catalogue's
         // constructor value, named under the subpath, stays in the entry module.
         yield!

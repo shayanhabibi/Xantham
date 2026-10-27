@@ -29,6 +29,7 @@ let passes: Pass<ShapeModel> list =
         Overloads.dedupeOverloads
         Ordering.orderDeclarations
         UnionArms.expandUnionArms
+        Arity.repairConstraints
         Arity.repairArity
         Arity.normalizeObjUnions
         ExportCollisions.resolveExportCollisions

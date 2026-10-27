@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "package": "conditional-default-bound-lab",
+  "module": "ConditionalDefaultBoundLab",
+  "counts": {
+    "exact": 3,
+    "ergonomic": 3,
+    "widened": 1,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SY - synthesize-anonymous",
+      "total": 1,
+      "exact": 1
+    },
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 4,
+      "ergonomic": 3,
+      "widened": 1
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 5,
+      "ergonomic": 5
+    }
+  ]
+}

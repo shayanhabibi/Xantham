@@ -821,3 +821,11 @@ by the dependency's generic hoists entry-typed shapes under a dependency root; a
 name's dotted prefix can be an entry subpath module (`Artifacts`) that a group's global type
 also spells. `groupModulesForScope` settles placement so no group reads the entry module; the
 compile gate is the check, and only `recursiveGroups` (one `namespace rec`) exempts it.
+
+**TypeScript bounds are covariant; F# bounds are invariant.** `UI_MESSAGE extends
+UIMessage<M, never>` satisfies a slot bounded by bare `UIMessage` in TypeScript, and never in F#:
+`UIMessage<'M, unit, ...>` is not `UIMessage<obj, UIDataTypes, ...>`. The type-id checks in
+`appliedRefTo` judge such a slot met. `repair-constraints` reads the rendered heads and
+applications instead and drops the slot's bound (`TP012`); it never lowers the variable. A
+bound naming a variable its declaration does not bind is dropped too (`TP013`), never written
+with that variable as `obj`.
