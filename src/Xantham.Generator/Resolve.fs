@@ -3489,7 +3489,10 @@ let private defaultAliasArguments (ctx: Context) (alias: SymbolResponse) (ty: Ty
                             return false
                         else
                             let! members =
-                                if candidate.Flags &&& (TypeFlags.Union ||| TypeFlags.Intersection) <> TypeFlags.None then
+                                if
+                                    candidate.Flags &&& (TypeFlags.Union ||| TypeFlags.Intersection)
+                                    <> TypeFlags.None
+                                then
                                     ctx.Session.getTypesOfType candidate.Id
                                 else
                                     async.Return ValueNone
@@ -3620,16 +3623,19 @@ let resolveDeclarationIdentities: Pass<ResolveModel> =
                                                                             return None
                                                                         else
                                                                             let! bound =
-                                                                                ctx.Session.getConstraintOfTypeParameter
+                                                                                ctx.Session
+                                                                                    .getConstraintOfTypeParameter
                                                                                     argument.Id
 
                                                                             let! declaredBound =
-                                                                                ctx.Session.getConstraintOfTypeParameter
+                                                                                ctx.Session
+                                                                                    .getConstraintOfTypeParameter
                                                                                     parameter.Id
 
                                                                             return
                                                                                 match bound, declaredBound with
-                                                                                | ValueSome bound, ValueSome declaredBound when
+                                                                                | ValueSome bound,
+                                                                                  ValueSome declaredBound when
                                                                                     bound.Id <> declaredBound.Id
                                                                                     ->
                                                                                     Some bound.TypeId
