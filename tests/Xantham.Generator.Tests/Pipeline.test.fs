@@ -4590,6 +4590,15 @@ let pipelineTests =
                 (handConfig (handInstalledFixture "covariant-bound-lab"))
                 (fun _ -> [])
 
+        // A type whose nested names make it a module too, beside a declaration spelled like the
+        // module's compiled `XModule` name.
+        yield!
+            fixtureTests
+                "module-suffix-lab"
+                (handInstalledFixture "module-suffix-lab")
+                (handConfig (handInstalledFixture "module-suffix-lab"))
+                (fun _ -> [])
+
         // An entry subpath module spelled like a shipped group's global type. The catalogue's
         // constructor value, named under the subpath, stays in the entry module.
         yield!

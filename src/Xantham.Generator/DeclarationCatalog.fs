@@ -2302,6 +2302,13 @@ let internal applyWithProducer
 
             let redirects = reused |> Map.map (fun _ producer -> producer.FSharpName)
 
+            // A group whose module the producer also owns (`FSharp.CloudEdge.Runtime.Agents` beside
+            // the agents producer) already carries the producer's name; an alias there names itself.
+            let qualifiedName name =
+                groups
+                |> List.tryFind (fun group -> group.Decls |> List.exists (fun decl -> Render.declName decl = name))
+                |> Option.map (fun group -> group.Module + "." + name)
+
             let declarations =
                 shape.Decls
                 |> List.choose (fun decl ->
@@ -2310,6 +2317,7 @@ let internal applyWithProducer
                         |> (fun name -> Map.tryFind name reused |> Option.map (fun producer -> name, producer))
                     with
                     | None -> Some(Render.qualifyDecl redirects decl)
+                    | Some(name, producer) when qualifiedName name = Some producer.FSharpName -> None
                     | Some(name, producer) when Set.contains name exportedNames ->
                         let parameters = parameters decl
 

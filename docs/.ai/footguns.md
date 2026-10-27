@@ -829,3 +829,13 @@ UIMessage<M, never>` satisfies a slot bounded by bare `UIMessage` in TypeScript,
 applications instead and drops the slot's bound (`TP012`); it never lowers the variable. A
 bound naming a variable its declaration does not bind is dropped too (`TP013`), never written
 with that variable as `obj`.
+
+**A type and a module of one name compile the module as `XModule`.** `type Workspace` beside
+the `module Workspace` its nested names render under makes F# name the module `WorkspaceModule`,
+and an exported `WorkspaceModule` is then FS0037. `resolve-module-suffixes` suffixes the
+declaration (`WorkspaceModule2`, `NE001`); `CompiledName` on the module does not help.
+
+**A shipped group's module can be the producer's module.** A consumer's group for a catalogued
+dependency derives the same module name the dependency's own producer used
+(`FSharp.CloudEdge.Runtime.Agents`). An alias written there for a reused export names itself
+(FS0953); reuse omits it, since the producer's declaration already carries the name.

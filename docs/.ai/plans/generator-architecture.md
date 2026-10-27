@@ -3935,3 +3935,16 @@ parameters is preferred over one lowering them to `obj` or a fixed bound.
 
 The existing `TR027` rewrite of an unbound variable to the slot's bound still lowers where the
 type-id check sees the mismatch first; it is unchanged here. No existing golden moves.
+
+### Shape and catalogue: two F# name collisions (2026-10-27)
+
+- `resolve-module-suffixes` (before `repair-constraints`): a declaration named `XModule`, beside
+  a type `X` that is also a module because names nest under it, takes the first free numeric
+  suffix, with every name nested under it; references and `DeclNames` follow (`NE001`).
+  `@cloudflare/computer`'s `WorkspaceModule`. Lab: module-suffix-lab.
+- Catalogue reuse omits the alias for a reused export whose qualified name in its group equals
+  the producer's name. think's `agents` group shares the agents producer's module and wrote
+  `type FiberContext = FSharp.CloudEdge.Runtime.Agents.FiberContext`. Verified on think; no
+  reduced lab reproduces the re-export path yet.
+
+No existing golden moves.

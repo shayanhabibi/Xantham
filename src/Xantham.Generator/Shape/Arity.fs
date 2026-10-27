@@ -683,3 +683,150 @@ let repairConstraints: Pass<ShapeModel> =
                         return Degraded({ model with Decls = decls }, findings)
                 }
     }
+
+/// The declaration under a new name.
+let private renamed (name: string) =
+    function
+    | FsInterface d -> FsInterface { d with Name = name }
+    | FsAbbrev d -> FsAbbrev { d with Name = name }
+    | FsPhantom d -> FsPhantom { d with Name = name }
+    | FsDelegateType d -> FsDelegateType { d with Name = name }
+    | FsMeasure d -> FsMeasure { d with Name = name }
+    | FsTaggedUnion d -> FsTaggedUnion { d with Name = name }
+    | FsErasedObjectUnion d -> FsErasedObjectUnion { d with Name = name }
+    | FsStringEnum d -> FsStringEnum { d with Name = name }
+    | FsEnum d -> FsEnum { d with Name = name }
+    | FsExports _ as decl -> decl
+
+/// FS0037: a type `X` beside the module `X` its nested names render under compiles the module as
+/// `XModule`, which a declaration of that name then duplicates. The declaration, and every name
+/// nested under it, takes the first free numeric suffix (`NE001`).
+let resolveModuleSuffixes: Pass<ShapeModel> =
+    {
+        Name = "resolve-module-suffixes"
+        Run =
+            fun _ model ->
+                async {
+                    let names = model.Decls |> List.choose declName |> Set.ofList
+
+                    let parentOf (name: string) =
+                        match name.LastIndexOf '.' with
+                        | -1 -> None
+                        | at -> Some(name.Substring(0, at))
+
+                    // Every type that is also a module: some declaration is nested under it.
+                    let modules =
+                        names
+                        |> Seq.choose parentOf
+                        |> Seq.filter (fun parent -> Set.contains parent names)
+                        |> Set.ofSeq
+
+                    let nestedUnder (root: string) (name: string) =
+                        name = root || name.StartsWith(root + ".")
+
+                    let roots =
+                        modules
+                        |> Set.toList
+                        |> List.map (fun name -> name + "Module")
+                        |> List.filter (fun root -> names |> Set.exists (nestedUnder root))
+
+                    if List.isEmpty roots then
+                        return Advanced model
+                    else
+                        let taken = names |> Set.map (fun name -> name.Split('.') |> Array.last)
+
+                        let replacement (root: string) =
+                            Seq.initInfinite (fun index -> $"{root}{index + 2}")
+                            |> Seq.find (fun candidate ->
+                                not (names |> Set.exists (nestedUnder candidate))
+                                && not (Set.contains candidate taken))
+
+                        let renames =
+                            roots
+                            |> List.collect (fun root ->
+                                let suffixed = replacement root
+
+                                names
+                                |> Set.toList
+                                |> List.filter (nestedUnder root)
+                                |> List.map (fun name -> name, suffixed + name.Substring root.Length))
+                            |> Map.ofList
+
+                        let rename =
+                            function
+                            | FsNamed name when Map.containsKey name renames -> FsNamed renames[name]
+                            | FsApp(name, arguments) when Map.containsKey name renames ->
+                                FsApp(renames[name], arguments)
+                            | other -> other
+
+                        let reference = mapRef rename
+
+                        let retarget decl =
+                            match mapDeclRefs rename decl with
+                            | FsInterface d ->
+                                FsInterface
+                                    { d with
+                                        Statics =
+                                            d.Statics
+                                            |> List.map (fun m ->
+                                                { m with
+                                                    Body =
+                                                        match m.Body with
+                                                        | ExportFunction(parameters, returns) ->
+                                                            ExportFunction(
+                                                                parameters
+                                                                |> List.map (fun p ->
+                                                                    { p with Type = reference p.Type }),
+                                                                reference returns
+                                                            )
+                                                        | ExportConstructor(parameters, returns) ->
+                                                            ExportConstructor(
+                                                                parameters
+                                                                |> List.map (fun p ->
+                                                                    { p with Type = reference p.Type }),
+                                                                reference returns
+                                                            )
+                                                        | ExportValue returns -> ExportValue(reference returns)
+                                                })
+                                        Entrypoint =
+                                            d.Entrypoint
+                                            |> Option.map (fun entrypoint ->
+                                                { entrypoint with
+                                                    Inherits = entrypoint.Inherits |> Option.map reference
+                                                })
+                                    }
+                            | FsAbbrev d ->
+                                FsAbbrev
+                                    { d with
+                                        Value = d.Value |> Option.map (fun (binding, value) -> binding, reference value)
+                                    }
+                            | other -> other
+
+                        let decls =
+                            model.Decls
+                            |> List.map (fun decl ->
+                                let decl = retarget decl
+
+                                match declName decl |> Option.bind (fun name -> Map.tryFind name renames) with
+                                | Some name -> renamed name decl
+                                | None -> decl)
+
+                        let findings =
+                            roots
+                            |> List.map (fun root ->
+                                Finding.make
+                                    renames[root]
+                                    (NameExports.TypeNameSuffixed(root, renames[root], "an F# module suffix")))
+
+                        return
+                            Degraded(
+                                { model with
+                                    Decls = decls
+                                    DeclNames =
+                                        model.DeclNames
+                                        |> Map.map (fun _ name -> Map.tryFind name renames |> Option.defaultValue name)
+                                },
+                                findings
+                            )
+                }
+    }
