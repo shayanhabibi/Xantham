@@ -3886,3 +3886,12 @@ aliased type's alias arguments to the frontier, beside the alias declarations it
 `AliasTypeArguments` is unchanged. The shared-empty-object identity also defers to `NotFollowed`:
 a locally failed derivation is not certified as `{}`. No golden moves.
 Lab: catalog-alias-argument-lab.
+
+### Shape: picked methods keep their delegates (2026-10-27)
+
+`signatureShaped` lists the function types read only through call signatures, which get no
+delegate name. It took every method member's type in the table. Following alias arguments put
+Workers' `Container` into sandbox's table, so `Pick<Container, "exec" | "interceptOutboundHttp">`
+lost its `Exec` and `InterceptOutboundHttp` delegates and read `Func<...>`. A method's type that
+any member reads as a property now keeps its delegate; the same rule names `Fetch` for a picked
+`Fetcher.fetch` that previously read `Func`. No golden moves.

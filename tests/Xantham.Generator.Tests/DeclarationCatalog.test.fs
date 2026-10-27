@@ -325,6 +325,35 @@ let id (value: Identity.Root.Result) : float = (Identity.Adapter.Exports.``use``
         finally
             if Directory.Exists directory then Directory.Delete(directory, true)
 
+    testCase "declaration catalog picked methods keep their delegates" <| fun _ ->
+        let directory = Path.Combine(temporaryRoot, "xantham-picked-method-" + Guid.NewGuid().ToString "N")
+        let package = Path.Combine(directory, "package")
+        let dependency = Path.Combine(package, "node_modules", "picked-method-owner-lab")
+        try
+            writePackageFile package "package.json" """{"name":"picked-method-consumer-lab","version":"1.0.0","types":"index.d.ts"}"""
+            writePackageFile package "index.d.ts" """import { Container } from 'picked-method-owner-lab'; type Picked = Pick<Container, "exec">; export function attach(container: Picked): void; export function container(): Container;"""
+            writePackageFile dependency "package.json" """{"name":"picked-method-owner-lab","version":"1.0.0","types":"index.d.ts"}"""
+            writePackageFile dependency "index.d.ts" """export interface Container { exec(cmd: string[], options?: { cwd: string }): Promise<void>; }"""
+            let configure name references =
+                let path = Path.Combine(directory, name + ".json")
+                File.WriteAllText(path,
+                    JsonSerializer.Serialize {| ``module`` = "Identity." + name; ``namespace`` = "Identity.Support"
+                                                lib = [| "esnext" |]; types = ([||] : string array)
+                                                groups = Map.ofList [ "picked-method-owner-lab", "ship" ]
+                                                declarationCatalog = true; declarationReferences = references |})
+                GeneratorConfig.loadFile path
+            let producer = Path.Combine(directory, "root")
+            Pipeline.run (configure "Root" [||]) dependency producer |> Async.RunSynchronously |> ignore
+            let reference = Path.Combine(producer, "declarations.json")
+            let adapter = Path.Combine(directory, "adapter")
+            Pipeline.run (configure "Adapter" [| reference |]) package adapter |> Async.RunSynchronously |> ignore
+            let consumer =
+                Directory.GetFiles(adapter, "*.fs", SearchOption.AllDirectories) |> Array.map File.ReadAllText |> String.concat "\n"
+            Expect.stringContains consumer "delegate of cmd: string[]" "the picked method is a named delegate"
+            Expect.isFalse (consumer.Contains "exec: Func<") "the picked method is not a Func"
+        finally
+            if Directory.Exists directory then Directory.Delete(directory, true)
+
 /// The trailing syntax kind of a normalized catalog handle (`<source>#<index>.<kind>`).
 let private handleKind (handle: string) =
     handle.Substring(handle.LastIndexOf '.' + 1) |> UInt32.Parse |> LanguagePrimitives.EnumOfValue<uint32, SyntaxKind>

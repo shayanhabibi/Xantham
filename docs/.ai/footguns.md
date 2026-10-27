@@ -808,3 +808,8 @@ only the type-parameter alias arguments of a union or intersection. A consumer r
 `InferEvent<CallStartEvent>` through its flattened arms has no facts for `CallStartEvent`, the
 application loses its key, and the declaration falls back to a parent-role key the producer
 never wrote. With a catalogue in use, the type-table walk also follows every alias argument.
+
+**A method's type can also be a property's type.** `Pick<Container, "exec">` reads
+`Container.exec`'s function type as a property. `signatureShaped` skips naming delegates for
+method types, so once `Container` itself is in the table the picked property reads as `Func`.
+A method type that any member reads as a property keeps its delegate.

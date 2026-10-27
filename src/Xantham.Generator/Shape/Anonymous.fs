@@ -515,10 +515,22 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                 else
                     Option.toList ids.Declared @ Option.toList ids.Value)
 
+        // A method's type that another member reads as a property (`Pick<Container, "exec">`)
+        // keeps its delegate.
         let methods =
-            model.Types
-            |> Map.toList
-            |> List.collect (fun (_, facts) -> facts.Members |> List.filter (emitsAsMethod model) |> List.map _.TypeId)
+            let members =
+                model.Types |> Map.toList |> List.collect (fun (_, facts) -> facts.Members)
+
+            let properties =
+                members
+                |> List.filter (emitsAsMethod model >> not)
+                |> List.map _.TypeId
+                |> Set.ofList
+
+            members
+            |> List.filter (emitsAsMethod model)
+            |> List.map _.TypeId
+            |> List.filter (fun id -> not (Set.contains id properties))
 
         // The arms of a member type that carry call signatures of their own.
         let callbackArms (typeId: int<Measure.typeId>) =
