@@ -249,16 +249,25 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
     // A hoisted name (`NumberFormatOptions.UnitDisplay`, §4.9) is written beside the
     // declaration at its root: a shipped group's file compiles before the entry module and
     // has to carry every shape its own declarations read.
+    //
+    // An entry subpath's module path (`Artifacts` for `pkg/artifacts`) owns no declaration, even
+    // where a shipped group declares a type spelled the same.
+    let entryModulePaths =
+        Shape.ExportLayout.modulePaths shape
+        |> Map.toList
+        |> List.collect (fun (_, path) -> List.init path.Length (fun count -> List.take (count + 1) path))
+        |> List.map (String.concat ".")
+        |> Set.ofList
+
     let rec ownerOf (name: string) =
         match name.LastIndexOf '.' with
         | -1 -> None
         | at ->
             let parent = name.Substring(0, at)
 
-            if Map.containsKey parent origins then
-                Some parent
-            else
-                ownerOf parent
+            if Set.contains parent entryModulePaths then None
+            elif Map.containsKey parent origins then Some parent
+            else ownerOf parent
 
     let rec originOf (name: string) =
         if Map.containsKey name declared then
@@ -321,9 +330,113 @@ let private groupModulesForScope compilerOnly (ctx: Context) (shape: ShapeModel)
             | _ -> None)
         |> Map.ofList
 
+    // A shipped group's file compiles before the entry module, so a group's declarations read
+    // no entry declaration. Under `recursiveGroups` every module shares one `namespace rec`, and
+    // declarations keep their source placement.
+    let ordered = not ctx.Config.RecursiveGroups
+    let reads = shape.Decls |> List.map (fun decl -> decl, Shape.Orphans.readNames decl)
+
+    // A shipped group's declaration with no export of its own that reads an entry declaration -
+    // `UiMessageChunkSchema.Result`, hoisted under an entry value whose type instantiates the
+    // dependency's generic over entry types - is written in the entry module, together with
+    // every such declaration reading it in turn.
+    let entryReaders =
+        if not ordered then
+            Set.empty
+        else
+            let placed =
+                shape.Decls
+                |> List.map (fun decl ->
+                    let name = Render.declName decl
+
+                    name,
+                    Map.tryFind name aliasOwners
+                    |> Option.defaultWith (fun () -> sourceGroupOf decl))
+                |> Map.ofList
+
+            let candidates =
+                reads
+                |> List.filter (fun (decl, _) ->
+                    let name = Render.declName decl
+
+                    not (Map.containsKey name declared)
+                    && (match Map.find name placed with
+                        | Dependency _ -> true
+                        | _ -> false))
+
+            let rec settle (pulled: Set<string>) =
+                let inEntry name =
+                    Set.contains name pulled || Map.tryFind name placed = Some EntryPackage
+
+                let additions =
+                    candidates
+                    |> List.filter (fun (decl, names) ->
+                        not (Set.contains (Render.declName decl) pulled) && List.exists inEntry names)
+                    |> List.map (fst >> Render.declName)
+
+                if List.isEmpty additions then
+                    pulled
+                else
+                    settle (Set.union pulled (Set.ofList additions))
+
+            settle Set.empty
+
+    // An entry declaration with no export of its own that one shipped group reads -
+    // `ToolWithFunction.Parameters`, hoisted under an entry alias over the dependency's anonymous
+    // shape - is written beside that group, together with every such declaration it reads.
+    let readerOwners =
+        let movable =
+            shape.Decls
+            |> List.filter (fun decl ->
+                ordered
+                && sourceGroupOf decl = EntryPackage
+                && not (Map.containsKey (Render.declName decl) declared)
+                && not (Map.containsKey (Render.declName decl) aliasOwners))
+            |> List.map Render.declName
+            |> Set.ofList
+
+        let rec settle (owners: Map<string, PackageId>) =
+            let ownerOf decl =
+                let name = Render.declName decl
+
+                if Set.contains name entryReaders then
+                    EntryPackage
+                else
+                    Map.tryFind name aliasOwners
+                    |> Option.orElse (Map.tryFind name owners)
+                    |> Option.defaultWith (fun () -> sourceGroupOf decl)
+
+            let additions =
+                reads
+                |> List.collect (fun (decl, names) ->
+                    match ownerOf decl with
+                    | Dependency _ as group ->
+                        names
+                        |> List.filter (fun name -> Set.contains name movable && not (Map.containsKey name owners))
+                        |> List.map (fun name -> name, group)
+                    | _ -> [])
+                |> List.groupBy fst
+                |> List.choose (fun (name, uses) ->
+                    match uses |> List.map snd |> List.distinct with
+                    | [ group ] -> Some(name, group)
+                    | _ -> None)
+
+            if List.isEmpty additions then
+                owners
+            else
+                settle (List.fold (fun owners (name, group) -> Map.add name group owners) owners additions)
+
+        settle Map.empty
+
     let groupOf decl =
-        Map.tryFind (Render.declName decl) aliasOwners
-        |> Option.defaultWith (fun () -> sourceGroupOf decl)
+        let name = Render.declName decl
+
+        if Set.contains name entryReaders then
+            EntryPackage
+        else
+            Map.tryFind name aliasOwners
+            |> Option.orElse (Map.tryFind name readerOwners)
+            |> Option.defaultWith (fun () -> sourceGroupOf decl)
 
     // The compiler lib ships as two modules under one `namespace rec`: the ECMAScript libs and
     // the DOM libs. A declaration's family is its own symbol's file; a hoisted name takes its

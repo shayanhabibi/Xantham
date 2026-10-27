@@ -813,3 +813,11 @@ never wrote. With a catalogue in use, the type-table walk also follows every ali
 `Container.exec`'s function type as a property. `signatureShaped` skips naming delegates for
 method types, so once `Container` itself is in the table the picked property reads as `Func`.
 A method type that any member reads as a property keeps its delegate.
+
+**A shipped group's file compiles before the entry module.** Placement by origin and by
+hoisting root can still leave a group declaration reading an entry one: an entry alias over a
+dependency's anonymous shape hoists the shape's parts under the entry name; an entry value typed
+by the dependency's generic hoists entry-typed shapes under a dependency root; and a hoisted
+name's dotted prefix can be an entry subpath module (`Artifacts`) that a group's global type
+also spells. `groupModulesForScope` settles placement so no group reads the entry module; the
+compile gate is the check, and only `recursiveGroups` (one `namespace rec`) exempts it.

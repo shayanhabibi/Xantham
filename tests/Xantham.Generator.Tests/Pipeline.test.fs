@@ -4553,6 +4553,33 @@ let pipelineTests =
                               [ "Panel.widget"; "Panel.boxed"; "Panel.pair"; "Exports.mount(widget)"; "Exports.mount()" ]
                               "every reference into the dependency is a widening with a name" ])
 
+        // A shipped group's declaration reads a shape hoisted under an entry alias. The golden
+        // compiles only with the shape beside the group, whose file precedes the entry module.
+        yield!
+            fixtureTests
+                "group-reader-lab"
+                (handInstalledFixture "group-reader-lab")
+                (handConfig (handInstalledFixture "group-reader-lab"))
+                (fun _ -> [])
+
+        // Shapes hoisted under an entry value whose type instantiates a shipped dependency's
+        // generic over entry types. They read entry declarations, so they stay in the entry.
+        yield!
+            fixtureTests
+                "entry-reader-lab"
+                (handInstalledFixture "entry-reader-lab")
+                (handConfig (handInstalledFixture "entry-reader-lab"))
+                (fun _ -> [])
+
+        // An entry subpath module spelled like a shipped group's global type. The catalogue's
+        // constructor value, named under the subpath, stays in the entry module.
+        yield!
+            fixtureTests
+                "subpath-owner-lab"
+                (handInstalledFixture "subpath-owner-lab")
+                (handConfig (handInstalledFixture "subpath-owner-lab"))
+                (fun _ -> [])
+
         // Wave five lane S (O7's `ship` disposition). Two dependencies are installed beside the
         // entry package and both configured `ship`. `dep-lab` is emitted as its own module and
         // the entry names its type across the boundary; `dep_lab` templates the same module

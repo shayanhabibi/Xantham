@@ -3895,3 +3895,21 @@ Workers' `Container` into sandbox's table, so `Pick<Container, "exec" | "interce
 lost its `Exec` and `InterceptOutboundHttp` delegates and read `Func<...>`. A method's type that
 any member reads as a property now keeps its delegate; the same rule names `Fetch` for a picked
 `Fetcher.fetch` that previously read `Func`. No golden moves.
+
+### Emit: groups never read the entry module (2026-10-27)
+
+A shipped group's file compiles before the entry module. The first CloudEdge binding compile
+found four group files reading their own entry module. `groupModulesForScope` now settles
+placement in three steps, all skipped under `recursiveGroups`:
+
+- A hoisted name's dotted prefix that is an entry subpath module (`Artifacts` for
+  `@cloudflare/computer/artifacts`) owns nothing, even where a shipped group declares a type
+  spelled the same (Workers' global `Artifacts`). Lab: subpath-owner-lab.
+- A group declaration with no export of its own that reads an entry declaration moves to the
+  entry, to a fixpoint (`UiMessageChunkSchema.Result`, hoisted under ai's `LazySchema<...>`
+  value and reading ai's `FinishReason`). Lab: entry-reader-lab.
+- An entry declaration with no export of its own that exactly one shipped group reads moves to
+  that group, to a fixpoint (`AiTextGenerationToolInputWithFunction.Parameters`, hoisted under an
+  aiutils alias over Workers' anonymous tool shape). Lab: group-reader-lab.
+
+No existing golden moves.
