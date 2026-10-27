@@ -797,3 +797,7 @@ declaration; the consumer may reach it twenty generations deep, past `FollowDept
 it with unbound parameters or `obj` members. Comparing that rendering against the producer row
 reports a mismatch that is only the frontier. `partial` in the reuse check skips the comparison
 for declarations reaching `NotFollowed`; do not tighten it back to a hard failure.
+
+**The checker shares one empty object type and hangs aliases on it.** `type X = Cond<..., {}>`
+resolving to `{}` attaches `X` to the type every bare `{}` in the program uses. Naming or keying
+`{}` by that alias is program-dependent; `isSharedEmptyObject` keeps it intrinsic.

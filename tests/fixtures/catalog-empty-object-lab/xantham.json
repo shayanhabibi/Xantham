@@ -1,0 +1,12 @@
+{
+  "module": "CatalogEmptyObjectLab",
+  "namespace": "Identity.Support",
+  "lib": [
+    "esnext"
+  ],
+  "types": [],
+  "groups": {
+    "empty-object-owner-lab": "ship"
+  },
+  "declarationCatalog": true
+}

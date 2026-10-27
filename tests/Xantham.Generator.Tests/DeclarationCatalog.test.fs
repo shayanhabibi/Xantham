@@ -1090,6 +1090,30 @@ let json (value: Identity.Root.Value) : Identity.Root.Output = Identity.Root.Out
                 finally
                     if Directory.Exists directory then Directory.Delete(directory, true)
 
+            testCase "the shared empty object keys alike whether or not an alias names it" <| fun _ ->
+                let directory = Path.Combine(temporaryRoot, "xantham-empty-object-" + Guid.NewGuid().ToString "N")
+                Directory.CreateDirectory directory |> ignore
+                try
+                    let package = Path.GetFullPath(Path.Combine(fixture, "..", "catalog-empty-object-lab"))
+                    let dependency = Path.Combine(package, "node_modules", "empty-object-owner-lab")
+                    let config =
+                        { GeneratorConfig.loadFile (Path.Combine(package, "xantham.json")) with
+                            ModuleName = Some "Identity.Root" }
+                    let root = Path.Combine(directory, "root")
+                    run config dependency root |> Async.RunSynchronously |> ignore
+                    let producer = File.ReadAllText(Path.Combine(root, "Identity.Root.fs"))
+                    Expect.stringContains producer "abstract logprobs: obj option" "a bare {} is not written as the alias resolving to it"
+                    Expect.stringContains producer "type MainModule = obj" "the alias is still declared"
+                    let adapter =
+                        { config with
+                            ModuleName = Some "Identity.Adapter"
+                            DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
+                    run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                    let consumer = File.ReadAllText(Path.Combine(directory, "adapter", "Identity.Adapter.fs"))
+                    Expect.stringContains consumer "complete () : Identity.Root.Completion" "the consumer reuses the record"
+                finally
+                    if Directory.Exists directory then Directory.Delete(directory, true)
+
             testCase "a consumer export naming a producer's anonymous union reuses its row" <| fun _ ->
                 let directory = Path.Combine(temporaryRoot, "xantham-consumer-alias-" + Guid.NewGuid().ToString "N")
                 Directory.CreateDirectory directory |> ignore

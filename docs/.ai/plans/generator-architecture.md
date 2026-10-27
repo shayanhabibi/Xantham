@@ -3859,3 +3859,16 @@ over Workers' anonymous status union, keys it by that export, and records the va
 equivalent; Workers keyed the union by those values (`InstanceStatus.Status`). Reuse now also
 looks up the consumer row's equivalents among producer primary identities, so the export
 abbreviates the producer row and `InstanceStatus` compares equal. Lab: catalog-consumer-alias-lab.
+
+### Shape and catalogue: the shared empty object (2026-10-27)
+
+Every bare `{}` resolves to one checker type. An alias resolving to it - Workers'
+`type MainModule = GlobalProp<"mainModule", {}>` - claimed it through its export, so Workers
+wrote every `logprobs?: {} | null` as `MainModule` and keyed it by `MainModule`'s handle, while
+`aigatewayprovider`, which never loads `MainModule`, keyed the same `{}` as an empty object.
+`isSharedEmptyObject` treats the type as intrinsic, as `string` is: `typeRefOnPath` renders it
+`obj` with `ObjectWithoutMembers` before consulting `DeclNames`, the alias still declares
+`type MainModule = obj`, and the catalogue keys it `empty-object` ahead of export and alias
+handles. Accepted tier movement (user decision): five Workers AI symbols that reached `{}`
+through `MainModule` move from ergonomic to widened; their F# type is unchanged.
+Lab: catalog-empty-object-lab.

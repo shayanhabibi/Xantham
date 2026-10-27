@@ -470,6 +470,10 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                 // Intrinsic checker types are shared by unrelated exports. Their aliases
                 // belong to the individual declaration, never the aggregate export handles.
                 None
+            | Some facts when Shape.Spec.isSharedEmptyObject facts ->
+                // Every bare `{}` is this one type; an alias the checker hangs on it in one
+                // program (`MainModule`) is absent from another.
+                Some(identity "empty-object" [] [])
             | Some facts when
                 (facts.Response.ObjectFlags
                  |> ValueOption.exists (fun flags ->
@@ -591,7 +595,9 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                                         match bound with
                                         | None -> "parameter:" + string index
                                         | Some bound -> json ("parameter", index, bound))
-                                    |> List.fold (fun bindings (parameter, key) -> Map.add parameter key bindings) bindings
+                                    |> List.fold
+                                        (fun bindings (parameter, key) -> Map.add parameter key bindings)
+                                        bindings
 
                                 let contracts =
                                     facts.IntersectionMembers |> List.choose (typeIdentity (id :: visited) bindings)
@@ -1068,10 +1074,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                 |> Map.toList
                 |> List.choose (fun (id, identity) ->
                     if identity.Role = "union" && not (Map.containsKey id shape.DeclNames) then
-                        Shape.Spec.namedUnionByMembers
-                            ctx
-                            shape
-                            (Shape.Spec.nonNullishMemberSet shape shape.Types[id])
+                        Shape.Spec.namedUnionByMembers ctx shape (Shape.Spec.nonNullishMemberSet shape shape.Types[id])
                         |> Option.map (fun (_, name) -> name, identity.Key)
                     else
                         None)

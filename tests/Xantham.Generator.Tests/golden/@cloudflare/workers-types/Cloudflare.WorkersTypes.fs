@@ -10453,9 +10453,9 @@ type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response =
     /// <summary>
     /// Log probabilities for the prompt (if requested)
     /// </summary>
-    abstract prompt_logprobs: Cloudflare.MainModule option with get, set
+    abstract prompt_logprobs: obj option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?id: string, ?``object``: string, ?created: float, ?model: string, ?choices: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Choices.Item[], ?usage: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Usage, ?prompt_logprobs: Cloudflare.MainModule) : Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response = jsNative
+    static member Create (?id: string, ?``object``: string, ?created: float, ?model: string, ?choices: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Choices.Item[], ?usage: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Usage, ?prompt_logprobs: obj) : Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response = jsNative
 
 [<Interface>]
 type Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Text_Completion_Response =
@@ -11192,9 +11192,9 @@ type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response =
     /// <summary>
     /// Log probabilities for the prompt (if requested)
     /// </summary>
-    abstract prompt_logprobs: Cloudflare.MainModule option with get, set
+    abstract prompt_logprobs: obj option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?id: string, ?``object``: string, ?created: float, ?model: string, ?choices: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Choices.Item[], ?usage: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Usage, ?prompt_logprobs: Cloudflare.MainModule) : Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response = jsNative
+    static member Create (?id: string, ?``object``: string, ?created: float, ?model: string, ?choices: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Choices.Item[], ?usage: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Usage, ?prompt_logprobs: obj) : Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response = jsNative
 
 [<Interface>]
 type Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Text_Completion_Response =
@@ -20488,9 +20488,9 @@ module Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response =
             /// <summary>
             /// Log probabilities (if requested)
             /// </summary>
-            abstract logprobs: Cloudflare.MainModule option with get, set
+            abstract logprobs: obj option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?index: float, ?message: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Choices.Item.Message, ?finish_reason: string, ?stop_reason: string, ?logprobs: Cloudflare.MainModule) : Item = jsNative
+            static member Create (?index: float, ?message: Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Chat_Completion_Response.Choices.Item.Message, ?finish_reason: string, ?stop_reason: string, ?logprobs: obj) : Item = jsNative
 
         module Item =
             [<Interface>]
@@ -20892,13 +20892,13 @@ module Ai_Cf_Aisingapore_Gemma_Sea_Lion_V4_27B_It_Text_Completion_Response =
             /// <summary>
             /// Log probabilities (if requested)
             /// </summary>
-            abstract logprobs: Cloudflare.MainModule option with get, set
+            abstract logprobs: obj option with get, set
             /// <summary>
             /// Log probabilities for the prompt (if requested)
             /// </summary>
-            abstract prompt_logprobs: Cloudflare.MainModule option with get, set
+            abstract prompt_logprobs: obj option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (index: float, text: string, finish_reason: string, ?stop_reason: string, ?logprobs: Cloudflare.MainModule, ?prompt_logprobs: Cloudflare.MainModule) : Item = jsNative
+            static member Create (index: float, text: string, finish_reason: string, ?stop_reason: string, ?logprobs: obj, ?prompt_logprobs: obj) : Item = jsNative
 
 module Ai_Cf_Baai_Bge_Base_En_V1_5_Input2 =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -22623,9 +22623,9 @@ module Ai_Cf_Moondream_Moondream3_1_9B_A2B_Output =
         /// <summary>
         /// Grounding information.
         /// </summary>
-        abstract grounding: Cloudflare.MainModule[] option with get, set
+        abstract grounding: obj[] option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (text: string, ?grounding: Cloudflare.MainModule[]) : Reasoning = jsNative
+        static member Create (text: string, ?grounding: obj[]) : Reasoning = jsNative
 
     module Objects =
         [<Interface>]
@@ -23003,9 +23003,9 @@ module Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response =
             /// <summary>
             /// Log probabilities (if requested)
             /// </summary>
-            abstract logprobs: Cloudflare.MainModule option with get, set
+            abstract logprobs: obj option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?index: float, ?message: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Choices.Item.Message, ?finish_reason: string, ?stop_reason: string, ?logprobs: Cloudflare.MainModule) : Item = jsNative
+            static member Create (?index: float, ?message: Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Chat_Completion_Response.Choices.Item.Message, ?finish_reason: string, ?stop_reason: string, ?logprobs: obj) : Item = jsNative
 
         module Item =
             [<Interface>]
@@ -23407,13 +23407,13 @@ module Ai_Cf_Qwen_Qwen3_30B_A3B_Fp8_Text_Completion_Response =
             /// <summary>
             /// Log probabilities (if requested)
             /// </summary>
-            abstract logprobs: Cloudflare.MainModule option with get, set
+            abstract logprobs: obj option with get, set
             /// <summary>
             /// Log probabilities for the prompt (if requested)
             /// </summary>
-            abstract prompt_logprobs: Cloudflare.MainModule option with get, set
+            abstract prompt_logprobs: obj option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (index: float, text: string, finish_reason: string, ?stop_reason: string, ?logprobs: Cloudflare.MainModule, ?prompt_logprobs: Cloudflare.MainModule) : Item = jsNative
+            static member Create (index: float, text: string, finish_reason: string, ?stop_reason: string, ?logprobs: obj, ?prompt_logprobs: obj) : Item = jsNative
 
 module Ai_Cf_Qwen_Qwq_32B_Messages =
     module Functions =

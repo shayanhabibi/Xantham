@@ -164,6 +164,27 @@ let internal absenceOf (facts: TypeFacts) =
 /// construction: a hoisted member sets at least one flag of the finding it raises.
 let internal isNullish (facts: TypeFacts) = (absenceOf facts).IsAbsent
 
+/// The checker's one empty object type, which every bare `{}` resolves to. An alias resolving to
+/// it (`type MainModule = GlobalProp<"mainModule", {}>`) does not name it: it is as intrinsic
+/// as `string`.
+let internal isSharedEmptyObject (facts: TypeFacts) =
+    flag TypeFlags.Object facts
+    && facts.Members.IsEmpty
+    && facts.IndexInfos.IsEmpty
+    && facts.CallSignatures.IsEmpty
+    && facts.ConstructSignatures.IsEmpty
+    && facts.TypeArguments.IsEmpty
+    && facts.BaseTypes.IsEmpty
+    && facts.DeclFile.IsNone
+    && facts.SymbolName
+       |> Option.forall (fun name -> name / uom<symbolName> = "__type")
+    && facts.Response.TargetTypeId.IsNone
+    && facts.Response.ObjectFlags
+       |> ValueOption.exists (fun flags ->
+           flags.HasFlag ObjectFlags.Anonymous
+           && flags.HasFlag ObjectFlags.MembersResolved
+           && not (flags.HasFlag ObjectFlags.Mapped))
+
 /// The spellings of absence a union arm is written with. An intersection with a nullish operand
 /// (`undefined & T`) is inhabited by that operand's absence alone, and carries its spelling.
 let internal absenceIn (model: ShapeModel) (facts: TypeFacts) =
@@ -2522,6 +2543,8 @@ and internal typeRefOnPath
                             FsNamed name,
                             [ Finding.make owner (TypeReference.TypeParameterOutOfScopeToConstraint name) ]
                         | None -> FsObj, [ Finding.make owner TypeReference.TypeParameterOutOfScope ]
+        elif isSharedEmptyObject facts then
+            FsObj, [ Finding.make owner TypeReference.ObjectWithoutMembers ]
         elif has TypeFlags.Object then
             // A shipped compiler lib declares `Promise` and still writes references to it as
             // `JS.Promise`, ahead of its own declaration.
