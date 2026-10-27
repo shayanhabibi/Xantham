@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "compiler": "498f59d207e22c40f1ecc218dfa67d1db25629a231bd0948c3db92df7457afc7",
-  "generator": "682fb618bea544a6549a8b2434fb48ee88bd4723b8e0f47d26f7b8d547baf6ab",
+  "generator": "01a6ea0a8d381e836a1021abe75c94176259b915becd8e674c0d70a033233da4",
   "inferenceProfile": "d2f99097bf8701703dbad824988206bf0800602c089c9094d2b66092c161b32f",
   "owner": "FableCoreTsInput",
   "inputs": [
@@ -602758,6 +602758,13 @@
         {
           "package": "typescript",
           "version": "7.1.0-beta",
+          "file": "lib/lib.es2025.intl.d.ts",
+          "sha256": "ffbe6d7b295306b2ba88030f65b74c107d8d99bdcf596ea99c62a02f606108b0",
+          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
+        },
+        {
+          "package": "typescript",
+          "version": "7.1.0-beta",
           "file": "lib/lib.es5.d.ts",
           "sha256": "45cc92f8dd3df7cb07b7d19e2b2ca34e78bc005c910c1e53ee1cf9bf37910215",
           "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
@@ -620324,13 +620331,13 @@
       "constraints": [
         "none"
       ],
-      "api": "1984266f72930d26c4335657e0e97ac233ac49bfc7625a6151ab0c97ecebaaca",
+      "api": "8ac51e7bbc8df8ca493558e50d425038ed49fd84a971c7bc2617836270e406a5",
       "owner": "FableCoreTsInput"
     },
     {
-      "identity": "c1e337ffec6c7bf403f42bc42b11e5e851d5f6d364eebc940b45188a75f0ea83",
+      "identity": "aa197e5c10387b752721bb9b71d79a4c134b48213fee6ef6757e0c07b0888b83",
       "handles": [
-        "typescript@7.1.0-beta/lib/lib.esnext.temporal.d.ts#570.266"
+        "typescript@7.1.0-beta/lib/lib.es5.d.ts#6599.267"
       ],
       "sources": [
         {
@@ -620348,7 +620355,7 @@
           "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
         }
       ],
-      "role": "generated:Base",
+      "role": "alias",
       "fSharpName": "Fable.Core.TS.Es.Temporal.ToStringRoundingOptions.Base",
       "arity": 1,
       "constraints": [
