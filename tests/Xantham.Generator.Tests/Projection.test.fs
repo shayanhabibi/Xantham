@@ -4,6 +4,7 @@ module Xantham.Generator.Tests.ProjectionTests
 open System
 open System.IO
 open System.Text.Json.Nodes
+open System.Xml.Linq
 open Expecto
 open Xantham.Generator
 open Xantham.Generator.Customization
@@ -24,11 +25,15 @@ let private supportReferences () =
         assets["packageFolders"].AsObject()
         |> Seq.map (fun folder -> Path.Combine(folder.Key, library.Value["path"].GetValue<string>(), assembly))
         |> Seq.find File.Exists)
-let private compiler workspace =
+let private catalogReferences () =
     let configuration = DirectoryInfo(AppContext.BaseDirectory).Parent.Name
-    let references = ["Xantham.Fable.Core"; "Xantham.Fable.Core.TS"] |> List.map (fun name ->
+    ["Xantham.Fable.Core"; "Xantham.Fable.Core.TS"] |> List.map (fun name ->
         Path.Combine(root, "src", name, "bin", configuration, "net8.0", name + ".dll"))
-    Compiler.dotnet workspace (references @ supportReferences ())
+let private compiler workspace =
+    Compiler.dotnet workspace (catalogReferences () @ supportReferences ())
+
+let private supportWitness =
+    "module ExplicitSupport\nopen Fable.Core\ntype Payload = abstract value: string\n[<TypeScriptTaggedUnion(\"kind\")>]\ntype Value = | [<Fickl.Core.InlineInterface>] Item of Payload\n"
 
 let private selections =
     ["Choice"; "EqualA"; "EqualB"; "OverlapC"; "Weird"] |> List.map (fun name ->
@@ -89,13 +94,23 @@ let tests = testList "projection companions" [
         use scratch = Scratch.directory "projection-support-references"
         let references = supportReferences ()
         Expect.equal (Compile.supportPackages references) "" "explicit support assemblies require no fallback packages"
-        let source = "module ExplicitSupport\nopen Fable.Core\ntype Payload = abstract value: string\n[<TypeScriptTaggedUnion(\"kind\")>]\ntype Value = | [<Fickl.Core.InlineInterface>] Item of Payload\n"
-        Compile.validate (Compiler.dotnet scratch.Path references) ["Consumer.fs", source] [] |> Async.RunSynchronously
+        Compile.validate (Compiler.dotnet scratch.Path references) ["Consumer.fs", supportWitness] [] |> Async.RunSynchronously
         let impostor = Path.Combine(scratch.Path, "Fable.Core.dll")
         File.Copy(typeof<unit>.Assembly.Location, impostor)
         let fallback = Compile.supportPackages [impostor]
         Expect.stringContains fallback "Include='Fable.Core'" "assembly identity authenticates the supplied Fable dependency"
         Expect.stringContains fallback "Include='Fickl.Core'" "unsupplied support dependency keeps its fallback"
+
+    testCase "validation fallback packages match the shipped support closure" <| fun _ ->
+        use scratch = Scratch.directory "projection-fallback-support"
+        let references = catalogReferences ()
+        let project = XDocument.Parse("<Project><ItemGroup>" + Compile.supportPackages references + "</ItemGroup></Project>")
+        let packages =
+            project.Descendants(XName.Get "PackageReference")
+            |> Seq.map (fun reference -> reference.Attribute(XName.Get "Include").Value, reference.Attribute(XName.Get "Version").Value)
+            |> Seq.toList
+        Expect.equal packages ["Fable.Core", "5.6.0"; "Fickl.Core", "0.7.2"] "fallback validation restores the shipped support versions"
+        Compile.validate (Compiler.dotnet scratch.Path references) ["Consumer.fs", supportWitness] [] |> Async.RunSynchronously
 
     testCase "Myriad companions are deterministic, gated goldens and leave the raw ABI intact" <| fun _ ->
         use scratch = Scratch.directory "projection-golden"

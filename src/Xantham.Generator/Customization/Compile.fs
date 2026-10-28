@@ -13,7 +13,7 @@ let supportPackages references =
         |> List.map (fun path -> AssemblyName.GetAssemblyName(Path.GetFullPath path).Name)
         |> Set.ofList
 
-    [ "Fable.Core", "5.5.0"; "Fickl.Core", "0.5.4" ]
+    [ "Fable.Core", "5.6.0"; "Fickl.Core", "0.7.2" ]
     |> List.filter (fun (name, _) -> not (Set.contains name suppliedAssemblies))
     |> List.map (fun (name, version) -> $"<PackageReference Include='{name}' Version='{version}' />")
     |> String.concat ""
