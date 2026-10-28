@@ -2444,15 +2444,17 @@ let genericDefaultConstraintTests =
                     """{"name":"remote-schema-lab","version":"1.0.0","types":"index.d.ts"}"""
                 writePackageFile package "node_modules/remote-schema-lab/index.d.ts" "export interface RemoteSchema {}\n"
                 let dependency = Path.Combine(package, "node_modules", "empty-union-owner-lab")
-                File.AppendAllText(Path.Combine(dependency, "index.d.ts"), """
+                let ownerAddition = """
 import type { RemoteSchema } from "remote-schema-lab";
 export type { RemoteSchema } from "remote-schema-lab";
 export interface Bound<T extends RemoteSchema = RemoteSchema> { value: T; }
-""")
-                File.AppendAllText(Path.Combine(package, "index.d.ts"), """
+"""
+                File.AppendAllText(Path.Combine(dependency, "index.d.ts"), ownerAddition)
+                let consumerAddition = """
 import type { Bound, RemoteSchema } from "empty-union-owner-lab";
 export interface Registration<T extends RemoteSchema = RemoteSchema> extends Bound<T> { execute(value: T): void; }
-""")
+"""
+                File.AppendAllText(Path.Combine(package, "index.d.ts"), consumerAddition)
                 writePackageFile package "next.d.ts" """import type { RemoteSchema } from "empty-union-owner-lab";
 import type { Registration } from "./index";
 export declare function share<T extends RemoteSchema>(value: Registration<T>): Registration<T>;
