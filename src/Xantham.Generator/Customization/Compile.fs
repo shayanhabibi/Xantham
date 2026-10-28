@@ -5,6 +5,18 @@ open System.IO
 open System.Diagnostics
 open System.Threading
 open System.Security
+open System.Reflection
+
+let supportPackages references =
+    let suppliedAssemblies =
+        references
+        |> List.map (fun path -> AssemblyName.GetAssemblyName(Path.GetFullPath path).Name)
+        |> Set.ofList
+
+    [ "Fable.Core", "5.5.0"; "Fickl.Core", "0.5.4" ]
+    |> List.filter (fun (name, _) -> not (Set.contains name suppliedAssemblies))
+    |> List.map (fun (name, version) -> $"<PackageReference Include='{name}' Version='{version}' />")
+    |> String.concat ""
 
 let validate compiler (files: (string * string) list) (contracts: string list) =
     async {
@@ -60,9 +72,11 @@ let validate compiler (files: (string * string) list) (contracts: string list) =
                     $"<Reference Include='Dependency{i}'><HintPath>{escape (Path.GetFullPath path)}</HintPath></Reference>")
                 |> String.concat ""
 
+            let packages = supportPackages references
+
             File.WriteAllText(
                 Path.Combine(workspace, "Validation.fsproj"),
-                $"<Project Sdk='Microsoft.NET.Sdk'><PropertyGroup><TargetFramework>net8.0</TargetFramework></PropertyGroup><ItemGroup>{items}<Compile Include='Contracts.fs' /><PackageReference Include='Fable.Core' Version='5.5.0' /><PackageReference Include='Fickl.Core' Version='0.5.4' />{refs}</ItemGroup></Project>"
+                $"<Project Sdk='Microsoft.NET.Sdk'><PropertyGroup><TargetFramework>net8.0</TargetFramework></PropertyGroup><ItemGroup>{items}<Compile Include='Contracts.fs' />{packages}{refs}</ItemGroup></Project>"
             )
 
             let start =

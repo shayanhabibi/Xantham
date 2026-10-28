@@ -38,8 +38,8 @@
     <ItemGroup>
         <!-- Fable.Core 5+, pinned: the compile gate carries the same pin, because generated
              bindings and the gate agree on one Fable.Core. -->
-        <PackageReference Include="Fable.Core" Version="5.5.0" />
-        <PackageReference Include="Fickl.Core" Version="0.6.0" />
+        <PackageReference Include="Fable.Core" Version="5.6.0" />
+        <PackageReference Include="Fickl.Core" Version="0.7.2" />
     </ItemGroup>
 
 </Project>

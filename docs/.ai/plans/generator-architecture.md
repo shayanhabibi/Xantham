@@ -2180,6 +2180,12 @@ dependency graph uses opt-in `recursiveGroups` placement. The configured namespa
 the immediate parent of every ordinary shipped module; compiler-library modules retain their
 separate owner. The existing namespace renderer owns the single-file recursive representation.
 
+Projection validation accepts the caller's compiled catalog owners and support assemblies through
+`Compiler.dotnet`. Explicit `Fable.Core` and `Fickl.Core` assembly identities suppress their
+fallback package references, so validation uses the consumer's supplied support closure.
+Assembly metadata authenticates these names; a DLL filename cannot replace a support identity.
+The projection suite covers explicit support compilation and filename-impostor rejection.
+
 ## Generic tagged unions (2026-10-09)
 
 A discriminated union declares the type parameters its arms read (§4.5(2), §4.9). `FsTaggedUnionDecl.TypeParameters` holds the alias's own parameters, then those `bind-free-type-params` records for a union hoisted out of a generic scope; `detect-tagged-unions` shapes the case fields under that scope, so a `T` payload reads `'T` rather than `obj` with `TR013`. `Spec.isTaggedDeclaration` states the conditions `detect-tagged-unions` applies inline; the naming walk and the reference read it. `unionRef` applies the parameters at every reference: an alias application its recovered arguments, any other tagged declaration its own and free parameters. Literal-union aliases with a phantom parameter stay non-generic string enums.
