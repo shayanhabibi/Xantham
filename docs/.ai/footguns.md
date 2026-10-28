@@ -122,6 +122,15 @@ Inline structural bounds retain their existing constraint policy. A transformed 
 that keeps an alias symbol cannot claim the original alias name through this recovery.
 The bound-alias naming lab checks owner/consumer API agreement and imported nominal rejection.
 
+**An empty interface can name a tautological bound in only one program.** An exported empty
+interface renders as an `obj` abbreviation, so the producer keeps its named generic bound while
+a consumer that widens the unshipped interface drops the bound. Canonicalize references before
+serializing constraints and treat canonical `obj` as absent, both on declarations and inside
+method and constructor signatures. All other bounds retain their complete canonical reference.
+The imported empty-bound case covers direct and transitive consumers, generic methods and
+constructors, consumer compilation, and rejection of changed empty and nominal bounds. API contract 15 requires
+regenerating earlier producer catalogs.
+
 **Anonymous intersections can inherit different reachable parents in different runs.**
 `BotEnterprise.botManagement: BotBase & { ja3Hash: string }` is the same checker contract
 when reached through `Combined = BotEnterprise & Other`, but a producer reaches Combined

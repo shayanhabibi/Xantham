@@ -1772,6 +1772,12 @@ let internal applyWithProducer
                     FsBranded(canonical primitive, Map.tryFind measure canonicalNames |> Option.defaultValue measure)
                 | other -> other
 
+            let canonicalConstraint canonical constraint_ =
+                constraint_
+                |> Option.map canonical
+                |> Option.filter ((<>) FsObj)
+                |> Canonical.option Canonical.reference
+
             let constraintsFor abbreviations decl =
                 let parameters = parameters decl
 
@@ -1783,8 +1789,7 @@ let internal applyWithProducer
                 let canonical = canonicalReference abbreviations Set.empty vars
 
                 parameters
-                |> List.map (fun parameter ->
-                    parameter.Constraint |> Canonical.option (canonical >> Canonical.reference))
+                |> List.map (fun parameter -> canonicalConstraint canonical parameter.Constraint)
                 |> List.toArray
 
             let constraints = constraintsFor abbreviations
@@ -1866,7 +1871,8 @@ let internal applyWithProducer
                         "signature"
                         [
                             parameters
-                            |> Canonical.list (fun parameter -> Canonical.option (typeText vars) parameter.Constraint)
+                            |> Canonical.list (fun parameter ->
+                                canonicalConstraint (reference vars) parameter.Constraint)
                             Canonical.list (parameter vars) args
                             typeText vars returns
                         ]

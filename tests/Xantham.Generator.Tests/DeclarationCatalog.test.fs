@@ -2448,11 +2448,17 @@ let genericDefaultConstraintTests =
 import type { RemoteSchema } from "remote-schema-lab";
 export type { RemoteSchema } from "remote-schema-lab";
 export interface Bound<T extends RemoteSchema = RemoteSchema> { value: T; }
+export interface GenericConstructors { new<T extends RemoteSchema>(value: T): Bound<T>; }
+export interface GenericMethods { invoke<T extends RemoteSchema>(value: T): T; }
+export interface NominalBound<T extends Data> { value: T; }
 """
                 File.AppendAllText(Path.Combine(dependency, "index.d.ts"), ownerAddition)
                 let consumerAddition = """
-import type { Bound, RemoteSchema } from "empty-union-owner-lab";
+import type { Bound, GenericConstructors, GenericMethods, NominalBound, Data, RemoteSchema } from "empty-union-owner-lab";
 export interface Registration<T extends RemoteSchema = RemoteSchema> extends Bound<T> { execute(value: T): void; }
+export declare function constructors(value: GenericConstructors): GenericConstructors;
+export declare function methods(value: GenericMethods): GenericMethods;
+export declare function nominal(value: NominalBound<Data>): NominalBound<Data>;
 """
                 File.AppendAllText(Path.Combine(package, "index.d.ts"), consumerAddition)
                 writePackageFile package "next.d.ts" """import type { RemoteSchema } from "empty-union-owner-lab";
@@ -2479,10 +2485,23 @@ export declare function share<T extends RemoteSchema>(value: Registration<T>): R
                 let consumer = """module Identity.Consumer
 let bound (value: Identity.Adapter.Registration<string>) : Identity.Root.Bound<string> = value :> _
 let forwarded (value: Identity.Adapter.Registration<string>) : Identity.Adapter.Registration<string> = Identity.Next.Exports.share value
+let construct (value: Identity.Root.GenericConstructors) : Identity.Root.Bound<string> = (Identity.Adapter.Exports.constructors value).Create "value"
+let invoke (value: Identity.Root.GenericMethods) : string = (Identity.Adapter.Exports.methods value).invoke "value"
+let nominal (value: Identity.Root.NominalBound<Identity.Root.Data>) : Identity.Root.NominalBound<Identity.Root.Data> = Identity.Adapter.Exports.nominal value
 """
                 let code, output = compileConsumer directory sharedSources consumer
                 Expect.equal code 0 output
                 let catalog = JsonNode.Parse(File.ReadAllText reference)
+                let nominal =
+                    catalog["declarations"].AsArray()
+                    |> Seq.find (fun entry -> entry["fSharpName"].GetValue<string>() = "Identity.Root.NominalBound")
+                let nominalConstraint = nominal["constraints"].DeepClone()
+                nominal["constraints"] <- JsonNode.Parse """["none"]"""
+                File.WriteAllText(reference, catalog.ToJsonString())
+                Expect.throwsC
+                    (fun () -> Pipeline.run adapter package (Path.Combine(directory, "unbounded")) |> Async.RunSynchronously |> ignore)
+                    (fun error -> Expect.stringContains error.Message "constraint mismatch" "the nominal Data bound remains authenticated")
+                nominal["constraints"] <- nominalConstraint
                 let bound =
                     catalog["declarations"].AsArray()
                     |> Seq.find (fun entry -> entry["fSharpName"].GetValue<string>() = "Identity.Root.Bound")
