@@ -231,9 +231,11 @@ let electedAliasOwners =
         let config = { GeneratorConfig.Default with ModuleName = Some "Mini.Owner"; DeclarationCatalog = true }
         Pipeline.run config fixture owner |> Async.RunSynchronously |> ignore
         let catalog = JsonSerializer.Deserialize<DeclarationCatalog.Catalog>(File.ReadAllText(Path.Combine(owner, "declarations.json")), JsonSerializerOptions(PropertyNameCaseInsensitive = true))
-        let issueData = catalog.Declarations |> Array.find (fun declaration -> declaration.FSharpName = "Mini.Owner.IssueData")
-        Expect.equal issueData.Equivalents.Length 1 "the elected alias records the unaliased union it names"
-        Expect.notEqual issueData.Equivalents[0] issueData.Identity "the alias keeps its own declaration identity"
+        for alias in [ "IssueData"; "FauxContentBlock" ] do
+            let elected = catalog.Declarations |> Array.find (fun declaration -> declaration.FSharpName = "Mini.Owner." + alias)
+            Expect.isNotNull elected.Equivalents "the elected alias records the unaliased union it names"
+            Expect.equal elected.Equivalents.Length 1 "the elected alias records exactly one equivalent member contract"
+            Expect.notEqual elected.Equivalents[0] elected.Identity "the alias keeps its own declaration identity"
         let consume name entry =
             let output = Path.Combine(scratch.Path, name)
             Pipeline.run { config with ModuleName = Some("Mini." + name); Entry = Some entry; DeclarationReferences = [ Path.Combine(owner, "declarations.json") ] } fixture output
@@ -241,9 +243,43 @@ let electedAliasOwners =
             File.ReadAllText(Path.Combine(output, $"Mini.{name}.fs"))
         let transitive = consume "Transitive" "consumer.d.ts"
         Expect.stringContains transitive "Mini.Owner.Schema" "a consumer reaching the union through a member reuses the producer's declarations"
+        Expect.stringContains transitive "Mini.Owner.AssistantMessage" "a wrapper over declared nominal arms reuses the producer's elected alias"
         Expect.isFalse (transitive.Contains "Issues.Item") "the union is not declared a second time"
         let direct = consume "Direct" "direct.d.ts"
         Expect.stringContains direct "issue: Mini.Owner.IssueData" "a consumer naming the alias reuses the same declaration"
+        Expect.stringContains direct "content: Mini.Owner.FauxContentBlock" "a consumer naming the nominal-arm alias reuses the same declaration"
+        let code, output = DeclarationCatalogTests.compileConsumer scratch.Path [ "owner/Mini.Owner.fs"; "Transitive/Mini.Transitive.fs"; "Direct/Mini.Direct.fs" ] """module Mini.Check
+let content (message: Mini.Owner.AssistantMessage) : Mini.Owner.FauxContentBlock[] = message.content
+let forward (message: Mini.Owner.AssistantMessage) = Mini.Transitive.Exports.message(message)
+let block (message: Mini.Owner.AssistantMessage) = Mini.Direct.Exports.content(message.content[0])
+"""
+        Expect.equal code 0 output
+        async {
+            let consumerConfig = { config with ModuleName = Some "Mini.Changed"; Entry = Some "consumer.d.ts"; DeclarationReferences = [ Path.Combine(owner, "declarations.json") ] }
+            let! mailbox, ctx = Bootstrap.start consumerConfig fixture
+            use _ = mailbox :> System.IDisposable
+            let! harvest, _ = Pipeline.runTier ctx Harvest.passes HarvestModel.Empty
+            let! resolve, _ = Pipeline.runTier ctx Resolve.passes (Pipeline.toResolve harvest)
+            let! shape, _ = Pipeline.runTier ctx Shape.Passes.passes (Pipeline.toShape (GeneratorConfig.runtimePackage consumerConfig ctx.PackageName) resolve)
+            let mutable changedCases = 0
+            let declarations =
+                shape.Decls |> List.map (function
+                    | FsTaggedUnion union ->
+                        let cases =
+                            union.Cases |> List.map (fun case ->
+                                if case.CompiledName = Some "text" then
+                                    changedCases <- changedCases + 1
+                                    { case with Name = case.Name + "Changed" }
+                                else case)
+                        FsTaggedUnion { union with Cases = cases }
+                    | declaration -> declaration)
+            Expect.equal changedCases 1 "the negative control changes the nominal union case while retaining its source identity"
+            let changed = { shape with Decls = declarations }
+            let! rejected = Async.Catch(DeclarationCatalog.apply ctx changed (Pipeline.groupModules ctx changed))
+            match rejected with
+            | Choice1Of2 _ -> failtest "a changed union case must not reuse the producer's nominal union alias"
+            | Choice2Of2 error -> Expect.stringContains error.Message "F# API mismatch" "equivalent source identity cannot bypass a changed union API"
+        } |> Async.RunSynchronously
 
 [<Tests>]
 let keyofMemberKeys =

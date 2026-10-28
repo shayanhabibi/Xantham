@@ -1067,7 +1067,8 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
         |> Set.ofList
 
     // A reference to an unaliased union resolves by member set to a declared union
-    // (`namedUnionByMembers`), so that declaration also answers for the union's own identity.
+    // (`namedUnionByMembers`), so that declaration also answers for the union's own identity,
+    // including source-union identities whose arms are declared interfaces or classes.
     // A declared literal union identified only by its export's handles (`type Kind = keyof typeof
     // Kind`) answers for its value key too, which a program without that export computes.
     let equivalents =
@@ -1076,7 +1077,10 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                 byType
                 |> Map.toList
                 |> List.choose (fun (id, identity) ->
-                    if identity.Role = "union" && not (Map.containsKey id shape.DeclNames) then
+                    if
+                        (identity.Role = "union" || identity.Role = "source-union")
+                        && not (Map.containsKey id shape.DeclNames)
+                    then
                         Shape.Spec.namedUnionByMembers ctx shape (Shape.Spec.nonNullishMemberSet shape shape.Types[id])
                         |> Option.map (fun (_, name) -> name, identity.Key)
                     else

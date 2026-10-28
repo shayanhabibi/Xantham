@@ -149,6 +149,11 @@ API and source checks still reject incompatible representations or stale contrac
 `census-owner-union-identity-lab` covers reachability, order, repeated occurrences, independent
 source arms, generic applications, aliases and conservative fallback. This correction belongs
 to identity contract 8 alongside source-anchored intersections.
+When `namedUnionByMembers` elects a producer-only alias for such a union, publish its
+`source-union` key as an equivalent alongside the existing `union` keys. Otherwise a consumer
+which reaches only the anonymous member cannot reuse that alias, and its wrapper API diverges.
+The alias-election owner lab covers both identities, direct and transitive consumers, and a
+changed union case that must still fail the API check.
 
 **TypeScript library ownership is logical, not a platform distribution.** Installed
 `lib/lib.*.d.ts` files from `typescript` and recognized `@typescript/typescript-<rid>`

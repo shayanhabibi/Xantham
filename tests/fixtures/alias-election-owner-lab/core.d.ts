@@ -7,3 +7,6 @@ export type InternalIssue<T extends IssueBase = Issue> = T extends any ? RawOf<T
 export type RawIssue<T extends IssueBase = Issue> = InternalIssue<T>;
 export interface ParsePayload<T = unknown> { value: T; issues: RawIssue[]; }
 export interface Schema { run(payload: ParsePayload): ParsePayload; }
+export interface TextContent { type: "text"; text: string; }
+export interface ToolCall { type: "toolCall"; name: string; }
+export interface AssistantMessage { content: (TextContent | ToolCall)[]; }
