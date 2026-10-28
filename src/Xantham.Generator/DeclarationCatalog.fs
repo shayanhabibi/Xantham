@@ -2112,7 +2112,8 @@ let internal applyWithProducer
                                 fail $"arity mismatch for {name} ({producer.FSharpName})"
 
                             if producer.Constraints <> constraints then
-                                fail $"constraint mismatch for {name} ({producer.FSharpName})"
+                                fail
+                                    $"constraint mismatch for {name} ({producer.FSharpName}): producer {json producer.Constraints}; consumer {json constraints}"
 
                             let expectedApi =
                                 match Map.tryFind producer.Identity inheritedVariants with

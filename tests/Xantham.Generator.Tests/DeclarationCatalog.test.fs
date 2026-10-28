@@ -2433,6 +2433,63 @@ let genericDefaultConstraintTests =
         testCase "declaration catalog generic defaults skipped - no compiler" <| fun _ -> skiptest "no tsc"
     | Some _ ->
         testList "declaration catalog generic defaults" [
+            testCase "empty imported interface bounds retain direct and transitive catalog identity" <| fun _ ->
+                use scratch = Scratch.directory "catalog-empty-imported-bound"
+                let directory = scratch.Path
+                let package = Path.Combine(directory, "package")
+                let source = Path.GetFullPath(Path.Combine(fixture, "..", "empty-union-alias-lab"))
+                for file in Directory.EnumerateFiles(source, "*", SearchOption.AllDirectories) do
+                    writePackageFile package (Path.GetRelativePath(source, file)) (File.ReadAllText file)
+                writePackageFile package "node_modules/remote-schema-lab/package.json"
+                    """{"name":"remote-schema-lab","version":"1.0.0","types":"index.d.ts"}"""
+                writePackageFile package "node_modules/remote-schema-lab/index.d.ts" "export interface RemoteSchema {}\n"
+                let dependency = Path.Combine(package, "node_modules", "empty-union-owner-lab")
+                File.AppendAllText(Path.Combine(dependency, "index.d.ts"), """
+import type { RemoteSchema } from "remote-schema-lab";
+export type { RemoteSchema } from "remote-schema-lab";
+export interface Bound<T extends RemoteSchema = RemoteSchema> { value: T; }
+""")
+                File.AppendAllText(Path.Combine(package, "index.d.ts"), """
+import type { Bound, RemoteSchema } from "empty-union-owner-lab";
+export interface Registration<T extends RemoteSchema = RemoteSchema> extends Bound<T> { execute(value: T): void; }
+""")
+                writePackageFile package "next.d.ts" """import type { RemoteSchema } from "empty-union-owner-lab";
+import type { Registration } from "./index";
+export declare function share<T extends RemoteSchema>(value: Registration<T>): Registration<T>;
+"""
+                let config =
+                    { GeneratorConfig.loadFile (Path.Combine(package, "xantham.json")) with
+                        ModuleName = Some "Identity.Root" }
+                let root = Path.Combine(directory, "root")
+                Pipeline.run config dependency root |> Async.RunSynchronously |> ignore
+                let reference = Path.Combine(root, "declarations.json")
+                let adapter =
+                    { config with
+                        ModuleName = Some "Identity.Adapter"
+                        DeclarationReferences = [ reference ] }
+                Pipeline.run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                let next =
+                    { adapter with
+                        ModuleName = Some "Identity.Next"
+                        Entry = Some "next.d.ts"
+                        DeclarationReferences = [ Path.Combine(directory, "adapter", "declarations.json") ] }
+                Pipeline.run next package (Path.Combine(directory, "next")) |> Async.RunSynchronously |> ignore
+                let consumer = """module Identity.Consumer
+let bound (value: Identity.Adapter.Registration<string>) : Identity.Root.Bound<string> = value :> _
+let forwarded (value: Identity.Adapter.Registration<string>) : Identity.Adapter.Registration<string> = Identity.Next.Exports.share value
+"""
+                let code, output = compileConsumer directory sharedSources consumer
+                Expect.equal code 0 output
+                let catalog = JsonNode.Parse(File.ReadAllText reference)
+                let bound =
+                    catalog["declarations"].AsArray()
+                    |> Seq.find (fun entry -> entry["fSharpName"].GetValue<string>() = "Identity.Root.Bound")
+                bound["constraints"] <- JsonNode.Parse """["some(string)"]"""
+                File.WriteAllText(reference, catalog.ToJsonString())
+                Expect.throwsC
+                    (fun () -> Pipeline.run adapter package (Path.Combine(directory, "tampered")) |> Async.RunSynchronously |> ignore)
+                    (fun error -> Expect.stringContains error.Message "constraint mismatch" "an empty interface does not authorize a different bound")
+
             testCase "never defaults retain shared constraints and compile concrete defaults" <| fun _ ->
                 use scratch = Scratch.directory "catalog-generic-defaults"
                 let directory = scratch.Path
