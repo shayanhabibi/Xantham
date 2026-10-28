@@ -650,6 +650,12 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                 facts.NonNullableAlias |> Option.iter (walk path order)
                 facts.NonNullableApplication |> Option.iter (walk path order)
 
+                // The selected branch occupies this reference position; conditionalRef reads
+                // its name just as it reads a directly referenced interface's name.
+                facts.Conditional
+                |> Option.bind _.Branch
+                |> Option.iter (fun (_, branch) -> walk path order branch)
+
                 if flag TypeFlags.TypeParameter facts then
                     for bound in Option.toList facts.Constraint @ Option.toList facts.Default do
                         match Map.tryFind bound model.Types with

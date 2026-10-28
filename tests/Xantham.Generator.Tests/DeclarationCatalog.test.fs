@@ -2433,6 +2433,59 @@ let genericDefaultConstraintTests =
         testCase "declaration catalog generic defaults skipped - no compiler" <| fun _ -> skiptest "no tsc"
     | Some _ ->
         testList "declaration catalog generic defaults" [
+            testCase "selected conditional branches retain named computed interfaces across catalogs" <| fun _ ->
+                use scratch = Scratch.directory "catalog-conditional-branch-names"
+                let directory = scratch.Path
+                let package = Path.Combine(directory, "package")
+                let dependency = Path.Combine(package, "node_modules", "conditional-owner-lab")
+                writePackageFile dependency "package.json"
+                    """{"name":"conditional-owner-lab","version":"1.0.0","types":"index.d.ts"}"""
+                writePackageFile dependency "index.d.ts" """export interface Branch { flag?: boolean; }
+interface Schema<T> { static: T; }
+type Static<T extends Schema<unknown>> = T["static"];
+declare const schema: Schema<{ value?: string }>;
+export interface ComputedBranch extends Static<typeof schema> {}
+export interface ConditionalModel<T extends string> {
+    direct?: T extends "known" ? Branch : never;
+    computed?: T extends "known" ? ComputedBranch : never;
+    deferred?: T extends "known" ? Branch : ComputedBranch;
+}
+"""
+                writePackageFile package "package.json"
+                    """{"name":"conditional-consumer-lab","version":"1.0.0","types":"index.d.ts"}"""
+                writePackageFile package "index.d.ts" """import type { ConditionalModel } from "conditional-owner-lab";
+export declare function share(value: ConditionalModel<string>): ConditionalModel<string>;
+"""
+                writePackageFile package "xantham.json"
+                    """{"module":"Identity.Root","lib":["esnext"],"types":[],"declarationCatalog":true,"groups":{"conditional-owner-lab":"ship"}}"""
+                let config = GeneratorConfig.loadFile (Path.Combine(package, "xantham.json"))
+                let root = Path.Combine(directory, "root")
+                Pipeline.run config dependency root |> Async.RunSynchronously |> ignore
+                let adapter =
+                    { config with
+                        ModuleName = Some "Identity.Adapter"
+                        DeclarationReferences = [ Path.Combine(root, "declarations.json") ] }
+                Pipeline.run adapter package (Path.Combine(directory, "adapter")) |> Async.RunSynchronously |> ignore
+                let consumer = """module Identity.Consumer
+let share (value: Identity.Root.ConditionalModel<string>) : Identity.Root.ConditionalModel<string> = Identity.Adapter.Exports.share value
+let direct (value: Identity.Root.ConditionalModel<string>) : Identity.Root.Branch option = value.direct
+let computed (value: Identity.Root.ConditionalModel<string>) : Identity.Root.ComputedBranch option = value.computed
+let deferred (value: Identity.Root.ConditionalModel<string>) : obj option = value.deferred
+"""
+                let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer
+                Expect.equal code 0 output
+
+                let reference = Path.Combine(root, "declarations.json")
+                let catalog = JsonNode.Parse(File.ReadAllText reference)
+                let declaration =
+                    catalog["declarations"].AsArray()
+                    |> Seq.find (fun entry -> entry["fSharpName"].GetValue<string>() = "Identity.Root.ConditionalModel")
+                declaration["api"] <- JsonValue.Create(String.replicate 64 "0")
+                File.WriteAllText(reference, catalog.ToJsonString())
+                Expect.throwsC
+                    (fun () -> Pipeline.run adapter package (Path.Combine(directory, "tampered")) |> Async.RunSynchronously |> ignore)
+                    (fun error -> Expect.stringContains error.Message "F# API mismatch" "a selected branch does not bypass API authentication")
+
             testCase "empty imported interface bounds retain direct and transitive catalog identity" <| fun _ ->
                 use scratch = Scratch.directory "catalog-empty-imported-bound"
                 let directory = scratch.Path
