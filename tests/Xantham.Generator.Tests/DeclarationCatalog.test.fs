@@ -2445,9 +2445,11 @@ interface Schema<T> { static: T; }
 type Static<T extends Schema<unknown>> = T["static"];
 declare const schema: Schema<{ value?: string }>;
 export interface ComputedBranch extends Static<typeof schema> {}
+export declare class NamedClass { readonly value: string; }
 export interface ConditionalModel<T extends string> {
     direct?: T extends "known" ? Branch : never;
     computed?: T extends "known" ? ComputedBranch : never;
+    classed?: T extends "known" ? NamedClass : never;
     deferred?: T extends "known" ? Branch : ComputedBranch;
 }
 """
@@ -2470,6 +2472,7 @@ export declare function share(value: ConditionalModel<string>): ConditionalModel
 let share (value: Identity.Root.ConditionalModel<string>) : Identity.Root.ConditionalModel<string> = Identity.Adapter.Exports.share value
 let direct (value: Identity.Root.ConditionalModel<string>) : Identity.Root.Branch option = value.direct
 let computed (value: Identity.Root.ConditionalModel<string>) : Identity.Root.ComputedBranch option = value.computed
+let classed (value: Identity.Root.ConditionalModel<string>) : Identity.Root.NamedClass option = value.classed
 let deferred (value: Identity.Root.ConditionalModel<string>) : obj option = value.deferred
 """
                 let code, output = compileConsumer directory [ "root/Identity.Root.fs"; "adapter/Identity.Adapter.fs" ] consumer

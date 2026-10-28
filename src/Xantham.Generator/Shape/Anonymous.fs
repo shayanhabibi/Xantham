@@ -650,11 +650,18 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                 facts.NonNullableAlias |> Option.iter (walk path order)
                 facts.NonNullableApplication |> Option.iter (walk path order)
 
-                // The selected branch occupies this reference position; conditionalRef reads
-                // its name just as it reads a directly referenced interface's name.
+                // A selected declared branch occupies this reference position. Anonymous
+                // computations keep their existing structural and alias discovery paths.
                 facts.Conditional
                 |> Option.bind _.Branch
-                |> Option.iter (fun (_, branch) -> walk path order branch)
+                |> Option.iter (fun (_, branch) ->
+                    match Map.tryFind branch model.Types with
+                    | Some branchFacts when
+                        (branchFacts.SymbolName |> Option.exists (isSyntheticName >> not))
+                        && hasAny (SymbolFlags.Interface ||| SymbolFlags.Class) branchFacts.SymbolFlags
+                        ->
+                        walk path order branch
+                    | _ -> ())
 
                 if flag TypeFlags.TypeParameter facts then
                     for bound in Option.toList facts.Constraint @ Option.toList facts.Default do

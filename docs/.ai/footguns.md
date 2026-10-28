@@ -131,11 +131,12 @@ The imported empty-bound case covers direct and transitive consumers, generic me
 constructors, consumer compilation, and rejection of changed empty and nominal bounds. API contract 15 requires
 regenerating earlier producer catalogs.
 
-**Resolved conditional branches still need the naming walk.** Resolve follows only the branch
-its mapping selected; `conditionalRef` can name that branch only if `Anonymous.walk` visits it
-at the original reference position. An exported interface may otherwise be named in a producer
-but widen to `obj` in an indirect consumer, including interfaces with computed inherited bases.
-Keep deferred two-branch conditionals deferred and keep catalog API authentication unchanged.
+**Resolved conditional declarations still need the naming walk.** A selected branch that names
+an interface or class needs `Anonymous.walk` at the original reference position. An exported
+interface may otherwise be named in a producer but widen to `obj` in an indirect consumer,
+including interfaces with computed inherited bases. Do not walk anonymous computations merely
+because a conditional selected them: their structural and alias paths own naming, and a second
+visit can mint unowned declarations. Keep deferred branches and catalog authentication unchanged.
 
 **Anonymous intersections can inherit different reachable parents in different runs.**
 `BotEnterprise.botManagement: BotBase & { ja3Hash: string }` is the same checker contract
