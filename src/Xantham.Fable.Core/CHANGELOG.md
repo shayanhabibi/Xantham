@@ -1,5 +1,5 @@
 ---
-last_commit_released: 687a15f013a1ea6531f0f51c5b015c416949c039
+last_commit_released: 4fc08942ab1374f77bee22bdad079993aebaf5c1
 name: Xantham.Fable.Core
 include:
   - ../../Directory.Build.props
@@ -12,6 +12,14 @@ updaters:
 ---
 
 # Changelog
+
+## 0.3.0-beta.2 - 2026-10-29
+
+### 🐞 Bug Fixes
+
+* *(generator)* Validate projections against supplied support assemblies ([259b9786](https://github.com/shayanhabibi/Xantham/commit/259b978625e6718de3d5c17fa01f7dffcaf65b35))
+
+<strong><small>[View changes on Github](https://github.com/shayanhabibi/Xantham/compare/687a15f013a1ea6531f0f51c5b015c416949c039..4fc08942ab1374f77bee22bdad079993aebaf5c1)</small></strong>
 
 ## 0.3.0-beta.1 - 2026-10-25
 

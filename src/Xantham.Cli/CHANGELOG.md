@@ -1,5 +1,5 @@
 ---
-last_commit_released: 687a15f013a1ea6531f0f51c5b015c416949c039
+last_commit_released: 4fc08942ab1374f77bee22bdad079993aebaf5c1
 name: xantham
 include:
   - ../Xantham.TypeScript.Wire/**
@@ -14,6 +14,22 @@ updaters:
 ---
 
 # Changelog
+
+## 0.4.0-beta.3 - 2026-10-29
+
+### 🏗️ Breaking changes
+
+* *(generator)* Recover generic methods from merged declarations (#175) ([569a8a05](https://github.com/shayanhabibi/Xantham/commit/569a8a059a0c8b3fcfbea56e49461544ca96dc89))
+
+### 🐞 Bug Fixes
+
+* *(generator)* Recover ambient values and precise overload returns (#176) ([d0200f85](https://github.com/shayanhabibi/Xantham/commit/d0200f8510dd76c8576481ac94964c0d6549f916))
+* *(generator)* Preserve exact keys and source ownership contracts (#177) ([e7ba6ab2](https://github.com/shayanhabibi/Xantham/commit/e7ba6ab213ae4d17f31e44735afb837d3a052758))
+* *(generator)* Specialize dependent constraints and key catalogue identities by bound (#179) ([87e82faa](https://github.com/shayanhabibi/Xantham/commit/87e82faa9db8eb1492d36d6ac439eb107046e9ce))
+* *(generator)* Validate projections against supplied support assemblies ([259b9786](https://github.com/shayanhabibi/Xantham/commit/259b978625e6718de3d5c17fa01f7dffcaf65b35))
+* *(generator)* Preserve source union alias equivalence ([5f331cb7](https://github.com/shayanhabibi/Xantham/commit/5f331cb71977b4aa6ebfc0aba79f4e7f364e0898))
+
+<strong><small>[View changes on Github](https://github.com/shayanhabibi/Xantham/compare/687a15f013a1ea6531f0f51c5b015c416949c039..4fc08942ab1374f77bee22bdad079993aebaf5c1)</small></strong>
 
 ## 0.4.0-beta.2 - 2026-10-25
 
