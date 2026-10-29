@@ -44,8 +44,18 @@ let tests =
                  contract.ApiVersion,
                  contract.InferenceVersion,
                  contract.CustomizationVersion)
-                (1, 9, 15, 5, 1)
-                "Identity 9 authenticates namespace alias occurrences; API 15 normalizes tautological obj bounds"
+                (1, 10, 16, 5, 1)
+                "Identity 10 authenticates Pi source equivalents; API 16 preserves generic aliases and inherited bases"
+
+        testCase "the identity contract rejects catalogues before Pi source equivalents" <| fun _ ->
+            rejects "identity version" (fun () ->
+                validateContract 2 expected.Compiler expected.Generator "profile"
+                    (Some { expected.Contract with IdentityVersion = 9 }))
+
+        testCase "the API contract rejects catalogues before generic object aliases and inherited bases" <| fun _ ->
+            rejects "API version" (fun () ->
+                validateContract 2 expected.Compiler expected.Generator "profile"
+                    (Some { expected.Contract with ApiVersion = 15 }))
 
         testCase "the identity contract rejects namespace aliases with global parent identity at the current API" <| fun _ ->
             rejects "identity version" (fun () ->

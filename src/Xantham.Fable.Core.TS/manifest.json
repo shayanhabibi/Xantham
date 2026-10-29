@@ -5,14 +5,14 @@
   "counts": {
     "exact": 3532,
     "ergonomic": 2763,
-    "widened": 276,
+    "widened": 275,
     "escape": 8
   },
   "passes": [
     {
       "pass": "SY - synthesize-anonymous",
-      "total": 1040,
-      "exact": 1040
+      "total": 1044,
+      "exact": 1044
     },
     {
       "pass": "LU - classify-literal-unions",
@@ -34,10 +34,10 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 83113,
+      "total": 83095,
       "exact": 894,
-      "ergonomic": 81713,
-      "widened": 506
+      "ergonomic": 81700,
+      "widened": 501
     },
     {
       "pass": "SA - shape-aliases",
@@ -54,9 +54,9 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 3183,
-      "exact": 291,
-      "ergonomic": 2889,
+      "total": 3176,
+      "exact": 288,
+      "ergonomic": 2885,
       "widened": 3
     },
     {

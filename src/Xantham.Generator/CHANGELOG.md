@@ -14,6 +14,13 @@ updaters:
 
 # Changelog
 
+## Unreleased
+
+### Known limitations
+
+* A catalog consumer can reject a source-identical generic object alias when a larger type graph causes its producer and consumer to retain different representable constraints. The catalog fails closed with a constraint mismatch. The Pi release's generated dependency chain does not hit this case; reproduce it with a `Section<T extends Reg>` object alias, a `Wrap<T>` union that uses `Section<T>`, and an `Ext<T>` consumed both directly and through `Holder<A extends Reg>`. In the observed graph the producer retained no constraint while the consumer retained `Reg`.
+* Recursive mutable mapped results such as Pi Durable's `Draft<T>` can still be emitted as `obj`. This does not change the generic input/result relationship of methods whose result is `T` itself.
+
 ## 0.3.0-beta.2 - 2026-10-25
 
 ### 🏗️ Breaking changes

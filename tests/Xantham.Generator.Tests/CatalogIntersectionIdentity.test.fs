@@ -396,3 +396,68 @@ let unionFallbackTests =
             Expect.isTrue (child.Role.StartsWith("member:", StringComparison.Ordinal)) "unavailable direct nominal-arm evidence retains parent-role fallback"
         }
         exercise |> Async.RunSynchronously
+
+[<Tests>]
+let catalogObjectAliasTests =
+    testCase "catalog preserves generic object aliases in union arms and abbreviated intersection bases" <| fun _ ->
+        use scratch = Scratch.directory "catalog-object-alias-bases"
+        let directory = scratch.Path
+        let owner = Path.Combine(directory, "node_modules", "catalog-owner")
+        let consumer = Path.Combine(directory, "consumer")
+        write owner "package.json" """{"name":"catalog-owner","version":"1.0.0","types":"index.d.ts"}"""
+        write owner "index.d.ts" """
+interface Reg { name: string }
+type Section<T extends Reg = Reg> = { key: string; render(input: T): string };
+type Wrap<T extends Reg = Reg> = { tool: string; wrap(t: T): T } | { section: string; wrap(s: Section<T>): Section<T> };
+interface Ext<T extends Reg = Reg> { sections?: readonly Section<T>[]; wraps?: readonly Wrap<T>[] }
+interface Req<M = string> { apiKey?: string; onPayload?: (value: unknown, model: M) => void }
+type Cancel = Req<string>;
+interface Tx { transform?: (h: Record<string, string>) => void }
+type ModelsCancel = Cancel & Tx;
+interface Models { cancel(options?: ModelsCancel): void }
+type Opt<T> = { deferredValue: T extends string ? string : number };
+interface Specializations { a: Opt<string>; b: Opt<number> }
+"""
+        write consumer "package.json" """{"name":"catalog-consumer","version":"1.0.0","types":"index.d.ts"}"""
+        write consumer "index.d.ts" "export interface Request { ext: Ext; models: Models; specializations: Specializations; }"
+        let generate name root references =
+            let output = Path.Combine(directory, name)
+            Pipeline.run (configure directory name references) root output |> Async.RunSynchronously |> ignore
+        generate "Owner" owner [||]
+        generate "Imported" consumer [| Path.Combine(directory, "Owner", "declarations.json") |]
+        let source = File.ReadAllText(Path.Combine(directory, "Owner", "Mini.Owner.fs"))
+        Expect.stringContains source "abstract deferredValue: string" "resolved string conditional stays precise"
+        Expect.stringContains source "abstract deferredValue: float" "resolved numeric conditional stays precise"
+        let code, output = DeclarationCatalogTests.compileConsumer directory [ "Owner/Mini.Owner.fs"; "Imported/Mini.Imported.fs" ] """module Mini.Check
+let baseOptions (x: Mini.Owner.ModelsCancel) : Mini.Owner.Req<string> = x :> _
+let roundtrip<'T when 'T :> Mini.Owner.Reg> (s: Mini.Owner.Section<'T>) (wrap: Mini.Owner.Wrap3<'T>) : Mini.Owner.Section<'T> = wrap.wrap s
+"""
+        Expect.equal code 0 output
+
+
+[<Tests>]
+let catalogMappedSpecializationTests =
+    testCase "catalog object aliases do not reuse another mapped specialization" <| fun _ ->
+        use scratch = Scratch.directory "catalog-mapped-specializations"
+        let directory = scratch.Path
+        let owner = Path.Combine(directory, "node_modules", "catalog-owner")
+        let consumer = Path.Combine(directory, "consumer")
+        write owner "package.json" """{"name":"catalog-owner","version":"1.0.0","types":"index.d.ts"}"""
+        write owner "index.d.ts" """
+type Flags<T> = { [K in keyof T]: boolean };
+interface A { a: 1 } interface B { b: 1 }
+interface H { x: Flags<A> }
+interface P { y: Flags<B> }
+"""
+        write consumer "package.json" """{"name":"catalog-consumer","version":"1.0.0","types":"index.d.ts"}"""
+        write consumer "index.d.ts" "export interface Request { h: H; p: P }"
+        let generate name root references =
+            let output = Path.Combine(directory, name)
+            Pipeline.run (configure directory name references) root output |> Async.RunSynchronously |> ignore
+        generate "Owner" owner [||]
+        generate "Imported" consumer [| Path.Combine(directory, "Owner", "declarations.json") |]
+        let code, output = DeclarationCatalogTests.compileConsumer directory [ "Owner/Mini.Owner.fs"; "Imported/Mini.Imported.fs" ] """module Mini.Check
+let left (r: Mini.Imported.Request) : bool = r.h.x.a
+let right (r: Mini.Imported.Request) : bool = r.p.y.b
+"""
+        Expect.equal code 0 output

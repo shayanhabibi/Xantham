@@ -58,7 +58,7 @@ let private isAliasTaggedForm (model: ShapeModel) (facts: TypeFacts) =
 /// symbol -> the smallest type id carrying it that binds parameters of its own. Every larger id
 /// carrying the same alias symbol is read as an application of that form. Where the declared type
 /// is in the table it is the form, since the checker creates it before any instantiation.
-let private aliasDeclarationForms (model: ShapeModel) : Map<SymbolKey, int<Measure.typeId>> =
+let private aliasDeclarationForms catalog (model: ShapeModel) : Map<SymbolKey, int<Measure.typeId>> =
     model.Types
     |> Map.toList
     |> List.sortBy fst
@@ -68,7 +68,8 @@ let private aliasDeclarationForms (model: ShapeModel) : Map<SymbolKey, int<Measu
             | ValueSome alias when
                 not (Map.containsKey alias forms)
                 && ((isAliasIntersectionForm model facts && not (List.isEmpty (declParamIds facts)))
-                    || isAliasTaggedForm model facts)
+                    || isAliasTaggedForm model facts
+                    || (catalog && isGenericObjectAliasForm model facts))
                 ->
                 Map.add alias typeId forms
             | _ -> forms)
@@ -288,6 +289,23 @@ let internal aliasInstantiationOf
     (facts: TypeFacts)
     : (string * int<Measure.typeId> list option) option =
     match facts.Response.AliasSymbolId with
+    | ValueSome alias when
+        flag TypeFlags.Object facts
+        && hasAny SymbolFlags.TypeLiteral facts.SymbolFlags
+        && not facts.AliasTypeArguments.IsEmpty
+        ->
+        match Map.tryFind alias forms with
+        | Some declared when declared <> facts.Response.TypeId ->
+            match Map.tryFind declared model.DeclNames, Map.tryFind declared model.Types with
+            | Some name, Some declaredFacts when
+                declaredFacts.Declarations = facts.Declarations
+                && (declParamIds declaredFacts).Length = facts.AliasTypeArguments.Length
+                && facts.AliasTypeArguments
+                   |> List.forall (fun argument -> Map.containsKey argument model.Types)
+                ->
+                Some(name, Some facts.AliasTypeArguments)
+            | _ -> None
+        | _ -> None
     | ValueSome alias when isFlattenable model facts ->
         match Map.tryFind alias forms with
         | Some declared when declared <> facts.Response.TypeId ->
@@ -369,7 +387,8 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
         |> List.choose (snd >> _.NonNullableAlias)
         |> Set.ofList
 
-    let aliasForms = aliasDeclarationForms model
+    let aliasForms =
+        aliasDeclarationForms (ctx.Config.DeclarationCatalog || not ctx.Config.DeclarationReferences.IsEmpty) model
 
     /// The type ids exported directly by name from a public path. A type outside this set is
     /// declared at the root, independent of walk order.
@@ -629,6 +648,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
             // application (§4.9). Naming it would declare the expansion a second time
             // under a made-up name and lose the tie to the generic it came from.
             && (instantiationOf { model with DeclNames = names } facts).IsNone
+            && (aliasInstantiationOf { model with DeclNames = names } aliasForms facts).IsNone
         elif flag TypeFlags.Intersection facts then
             // An intersection of object types is one flattened interface (§4.6): the
             // resolve tier read its members off the intersection itself, so it names and
@@ -697,6 +717,9 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                 match facts.Response.AliasSymbolId with
                 | ValueSome alias when
                     isFlattenable model facts
+                    || (flag TypeFlags.Object facts
+                        && hasAny SymbolFlags.TypeLiteral facts.SymbolFlags
+                        && not facts.AliasTypeArguments.IsEmpty)
                     || (flag TypeFlags.Union facts && not (flag TypeFlags.Boolean facts))
                     ->
                     match Map.tryFind alias aliasForms with

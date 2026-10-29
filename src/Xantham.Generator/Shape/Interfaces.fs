@@ -169,7 +169,28 @@ let shapeInterfaces: Pass<ShapeModel> =
                                 // gate: a declared base and an intersection operand are both a
                                 // type this declaration *is*. Members are declared in full too.
                                 let inheritable (operandId: int<Measure.typeId>) =
-                                    match typeRef ctx { model with TypeVars = scope } None name operandId with
+                                    let scoped = { model with TypeVars = scope }
+
+                                    let operandReference =
+                                        match
+                                            Map.tryFind operandId model.Types |> Option.bind (instantiationOf model)
+                                        with
+                                        | Some(operand, arguments) when
+                                            (ctx.Config.DeclarationCatalog
+                                             || not ctx.Config.DeclarationReferences.IsEmpty)
+                                            && Set.contains operand interfaceNames
+                                            ->
+                                            let parameters =
+                                                model.Types[operandId].Response.TargetTypeId
+                                                |> ValueOption.toOption
+                                                |> Option.bind (fun target -> Map.tryFind target model.Types)
+                                                |> Option.map ownArguments
+                                                |> Option.defaultValue []
+
+                                            appliedRefTo ctx scoped None name operand parameters arguments
+                                        | _ -> typeRef ctx scoped None name operandId
+
+                                    match operandReference with
                                     | (FsNamed operand | FsApp(operand, _)) as reference, refFindings ->
                                         if not (Set.contains operand interfaceNames) then
                                             Error(ShapeInterfaces.BaseNotDeclaredHere operand)

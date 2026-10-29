@@ -10494,7 +10494,7 @@ module Es =
             iterables: 'T *
             ?options:
                 U3<
-                    IteratorConstructor.Zip.Options5<'TPadding>,
+                    IteratorConstructor.Zip.Options4.Base<'TPadding>,
                     IteratorConstructor.Zip.Options2,
                     IteratorConstructor.Zip.Options3
                  > ->
@@ -10526,7 +10526,7 @@ module Es =
             iterables: obj *
             ?options:
                 U3<
-                    IteratorConstructor.Zip.Options6<'TPadding>,
+                    IteratorConstructor.Zip.Options5<'TPadding>,
                     IteratorConstructor.Zip.Options2,
                     IteratorConstructor.Zip.Options3
                  > ->
@@ -10568,7 +10568,7 @@ module Es =
             iterables: obj *
             ?options:
                 U3<
-                    Fable.Core.TS.Es.IteratorConstructor.Zip.Options5<'TPadding>,
+                    IteratorConstructor.Zip.Options4.Base<'TPadding>,
                     IteratorConstructor.Zip.Options2,
                     IteratorConstructor.Zip.Options3
                  > ->
@@ -10584,7 +10584,7 @@ module Es =
             iterables: obj *
             ?options:
                 U3<
-                    IteratorConstructor.ZipKeyed.Options3,
+                    IteratorConstructor.ZipKeyed.Options2,
                     IteratorConstructor.Zip.Options2,
                     IteratorConstructor.Zip.Options3
                  > ->
@@ -23241,7 +23241,7 @@ module Es =
 
             [<Interface>]
             type Options4<'TPadding> =
-                inherit Fable.Core.TS.Es.IteratorConstructor.Zip.Options5<'TPadding>
+                inherit IteratorConstructor.Zip.Options4.Base<'TPadding>
 
                 [<ParamObject; Emit("({ mode: 'longest', ...$0 })")>]
                 static member Create(?padding: obj) : Options4<'TPadding> = jsNative
@@ -23269,39 +23269,40 @@ module Es =
                 [<Literal>]
                 let mode = "longest"
 
-            [<Interface>]
-            type Options6<'TPadding> =
-                /// <summary>
-                /// Continues until every input is exhausted.
-                /// </summary>
-                /// <remarks>TypeScript type: <c>"longest"</c></remarks>
-                abstract mode: string with get, set
-                /// <summary>
-                /// Values used when an input is exhausted before the others.
-                /// </summary>
-                abstract padding: obj option with get, set
+            module Options4 =
+                [<Interface>]
+                type Base<'T> =
+                    /// <summary>
+                    /// Continues until every input is exhausted.
+                    /// </summary>
+                    /// <remarks>TypeScript type: <c>"longest"</c></remarks>
+                    abstract mode: string with get, set
+                    /// <summary>
+                    /// Values used when an input is exhausted before the others.
+                    /// </summary>
+                    abstract padding: obj option with get, set
 
-                [<ParamObject; Emit("({ mode: 'longest', ...$0 })")>]
-                static member Create(?padding: obj) : Options6<'TPadding> = jsNative
+                    [<ParamObject; Emit("({ mode: 'longest', ...$0 })")>]
+                    static member Create(?padding: obj) : Base<'T> = jsNative
 
-            module Options6 =
-                /// <summary>
-                /// Continues until every input is exhausted.
-                /// </summary>
-                /// <remarks>TypeScript type: <c>"longest"</c></remarks>
-                [<Literal>]
-                let mode = "longest"
+                module Base =
+                    /// <summary>
+                    /// Continues until every input is exhausted.
+                    /// </summary>
+                    /// <remarks>TypeScript type: <c>"longest"</c></remarks>
+                    [<Literal>]
+                    let mode = "longest"
 
         module ZipKeyed =
             [<Interface>]
             type Options<'TPadding> =
-                inherit Fable.Core.TS.Es.IteratorConstructor.Zip.Options5<'TPadding>
+                inherit IteratorConstructor.Zip.Options4.Base<'TPadding>
 
                 [<ParamObject; Emit("({ mode: 'longest', ...$0 })")>]
                 static member Create(?padding: obj) : Options<'TPadding> = jsNative
 
             [<Interface>]
-            type Options3 =
+            type Options2 =
                 /// <summary>
                 /// Continues until every input is exhausted.
                 /// </summary>
@@ -23313,9 +23314,9 @@ module Es =
                 abstract padding: obj option with get, set
 
                 [<ParamObject; Emit("({ mode: 'longest', ...$0 })")>]
-                static member Create(?padding: obj) : Options3 = jsNative
+                static member Create(?padding: obj) : Options2 = jsNative
 
-            module Options3 =
+            module Options2 =
                 /// <summary>
                 /// Continues until every input is exhausted.
                 /// </summary>
@@ -23375,11 +23376,6 @@ module Es =
                         ?set: (obj -> unit)
                     ) : Attributes =
                     jsNative
-
-        module Freeze =
-            type Result<'T> =
-                [<EmitIndexer>]
-                abstract Item: string -> obj
 
         module GetOwnPropertyDescriptors =
             type Result =

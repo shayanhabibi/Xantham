@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "compiler": "a183b1956edbe7e7d98f2249858eedf2d8a9790809cc4909db1276e202faaa70",
-  "generator": "592ae0afbb174f4359fd9cb265287235a55dd63f29f1dc638b31954e29c73956",
+  "generator": "efe59b5cb7dc105c95bbe1002b7df8b1bfbde442a6f1cb89a8520c6acc747607",
   "inferenceProfile": "d2f99097bf8701703dbad824988206bf0800602c089c9094d2b66092c161b32f",
   "owner": "FableCoreTsInput",
   "inputs": [
@@ -607661,7 +607661,7 @@
         }
       ],
       "role": "type",
-      "fSharpName": "Fable.Core.TS.Es.IteratorConstructor.Zip.Options5",
+      "fSharpName": "Fable.Core.TS.Es.IteratorConstructor.Zip.Options4.Base",
       "arity": 1,
       "constraints": [
         "none"
@@ -607775,7 +607775,7 @@
         }
       ],
       "role": "type",
-      "fSharpName": "Fable.Core.TS.Es.IteratorConstructor.Zip.Options6",
+      "fSharpName": "Fable.Core.TS.Es.IteratorConstructor.Zip.Options5",
       "arity": 1,
       "constraints": [
         "none"
@@ -607822,7 +607822,7 @@
         }
       ],
       "role": "type",
-      "fSharpName": "Fable.Core.TS.Es.IteratorConstructor.ZipKeyed.Options3",
+      "fSharpName": "Fable.Core.TS.Es.IteratorConstructor.ZipKeyed.Options2",
       "arity": 0,
       "constraints": [],
       "api": "df566ff46fcda1db6b813e42ab2d255729295eefa91a4e16f6c69bd5bf470b9c",
@@ -609831,29 +609831,6 @@
       "arity": 0,
       "constraints": [],
       "api": "02831000679a2c319ccc441d6b350ff2323e879529cd0e3fcb33ddea745bf7fd",
-      "owner": "FableCoreTsInput"
-    },
-    {
-      "identity": "b2cd90c65bfe65680ddcb533b0874d498841c3552117b175c40df019b89a51b0",
-      "handles": [
-        "typescript@7.1.0-beta/lib/lib.es5.d.ts#6578.267"
-      ],
-      "sources": [
-        {
-          "package": "typescript",
-          "version": "7.1.0-beta",
-          "file": "lib/lib.es5.d.ts",
-          "sha256": "45cc92f8dd3df7cb07b7d19e2b2ca34e78bc005c910c1e53ee1cf9bf37910215",
-          "manifestSha256": "09f05906294dac3a294062ef5d735659452ed1c521639e93c96e4b306a0cfef4"
-        }
-      ],
-      "role": "alias",
-      "fSharpName": "Fable.Core.TS.Es.ObjectConstructor.Freeze.Result",
-      "arity": 1,
-      "constraints": [
-        "none"
-      ],
-      "api": "ca0f0beb1f82d43039013c8aa0e6b888a0bc5bfc9e0443022605202337c2d5bb",
       "owner": "FableCoreTsInput"
     },
     {
@@ -631543,10 +631520,10 @@
     }
   ],
   "compatibility": {
-    "apiVersion": 15,
+    "apiVersion": 16,
     "contractVersion": 1,
     "customizationVersion": 1,
-    "identityVersion": 9,
+    "identityVersion": 10,
     "inferenceVersion": 5,
     "compiler": {
       "astProtocolVersion": 9,

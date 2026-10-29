@@ -1493,6 +1493,18 @@ let internal restOverloads (model: ShapeModel) (signature: ResolvedSignature) : 
         |> List.map (fun (_, arms) -> arms |> List.maxBy optionalElements)
         |> List.map (spreadTuple signature rest)
 
+/// A generic object-literal alias in its declared parameter form. A concrete or otherwise
+/// specialized application cannot supply the body for a different application.
+let internal isGenericObjectAliasForm (model: ShapeModel) (facts: TypeFacts) =
+    flag TypeFlags.Object facts
+    && hasAny SymbolFlags.TypeLiteral facts.SymbolFlags
+    && not facts.AliasDeclarations.IsEmpty
+    && not facts.Declarations.IsEmpty
+    && not facts.AliasTypeArguments.IsEmpty
+    && facts.AliasTypeArguments = declParamIds facts
+    && facts.AliasTypeArguments
+       |> List.forall (fun id -> Map.tryFind id model.Types |> Option.exists (flag TypeFlags.TypeParameter))
+
 /// The generic declaration an instantiation points back at, when this run declares it. A
 /// generic declaration is its own target, so only a genuine instantiation matches.
 let internal instantiationOf (model: ShapeModel) (facts: TypeFacts) =
@@ -2889,8 +2901,42 @@ and internal objectRef
                 recordRef ctx model self owner facts
             else
 
-                match instantiationOf model facts with
-                | Some(name, arguments) ->
+                // A declaration promoted after anonymous naming may contain an object-alias
+                // application whose type id the earlier walk never visited. Resolve it through
+                // the one named source declaration, preserving the site's own arguments.
+                let objectAliasApplication =
+                    match facts.Response.AliasSymbolId, facts.AliasTypeArguments with
+                    | ValueSome alias, _ :: _ when
+                        (ctx.Config.DeclarationCatalog || not ctx.Config.DeclarationReferences.IsEmpty)
+                        && hasAny SymbolFlags.TypeLiteral facts.SymbolFlags
+                        ->
+                        model.DeclNames
+                        |> Map.toList
+                        |> List.choose (fun (id, name) ->
+                            match Map.tryFind id model.Types with
+                            | Some declared when
+                                not (Map.containsKey id model.AliasApplications)
+                                && declared.Response.AliasSymbolId = ValueSome alias
+                                && declared.Declarations = facts.Declarations
+                                && isGenericObjectAliasForm model declared
+                                ->
+                                let parameters = (declParamIds declared @ freeParamsOf model id) |> List.distinct
+
+                                if parameters.Length = facts.AliasTypeArguments.Length then
+                                    Some(name, parameters)
+                                else
+                                    None
+                            | _ -> None)
+                        |> List.distinct
+                        |> function
+                            | [ candidate ] -> Some candidate
+                            | _ -> None
+                    | _ -> None
+
+                match objectAliasApplication, instantiationOf model facts with
+                | Some(name, parameters), _ ->
+                    appliedRefTo ctx model self owner name parameters facts.AliasTypeArguments
+                | None, Some(name, arguments) ->
                     let parameters =
                         facts.Response.TargetTypeId
                         |> ValueOption.toOption
@@ -2899,7 +2945,7 @@ and internal objectRef
                         |> Option.defaultValue []
 
                     appliedRefTo ctx model self owner name parameters arguments
-                | None ->
+                | None, None ->
                     match
                         libBinding ctx model self owner facts
                         |> Option.orElseWith (fun () -> mappedBinding ctx model self owner facts)
