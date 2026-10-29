@@ -251,7 +251,13 @@ let private dependencyNames (model: ShapeModel) =
 
 /// Catalog reuse can remove the last reader of a dependency's anonymous declaration after
 /// shaping. Prune those declarations and their catalog rows together, preserving exports.
-let internal pruneDependencyOrphans (model: ShapeModel) (owner: string) (qualified: string -> string option) (exports: Set<string>) declarations =
+let internal pruneDependencyOrphans
+    (model: ShapeModel)
+    (owner: string)
+    (qualified: string -> string option)
+    (exports: Set<string>)
+    declarations
+    =
     let dependencyNames = dependencyNames model
 
     let rec loop dropped decls =
