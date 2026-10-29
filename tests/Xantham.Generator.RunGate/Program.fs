@@ -26,6 +26,9 @@ let private equal (claim: string) (expected: 'T) (actual: 'T) =
 /// The JSON of a value as JavaScript sees it: the shape an erased type really has.
 let private json (value: obj) : string = emitJsExpr value "JSON.stringify($0)"
 
+let private jsonFlatObject (value: obj) : string =
+    emitJsExpr value "JSON.stringify($0, Object.keys($0).sort())"
+
 let private patternParameters () =
     let omitted = PatternParameterLab.Keys.Create(__None = "none", _None = "underscore")
 
@@ -313,14 +316,14 @@ let private nestedNames () =
 
 let private taggedUnions () =
     let circle = PhaseBLab.Shape.Circle(PhaseBLab.CircleShape.Create 2.0)
-    equal "a tagged-union case erases to the tagged object" """{"kind":"circle","radius":2}""" (json circle)
+    equal "a tagged-union case erases to the tagged object" """{"kind":"circle","radius":2}""" (jsonFlatObject circle)
     equal "and JavaScript reads it off the tag" (System.Math.PI * 4.0) (PhaseBLab.Exports.area circle)
     let rect = PhaseBLab.Shape.RoundRect(PhaseBLab.RoundRectShape.Create(2.0, 3.0, 1.0))
 
     equal
         "a case built from its arm interface carries its CompiledName tag"
-        """{"kind":"round-rect","width":2,"height":3,"radius":1}"""
-        (json rect)
+        """{"height":3,"kind":"round-rect","radius":1,"width":2}"""
+        (jsonFlatObject rect)
 
     equal "and the JavaScript side agrees on its arm" 6.0 (PhaseBLab.Exports.area rect)
 
@@ -910,12 +913,10 @@ let private callbackFunctionForms () =
 
     let fromJs = Probes.CallbackFunctions.handlers
     equal "a callback read off an interface member applies with all its arguments" "js:1:2" (fromJs.onTick 1.0 2.0)
-    // Measured, not wanted. Reading a function-typed member back out hands F# a curry wrapper of
-    // length 1 rather than the JavaScript function itself, so a consumer that passes the value on
-    // to JavaScript passes a unary function. `Func` reads back as the function JavaScript holds.
+
     equal
-        "reading a function-typed member back hands F# a unary curry wrapper"
-        1.0
+        "reading a function-typed member back preserves its JavaScript arity"
+        2.0
         (emitJsExpr fromJs.onTick "$0.length")
 
     let attempt (f: unit -> string) =
@@ -926,9 +927,7 @@ let private callbackFunctionForms () =
 
     let factory = Probes.CallbackFunctions.factory
 
-    // A function-typed *property*: the value is read off the member and applied at the call site.
-    // The wrapper applies correctly from F#; its arity is what is lost.
-    equal "a function-typed property reads back as a unary curry wrapper too" 1.0 (emitJsExpr factory.pair "$0.length")
+    equal "a function-typed property preserves its JavaScript arity too" 2.0 (emitJsExpr factory.pair "$0.length")
     equal "and applies with all its arguments" "pair:1:2" (attempt (fun () -> factory.pair 1.0 2.0))
     equal "a function-typed member of arity 0 applies" "ready" (attempt factory.ready)
 
@@ -1099,6 +1098,8 @@ let private callbackGoldenForms () =
 /// compiles an F# tuple to a JavaScript array, so each claim below reads the `length` of the
 /// function JavaScript received beside the result of calling it with all its arguments at once.
 let private callbackTupledForms () =
+    let show (value: float) : string = emitJsExpr value "String($0)"
+
     let attempt (f: unit -> string) =
         try
             f ()
@@ -1113,16 +1114,17 @@ let private callbackTupledForms () =
 
     // Measured, not wanted. A tupled parameter crosses as a one-argument JavaScript function
     // taking an array, so the runtime's `fn(1, 2)` binds the array slot to `1` and the
-    // destructuring reads `undefined`. The value is wrong and nothing throws.
+    // destructuring reads `undefined`. JavaScript String coercion exposes these invalid numeric
+    // values; Fable numeric interpolation would throw while formatting them.
     equal
         "a tupled function of arity 2 crosses as a unary function over an array"
         "1:got:undefined:undefined"
-        (attempt (fun () -> Probes.CallbackTuples.callTwo (fun (a, b) -> $"got:{a}:{b}")))
+        (attempt (fun () -> Probes.CallbackTuples.callTwo (fun (a, b) -> $"got:{show a}:{show b}")))
 
     equal
         "and arity 3 the same way"
         "1:got:undefined:undefined:undefined"
-        (attempt (fun () -> Probes.CallbackTuples.callThree (fun (a, b, c) -> $"got:{a}:{b}:{c}")))
+        (attempt (fun () -> Probes.CallbackTuples.callThree (fun (a, b, c) -> $"got:{show a}:{show b}:{show c}")))
 
     let mutable sawVoidTwo = 0.0
 
@@ -1136,10 +1138,10 @@ let private callbackTupledForms () =
     equal
         "a named tupled abbreviation crosses at arity 1 too"
         "1:undefined|undefined"
-        (attempt (fun () -> Probes.CallbackTuples.callNamed (fun (value, digits) -> $"{value}|{digits}")))
+        (attempt (fun () -> Probes.CallbackTuples.callNamed (fun (value, digits) -> $"{show value}|{show digits}")))
 
     let built =
-        Probes.TupledHandlers.Create(onTick = (fun (a, b) -> $"tick:{a}:{b}"), onDone = (fun _ -> ()))
+        Probes.TupledHandlers.Create(onTick = (fun (a, b) -> $"tick:{show a}:{show b}"), onDone = (fun _ -> ()))
 
     equal
         "a tupled callback in a ParamObject literal crosses at arity 1"
@@ -1147,7 +1149,11 @@ let private callbackTupledForms () =
         (attempt (fun () -> Probes.CallbackTuples.fire built))
 
     let options =
-        Probes.TupledOptions.Create(label = "b", transform = (fun (a, b) -> $"t:{a}:{b}"), finish = (fun () -> ()))
+        Probes.TupledOptions.Create(
+            label = "b",
+            transform = (fun (a, b) -> $"t:{show a}:{show b}"),
+            finish = (fun () -> ())
+        )
 
     equal
         "a tupled method-shaped ParamObject parameter crosses at arity 1"
@@ -1940,7 +1946,7 @@ let private mintedTaggedCases () =
     equal
         "a case minted from an inline union erases to the tagged object"
         """{"type":"fetch","url":"/x"}"""
-        (json (SharedTagLab.Wide.Event.Fetch(SharedTagLab.FetchInfo.Create "/x")))
+        (jsonFlatObject (SharedTagLab.Wide.Event.Fetch(SharedTagLab.FetchInfo.Create "/x")))
 
     equal
         "and an arm carrying the tag alone erases to it alone"
@@ -1992,8 +1998,8 @@ let private inlinedArmCases () =
 
     equal
         "a case built from its arm interface is the arm, tagged"
-        """{"op":"ping","at":5}"""
-        (json (InlineArmLab.Message.Ping ping))
+        """{"at":5,"op":"ping"}"""
+        (jsonFlatObject (InlineArmLab.Message.Ping ping))
 
     let received: InlineArmLab.Message = emitJsExpr () """({ op: "pong", at: 2 })"""
 

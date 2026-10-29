@@ -1073,12 +1073,15 @@ from the catalogue as D1–D12.
    weighed both fail at two arguments:
 
    - **Curried** (`float -> float -> string`, lane AE). A method's return of arity 2 or more
-     compiles its call site one argument at a time and throws `TypeError`; a function-typed member
-     read back arrives as a wrapper of length 1.
+     compiles its call site one argument at a time and throws `TypeError`. Under the pinned
+     Fickl 0.7.2 (Fable 5.24), a function-typed member read back retains its JavaScript arity;
+     the earlier length-1 curry wrapper measurement applied to Fable 5.2.
    - **Tupled** (`(float * float) -> string`, lane AK). Fable compiles an F# tuple to a JavaScript
      array, so the value crosses as a one-argument function over an array. In parameter,
-     `ParamObject` and abbreviation position the runtime's arguments read `undefined` and nothing
-     throws; read-back keeps the arity and breaks the application instead.
+     `ParamObject` and abbreviation position the runtime's arguments read `undefined`;
+     Fickl 0.7.2's numeric interpolation throws while formatting those values. The run gate uses
+     JavaScript `String` coercion to expose the argument mismatch independently of formatting.
+     Read-back keeps the arity and breaks the application instead.
    - **Delegate.** Green in all eleven positions, at every arity, in both directions.
 
    At one argument or none the two function spellings coincide and there is nothing left to lose,
