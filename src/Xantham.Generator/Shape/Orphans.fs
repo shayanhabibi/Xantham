@@ -184,7 +184,6 @@ let private declName (decl: FsDecl) =
 let rec private prune
     (arms: Set<string>)
     (minted: Set<string>)
-    (dependencyOrphans: Set<string>)
     (roots: string list)
     (exports: string list)
     (dropped: string list)
@@ -201,8 +200,7 @@ let rec private prune
             | _, Some name when
                 not (Set.contains name read)
                 && Set.contains name minted
-                && (Set.contains name dependencyOrphans
-                    || roots |> List.exists (fun root -> name.StartsWith root))
+                && roots |> List.exists (fun root -> name.StartsWith root)
                 ->
                 Some name
             | _ -> None)
@@ -229,7 +227,7 @@ let rec private prune
     else
         decls
         |> List.filter (fun decl -> declName decl |> Option.forall (fun name -> not (Set.contains name unread)))
-        |> prune arms minted dependencyOrphans roots exports (dropped @ List.ofSeq unread)
+        |> prune arms minted roots exports (dropped @ List.ofSeq unread)
 
 let private dependencyNames (model: ShapeModel) =
     model.DeclNames
@@ -253,7 +251,7 @@ let private dependencyNames (model: ShapeModel) =
 
 /// Catalog reuse can remove the last reader of a dependency's anonymous declaration after
 /// shaping. Prune those declarations and their catalog rows together, preserving exports.
-let internal pruneDependencyOrphans (model: ShapeModel) qualified (exports: Set<string>) declarations =
+let internal pruneDependencyOrphans (model: ShapeModel) (owner: string) (qualified: string -> string option) (exports: Set<string>) declarations =
     let dependencyNames = dependencyNames model
 
     let rec loop dropped decls =
@@ -265,6 +263,7 @@ let internal pruneDependencyOrphans (model: ShapeModel) qualified (exports: Set<
             |> List.filter (fun name ->
                 Set.contains name model.MintedNames
                 && Set.contains name dependencyNames
+                && (qualified name |> Option.exists (fun full -> not (full.StartsWith(owner + "."))))
                 && not (Set.contains name read)
                 && (qualified name |> Option.forall (fun full -> not (Set.contains full read)))
                 && (exports
@@ -312,20 +311,8 @@ let dropOrphanDelegates: Pass<ShapeModel> =
                             | _ -> None)
                         |> Set.ofList
 
-                    // Private anonymous shapes from dependency packages can be reached while
-                    // a union is explored and then become unread when that union widens. They
-                    // have no public export in this package and must not create a second owner.
-                    let dependencyOrphans = dependencyNames model
-
                     let decls, dropped =
-                        prune
-                            arms
-                            model.MintedNames
-                            dependencyOrphans
-                            (armRoots model arms)
-                            (exportNames ctx model)
-                            []
-                            model.Decls
+                        prune arms model.MintedNames (armRoots model arms) (exportNames ctx model) [] model.Decls
 
                     // A delegate read only by declarations dropped alongside it is an arm
                     // declaration, graded as one: its readers were arm declarations.

@@ -1,4 +1,4 @@
-﻿/// Stable declaration ownership shared by independently generated entry modules.
+/// Stable declaration ownership shared by independently generated entry modules.
 module Xantham.Generator.DeclarationCatalog
 
 open System
@@ -2440,7 +2440,7 @@ let internal applyWithProducer
                     | Some _ -> None)
 
             let declarations, pruned =
-                Shape.Orphans.pruneDependencyOrphans shape qualifiedName exportedNames declarations
+                Shape.Orphans.pruneDependencyOrphans shape owner qualifiedName exportedNames declarations
 
             let owned =
                 owned
