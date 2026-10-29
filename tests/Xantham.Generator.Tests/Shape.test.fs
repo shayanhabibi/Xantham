@@ -35,19 +35,39 @@ let compiledMeasureOverloadTests =
             let aliases = Map.ofList [ "Conversation", conversation; "Task", task ]
             let aliasKey name = Spec.CompiledSignature.parameterKey aliases [] [ parameter (FsNamed name) ]
             Expect.equal (aliasKey "Conversation") (aliasKey "Task") "named numeric aliases collide"
-        testCase "deduplication keeps the first branded overload and its source type" <| fun _ ->
-            let method_ id = FsMethod { Name = "doc"; Docs = ""; Tags = []; TypeParameters = []
-                                        Parameters = [ parameter id ]; Return = FsUnit }
+        testCase "colliding brands retain both JavaScript calls and their return types" <| fun _ ->
+            let method_ id result = { Name = "doc"; Docs = ""; Tags = []; TypeParameters = []
+                                      Parameters = [ parameter id ]; Return = result }
+            let conversationMethod = method_ conversation FsString
+            let taskMethod = method_ task FsFloat
+            let stringMethod = method_ FsString FsUnit
             let declaration =
                 FsInterface
                     { Name = "Tx"; Callable = false; Docs = ""; Tags = []; Order = None; TypeParameters = []
-                      Inherits = []; Members = [ method_ conversation; method_ task; method_ FsString ]
+                      Inherits = []; Members = [ FsMethod conversationMethod; FsMethod taskMethod; FsMethod stringMethod ]
                       Entrypoint = None; CreateOverloads = []; Statics = [] }
             let model = { Build.shapeModel [] with Decls = [ declaration ] }
             let result, findings = Build.runPass Overloads.dedupeOverloads model
             let members = result.Decls |> List.pick (function FsInterface d -> Some d.Members | _ -> None)
-            Expect.equal members [ method_ conversation; method_ FsString ] "only the erased duplicate is removed"
-            Expect.equal (findings |> List.map (fun f -> f.Key, f.Symbol)) [ "DO001", "Tx.doc" ] "the dropped overload is reported"
+            Expect.equal members [ FsMethod conversationMethod; FsStringKeyed("doc", FsMethod { taskMethod with Name = "docById" }); FsMethod stringMethod ] "both typed overloads and distinct returns remain"
+            Expect.equal (findings |> List.map (fun f -> f.Key, f.Symbol)) [ "DO010", "Tx.doc" ] "the renamed overload is reported"
+        testCase "renamed overload retains its generic input and return relationship" <| fun _ ->
+            let method_ id =
+                FsMethod { Name = "apply"; Docs = ""; Tags = []; TypeParameters = [ { Name = "T"; Constraint = None } ]
+                           Parameters = [ parameter id; { parameter (FsTypeVar "T") with Name = "value" } ]; Return = FsTypeVar "T" }
+            let declaration =
+                FsInterface { Name = "Tx"; Callable = false; Docs = ""; Tags = []; Order = None; TypeParameters = []
+                              Inherits = []; Members = [ method_ conversation; method_ task ]; Entrypoint = None
+                              CreateOverloads = []; Statics = [] }
+            let result, _ = Build.runPass Overloads.dedupeOverloads { Build.shapeModel [] with Decls = [ declaration ] }
+            let members = result.Decls |> List.pick (function FsInterface d -> Some d.Members | _ -> None)
+            match members with
+            | [ FsMethod first; FsStringKeyed("apply", FsMethod second) ] ->
+                Expect.equal first.Return (FsTypeVar "T") "first result remains generic"
+                Expect.equal second.Return (FsTypeVar "T") "renamed result remains generic"
+                Expect.equal second.Parameters[1].Type (FsTypeVar "T") "input and result share the same variable"
+                Expect.equal second.TypeParameters [ { Name = "T"; Constraint = None } ] "unrepresentable constraint may stay dropped"
+            | other -> failtestf "Expected both call forms, got %A" other
     ]
 
 [<Tests>]

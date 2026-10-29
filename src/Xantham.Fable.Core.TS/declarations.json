@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "compiler": "a183b1956edbe7e7d98f2249858eedf2d8a9790809cc4909db1276e202faaa70",
-  "generator": "d352c1793ece7d9c024e311fb9e879a7a7d66495e5f624b55baf4987bd648f6b",
+  "generator": "592ae0afbb174f4359fd9cb265287235a55dd63f29f1dc638b31954e29c73956",
   "inferenceProfile": "d2f99097bf8701703dbad824988206bf0800602c089c9094d2b66092c161b32f",
   "owner": "FableCoreTsInput",
   "inputs": [
@@ -3850,7 +3850,10 @@
       "arity": 0,
       "constraints": [],
       "api": "265be1d1fdccbc76a41c7a4b22f12c45fc27125b918a4335f03fd3990555019c",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "302d0a9c8df55a1b9964699e84e980d11edafe963440e505d99d6defec49e768"
+      ]
     },
     {
       "identity": "47c512b7b0353b7cd0105a74f9df62cedade74b5b19eea9fa6b846bde491a583",
@@ -19488,7 +19491,12 @@
       "arity": 0,
       "constraints": [],
       "api": "261efb4675b3ba7a67e7b2c51fb0ac2ad45cbecf040462d5b062f82a4420c6f0",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "35bdc773d3941eb558835fc543d02e61e19c3d50ccc5e5fee628df19d8b1c81e",
+        "7c83650b30699444750c373b7cbcdaa0d67d5aeabf098e0c88953eae27fa60a0",
+        "994655c6c0d9e0c4e10c1af0a265366861d35555ca44e39507298889fa19cfad"
+      ]
     },
     {
       "identity": "5f3d1f81fe997f1f66ef8350a374f93814fc73432a44c314c5f0222f6516a2eb",
@@ -19866,7 +19874,10 @@
       "arity": 0,
       "constraints": [],
       "api": "5bf5311679b22d34ed7a93203a1a6435fdd3af73c964fbb9a86576adc93d0967",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "4125c8e1932e409cdb6dd5c63a42533171888bf4d2710daee40d489c95995f7d"
+      ]
     },
     {
       "identity": "ec11c6af1efd2412c83c4d1a29ed0e1e178db136cf20ad37b3e17f0935a2c44c",
@@ -21582,7 +21593,10 @@
       "arity": 0,
       "constraints": [],
       "api": "9b8757050a428e7f30068a09afa9925b61673da9e94b6ca7fc8f638fc3fc1e13",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "6abd07cebf9691d3bf3f8f99dd43c583d00e8c8dc0fbb36495bfd41faf4afdfe"
+      ]
     },
     {
       "identity": "b1c28ddb3f2b8f3a7c66e3c8e4b3daf8030f348724e61ee74fefd7df3a64f10c",
@@ -43838,7 +43852,13 @@
       "arity": 0,
       "constraints": [],
       "api": "8bf09f2e145593753836a8ab3ad0186ead86cf3967ae51e90c2899098097ffd3",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "07a545ee45ecd34303c1ac6d44720af4cf715cb58f32f8f04d7110b54668c974",
+        "76572d9ecbd2593fdfd5d91711a415722819bbe4ce8be2fecc62c3c75f822cdf",
+        "d6161cc14a3d53adcd471ed0c2a71e1e1493770052332136cba3c775df5b7c39",
+        "da14ec0073ee2101058a41375821514954cf08efdb5669e62f411210830d77ca"
+      ]
     },
     {
       "identity": "f3d44cf6c8a71f6a136bfd82077029db7584d3085f5d1e76bf1ebd415845eea0",
@@ -53053,7 +53073,7 @@
       "owner": "FableCoreTsInput"
     },
     {
-      "identity": "f52ca6e433007588dc05f90ce7070501ba9c4951371f0d81941c8573f88dfad0",
+      "identity": "55badba631b702a40ccd6f1a0c903fc8019b76dda902b60c8eeb77f333c72f88",
       "handles": [
         "typescript@7.1.0-beta/lib/lib.dom.d.ts#19537.189"
       ],
@@ -69863,7 +69883,10 @@
       "arity": 0,
       "constraints": [],
       "api": "67cc11f7c3d0fc83b9ec785f17cfcc9d23ab8a16848322c6cbdc9c95f316fab4",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "9b459887e31f682340b3b9cfe2b8e96c16e8d85b116dcf3be9454ddcadb055d4"
+      ]
     },
     {
       "identity": "3f4b423575b5a8b90bcca91df4d304b2215da653f2c4e823043046d93033b6e4",
@@ -78529,7 +78552,7 @@
       "owner": "FableCoreTsInput"
     },
     {
-      "identity": "b1e012631c276c6a8dc375026086e7bf7b228b5dfee3bbe6310e02e65d0deab2",
+      "identity": "65d0bcb2914bc19f974e09cabfb62c4afee58f97b78a72dcdf4efcbca69ab278",
       "handles": [
         "typescript@7.1.0-beta/lib/lib.dom.d.ts#26593.189"
       ],
@@ -78697,7 +78720,7 @@
       "owner": "FableCoreTsInput"
     },
     {
-      "identity": "9b4c7b49446f62fb8e04d6639c372130f46447752226151915b8f10f563d1675",
+      "identity": "9fd6cdcc725e5d1180a0a950b587aa643c9b6f569b506238724366941f453995",
       "handles": [
         "typescript@7.1.0-beta/lib/lib.es2015.iterable.d.ts#947.266",
         "typescript@7.1.0-beta/lib/lib.es2015.promise.d.ts#273.262",
@@ -85328,7 +85351,10 @@
       "arity": 0,
       "constraints": [],
       "api": "cef5b8479c00820de044a1c6c5ab4b7507190f11f49dc0b86a7c51004f27261b",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "7106d3fa9221d011facc04a50dd03a196217c5d04a5fc3bf402f5915a6230d67"
+      ]
     },
     {
       "identity": "89f7147a35120a5752cf3685c9f05b8104a074b3116720d1e0c0ba8d1ca6c1da",
@@ -85349,7 +85375,10 @@
       "arity": 0,
       "constraints": [],
       "api": "d30054d3ab00fb7487222d745c27af889778ac502a6237a5cb9832d62261f8ab",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "64d36fdce3d56e70d730f1e29de8bb08982e8b94356fbbc5eba83d85d8281c09"
+      ]
     },
     {
       "identity": "e014e05295e7e97d4294fa19cb299b0cf6ffba4ba774c0841b6a8403efc06271",
@@ -85510,7 +85539,10 @@
       "arity": 0,
       "constraints": [],
       "api": "88011b0605b94a6a1e79eb3bd721bb9eb9a6910c299a182f85d9d5a0ad2b150b",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "fc8acc636325fcc179dac25490afb7ba555a296807f2d89f8baf2fc16010711c"
+      ]
     },
     {
       "identity": "a8e7aa1fa95ee3c18309545ed2b280ac0f2dda9757c8d44b28a026d8c036c873",
@@ -85650,7 +85682,10 @@
       "arity": 0,
       "constraints": [],
       "api": "df1db66f1c5e200964f6162e0d9c8e4aa5cda78642ad8a4bb11f5c21d99a6f7e",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "8c00b3ae2063bc8becac3e5f0f545f5d43476acd94ff3528c3f69da02a2d3057"
+      ]
     },
     {
       "identity": "d4f7d91d98145890fabe83c5ea984ea8f8dca06d0fc3ca636f2bf779cf71d43b",
@@ -85692,7 +85727,10 @@
       "arity": 0,
       "constraints": [],
       "api": "4a0e106473dcce9608e001035e64c6eabc346994b87041966496cb8053c11c87",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "cd62956d48314e6fa6ec3ab44f00b8a2d7ff363497b270de9d3ebc63d3c09c29"
+      ]
     },
     {
       "identity": "5da2045b4fac14f80ccb591b7b81a3e86c89333f64f80abccc16c9c005e5c238",
@@ -92837,7 +92875,7 @@
       "owner": "FableCoreTsInput"
     },
     {
-      "identity": "df0151be6da457589d550b59d03eacc9eb17d0ad627c885db83798cffcbf3c34",
+      "identity": "158d948b3048b0a2f0dc0221e79223ee9e4d2650d8bd5435434e7e358930073d",
       "handles": [
         "typescript@7.1.0-beta/lib/lib.dom.d.ts#29194.189"
       ],
@@ -93139,7 +93177,7 @@
       "owner": "FableCoreTsInput"
     },
     {
-      "identity": "82ba4d47b59259f6b4fa4b60b1a5c767e650906de1d8e087fe7e8fc97c242e07",
+      "identity": "ebf21dd5139586468260d5bb72899d3bcdcaa2393f2ed7641a7ec740c67fdb90",
       "handles": [
         "typescript@7.1.0-beta/lib/lib.dom.d.ts#29747.189"
       ],
@@ -115960,7 +115998,10 @@
       "arity": 0,
       "constraints": [],
       "api": "da2e72ad8ce65f012ae358bee4cca2d33d18ea6ebe07e454b463921f6f4f90a6",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "a730406ef67b190f10189873a22a99cdf964b4f7625aa31ac0adbba5046bdef0"
+      ]
     },
     {
       "identity": "c23a028e1b39aa848dd9a5d9091ccb635ffeb6b29fb27249f9e83f3ff8e4fbf4",
@@ -117070,7 +117111,7 @@
       "owner": "FableCoreTsInput"
     },
     {
-      "identity": "abb76674407e3cb37f607178aad931772817ad49b4d77bf15fb9b2bc1037117d",
+      "identity": "c6775419aeb7ec3eaeb2a1e4f00373dc2e60fab645d2ba0b1d3a5b5035840cfd",
       "handles": [
         "typescript@7.1.0-beta/lib/lib.dom.d.ts#37122.189"
       ],
@@ -123235,7 +123276,10 @@
       "arity": 0,
       "constraints": [],
       "api": "38731cbbaacec6039c6b2deb512a413cc85d20c719acea8f245e1a3a50968c6c",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "c1ea00a475a523e2e2d15af179f18b5aa425fccefe8751aef33de00f8d80f48f"
+      ]
     },
     {
       "identity": "4c3f829a88852db2d06bcb6a496aebb8c4bc9818222f73f57fc40c65a416aa97",
@@ -125018,7 +125062,7 @@
       "owner": "FableCoreTsInput"
     },
     {
-      "identity": "8674f4d466e4c9e0913b636f12adaac8548ccf70a62e096e92c5700c2569c99a",
+      "identity": "e308b52239d398d75c417c4440dde998b57e5c705bd3c4dbb49355d441b03b94",
       "handles": [
         "typescript@7.1.0-beta/lib/lib.dom.d.ts#38636.189"
       ],
@@ -127337,7 +127381,11 @@
       "arity": 0,
       "constraints": [],
       "api": "328728666afc997bdbefa7aee6d5ac343e7606c162e6d041e937593106d3f07f",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "61764b6e62f704338ba46ebb5abfaddf5c3c4d1f24789088425122cc3d548ff1",
+        "9ccc3f01aba2dba7cafec90371e1bb428c873f1bbc93d45cae71ae3e53e4edb9"
+      ]
     },
     {
       "identity": "2029e4dbb717d6ba9c17b76df4cc822e815636d882342fbe4b4717f7e2b436db",
@@ -130742,7 +130790,10 @@
       "arity": 0,
       "constraints": [],
       "api": "f65dab0b318036b2039ab577535fdf79eaaa59c55d81be79123e799539a0ab79",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "12b750a30b8adbbc0d1767d70e611ff43fcb0831319b67e23e4fc4ab46bc3435"
+      ]
     },
     {
       "identity": "91620d5c579447a0166f524933ba538015636064ed6b80fde7587fefd7c10a74",
@@ -133005,7 +133056,10 @@
       "arity": 0,
       "constraints": [],
       "api": "16ebb7e482da7f79505454978340e1ca3df894fea8c72703565c36e23b5bc20d",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "793bb53489c6d30e4f5fd83967323e412c53670928ca3bb8c567d3adf2696596"
+      ]
     },
     {
       "identity": "66460707180bfb775d24db62f7c136a1ad88d533a457865ee24d33912c082fd9",
@@ -137789,7 +137843,10 @@
       "arity": 0,
       "constraints": [],
       "api": "3f8a5706d539bb53c2e02b99c3b0e9989fcbc1b7dbe11b7834677cbdc8554ba9",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "bea0607061a98db4e12ec963c6a3a99551e788692c0c06249368bac2cd68c116"
+      ]
     },
     {
       "identity": "9d3e503d31488fe759561881bcb2817cbda8341d421a5c83e04fae10bc40e87a",
@@ -139037,7 +139094,10 @@
       "arity": 0,
       "constraints": [],
       "api": "63826c7bbfe7addd7fa29fa1a2b1241fceac0b4fe1aa44d957c35fa3a78be8ba",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "5bd7eb5e31e2815a2e8cc779659bc4342e863cc04741dd56e52efb1354eaefc7"
+      ]
     },
     {
       "identity": "6341202a638fabda4ef4274958b6237d624c195efbca126c0c1552092a796d7c",
@@ -139177,7 +139237,10 @@
       "arity": 0,
       "constraints": [],
       "api": "d883c625600eff4744ab9443aeae81c80d08bedef3173193ad852a00d9d1553e",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "7cc26b39bed9c3b6b817d1ace2ecb87b70dafe94a4d4e7be19c49033fe090237"
+      ]
     },
     {
       "identity": "9cb4e13e6586627f57029c15ba5210b166a3d6e5195915e392dbeeebb04f9da3",
@@ -246921,7 +246984,10 @@
       "arity": 0,
       "constraints": [],
       "api": "4c9b7228e1bad739a5b7cbd3679f6b9060213b27df348cdb186d4fef1643b48b",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "050edae5691a7232423429a3a4a7f5a12c9cceb76d344cf0bc0a933f671edbfc"
+      ]
     },
     {
       "identity": "32425c188ee4230a79afe3adea42a6f383708c024f7eec8175189913bbf8a9e1",
@@ -247495,7 +247561,10 @@
       "arity": 0,
       "constraints": [],
       "api": "7e455568294dd78878e46c3d1c8efce11567f108e73f7da64f92763d7626fb8d",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "3f9dc4c70d362dfe77a1609615e9e1fabf742d585c2acb1096f0c0112a74225c"
+      ]
     },
     {
       "identity": "389dbd734f3b595882ac29d482c9019b04569bf3a5f6aca203436ae70bd3dbb9",
@@ -279867,7 +279936,10 @@
       "arity": 0,
       "constraints": [],
       "api": "e5c9a92f591a1d4c9b85f60d6a7dfd91aba6f67b6e3c10262848f3ef6fdd52e0",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "3b2a4f9e11a3443f5899a6c387109b7abf21407cf1b5e7649e37d917c1443ac7"
+      ]
     },
     {
       "identity": "950219c34ecc16979e2f2ecb9bf74844011700fa1fdc9a7472822e23be2c1d91",
@@ -289093,7 +289165,10 @@
       "arity": 0,
       "constraints": [],
       "api": "55dbf4545c7d474f7f4bee4b77b96a38254554f9d392067d2d65601c1005cf5d",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "63fa1beb69c83e20e5383ac449788c0535204ddfb6c4bf687b3fc0895623f554"
+      ]
     },
     {
       "identity": "ed20a8375d1f534390bfc517ceecef3c7b954861f40c175680cfad9354159227",
@@ -291639,7 +291714,10 @@
       "arity": 0,
       "constraints": [],
       "api": "704b6059782c5d31b66192c14a3dbddc439cc521651d5ced6e2273655ca89db9",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "6095283ba067a30269fce74483641305f1deb02eae9d2cbe5e7d5a944c5d8eb9"
+      ]
     },
     {
       "identity": "1ec3b97de4aa4e478dcfeb4cd3d40b493789e0cd93cc8ed9e567fe5ff2edcea2",
@@ -291800,7 +291878,10 @@
       "arity": 0,
       "constraints": [],
       "api": "606168908b7de5c2bdf0313675e7916c8dd8bd63e5f3c7d56957a285fb3c0d7c",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "4c4dcc150d9682d25da676fb8f8a0a5190c5507f967a5d99a5d2628e5d54044f"
+      ]
     },
     {
       "identity": "f9ba32255fa2ce3d9f6cdc4278184179cf9d9cee69b878887f78fe2ccf058fdb",
@@ -296792,7 +296873,10 @@
       "arity": 0,
       "constraints": [],
       "api": "8edeb2c1dac9a82d0c988c1a3adb63c08c8261549e9e1034f5095096c4289df1",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "f3611739979eb7297e735e98d6e177a21735920c6990b9802f1f5f95ed376827"
+      ]
     },
     {
       "identity": "4e7a562e02aead52fd3adbf45fb2e71ee0bee95da2815359bf818a01a44d85b2",
@@ -302735,7 +302819,7 @@
       "owner": "FableCoreTsInput"
     },
     {
-      "identity": "b2b5ff12cbe7122ac2219e6e93a4d8034a571eaa8ec6e2c3f667f76b882d386e",
+      "identity": "67791f29bc64efd89beb2c3d5114895a5fd527c0e12f5cb63af5253c3d50c92d",
       "handles": [
         "typescript@7.1.0-beta/lib/lib.dom.d.ts#65720.189"
       ],
@@ -317929,7 +318013,10 @@
       "arity": 0,
       "constraints": [],
       "api": "6f9f59dd9ac8c7be9a5a591e2d2968aec811fd493a1070bccccf3d0497226aa6",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "79d2f9d8598c274f4b9bb0ccf4580d8acd6db9982d245d2c3b860dfeb64b91a6"
+      ]
     },
     {
       "identity": "4ebdcbd3bc4313cc644d511c2832770873e1585f8bd3b68f0d3d68a99fabb2e0",
@@ -326515,7 +326602,10 @@
       "arity": 0,
       "constraints": [],
       "api": "0e3b2ca043a5bf565916e7391117b98c63e24ad06895f6dbb70bfade353b82af",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "728bf354e6aa3f7b7a1f8c31da3dc14a6714d901b5cd61c8bcdea8f63454a81d"
+      ]
     },
     {
       "identity": "265169958e09f8042c1d3f541c0a4d8f852111bec5a4c0547e038535a4afd5a2",
@@ -345279,7 +345369,10 @@
       "arity": 0,
       "constraints": [],
       "api": "ea1e731126ba2bc54341925504d1fd16fd8328ee30290c7f63215120b24921ee",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "0f99f33f3fd3ed2258834f86c2fe3aae5ce980c3d867acd5d3e607e7116fb131"
+      ]
     },
     {
       "identity": "a015dc89f9b8cfa0e263c857986c1b74d30e90b018ffa243ede9d461203d2955",
@@ -355309,7 +355402,10 @@
       "arity": 0,
       "constraints": [],
       "api": "c1735e108fa168ff8c84ab8333062c2f8326d32f6a754f31e30c3a4caad4b1fe",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "fe2e08a945db3c4d8281799217193da65bf1989c441772aa2cdae2a15d80d4b6"
+      ]
     },
     {
       "identity": "a55bb7aa4330a2a4e95be0da79e0c389b3ee3fd81b1baedecbeef133b84db88c",
@@ -359398,7 +359494,7 @@
       "owner": "FableCoreTsInput"
     },
     {
-      "identity": "ee2019814091600c955d0f78cb2b7a151a35f39ed17c4d708ce1a3ddc71e2ce0",
+      "identity": "5551542f6dffef57a8b9968fcb011afff2f0ed829c210d3140cd805a061b05b4",
       "handles": [
         "typescript@7.1.0-beta/lib/lib.dom.d.ts#76858.189"
       ],
@@ -393213,7 +393309,10 @@
       "arity": 0,
       "constraints": [],
       "api": "8673d48d034c79c9f9661eba163d664ea8974c0b56937b66e10975fa1a5bd319",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "b5ad3054049bc5d5d5ee402e10ccd55c7a2e176543db3754364b2ddea0887fcb"
+      ]
     },
     {
       "identity": "0a838d87263cdf5af6c43cd961d42f7852746333d6515c0493bb1acd13c180f0",
@@ -394052,7 +394151,7 @@
       "owner": "FableCoreTsInput"
     },
     {
-      "identity": "6b54e6facbdd33e14ab9c18e48ab1c9db146459e66b76f7a6c371f139bd5e482",
+      "identity": "1efb2fbc431ca29998f0c02e7d71213daff0b032d32b11d185f6d17654553fa4",
       "handles": [
         "typescript@7.1.0-beta/lib/lib.dom.d.ts#85769.189"
       ],
@@ -397724,7 +397823,7 @@
       "owner": "FableCoreTsInput"
     },
     {
-      "identity": "6f25604c6e5fddfd5a9ae9dc7bd8f0ae15776748905e81ab854c24c04f15408d",
+      "identity": "ae924ff96b358638e0a4cc0959aa95614ac8d7b940c9654fa1625ab2597655be",
       "handles": [
         "typescript@7.1.0-beta/lib/lib.dom.d.ts#86053.189"
       ],
@@ -482405,7 +482504,10 @@
       "arity": 0,
       "constraints": [],
       "api": "7ab2341a310cd9a776a73e0812e054eef5b98f832674c39862c7d501c3206ad5",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "61430805777de1c46a7f66d6f771e5c265b7ed2d6d776f312737e6e734860939"
+      ]
     },
     {
       "identity": "10674cda8feb3c9ac8eadc5ce6a7eb9b0cedde2b420ca223eb5dbdaed1afe608",
@@ -482548,7 +482650,7 @@
       "owner": "FableCoreTsInput"
     },
     {
-      "identity": "3e9c4bff184dd86cacc50ebf63941ff00fd3b9c0d60c278eaa2d37979bd1869b",
+      "identity": "30e64a4a13f04b0dbbe8b3bd6fbe39a6997ae0c8e3486e80c6a01d25f5eb2c18",
       "handles": [
         "typescript@7.1.0-beta/lib/lib.dom.d.ts#101684.189"
       ],
@@ -482685,7 +482787,10 @@
       "arity": 0,
       "constraints": [],
       "api": "48191ae851b16f7bfdc51598ee8d46e12f6a289096f8d7d2e57e3b4be21fe9f0",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "85bc98de0fdc898345bf9913118b491c380bd2f4576c58d7b04a94e1f5607855"
+      ]
     },
     {
       "identity": "f64e9d5ef0dc088d5015631e1db9322ce51cb27eb800405d2b59363b6686af92",
@@ -482944,7 +483049,10 @@
       "arity": 0,
       "constraints": [],
       "api": "8d971644427fcf69d19aca591037cf5ccf9ae43a81ed3c3d12691bd9f4ebe12d",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "99f278dd10e82aa21fd5d9e0172e6ca5e4063b41b2aa6120f05cab263458b693"
+      ]
     },
     {
       "identity": "b0da2243017ced208ac93c37fd1addc922e32502af244c97dee2f76881355eb6",
@@ -482965,7 +483073,10 @@
       "arity": 0,
       "constraints": [],
       "api": "faedf3f69aa80528619dc549969ccb42dad1a6e835962a596bdcd5af62f284f6",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "5b4fc49afc5176a78aada2da5c96bd9d1a59d77514ac412be1035ffc2dfa206a"
+      ]
     },
     {
       "identity": "2dea84d279c042e3d8024449ef58952b2bd5253488017435ecfe0d35e6ce3d78",
@@ -495708,7 +495819,7 @@
       "owner": "FableCoreTsInput"
     },
     {
-      "identity": "13aee55eac76a3fa9d2b963186c2227e7281e626dc7621be2e7da6bb84a0553c",
+      "identity": "8eed17d1884ca86b2e6677b165e6012ffe626b4b28604ca42e3dd2a3d43493df",
       "handles": [
         "typescript@7.1.0-beta/lib/lib.dom.d.ts#104313.189"
       ],
@@ -521447,7 +521558,10 @@
       "arity": 0,
       "constraints": [],
       "api": "351ef95be1ebb5682b4d2501241c18bb057beebd840441192ef8589eb9464d4e",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "6d695dd5fa094c838f94f7f0f88737926cb0e84d4aad1d823e1872eb8651a403"
+      ]
     },
     {
       "identity": "1f3d6942d861350c9554c8bc3dffbdf5eeb9d442c9fa593df39aadbf3b56829b",
@@ -525230,7 +525344,7 @@
       "owner": "FableCoreTsInput"
     },
     {
-      "identity": "6a8f2688d9bd4f596a22c45af7e84eb1999eb4b8cde7629ec039b5d119581777",
+      "identity": "4fb8aab510eaefc5bf3181af404966c34546a178e571ab061f6e7300822acafe",
       "handles": [
         "typescript@7.1.0-beta/lib/lib.dom.d.ts#109993.189"
       ],
@@ -525546,7 +525660,7 @@
       "owner": "FableCoreTsInput"
     },
     {
-      "identity": "61ef4bbaf7a0eaeb21d72f3eef33d35dd367fd38d132beb8f7fd0742cbd3f673",
+      "identity": "2a31e7c87a5fc1d3e54f39b1989891c3ef5a803bdc276055ca1dc9f8d66a6aa9",
       "handles": [
         "typescript@7.1.0-beta/lib/lib.dom.d.ts#110235.189"
       ],
@@ -525704,7 +525818,10 @@
       "arity": 0,
       "constraints": [],
       "api": "38fd9a8f20eafb36dc2bd84cd940fec66332dbd151639eb80357b5c34dc66ab5",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "bbd875f606f99a35e457626ebe4d307491f5e2d9901d3abd51da0cc06c2af329"
+      ]
     },
     {
       "identity": "e3efcf6a12b7cb79f69552bb96f10cc8556227d4db2308ec327272bee22c3509",
@@ -526087,7 +526204,7 @@
       "owner": "FableCoreTsInput"
     },
     {
-      "identity": "3fdfd138d3499391fde0feff5734b53d694ef1c0790e89d915ec407789a7827b",
+      "identity": "eb06889afddc0b6df17f7ea036d6777a08b626ce1641595a991263e30e88d858",
       "handles": [
         "typescript@7.1.0-beta/lib/lib.dom.d.ts#110409.189"
       ],
@@ -526464,7 +526581,10 @@
       "arity": 0,
       "constraints": [],
       "api": "cff45f3634d5a065b36d4ef88c38a0fca6f87cd043204c99262cc971a1aa9fbb",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "0fc15df9bd08de6efb907ba527ef5af2326f3a558418cf858b141a9c799714ef"
+      ]
     },
     {
       "identity": "b011b60563e3c2133845a9aaa2c7f0b428c1da0b3b1629b2c660ea87c7259a05",
@@ -528951,7 +529071,10 @@
       "arity": 0,
       "constraints": [],
       "api": "be317ced877bc11b05c761b6093bae9e2937b92b5b418dc3856a2f8e5d24a073",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "69b9a99fea59353338225b4c104bf7589c29e8bfe85b35e5b7c4fb25205b9a9c"
+      ]
     },
     {
       "identity": "c0cbf3ca6c1782d0f90f6cbb914591f7f8c8035f4cd1f1725cd91d0bb9c1c8e8",
@@ -537160,7 +537283,10 @@
       "arity": 0,
       "constraints": [],
       "api": "89b7933e3249aefe553fb54dfb8d431275c39df9c76c62991d305c0dfdcf28f9",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "0a0cc68f26bf9ebfe1192b82a715d7cf1ef3eaf6888532fe14e407740f065c70"
+      ]
     },
     {
       "identity": "72b913651f256ca6400c0e40c83b0ec70719fb157f731d0111651b72917d111f",
@@ -545283,7 +545409,7 @@
       "owner": "FableCoreTsInput"
     },
     {
-      "identity": "83a6179790d0693c8b4e062fca81cb162ec5acf81365a5666285e5bbc888f063",
+      "identity": "f10e4d3816fb615afc84bd91f531a557542aa8041bbc12fa14c135261bab958f",
       "handles": [
         "typescript@7.1.0-beta/lib/lib.dom.d.ts#129191.189"
       ],
@@ -546937,7 +547063,7 @@
       "owner": "FableCoreTsInput"
     },
     {
-      "identity": "17b0ffcdd29c380443e2c3e1dd4db7d1b2cba5855dafcd677ab03c38d60df741",
+      "identity": "389a8a6459f464c9f6dec027e5d6a064de4b0f134aeabc4477b62643ec27958e",
       "handles": [
         "typescript@7.1.0-beta/lib/lib.dom.d.ts#129381.189"
       ],
@@ -555037,7 +555163,7 @@
       "owner": "FableCoreTsInput"
     },
     {
-      "identity": "34fddb5480779dd4c81f8437b1de2b180b13f52695e0f1ca4522ee07aa97b655",
+      "identity": "50a71b130b24e355e08a799572f52b7e4ac0cfd51c15e18890b35760122bc9f4",
       "handles": [
         "typescript@7.1.0-beta/lib/lib.dom.d.ts#131953.189"
       ],
@@ -564219,7 +564345,10 @@
       "arity": 0,
       "constraints": [],
       "api": "ca794ac84d829c6823dacca757ca765a81e549d16d85e6bbacf533fd29ad2ce7",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "25f8027ce74160ceccb54f78abf0303640a5b945167d4b2f9440adadc5cab852"
+      ]
     },
     {
       "identity": "09bcd1cb17afde7b39b6bff244bdc1a9e85d5a33b6c6c65feb3107730f11a386",
@@ -567147,7 +567276,10 @@
       "arity": 0,
       "constraints": [],
       "api": "a437fee0709090d79affce75536ba36203296c0bb27b00e5cc9edbc61e9db831",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "34a1867a7b793b72ca9f130eb70578d9bbd4aa0f89d6cfefcebcfa9907d1b0ec"
+      ]
     },
     {
       "identity": "7e2d805f6875fd877a14b0ffc3cee848515664f1a7aa32cccc54ddc242d93235",
@@ -574672,7 +574804,10 @@
       "arity": 0,
       "constraints": [],
       "api": "e1edf9b3a8b68047016bf7607ee4ef73048bef192b898c341260648f6d438546",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "7849fd28dc394073cba858a09fb12cf0884a8199c103778830de9e5fe5964656"
+      ]
     },
     {
       "identity": "89c54a8ad89b99064081aea66b41250f859f10c22aae552dbd639f8fdfbc74d6",
@@ -576048,7 +576183,10 @@
       "arity": 0,
       "constraints": [],
       "api": "d1f6d9d9c5438fcbdaeadd54ddd0ab22ff39a8796b891cd4e11ba8fa9196eb37",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "eafc31de7b66d59c21f1219745c11f28b3bb895b555be198e45cbe0dc6ab74e2"
+      ]
     },
     {
       "identity": "ff955a5cc1f80ebd0b9aa486167af5f5d74919fe6683b8bbf901cca911281983",
@@ -585316,7 +585454,7 @@
       "fSharpName": "Fable.Core.TS.Es.GlobalThis",
       "arity": 0,
       "constraints": [],
-      "api": "8ce15e1f57b98d76616b0ca55858d521bf3a5848059425349ca62492898e20ef",
+      "api": "87f6ebcb50ee0558f1ecb6d328b99afbb5b2b0796936cb45e86bdee67984ecd8",
       "owner": "FableCoreTsInput"
     },
     {
@@ -601636,7 +601774,7 @@
       "fSharpName": "Fable.Core.TS.Es.Intl",
       "arity": 0,
       "constraints": [],
-      "api": "c8e3932eaeadf17579aa7c0454744084af28cecdfa33bb36bae7215b857c77e9",
+      "api": "88af663bb55424ad0564557316dbbefd7c9c63632eef8eaf6cec0e9414bf99f5",
       "owner": "FableCoreTsInput"
     },
     {
@@ -603028,7 +603166,10 @@
       "arity": 0,
       "constraints": [],
       "api": "fc27ad2b0ed84f0863d6ce733cff43dd682aacea5f566ac576a9379851fb62cf",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "921b8be41f5421a355aa61f7104b6f1556f0a4fbedd31c33047c142f9db947b0"
+      ]
     },
     {
       "identity": "b181ac284712fc3b98af0d46849133eba96d1060713546710c4c530c6d6504dd",
@@ -603266,7 +603407,10 @@
       "arity": 0,
       "constraints": [],
       "api": "7c83c9951bbd425c5ffc413b95008fbd6c225b19b877f8e3323a473520dfff95",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "5a9294972bc7898446246e5fdbd19a76fbb78f52dfb18b681b6ad9fa60f53867"
+      ]
     },
     {
       "identity": "0abfde635bbf859c4f60878c03f91bf2d32cf9b53616821866b1da6e52196037",
@@ -603808,7 +603952,7 @@
       "owner": "FableCoreTsInput"
     },
     {
-      "identity": "74149d1499bf292f378c14e1099299d8b382e4eb4f30e2c70db8b4c453ddc8e9",
+      "identity": "008a4ed49953d0d94b065ee4d3c226b6a11afac1f9fa3398cb78f81f2f1a3b07",
       "handles": [
         "typescript@7.1.0-beta/lib/lib.es2020.intl.d.ts#764.189"
       ],
@@ -605510,7 +605654,10 @@
       "arity": 0,
       "constraints": [],
       "api": "8033409359c50013f3618a359316b663edfb584e5c15537eddab313e144feefd",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "340d60f8053996b7680db97cef14f3df04245cdee00f5d3deba294a2b6261841"
+      ]
     },
     {
       "identity": "af36e8fb4bd0c20ce3b9c54689ec62b4728dcd7646a3a259c08469f84dfd2b3a",
@@ -609736,7 +609883,10 @@
       "arity": 0,
       "constraints": [],
       "api": "8694e29af084d5bd3cc9c1027a5d760439ba4f6cb39010bf12964b96f890f321",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "8651f0413aa53e3dfb3ad7ad6d75fa78380ab43df26f697a1cfe65a2d9393d68"
+      ]
     },
     {
       "identity": "964cfe9d71f21196ca8976922bcda239ecb3c87680efac004a31502f1bcbafa5",
@@ -619443,7 +619593,10 @@
       "arity": 0,
       "constraints": [],
       "api": "c8a606a45c8ae907fc66d7e9ea875826abb47bf45bfd5d636a38b53977799919",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "697cab3359c4c34c63c8717016f06cdb176e32d5bbf2ad7dd79c9c0c979d12ab"
+      ]
     },
     {
       "identity": "8eddacdcb7e784d13003c4b3fab4fbe0707f6c61163b8c8f4145948f955047db",
@@ -620302,7 +620455,10 @@
       "arity": 0,
       "constraints": [],
       "api": "65e6ce5055b9bc487c3fe0d12c34d454dc76ac0e26914564f8b50c2d20fa6f7e",
-      "owner": "FableCoreTsInput"
+      "owner": "FableCoreTsInput",
+      "equivalents": [
+        "998f6a2ca14967414612084baf8028137c49ac8237fc20e2fbfd5aa8fa1cb8c8"
+      ]
     },
     {
       "identity": "333ebb5029d94b3583effe42a70409664136247e8b664ed96621587b0d0bb406",

@@ -4,8 +4,8 @@
   "module": "OverloadArityLab",
   "counts": {
     "exact": 4,
-    "ergonomic": 4,
-    "widened": 3,
+    "ergonomic": 5,
+    "widened": 2,
     "escape": 0
   },
   "passes": [
@@ -33,7 +33,8 @@
     {
       "pass": "DO - dedupe-overloads",
       "total": 2,
-      "widened": 2
+      "ergonomic": 1,
+      "widened": 1
     }
   ]
 }

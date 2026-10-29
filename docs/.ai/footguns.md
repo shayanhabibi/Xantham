@@ -867,3 +867,12 @@ declaration (`WorkspaceModule2`, `NE001`); `CompiledName` on the module does not
 dependency derives the same module name the dependency's own producer used
 (`FSharp.CloudEdge.Runtime.Agents`). An alias written there for a reused export names itself
 (FS0953); reuse omits it, since the producer's declaration already carries the name.
+
+**Measures erase in CLR overload keys, but their callers must remain usable.** When two method
+parameters differ by a numeric measure, deduplication gives the later call a distinct F# member
+name and emits the original JavaScript key. Dropping it silently rejects callers carrying the
+other branded ID; differing return types must remain attached to their own call forms.
+
+**A private named brand may cross a catalog boundary.** In catalog mode, name declared brand
+aliases even when they are not exported locally, so catalog identity can reuse the producer's
+measure. Anonymous brand markers still widen; catalog surface compatibility remains strict.

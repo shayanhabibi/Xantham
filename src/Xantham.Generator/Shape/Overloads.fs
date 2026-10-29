@@ -98,6 +98,74 @@ let dedupeOverloads: Pass<ShapeModel> =
                             |> Option.map _.Name
 
                     let dedupeMethods (owner: string) (members: FsMember list) =
+                        // Keep distinct measured call forms even though their CLR signatures
+                        // collide. The renamed F# member still invokes the original JS key.
+                        let mutable allocated =
+                            members
+                            |> List.choose (function
+                                | FsMethod m -> Some m.Name
+                                | FsProperty p -> Some p.Name
+                                | FsStringKeyed(_, FsMethod m)
+                                | FsSymbolKeyed(_, FsMethod m)
+                                | FsLiteralKeyed(_, _, FsMethod m) -> Some m.Name
+                                | _ -> None)
+                            |> Set.ofList
+
+                        let mutable measured = Map.empty
+
+                        let members =
+                            members
+                            |> List.map (function
+                                | FsMethod m as member_ ->
+                                    let key = m.Name, signatureKey m.TypeParameters m.Parameters
+
+                                    let source =
+                                        m.Parameters
+                                        |> List.map (fun p ->
+                                            p.Optional, CompiledSignature.compiled abbrevs m.TypeParameters p.Type)
+
+                                    match Map.tryFind key measured with
+                                    | Some previous when previous <> source ->
+                                        let index =
+                                            List.zip previous source
+                                            |> List.findIndex (fun (left, right) -> left <> right)
+
+                                        let parameter = m.Parameters[index].Name
+
+                                        let suffix =
+                                            if System.String.IsNullOrEmpty parameter then
+                                                "Argument"
+                                            else
+                                                parameter.Substring(0, 1).ToUpperInvariant() + parameter.Substring(1)
+
+                                        let baseName = m.Name + "By" + suffix
+
+                                        let rec fresh index =
+                                            let name = if index = 1 then baseName else baseName + string index
+
+                                            if Set.contains name allocated then
+                                                fresh (index + 1)
+                                            else
+                                                name
+
+                                        let name = fresh 1
+                                        allocated <- Set.add name allocated
+
+                                        findings <-
+                                            findings
+                                            @ [
+                                                Finding.make
+                                                    $"{owner}.{m.Name}"
+                                                    (DedupeOverloads.MeasuredOverloadRenamed name)
+                                            ]
+
+                                        FsStringKeyed(m.Name, FsMethod { m with Name = name })
+                                    | None ->
+                                        measured <- Map.add key source measured
+                                        member_
+                                    | Some _ -> member_
+                                | member_ -> member_)
+
                         let mutable seen = Set.empty
 
                         members

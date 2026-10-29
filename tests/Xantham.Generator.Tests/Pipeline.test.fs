@@ -7320,11 +7320,12 @@ let overloadArityTests =
                           (rendered.Findings
                            |> List.filter (fun f -> f.Key = "DO001")
                            |> List.map _.Symbol)
-                          [ "Writer.pad"; "Documents.doc" ]
+                          [ "Writer.pad" ]
                           "only pairs with the same compiled parameters are dropped"
 
                       Expect.stringContains source "conversationId: float<ConversationId>" "the retained overload preserves its numeric brand"
-                      Expect.isFalse (source.Contains "taskId: float<TaskId>") "the erased duplicate is removed"
+                      Expect.stringContains source "docByTaskId" "the erased task overload has a callable F# name"
+                      Expect.stringContains source "taskId: float<TaskId>" "the task overload preserves its brand"
                       Expect.stringContains source "key: string" "the string-key overload remains distinct" ])
     ]
 

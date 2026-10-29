@@ -633,7 +633,13 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
             // An intersection of object types is one flattened interface (§4.6): the
             // resolve tier read its members off the intersection itself, so it names and
             // declares like any anonymous shape. An operand-only intersection widens.
-            isFlattenable model facts
+            let catalogBrand =
+                (ctx.Config.DeclarationCatalog
+                 || not (List.isEmpty ctx.Config.DeclarationReferences))
+                && not facts.AliasDeclarations.IsEmpty
+                && (brandedPrimitive model facts).IsSome
+
+            (isFlattenable model facts || catalogBrand)
             // Unless it is an application of an alias this run already declares, which is
             // written as that application rather than named a second time.
             && (aliasInstantiationOf { model with DeclNames = names } aliasForms facts).IsNone
@@ -899,10 +905,19 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                             | Some operandFacts when
                                 (operandFacts.SymbolName |> Option.exists (isSyntheticName >> not))
                                 || not operandFacts.AliasDeclarations.IsEmpty
+                                || ((operandFacts.Declarations
+                                     |> List.exists (fun handle ->
+                                         NodeHandle.parse (handle / uom<declHandle>)
+                                         |> ValueOption.exists (fun node -> node.Kind = SyntaxKind.TypeLiteral)))
+                                    && (operandFacts.Members
+                                        |> List.exists (fun member_ ->
+                                            Map.tryFind member_.TypeId model.Types
+                                            |> Option.exists (flag TypeFlags.StringLiteral)))
+                                    && (brandedPrimitive model facts).IsNone)
                                 ->
-                                // A named object alias has the anonymous body's __type symbol.
-                                // Its alias declaration still anchors the base when the owning
-                                // package is reached through an intersection in a consumer.
+                                // A named alias or discriminated source type literal can own
+                                // an intersection base in another catalog. Name it here so
+                                // both sides preserve the same inheritance edge.
                                 walk (into "Base") order operand
                             | _ -> ()
 

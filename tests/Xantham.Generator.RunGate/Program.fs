@@ -26,6 +26,18 @@ let private equal (claim: string) (expected: 'T) (actual: 'T) =
 /// The JSON of a value as JavaScript sees it: the shape an erased type really has.
 let private json (value: obj) : string = emitJsExpr value "JSON.stringify($0)"
 
+let private measuredOverloads () =
+    let documents: OverloadArityLab.Documents =
+        emitJsExpr () "({prefix: 'receiver', doc(token, id) { return this.prefix + ':' + token.value + ':' + id; }})"
+
+    let token = OverloadArityLab.Token<string>.Create "value"
+    let result: string = documents.docByTaskId (token, 7.0<OverloadArityLab.TaskId>)
+
+    equal
+        "renamed measured overload keeps JavaScript key, receiver, arguments and generic result"
+        "receiver:value:7"
+        result
+
 let private patternParameters () =
     let omitted = PatternParameterLab.Keys.Create(__None = "none", _None = "underscore")
 
@@ -2528,6 +2540,7 @@ let main _ =
     GenericCallableInterfaces.run check
     RecursiveCallbacks.run check
     BacktickMembers.run check
+    measuredOverloads ()
     Projections.run check
 
     match failures with

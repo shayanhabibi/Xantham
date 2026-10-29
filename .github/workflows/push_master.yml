@@ -20,6 +20,15 @@ on:
       - '.github/workflows/push_master.yml'
       - '.github/workflows/test-shards.yml'
   workflow_dispatch:
+    inputs:
+      support_only:
+        description: Publish the validated Core and Core.TS support packages only
+        type: boolean
+        default: false
+      validated_sha:
+        description: Commit whose support sources and tests were validated
+        type: string
+        required: false
 
 permissions:
   contents: read
@@ -36,6 +45,48 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  publish-support-only:
+    if: github.event_name == 'workflow_dispatch' && inputs.support_only && github.ref == 'refs/heads/fidelity/pi-constraints'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Bind the support source to the validated commit
+        env:
+          VALIDATED_SHA: ${{ inputs.validated_sha }}
+        run: |
+          [[ "$VALIDATED_SHA" =~ ^[0-9a-f]{40}$ ]]
+          git merge-base --is-ancestor "$VALIDATED_SHA" "$GITHUB_SHA"
+          git diff --quiet "$VALIDATED_SHA" "$GITHUB_SHA" -- . ':(exclude).github/workflows/push_master.yml'
+      - uses: ./.github/actions/setup
+      - name: Refuse existing immutable support versions
+        run: |
+          python3 - <<'PY'
+          import json, urllib.request, xml.etree.ElementTree as ET
+          for name in ['Xantham.Fable.Core', 'Xantham.Fable.Core.TS']:
+              version = ET.parse(f'src/{name}/{name}.fsproj').find('.//Version').text
+              url = f'https://dl.cloudsmith.io/public/shayanhabibi/xantham/nuget/{name.lower()}/index.json'
+              with urllib.request.urlopen(url, timeout=30) as response:
+                  versions = json.load(response)['versions']
+              if version.lower() in [v.lower() for v in versions]:
+                  raise SystemExit(f'{name} {version} already exists; inspect before retrying')
+          PY
+      - name: Pack the two validated support packages
+        run: dotnet fsi build.fsx -- pack --ci --no-format --skip-tests --project Xantham.Fable.Core Xantham.Fable.Core.TS
+      - name: Retain support packages
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: pi-support-packages-${{ github.sha }}
+          path: bin/*.nupkg
+          if-no-files-found: error
+      - name: Publish support packages to Cloudsmith
+        env:
+          NUGET_API_KEY: ${{ secrets.CLOUDSMITH_API_KEY }}
+        run: dotnet fsi build.fsx -- publish artifacts --project Xantham.Fable.Core Xantham.Fable.Core.TS --nuget-source https://nuget.cloudsmith.io/shayanhabibi/xantham/v3/index.json
+
   package:
     outputs:
       full: ${{ steps.scope.outputs.full }}

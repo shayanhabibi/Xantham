@@ -450,6 +450,25 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
         else
             ""
 
+    // A mixed union may be compared structurally inside another contract only when it
+    // includes a real source-anchored arm. All-intrinsic and nullable-only unions remain local.
+    let sourceAnchoredMixedUnion bindings (facts: TypeFacts) =
+        let arms = facts.UnionMembers |> List.choose (fun id -> Map.tryFind id shape.Types)
+
+        Map.isEmpty bindings
+        && arms.Length = facts.UnionMembers.Length
+        && (arms
+            |> List.exists (fun arm ->
+                intrinsicArgumentKey arm.Response <> ""
+                && not (
+                    arm.Response.Flags.HasFlag TypeFlags.Null
+                    || arm.Response.Flags.HasFlag TypeFlags.Undefined
+                )))
+        && (arms
+            |> List.exists (fun arm ->
+                intrinsicArgumentKey arm.Response = ""
+                && (not arm.Declarations.IsEmpty || not arm.AliasDeclarations.IsEmpty)))
+
     let boundParameters id facts =
         Shape.Spec.declParamIds facts @ Shape.Spec.freeParamsOf shape id
         |> List.distinct
@@ -520,7 +539,8 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                     elif
                         not (List.isEmpty visited)
                         && facts.AliasDeclarations.IsEmpty
-                        && (literalUnionIdentity true facts).IsSome
+                        && ((literalUnionIdentity true facts).IsSome
+                            || sourceAnchoredMixedUnion bindings facts)
                     then
                         // Inside another type's key, an unaliased literal union (`keyof typeof
                         // Kind`) is one interned type whether or not this program exports a name
@@ -560,57 +580,31 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                                     )
                                 else
                                     None
+                            elif sourceAnchoredMixedUnion bindings facts then
+                                let contracts =
+                                    facts.UnionMembers
+                                    |> List.choose (fun memberId ->
+                                        Map.tryFind memberId shape.Types
+                                        |> Option.bind (fun memberFacts ->
+                                            let intrinsic = intrinsicArgumentKey memberFacts.Response
+
+                                            if intrinsic <> "" then
+                                                Some intrinsic
+                                            else
+                                                typeIdentity (id :: visited) bindings memberId |> Option.map _.Key))
+
+                                if contracts.Length = facts.UnionMembers.Length then
+                                    Some(identity "union" [] (List.sort contracts))
+                                else
+                                    None
                             else
                                 None
                         else
                             None
 
                     let intersectionIdentity =
-                        if facts.AliasDeclarations.IsEmpty && not facts.IntersectionMembers.IsEmpty then
-                            let constituents =
-                                facts.IntersectionMembers
-                                |> List.choose (fun child -> Map.tryFind child shape.Types)
-
-                            let anchors = constituents |> List.collect _.Declarations
-
-                            let hasWrittenLiteral =
-                                anchors
-                                |> List.exists (fun handle ->
-                                    NodeHandle.parse (handle / uom<declHandle>)
-                                    |> ValueOption.exists (fun node -> node.Kind = SyntaxKind.TypeLiteral))
-
-                            if hasWrittenLiteral && constituents.Length = facts.IntersectionMembers.Length then
-                                // The hoisted declaration binds the parameters it reads from its
-                                // scope positionally, with their bounds, so copies over each
-                                // owner's own equally bounded parameter key alike.
-                                let bindings =
-                                    boundParameters id facts
-                                    |> List.mapi (fun index parameter ->
-                                        let bound =
-                                            Map.tryFind parameter shape.Types
-                                            |> Option.bind _.Constraint
-                                            |> Option.map (fun bound ->
-                                                typeIdentity (id :: visited) bindings bound
-                                                |> Option.map _.Key
-                                                |> Option.defaultValue "")
-
-                                        parameter,
-                                        match bound with
-                                        | None -> "parameter:" + string index
-                                        | Some bound -> json ("parameter", index, bound))
-                                    |> List.fold
-                                        (fun bindings (parameter, key) -> Map.add parameter key bindings)
-                                        bindings
-
-                                let contracts =
-                                    facts.IntersectionMembers |> List.choose (typeIdentity (id :: visited) bindings)
-
-                                if contracts.Length = facts.IntersectionMembers.Length then
-                                    Some(identity "source-intersection" anchors (contracts |> List.map _.Key))
-                                else
-                                    None
-                            else
-                                None
+                        if facts.AliasDeclarations.IsEmpty then
+                            sourceIntersectionIdentity visited bindings id facts
                         else
                             None
 
@@ -898,6 +892,71 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                     else
                         Some(identity role handles (arguments @ parameterBounds))
 
+    and sourceIntersectionIdentity visited bindings id (facts: TypeFacts) =
+        if facts.IntersectionMembers.IsEmpty then
+            None
+        else
+            let constituents =
+                facts.IntersectionMembers
+                |> List.choose (fun child -> Map.tryFind child shape.Types)
+
+            let anchors = constituents |> List.collect _.Declarations
+
+            let hasWrittenLiteral =
+                anchors
+                |> List.exists (fun handle ->
+                    NodeHandle.parse (handle / uom<declHandle>)
+                    |> ValueOption.exists (fun node -> node.Kind = SyntaxKind.TypeLiteral))
+
+            if hasWrittenLiteral && constituents.Length = facts.IntersectionMembers.Length then
+                // The hoisted declaration binds the parameters it reads from its
+                // scope positionally, with their bounds, so copies over each
+                // owner's own equally bounded parameter key alike.
+                let bindings =
+                    boundParameters id facts
+                    |> List.mapi (fun index parameter ->
+                        let bound =
+                            Map.tryFind parameter shape.Types
+                            |> Option.bind _.Constraint
+                            |> Option.map (fun bound ->
+                                typeIdentity (id :: visited) bindings bound
+                                |> Option.map _.Key
+                                |> Option.defaultValue "")
+
+                        parameter,
+                        match bound with
+                        | None -> "parameter:" + string index
+                        | Some bound -> json ("parameter", index, bound))
+                    |> List.fold (fun bindings (parameter, key) -> Map.add parameter key bindings) bindings
+
+                let contracts =
+                    facts.IntersectionMembers |> List.choose (typeIdentity (id :: visited) bindings)
+
+                if contracts.Length = facts.IntersectionMembers.Length then
+                    Some(identity "source-intersection" anchors (contracts |> List.map _.Key))
+                else
+                    None
+            else
+                None
+
+    let sourceUnionEquivalent id (facts: TypeFacts) =
+        let anchored memberId =
+            Map.tryFind memberId shape.Types
+            |> Option.exists (fun arm ->
+                not arm.Declarations.IsEmpty
+                || not arm.AliasDeclarations.IsEmpty
+                || not arm.IntersectionMembers.IsEmpty)
+
+        if facts.UnionMembers.Length < 2 || not (List.forall anchored facts.UnionMembers) then
+            None
+        else
+            let contracts = facts.UnionMembers |> List.choose (typeIdentity [ id ] Map.empty)
+
+            if contracts.Length = facts.UnionMembers.Length then
+                Some(identity "union" [] (contracts |> List.map _.Key |> List.sort))
+            else
+                None
+
     let mutable byType =
         shape.Types
         |> Map.toList
@@ -1073,6 +1132,29 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
     // Kind`) answers for its value key too, which a program without that export computes.
     let equivalents =
         [
+            yield!
+                shape.DeclNames
+                |> Map.toList
+                |> List.collect (fun (id, name) ->
+                    match Map.tryFind id shape.Types with
+                    | Some facts when
+                        (boundParameters id facts).IsEmpty
+                        && facts.AliasTypeArguments.IsEmpty
+                        && facts.DeclarationArguments.IsEmpty
+                        ->
+                        [
+                            sourceIntersectionIdentity [] Map.empty id facts
+                            sourceUnionEquivalent id facts
+                        ]
+                        |> List.choose (Option.map (fun equivalent -> name, equivalent.Key))
+                    | _ -> [])
+                |> List.groupBy snd
+                |> List.choose (fun (_, entries) ->
+                    if (entries |> List.map fst |> List.distinct |> List.length) = 1 then
+                        Some entries
+                    else
+                        None)
+                |> List.concat
             yield!
                 byType
                 |> Map.toList

@@ -4188,6 +4188,29 @@ let internal signatureTags (tags: JSDocTagInfo list) (signature: ResolvedSignatu
     | Some Undocumented -> tags |> List.filter (fun tag -> tag.Name <> "deprecated")
     | None -> tags
 
+/// Whether a signature position carries a given type parameter, without walking object members.
+let private carriesTypeParameter (model: ShapeModel) key root =
+    let rec visit seen pending =
+        match pending with
+        | [] -> false
+        | id :: _ when id = key -> true
+        | id :: rest when Set.contains id seen -> visit seen rest
+        | id :: rest ->
+            match Map.tryFind id model.Types with
+            | None -> visit (Set.add id seen) rest
+            | Some facts ->
+                let children =
+                    facts.TypeArguments
+                    @ facts.AliasTypeArguments
+                    @ facts.UnionMembers
+                    @ (facts.CallSignatures
+                       |> List.collect (fun signature ->
+                           signature.ReturnTypeId :: (signature.Parameters |> List.map _.TypeId)))
+
+                visit (Set.add id seen) (children @ rest)
+
+    visit Set.empty [ root ]
+
 /// A resolved signature as an F# type-parameter list, parameter list and return reference.
 /// Rest parameters are marked from the signature flag; their array types read as-is, and a
 /// tuple-typed one is written out as the parameters it stands for. A signature's *own*
@@ -4201,10 +4224,22 @@ let internal shapeSignature
     : FsTypeParam list * FsParam list * FsTypeRef * Finding list =
     let signature = expandTupleRest model declared
 
-    // §4.10, the open keyof regime: a `K extends keyof T` variable is not bound as an F#
-    // variable - a bare `'K` would let any type through and drag `T[K]` to obj. The support
-    // package's `keyof<'T>` is written at its uses instead.
-    let candidates = keyCandidates model signature.TypeParameters
+    // §4.10, the open keyof regime: use the support package's key idiom where it preserves
+    // an indexed access. When a method returns the same key it receives, retain that generic
+    // relationship and drop the constraint F# cannot express.
+    let candidates =
+        keyCandidates model signature.TypeParameters
+        // When the method returns its input key itself, retaining that relationship is
+        // more useful than replacing both occurrences with an uncorrelated keyof wrapper.
+        |> List.filter (fun (key, operand) ->
+            let roots = signature.ReturnTypeId :: (signature.Parameters |> List.map _.TypeId)
+
+            not (
+                carriesTypeParameter model key signature.ReturnTypeId
+                && (signature.Parameters
+                    |> List.exists (fun parameter -> carriesTypeParameter model key parameter.TypeId))
+                && not (mentionsAccess model operand key roots)
+            ))
 
     let plain =
         signature.TypeParameters
@@ -5182,7 +5217,7 @@ module CompiledSignature =
         | FsFunc(argument, ret) -> FsFunc(recur argument, recur ret)
         | FsApp(name, args) -> FsApp(name, List.map recur args)
         | FsBranded(primitive, measure) -> FsBranded(recur primitive, measure)
-        | other -> other
+        | (FsBool | FsString | FsFloat | FsBigInt | FsUnit | FsObj | FsTypeVar _ | FsNamed _) as leaf -> leaf
 
     let rec private renameTypeVars (rename: Map<string, string>) (reference: FsTypeRef) : FsTypeRef =
         let recur = renameTypeVars rename
@@ -5218,7 +5253,7 @@ module CompiledSignature =
         | FsDelegate(args, ret) -> FsDelegate(List.map recur args, recur ret)
         | FsFunc(argument, ret) -> FsFunc(recur argument, recur ret)
         | FsApp(name, args) -> FsApp(name, List.map recur args)
-        | other -> other
+        | (FsBool | FsString | FsFloat | FsBigInt | FsUnit | FsObj | FsTypeVar _ | FsNamed _) as leaf -> leaf
 
     /// The compiled parameter signature: generic arity, optionality and type per position.
     /// Measures erase from parameter types; ParamArray remains call-site metadata.

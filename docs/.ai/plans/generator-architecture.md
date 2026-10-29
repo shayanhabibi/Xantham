@@ -3961,3 +3961,21 @@ type-id check sees the mismatch first; it is unchanged here. No existing golden 
   reduced lab reproduces the re-export path yet.
 
 No existing golden moves.
+
+### Measured overloads and catalog frontier reuse (2026-10-28)
+
+`dedupe-overloads` retains both method call forms when their CLR parameter signatures collide
+only after numeric-measure erasure. The later member receives a distinct F# name and an `Emit`
+for the original JavaScript method. `DO010` records the ergonomic rename; each call retains its
+original parameter and return types. The overload-arity lab and shape matrix cover both brands,
+a distinct string overload, and differing return types.
+
+In catalog mode, anonymous-shape discovery also names declared branded aliases reached through
+private references. This lets the existing catalog identity machinery reuse the producer-owned
+measure instead of widening it at the consumer frontier. Truly anonymous markers still widen;
+catalog surface compatibility remains strict.
+
+For a method that takes and returns the same `keyof`-constrained type parameter, retain the
+generic input/result relationship and drop the unrepresentable constraint. Catalog identities
+also give a non-generic named intersection its source-constituent equivalent and normalize
+source-anchored mixed unions when they occur inside another contract.

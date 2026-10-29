@@ -54,6 +54,8 @@ type TaskToken<'T> = Token<'T>
 
 type Documents =
     abstract doc<'T>: token: Token<'T> * conversationId: float<ConversationId> -> 'T
+    [<Emit("$0['doc']($1...)")>]
+    abstract docByTaskId<'T>: token: Token<'T> * taskId: float<TaskId> -> 'T
     abstract doc<'T>: token: Token<'T> * key: string -> 'T
 
 /// <summary>The package's value exports, each bound to its import.</summary>

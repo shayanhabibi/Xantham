@@ -80,6 +80,7 @@
         <Compile Include="..\Xantham.Generator.Tests\golden\census-callable-provenance-lab\CensusCallableProvenanceLab.fs" Link="census-callable-provenance-lab\CensusCallableProvenanceLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\census-ambient-export-value-lab\CensusAmbientExportValueLab.fs" Link="census-ambient-export-value-lab\CensusAmbientExportValueLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\census-backtick-members-lab\CensusBacktickMembersLab.fs" Link="census-backtick-members-lab\CensusBacktickMembersLab.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\overload-arity-lab\OverloadArityLab.fs" Link="overload-arity-lab\OverloadArityLab.fs" />
         <Compile Include="BacktickMembers.fs" />
         <Compile Include="Program.fs" />
         <None Include="register.mjs" />

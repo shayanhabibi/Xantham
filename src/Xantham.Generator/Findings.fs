@@ -249,6 +249,7 @@ module FindingCodes =
             "DO.ExportMemberRenamed", "DO007"
             "DO.ExportReturnTypesUnioned", "DO008"
             "DO.ExportDeclarationsConsolidated", "DO009"
+            "DO.MeasuredOverloadRenamed", "DO010"
             "UA.ArmOverloadsSynthesized", "UA001"
             "UA.ArmCountExceedsCap", "UA002"
             "UA.ArmsCollapseToOneSignature", "UA003"
@@ -1222,11 +1223,15 @@ type DedupeOverloads =
     /// included, consolidated to one member; the erased constraint or alias is recorded on the
     /// member's own mapping findings.
     | [<Ergonomic>] ExportDeclarationsConsolidated of owner: string * exportName: string * declarations: int
+    /// Distinct measured parameters erase to one CLR signature; preserve the second call under a different F# name.
+    | [<Ergonomic>] MeasuredOverloadRenamed of memberName: string
 
     interface IFindingKind with
         member this.Message =
             match this with
             | OverloadDropped -> "overload dropped: identical to an earlier one after widening"
+            | MeasuredOverloadRenamed memberName ->
+                $"overload renamed {memberName}; its original JavaScript method is retained"
             | ExportOccurrenceConsolidated(owner, exportName, occurrences) ->
                 $"{occurrences} occurrences of export {exportName} under {owner} consolidated to one member"
             | ExportMemberRenamed(owner, exportName, memberName, reason) ->

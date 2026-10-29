@@ -91,6 +91,123 @@ let hash (request: Mini.Imported.Request) : string = request.cf.botManagement.ja
             (fun error -> Expect.stringContains error.Message "input source hash mismatch" "the source occurrence stays byte-authenticated")
 
 [<Tests>]
+let privateBrandTests =
+    testCase "catalog preserves named numeric brands reached through a private reference" <| fun _ ->
+        use scratch = Scratch.directory "catalog-private-brand"
+        let directory = scratch.Path
+        let owner = Path.Combine(directory, "node_modules", "catalog-owner")
+        let package = Path.Combine(directory, "consumer")
+        write owner "package.json" """{"name":"catalog-owner","version":"1.0.0","types":"index.d.ts"}"""
+        write owner "index.d.ts" "type EntryId = number & { readonly __brand: 'EntryId' };\ninterface Entry { id: EntryId; }\n"
+        write package "package.json" """{"name":"catalog-consumer","version":"1.0.0","types":"index.d.ts"}"""
+        write package "index.d.ts" "export interface Request { entry: Entry; }"
+        let generate name root references =
+            let output = Path.Combine(directory, name)
+            Pipeline.run (configure directory name references) root output |> Async.RunSynchronously |> ignore
+            read (Path.Combine(output, "declarations.json"))
+        let producer = generate "Owner" owner ([||]: string array)
+        generate "Imported" package [| Path.Combine(directory, "Owner", "declarations.json") |] |> ignore
+        Expect.isTrue (producer.Declarations |> Array.exists (fun entry -> entry.FSharpName.EndsWith(".EntryId", StringComparison.Ordinal))) "the named brand has a catalog owner"
+        Expect.isFalse (File.ReadAllText(Path.Combine(directory, "Owner", "Mini.Owner.fs")).Contains "abstract __brand") "brand markers are not exposed as intersection bases"
+        let code, output = DeclarationCatalogTests.compileConsumer directory [ "Owner/Mini.Owner.fs"; "Imported/Mini.Imported.fs" ] """module Mini.Check
+let id (request: Mini.Imported.Request) : float<Mini.Owner.EntryId> = request.entry.id
+"""
+        Expect.equal code 0 output
+
+[<Tests>]
+let aliasedIntersectionTests =
+    testCase "catalog reuses a named intersection through its source constituents" <| fun _ ->
+        use scratch = Scratch.directory "catalog-aliased-intersection"
+        let directory = scratch.Path
+        let owner = Path.Combine(directory, "node_modules", "catalog-owner")
+        let package = Path.Combine(directory, "consumer")
+        write owner "package.json" """{"name":"catalog-owner","version":"1.0.0","types":"index.d.ts"}"""
+        write owner "index.d.ts" "interface Image { data: string; }\ntype Content = string | Image[];\ntype Submission = { id: string } & ({ type: 'input'; content: Content } | { type: 'write'; text: string });\ntype Input = Extract<Submission, { type: 'input' }>;\ntype Create = Submission extends infer R ? R extends Submission ? Omit<R, 'id'> : never : never;\ninterface Handler { submit(input: Input): void; create(input: Create): void; }\n"
+        write package "package.json" """{"name":"catalog-consumer","version":"1.0.0","types":"index.d.ts"}"""
+        write package "index.d.ts" "export interface Request { handler: Handler; }"
+        let generate name root references =
+            let output = Path.Combine(directory, name)
+            Pipeline.run (configure directory name references) root output |> Async.RunSynchronously |> ignore
+            read (Path.Combine(output, "declarations.json"))
+        let producer = generate "Owner" owner ([||]: string array)
+        let input = producer.Declarations |> Array.find (fun entry -> entry.FSharpName.EndsWith(".Input", StringComparison.Ordinal))
+        let create = producer.Declarations |> Array.find (fun entry -> entry.FSharpName.EndsWith(".Create", StringComparison.Ordinal))
+        Expect.isNonEmpty input.Equivalents "the source intersection identifies the named alias"
+        Expect.isNonEmpty create.Equivalents "the distributed union identifies the named conditional alias"
+        for equivalent in input.Equivalents do
+            Expect.isFalse (producer.Declarations |> Array.exists (fun entry -> entry.Identity = equivalent && entry.Identity <> input.Identity)) "an equivalent must not name a different producer declaration"
+        let reference = Path.Combine(directory, "Owner", "declarations.json")
+        generate "Imported" package [| reference |] |> ignore
+        let code, output = DeclarationCatalogTests.compileConsumer directory [ "Owner/Mini.Owner.fs"; "Imported/Mini.Imported.fs" ] """module Mini.Check
+let submit (request: Mini.Imported.Request) (input: Mini.Owner.Input) = request.handler.submit input
+let create (request: Mini.Imported.Request) (input: Mini.Owner.Create) = request.handler.create input
+"""
+        Expect.equal code 0 output
+        let original = File.ReadAllText reference
+        let altered = JsonNode.Parse original
+        let row = altered["declarations"].AsArray() |> Seq.find (fun entry -> entry["identity"].GetValue<string>() = input.Identity)
+        row["equivalents"] <- JsonArray()
+        File.WriteAllText(reference, altered.ToJsonString())
+        Expect.throwsC
+            (fun () -> generate "WithoutEquivalent" package [| reference |] |> ignore)
+            (fun error -> Expect.stringContains error.Message "F# API mismatch" "removing the equivalent must reject the consumer")
+        let alteredUnion = JsonNode.Parse original
+        let unionRow = alteredUnion["declarations"].AsArray() |> Seq.find (fun entry -> entry["identity"].GetValue<string>() = create.Identity)
+        unionRow["equivalents"] <- JsonArray()
+        File.WriteAllText(reference, alteredUnion.ToJsonString())
+        Expect.throwsC
+            (fun () -> generate "WithoutUnionEquivalent" package [| reference |] |> ignore)
+            (fun error -> Expect.stringContains error.Message "F# API mismatch" "removing the union equivalent must reject the consumer")
+
+[<Tests>]
+let sharedLiteralBaseTests =
+    testCase "catalog preserves a shared union arm as an intersection base" <| fun _ ->
+        use scratch = Scratch.directory "catalog-literal-base"
+        let directory = scratch.Path
+        let owner = Path.Combine(directory, "node_modules", "catalog-owner")
+        let package = Path.Combine(directory, "consumer")
+        write owner "package.json" """{"name":"catalog-owner","version":"1.0.0","types":"index.d.ts"}"""
+        write owner "index.d.ts" "type Semantics = { scope: 'session'; history?: never; fork?: never } | { scope: 'task'; history?: never; fork?: never };\ntype Family<T, I> = { kind: string } & Semantics & { family: true; initial(seed: I): T };\ntype SessionFamily<T, I> = Family<T, I> & { scope: 'session' };\ninterface Handler { use(value: SessionFamily<string, number>): void; }\n"
+        write package "package.json" """{"name":"catalog-consumer","version":"1.0.0","types":"index.d.ts"}"""
+        write package "index.d.ts" "export interface Request { handler: Handler; }"
+        let generate name root references =
+            let output = Path.Combine(directory, name)
+            Pipeline.run (configure directory name references) root output |> Async.RunSynchronously |> ignore
+        generate "Owner" owner ([||]: string array)
+        generate "Imported" package [| Path.Combine(directory, "Owner", "declarations.json") |]
+        let code, output = DeclarationCatalogTests.compileConsumer directory [ "Owner/Mini.Owner.fs"; "Imported/Mini.Imported.fs" ] """module Mini.Check
+let handler (request: Mini.Imported.Request) : Mini.Owner.Handler = request.handler
+"""
+        Expect.equal code 0 output
+
+[<Tests>]
+let genericBrandTests =
+    testCase "catalog keeps separate private generic numeric brand aliases" <| fun _ ->
+        use scratch = Scratch.directory "catalog-generic-brands"
+        let directory = scratch.Path
+        let owner = Path.Combine(directory, "node_modules", "catalog-owner")
+        let package = Path.Combine(directory, "consumer")
+        write owner "package.json" """{"name":"catalog-owner","version":"1.0.0","types":"index.d.ts"}"""
+        write owner "index.d.ts" "type Brand<T, B> = T & { readonly __brand: B };\ntype EntryId = Brand<number, 'EntryId'>;\ntype TaskId = Brand<number, 'TaskId'>;\ninterface Entry { id: EntryId; task: TaskId; }\n"
+        write package "package.json" """{"name":"catalog-consumer","version":"1.0.0","types":"index.d.ts"}"""
+        write package "index.d.ts" "export interface Request { entry: Entry; }"
+        let generate name root references =
+            let output = Path.Combine(directory, name)
+            Pipeline.run (configure directory name references) root output |> Async.RunSynchronously |> ignore
+        generate "Owner" owner ([||]: string array)
+        generate "Imported" package [| Path.Combine(directory, "Owner", "declarations.json") |]
+        let sources = [ "Owner/Mini.Owner.fs"; "Imported/Mini.Imported.fs" ]
+        let code, output = DeclarationCatalogTests.compileConsumer directory sources """module Mini.Check
+let id (request: Mini.Imported.Request) : float<Mini.Owner.EntryId> = request.entry.id
+let task (request: Mini.Imported.Request) : float<Mini.Owner.TaskId> = request.entry.task
+"""
+        Expect.equal code 0 output
+        let invalid, _ = DeclarationCatalogTests.compileConsumer directory sources """module Mini.Invalid
+let wrong (request: Mini.Imported.Request) : float<Mini.Owner.EntryId> = request.entry.task
+"""
+        Expect.notEqual invalid 0 "different branded aliases must not unify"
+
+[<Tests>]
 let genericTests =
     testCase "catalog intersection identity retains generic applications and independent source contracts" <| fun _ ->
         use scratch = Scratch.directory "catalog-intersection-generic"
