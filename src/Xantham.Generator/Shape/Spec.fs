@@ -1498,6 +1498,8 @@ let internal restOverloads (model: ShapeModel) (signature: ResolvedSignature) : 
 let internal isGenericObjectAliasForm (model: ShapeModel) (facts: TypeFacts) =
     flag TypeFlags.Object facts
     && hasAny SymbolFlags.TypeLiteral facts.SymbolFlags
+    && facts.CallSignatures.IsEmpty
+    && facts.ConstructSignatures.IsEmpty
     && not facts.AliasDeclarations.IsEmpty
     && not facts.Declarations.IsEmpty
     && not facts.AliasTypeArguments.IsEmpty

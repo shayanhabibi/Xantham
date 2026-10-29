@@ -461,3 +461,30 @@ let left (r: Mini.Imported.Request) : bool = r.h.x.a
 let right (r: Mini.Imported.Request) : bool = r.p.y.b
 """
         Expect.equal code 0 output
+
+[<Tests>]
+let catalogGenericCallbackTests =
+    testCase "catalog preserves generic callback aliases without duplicate declarations" <| fun _ ->
+        use scratch = Scratch.directory "catalog-generic-callback"
+        let directory = scratch.Path
+        let owner = Path.Combine(directory, "node_modules", "catalog-owner")
+        let consumer = Path.Combine(directory, "consumer")
+        write owner "package.json" """{"name":"catalog-owner","version":"1.0.0","types":"index.d.ts"}"""
+        write owner "index.d.ts" """
+type Handler<Env = unknown, Metadata = unknown, Props = unknown> =
+    (request: Metadata, env: Env, context: Props) => string | Promise<string>;
+interface Worker<Env = unknown, Metadata = unknown, Props = unknown> {
+    fetch?: Handler<Env, Metadata, Props>;
+}
+"""
+        write consumer "package.json" """{"name":"catalog-consumer","version":"1.0.0","types":"index.d.ts"}"""
+        write consumer "index.d.ts" "export interface Request { worker: Worker; }"
+        let generate name root references =
+            let output = Path.Combine(directory, name)
+            Pipeline.run (configure directory name references) root output |> Async.RunSynchronously |> ignore
+        generate "Owner" owner [||]
+        generate "Imported" consumer [| Path.Combine(directory, "Owner", "declarations.json") |]
+        let code, output = DeclarationCatalogTests.compileConsumer directory [ "Owner/Mini.Owner.fs"; "Imported/Mini.Imported.fs" ] """module Mini.Check
+let worker (r: Mini.Imported.Request) : Mini.Owner.Worker<obj, obj, obj> = r.worker
+"""
+        Expect.equal code 0 output
