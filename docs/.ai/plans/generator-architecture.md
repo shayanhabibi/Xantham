@@ -3425,6 +3425,13 @@ Compiled overload identity excludes ParamArray metadata. Overloads with identica
 parameter types share a .NET signature even when only one is a rest overload; deduplication
 retains the first and reports the existing DO001 finding for the dropped contract.
 
+Compiled parameter keys also erase measures after abbreviation expansion, recursively through
+generic arguments, tuples, arrays and callback types. Numeric conversation/task ID brands can
+therefore share an overload when their token aliases resolve to the same parameter type.
+The retained member keeps its branded source signature; branded return alternatives retain
+their separate contracts in export collision resolution. Shape tests cover erasure and its
+nonduplicate boundaries, and `overload-arity-lab` binds generation and consumer compilation.
+
 Harvest deduplication includes the declaring namespace, preserving a same-named re-export
 beside its root export. Distinct source type-alias symbols retain their declarations across
 module owners even when the checker shares their type ID, including primitive aliases.

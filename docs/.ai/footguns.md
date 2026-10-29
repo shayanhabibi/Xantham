@@ -673,6 +673,13 @@ the same compiler shape without importing the entire global scope.
 
 ## Source-identical overloads precede emitted signature collisions (2026-10-25)
 
+Numeric brands rendered as measures erase from CLR parameter signatures, including nested
+generic, tuple, array and callback positions. Compare their primitive representations in
+`CompiledSignature.parameterKey`; retain measures in emitted parameters and return-contract
+comparison. Otherwise conversation/task ID overloads compile to duplicate methods, or an
+over-broad correction discards distinct branded return alternatives. The overload-arity lab
+covers generic token aliases beside branded IDs and a distinct string-key overload.
+
 Two source overloads with identical compiler parameter types and optionality select the first
 return in TypeScript. For example `readlinkSync(path, options?: EncodingOption): string`
 precedes an overload with the same inputs returning `string | Buffer`; unioning those returns

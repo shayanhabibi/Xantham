@@ -34,6 +34,28 @@ type Setter =
     [<Emit("$0($1...)")>]
     abstract Invoke: a: string * b: string * c: string * d: float -> unit
 
+/// <remarks>A brand over <c>float</c>.</remarks>
+[<Measure>]
+type ConversationId
+
+/// <remarks>A brand over <c>float</c>.</remarks>
+[<Measure>]
+type TaskId
+
+[<Interface>]
+type Token<'T> =
+    abstract value: 'T
+    [<ParamObject; Emit("$0")>]
+    static member Create (value: 'T) : Token<'T> = jsNative
+
+type ConversationToken<'T> = Token<'T>
+
+type TaskToken<'T> = Token<'T>
+
+type Documents =
+    abstract doc<'T>: token: Token<'T> * conversationId: float<ConversationId> -> 'T
+    abstract doc<'T>: token: Token<'T> * key: string -> 'T
+
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
@@ -41,3 +63,5 @@ type Exports =
     static member writer: Writer = jsNative
     [<Import("setter", "overload-arity-lab")>]
     static member setter: Setter = jsNative
+    [<Import("idBrand", "overload-arity-lab")>]
+    static member idBrand: Fable.Core.TS.Es.Symbol = jsNative

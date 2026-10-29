@@ -11,6 +11,46 @@ open Xantham.Generator
 open Xantham.Generator.Shape
 
 [<Tests>]
+let compiledMeasureOverloadTests =
+    let parameter reference = { Name = "id"; Optional = false; Rest = false; Type = reference }
+    let key reference = Spec.CompiledSignature.parameterKey Map.empty [] [ parameter reference ]
+    let conversation = FsBranded(FsFloat, "ConversationId")
+    let task = FsBranded(FsFloat, "TaskId")
+    testList "compiled measure overloads" [
+        testCase "numeric brands and their primitive share a compiled parameter type" <| fun _ ->
+            Expect.equal (key conversation) (key task) "measures erase from CLR signatures"
+            Expect.equal (key conversation) (key FsFloat) "the unmeasured primitive has the same representation"
+        testCase "measure erasure reaches nested parameter positions" <| fun _ ->
+            for wrap in [ FsArray; FsOption; (fun t -> FsTuple [ FsString; t ]); (fun t -> FsApp("Token", [ t ]));
+                          (fun t -> FsFunc(t, t)); (fun t -> FsDelegate([ t ], t)); (fun t -> FsErasedUnion [ FsString; t ]) ] do
+                Expect.equal (key (wrap conversation)) (key (wrap task)) "nested measures erase as well"
+        testCase "distinct primitives and nominal types remain separate" <| fun _ ->
+            Expect.notEqual (key conversation) (key (FsBranded(FsString, "TextId"))) "numeric and string representations differ"
+            Expect.notEqual (key (FsNamed "ConversationToken")) (key (FsNamed "TaskToken")) "nominal contracts are preserved"
+            Expect.notEqual (key (FsApp("Token", [ FsString ]))) (key (FsApp("Token", [ FsFloat ]))) "generic argument representations differ"
+        testCase "signature comparison retains branded source and return contracts" <| fun _ ->
+            Expect.equal (Spec.CompiledSignature.compiled Map.empty [] conversation) conversation "return union comparison preserves the brand"
+            Expect.notEqual (Spec.CompiledSignature.compiled Map.empty [] conversation) (Spec.CompiledSignature.compiled Map.empty [] task) "distinct branded returns remain distinct"
+        testCase "abbreviations expand before their measures erase" <| fun _ ->
+            let aliases = Map.ofList [ "Conversation", conversation; "Task", task ]
+            let aliasKey name = Spec.CompiledSignature.parameterKey aliases [] [ parameter (FsNamed name) ]
+            Expect.equal (aliasKey "Conversation") (aliasKey "Task") "named numeric aliases collide"
+        testCase "deduplication keeps the first branded overload and its source type" <| fun _ ->
+            let method_ id = FsMethod { Name = "doc"; Docs = ""; Tags = []; TypeParameters = []
+                                        Parameters = [ parameter id ]; Return = FsUnit }
+            let declaration =
+                FsInterface
+                    { Name = "Tx"; Callable = false; Docs = ""; Tags = []; Order = None; TypeParameters = []
+                      Inherits = []; Members = [ method_ conversation; method_ task; method_ FsString ]
+                      Entrypoint = None; CreateOverloads = []; Statics = [] }
+            let model = { Build.shapeModel [] with Decls = [ declaration ] }
+            let result, findings = Build.runPass Overloads.dedupeOverloads model
+            let members = result.Decls |> List.pick (function FsInterface d -> Some d.Members | _ -> None)
+            Expect.equal members [ method_ conversation; method_ FsString ] "only the erased duplicate is removed"
+            Expect.equal (findings |> List.map (fun f -> f.Key, f.Symbol)) [ "DO001", "Tx.doc" ] "the dropped overload is reported"
+    ]
+
+[<Tests>]
 let backtickMemberTests =
     testList "backtick members" [
         testCase "normalization preserves each source key beside reserved ordinary names" <| fun _ ->

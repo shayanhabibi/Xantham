@@ -5206,12 +5206,26 @@ module CompiledSignature =
 
         normalize abbrevs Set.empty (renameTypeVars rename reference)
 
+    let rec private eraseMeasures (reference: FsTypeRef) =
+        let recur = eraseMeasures
+
+        match reference with
+        | FsBranded(primitive, _) -> recur primitive
+        | FsOption inner -> FsOption(recur inner)
+        | FsArray element -> FsArray(recur element)
+        | FsTuple components -> FsTuple(List.map recur components)
+        | FsErasedUnion arms -> FsErasedUnion(List.map recur arms)
+        | FsDelegate(args, ret) -> FsDelegate(List.map recur args, recur ret)
+        | FsFunc(argument, ret) -> FsFunc(recur argument, recur ret)
+        | FsApp(name, args) -> FsApp(name, List.map recur args)
+        | other -> other
+
     /// The compiled parameter signature: generic arity, optionality and type per position.
-    /// ParamArray is call-site metadata and contributes nothing to overload identity.
+    /// Measures erase from parameter types; ParamArray remains call-site metadata.
     let parameterKey (abbrevs: Map<string, FsTypeRef>) (typeParameters: FsTypeParam list) (parameters: FsParam list) =
         typeParameters.Length,
         parameters
-        |> List.map (fun p -> p.Optional, compiled abbrevs typeParameters p.Type)
+        |> List.map (fun p -> p.Optional, compiled abbrevs typeParameters p.Type |> eraseMeasures)
 
     /// The parameter's type as written in its slot: an optional parameter renders `?name: T`
     /// for a `T option` reference.

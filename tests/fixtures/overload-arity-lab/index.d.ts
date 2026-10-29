@@ -19,3 +19,16 @@ export interface Setter {
 
 export declare const writer: Writer;
 export declare const setter: Setter;
+
+declare const idBrand: unique symbol;
+export type ConversationId = number & { readonly [idBrand]: "conversation" };
+export type TaskId = number & { readonly [idBrand]: "task" };
+export interface Token<T> { readonly value: T; }
+export type ConversationToken<T> = Token<T>;
+export type TaskToken<T> = Token<T>;
+
+export interface Documents {
+    doc<T>(token: ConversationToken<T>, conversationId: ConversationId): T;
+    doc<T>(token: TaskToken<T>, taskId: TaskId): T;
+    doc<T>(token: Token<T>, key: string): T;
+}
