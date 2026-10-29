@@ -184,6 +184,7 @@ let private declName (decl: FsDecl) =
 let rec private prune
     (arms: Set<string>)
     (minted: Set<string>)
+    (dependencyOrphans: Set<string>)
     (roots: string list)
     (exports: string list)
     (dropped: string list)
@@ -200,7 +201,8 @@ let rec private prune
             | _, Some name when
                 not (Set.contains name read)
                 && Set.contains name minted
-                && roots |> List.exists (fun root -> name.StartsWith root)
+                && (Set.contains name dependencyOrphans
+                    || roots |> List.exists (fun root -> name.StartsWith root))
                 ->
                 Some name
             | _ -> None)
@@ -227,7 +229,58 @@ let rec private prune
     else
         decls
         |> List.filter (fun decl -> declName decl |> Option.forall (fun name -> not (Set.contains name unread)))
-        |> prune arms minted roots exports (dropped @ List.ofSeq unread)
+        |> prune arms minted dependencyOrphans roots exports (dropped @ List.ofSeq unread)
+
+let private dependencyNames (model: ShapeModel) =
+    model.DeclNames
+    |> Map.toList
+    |> List.groupBy snd
+    |> List.choose (fun (name, entries) ->
+        if
+            entries
+            |> List.forall (fun (id, _) ->
+                Map.tryFind id model.Types
+                |> Option.exists (fun facts ->
+                    match facts.Origin with
+                    | Dependency _ -> true
+                    | _ -> false))
+        then
+            Some name
+        else
+            None)
+    |> Set.ofList
+
+
+/// Catalog reuse can remove the last reader of a dependency's anonymous declaration after
+/// shaping. Prune those declarations and their catalog rows together, preserving exports.
+let internal pruneDependencyOrphans (model: ShapeModel) qualified (exports: Set<string>) declarations =
+    let dependencyNames = dependencyNames model
+
+    let rec loop dropped decls =
+        let read = decls |> List.collect readNames |> Set.ofList
+
+        let unused =
+            decls
+            |> List.choose declName
+            |> List.filter (fun name ->
+                Set.contains name model.MintedNames
+                && Set.contains name dependencyNames
+                && not (Set.contains name read)
+                && (qualified name |> Option.forall (fun full -> not (Set.contains full read)))
+                && (exports
+                    |> Set.forall (fun export -> not (represented (Set.singleton name) export))))
+            |> Set.ofList
+
+        if Set.isEmpty unused then
+            decls, dropped
+        else
+            let retained =
+                decls
+                |> List.filter (fun decl -> declName decl |> Option.forall (fun name -> not (Set.contains name unused)))
+
+            loop (Set.union dropped unused) retained
+
+    loop Set.empty declarations
 
 /// The name every harvested export is looked up under: the qualified name `name-exports`
 /// assigned, falling back to the bare export name for a value export.
@@ -259,8 +312,20 @@ let dropOrphanDelegates: Pass<ShapeModel> =
                             | _ -> None)
                         |> Set.ofList
 
+                    // Private anonymous shapes from dependency packages can be reached while
+                    // a union is explored and then become unread when that union widens. They
+                    // have no public export in this package and must not create a second owner.
+                    let dependencyOrphans = dependencyNames model
+
                     let decls, dropped =
-                        prune arms model.MintedNames (armRoots model arms) (exportNames ctx model) [] model.Decls
+                        prune
+                            arms
+                            model.MintedNames
+                            dependencyOrphans
+                            (armRoots model arms)
+                            (exportNames ctx model)
+                            []
+                            model.Decls
 
                     // A delegate read only by declarations dropped alongside it is an arm
                     // declaration, graded as one: its readers were arm declarations.

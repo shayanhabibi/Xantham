@@ -1,4 +1,4 @@
-/// Stable declaration ownership shared by independently generated entry modules.
+﻿/// Stable declaration ownership shared by independently generated entry modules.
 module Xantham.Generator.DeclarationCatalog
 
 open System
@@ -2438,6 +2438,23 @@ let internal applyWithProducer
                                     })
                         )
                     | Some _ -> None)
+
+            let declarations, pruned =
+                Shape.Orphans.pruneDependencyOrphans shape qualifiedName exportedNames declarations
+
+            let owned =
+                owned
+                |> List.filter (fun declaration -> not (Set.contains (localName declaration) pruned))
+
+            let prunedIdentities =
+                pruned
+                |> Set.toList
+                |> List.choose (fun name -> Map.tryFind name identities |> Option.map _.Key)
+                |> Set.ofList
+
+            ownedVariants <-
+                ownedVariants
+                |> List.filter (fun variant -> not (Set.contains variant.Identity prunedIdentities))
 
             let owners =
                 [
