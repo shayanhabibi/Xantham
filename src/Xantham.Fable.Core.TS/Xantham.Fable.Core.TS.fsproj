@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <Version>0.4.0-beta.2</Version>
+    <Version>0.4.0-beta.3</Version>
     <FSharpCoreImplicitPackageVersion>4.7.2</FSharpCoreImplicitPackageVersion>
     <AssemblyVersion>0.0.0.0</AssemblyVersion>
     <PackageId>Xantham.Fable.Core.TS</PackageId>
@@ -20,14 +20,18 @@
     <None Include="obj/xantham/declarations.json.br;obj/xantham/catalogue.json" Pack="true" PackagePath="xantham/" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Xantham.Fable.Core\Xantham.Fable.Core.fsproj" />
+    <Content Include="@(Compile);$(MSBuildProjectFile)" Pack="true" PackagePath="fable/" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Xantham.Fable.Core\Xantham.Fable.Core.fsproj" Condition="Exists('..\Xantham.Fable.Core\Xantham.Fable.Core.fsproj')" />
+    <PackageReference Include="Xantham.Fable.Core" Version="0.3.0-beta.1" Condition="!Exists('..\Xantham.Fable.Core\Xantham.Fable.Core.fsproj')" />
     <PackageReference Include="Fable.Core" Version="5.6.0" />
     <PackageReference Include="Fable.Package.SDK" Version="1.4.1" PrivateAssets="all" />
   </ItemGroup>
-  <Target Name="RecordDeclarationCatalogBuild" AfterTargets="Build" Inputs="$(TargetPath);@(Compile);$(MSBuildProjectFullPath);$(MSBuildThisFileDirectory)../../tools/package-core-ts-catalog.fsx" Outputs="$(TargetPath).catalogue-build.json">
+  <Target Name="RecordDeclarationCatalogBuild" Condition="Exists('$(MSBuildThisFileDirectory)../../tools/package-core-ts-catalog.fsx')" AfterTargets="Build" Inputs="$(TargetPath);@(Compile);$(MSBuildProjectFullPath);$(MSBuildThisFileDirectory)../../tools/package-core-ts-catalog.fsx" Outputs="$(TargetPath).catalogue-build.json">
     <Exec Command="dotnet fsi &quot;$(MSBuildThisFileDirectory)../../tools/package-core-ts-catalog.fsx&quot; -- record-build &quot;$(MSBuildProjectDirectory)&quot; &quot;$(TargetPath)&quot;" />
   </Target>
-  <Target Name="PrepareDeclarationCatalog" BeforeTargets="GenerateNuspec">
+  <Target Name="PrepareDeclarationCatalog" Condition="Exists('$(MSBuildThisFileDirectory)../../tools/package-core-ts-catalog.fsx')" BeforeTargets="GenerateNuspec">
     <Exec Command="dotnet fsi &quot;$(MSBuildThisFileDirectory)../../tools/package-core-ts-catalog.fsx&quot; -- prepare &quot;$(MSBuildProjectDirectory)&quot; &quot;$(TargetPath)&quot; &quot;$(PackageVersion)&quot;" />
   </Target>
 </Project>

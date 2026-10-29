@@ -25,6 +25,11 @@ on:
         description: Publish the validated Core and Core.TS support packages only
         type: boolean
         default: false
+      support_package:
+        description: Support package selection
+        type: choice
+        options: [all, core-ts]
+        default: all
       validated_sha:
         description: Commit whose support sources and tests were validated
         type: string
@@ -63,10 +68,25 @@ jobs:
           git diff --quiet "$VALIDATED_SHA" "$GITHUB_SHA" -- . ':(exclude).github/workflows/push_master.yml'
       - uses: ./.github/actions/setup
       - name: Refuse existing immutable support versions
+        env:
+          SUPPORT_PACKAGE: ${{ inputs.support_package }}
         run: |
           python3 - <<'PY'
-          import json, urllib.request, xml.etree.ElementTree as ET
-          for name in ['Xantham.Fable.Core', 'Xantham.Fable.Core.TS']:
+          import io, json, os, pathlib, urllib.request, xml.etree.ElementTree as ET, zipfile
+          selection = os.environ['SUPPORT_PACKAGE']
+          if selection not in ('all', 'core-ts'):
+              raise SystemExit('invalid support package selection')
+          names = ['Xantham.Fable.Core.TS'] if selection == 'core-ts' else ['Xantham.Fable.Core', 'Xantham.Fable.Core.TS']
+          if selection == 'core-ts':
+              core = 'Xantham.Fable.Core'
+              version = ET.parse(f'src/{core}/{core}.fsproj').find('.//Version').text
+              url = f'https://dl.cloudsmith.io/public/shayanhabibi/xantham/nuget/{core.lower()}/{version.lower()}/{core.lower()}.{version.lower()}.nupkg'
+              with urllib.request.urlopen(url, timeout=30) as response:
+                  archive = zipfile.ZipFile(io.BytesIO(response.read()))
+              for file in ('Library.fs', 'Helpers.fs', core + '.fsproj'):
+                  if archive.read('fable/' + file) != pathlib.Path('src', core, file).read_bytes():
+                      raise SystemExit(f'published {core} {version} differs from validated source: {file}')
+          for name in names:
               version = ET.parse(f'src/{name}/{name}.fsproj').find('.//Version').text
               url = f'https://dl.cloudsmith.io/public/shayanhabibi/xantham/nuget/{name.lower()}/index.json'
               with urllib.request.urlopen(url, timeout=30) as response:
@@ -74,8 +94,15 @@ jobs:
               if version.lower() in [v.lower() for v in versions]:
                   raise SystemExit(f'{name} {version} already exists; inspect before retrying')
           PY
-      - name: Pack the two validated support packages
-        run: dotnet fsi build.fsx -- pack --ci --no-format --skip-tests --project Xantham.Fable.Core Xantham.Fable.Core.TS
+      - name: Pack the validated support packages
+        env:
+          SUPPORT_PACKAGE: ${{ inputs.support_package }}
+        run: |
+          if [ "$SUPPORT_PACKAGE" = core-ts ]; then
+            dotnet fsi build.fsx -- pack --ci --no-format --skip-tests --project Xantham.Fable.Core.TS
+          else
+            dotnet fsi build.fsx -- pack --ci --no-format --skip-tests --project Xantham.Fable.Core Xantham.Fable.Core.TS
+          fi
       - name: Retain support packages
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
@@ -85,7 +112,13 @@ jobs:
       - name: Publish support packages to Cloudsmith
         env:
           NUGET_API_KEY: ${{ secrets.CLOUDSMITH_API_KEY }}
-        run: dotnet fsi build.fsx -- publish artifacts --project Xantham.Fable.Core Xantham.Fable.Core.TS --nuget-source https://nuget.cloudsmith.io/shayanhabibi/xantham/v3/index.json
+          SUPPORT_PACKAGE: ${{ inputs.support_package }}
+        run: |
+          if [ "$SUPPORT_PACKAGE" = core-ts ]; then
+            dotnet fsi build.fsx -- publish artifacts --project Xantham.Fable.Core.TS --nuget-source https://nuget.cloudsmith.io/shayanhabibi/xantham/v3/index.json
+          else
+            dotnet fsi build.fsx -- publish artifacts --project Xantham.Fable.Core Xantham.Fable.Core.TS --nuget-source https://nuget.cloudsmith.io/shayanhabibi/xantham/v3/index.json
+          fi
 
   package:
     outputs:

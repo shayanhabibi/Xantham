@@ -76,6 +76,19 @@ let tests = testSequenced <| testList "core-ts package" [
         for payload in ["xantham/declarations.json.br"; "xantham/catalogue.json"] do
             Expect.isNotNull (archive.GetEntry payload) ("the package distributes " + payload)
 
+        let sourceFiles =
+            XDocument.Load(project).Descendants(XName.Get "Compile")
+            |> Seq.map (fun element -> element.Attribute(XName.Get "Include").Value)
+            |> Seq.append [Path.GetFileName project]
+        for file in sourceFiles do
+            let entry = archive.GetEntry("fable/" + file)
+            Expect.isNotNull entry ("the package distributes Fable source " + file)
+            use source = entry.Open()
+            use contents = new MemoryStream()
+            source.CopyTo(contents)
+            let expected = File.ReadAllBytes(Path.Combine(Path.GetDirectoryName project, file))
+            Expect.sequenceEqual (SHA256.HashData(contents.ToArray())) (SHA256.HashData(expected)) (file + " matches the built source")
+
         let consumer = Path.Combine(scratch.Path, "consumer")
         Directory.CreateDirectory consumer |> ignore
         for file in ["Directory.Build.props"; "Directory.Build.targets"] do
