@@ -1,0 +1,4 @@
+{
+  "census-root:direct": "index.js",
+  "census-root:alias": "alias.js"
+}

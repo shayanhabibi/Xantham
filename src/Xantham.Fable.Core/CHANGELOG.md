@@ -1,5 +1,5 @@
 ---
-last_commit_released: 0d9626867755b04d294c4313cd8a1ec299ccf543
+last_commit_released: 4fc08942ab1374f77bee22bdad079993aebaf5c1
 name: Xantham.Fable.Core
 include:
   - ../../Directory.Build.props
@@ -12,6 +12,25 @@ updaters:
 ---
 
 # Changelog
+
+## 0.3.0-beta.2 - 2026-10-29
+
+### 🐞 Bug Fixes
+
+* *(generator)* Validate projections against supplied support assemblies ([259b9786](https://github.com/shayanhabibi/Xantham/commit/259b978625e6718de3d5c17fa01f7dffcaf65b35))
+
+<strong><small>[View changes on Github](https://github.com/shayanhabibi/Xantham/compare/687a15f013a1ea6531f0f51c5b015c416949c039..4fc08942ab1374f77bee22bdad079993aebaf5c1)</small></strong>
+
+## 0.3.0-beta.1 - 2026-10-25
+
+### 🏗️ Breaking changes
+
+* *(generator)* Prune tagged-union arms and separate shared tags with CaseTest (#160) ([4bb45d91](https://github.com/shayanhabibi/Xantham/commit/4bb45d915a626579a971bf09b767eb2469562063))
+* *(generator)* Carry tagged-union interface arms with InlineInterface (#164) ([cd720b9c](https://github.com/shayanhabibi/Xantham/commit/cd720b9c5788238cbd5e16a61aa98ae8d6f5b34b))
+* *(generator)* Preserve generic callable interface contracts (#169) ([c50ec1ea](https://github.com/shayanhabibi/Xantham/commit/c50ec1ea0aa2520a92e011242bce30df09828a7c))
+* *(generator)* Close seven fidelity gaps from symbol to private members (#173) ([687a15f0](https://github.com/shayanhabibi/Xantham/commit/687a15f013a1ea6531f0f51c5b015c416949c039))
+
+<strong><small>[View changes on Github](https://github.com/shayanhabibi/Xantham/compare/0d9626867755b04d294c4313cd8a1ec299ccf543..687a15f013a1ea6531f0f51c5b015c416949c039)</small></strong>
 
 ## 0.2.0 - 2026-10-10
 

@@ -1,4 +1,4 @@
-﻿/// The shape tier's nano-pass payoff: each pass exercised on a hand-built model, asserted on
+/// The shape tier's nano-pass payoff: each pass exercised on a hand-built model, asserted on
 /// the output model and its findings. No wire, no fixtures.
 module Xantham.Generator.Tests.ShapeTests
 
@@ -9,6 +9,258 @@ open Xantham.TypeScript.Wire
 open Xantham.TypeScript.Wire.Proto
 open Xantham.Generator
 open Xantham.Generator.Shape
+
+[<Tests>]
+let backtickMemberTests =
+    testList "backtick members" [
+        testCase "normalization preserves each source key beside reserved ordinary names" <| fun _ ->
+            let field id name = Build.resolvedMember (Build.symbol id name SymbolFlags.Property) 1
+            let owner =
+                { Build.facts (Build.typeResponse 10 TypeFlags.Object) with
+                    Members = [ field 100 "$`"; field 101 "`"; field 102 "Item"; field 103 "Item2" ] }
+            let model = Build.shapeModel (Build.primitives @ [ owner ])
+            let members, findings = Spec.shapeMembers Build.context model Set.empty "Bag" owner
+            Expect.equal members.Length 4 "distinct JavaScript keys survive shaping"
+            Expect.isEmpty (findings |> List.filter (fun finding -> finding.Key = "MB007")) "keys are preserved"
+            Expect.equal (findings |> List.filter (fun finding -> finding.Key = "MB012") |> List.map _.Symbol) [ "Bag.$`"; "Bag.`" ] "each renamed source key reports its mapping"
+    ]
+
+[<Tests>]
+let emptyOwnedObjectReferenceTests =
+    let symbol = Build.symbol 100 "Empty" SymbolFlags.Interface
+    let facts =
+        { Build.facts { Build.typeResponse 10 TypeFlags.Object with Symbol = ValueSome(Build.compactOf symbol) } with
+            SymbolName = Some("Empty" * uom<symbolName>)
+            SymbolFlags = SymbolFlags.Interface }
+    let model =
+        { Build.shapeModel [ facts ] with
+            Harvest = { HarvestModel.Empty with Exports = [ Build.export "Renamed" symbol ] }
+            ExportTypes = Map.ofList [ symbol.SymbolId, { Declared = Some 10<typeId>; Value = None; AliasParameters = None } ] }
+    let keys context model facts =
+        let reference, findings = Spec.objectRef context model None "Scope.Renamed" facts
+        Expect.equal reference FsObj "the empty-object representation is unchanged"
+        findings |> List.map _.Key
+    testList "empty owned object references" [
+        testCase "a selected compiler type is owned independently of its spelling" <| fun _ ->
+            Expect.equal (keys Build.context model facts) [ "TR047" ] "selected empty interfaces use the empty-object diagnostic"
+        testCase "an unselected type still owes a declaration" <| fun _ ->
+            Expect.equal (keys Build.context { model with Harvest = HarvestModel.Empty } facts) [ "TR023" ] "a type-table entry does not establish ownership"
+        testCase "an unrelated selected type cannot establish ownership" <| fun _ ->
+            let unrelated = { model with ExportTypes = Map.ofList [ symbol.SymbolId, { Declared = Some 11<typeId>; Value = None; AliasParameters = None } ] }
+            Expect.equal (keys Build.context unrelated facts) [ "TR023" ] "ownership requires the exact compiler type"
+        testCase "private nominal instances retain the missing-declaration path" <| fun _ ->
+            Expect.equal (keys Build.context model { facts with PrivateMembers = true }) [ "TR023" ] "private members keep nominal identity"
+        testCase "widened groups do not acquire selected ownership" <| fun _ ->
+            Expect.equal (keys Build.context model { facts with Origin = CompilerLib }) [ "TR023" ] "the default compiler-library group is widened"
+        testCase "referenced owners retain the referenced declaration" <| fun _ ->
+            let context = { Build.context with Config = { Build.context.Config with Groups = Map.ofList [ "typescript/lib" * uom<npmDependency>, Reference ] } }
+            let reference, findings = Spec.objectRef context model None "Scope.Renamed" { facts with Origin = CompilerLib }
+            Expect.isFalse (reference = FsObj) "reference disposition retains its external name"
+            Expect.isEmpty findings "an empty reference adds no local ownership finding"
+    ]
+
+[<Tests>]
+let compilerNoInferAliasTests =
+    testList "compiler NoInfer alias shaping" [
+        for resolve in [ false; true ] do
+            testCase $"authentication belongs to the symbol rather than its shared intrinsic type resolveNoInfer={resolve}" <| fun _ ->
+                let intrinsic = Build.facts { Build.typeResponse 10 TypeFlags.Any with IntrinsicName = ValueSome "intrinsic" }
+                let parameter = { Build.facts (Build.typeResponse 20 TypeFlags.TypeParameter) with SymbolName = Some("T" * uom<symbolName>) }
+                let uppercase = Build.export "Uppercase" (Build.symbol 100 "Uppercase" SymbolFlags.TypeAlias)
+                let authenticated = Build.export "NoInfer" (Build.symbol 101 "NoInfer" SymbolFlags.TypeAlias)
+                let impostor = { Build.export "NoInfer" (Build.symbol 102 "NoInfer" SymbolFlags.TypeAlias) with NamespacePath = Some "Impostor" }
+                let model =
+                    { Build.shapeModel [ intrinsic; parameter ] with
+                        Harvest = { HarvestModel.Empty with Exports = [ uppercase; authenticated; impostor ] }
+                        CompilerNoInferSymbols = Set.singleton authenticated.Symbol.SymbolId
+                        ExportTypes =
+                            [ uppercase; authenticated; impostor ]
+                            |> List.map (fun export -> export.Symbol.SymbolId, { Declared = Some 10<typeId>; Value = None; AliasParameters = Some [ 20<typeId> ] })
+                            |> Map.ofList
+                        DeclNames = Map.ofList [ 10<typeId>, "Uppercase" ] }
+                let context = { Build.context with Config = { GeneratorConfig.Default with ResolveNoInfer = resolve } }
+                let shaped, findings = Pipeline.runTier context [ Aliases.shapeAliases ] model |> Async.RunSynchronously
+                let aliases = shaped.Decls |> List.choose (function FsAbbrev alias -> Some alias | _ -> None)
+                let actual = aliases |> List.find (fun alias -> alias.Name = "NoInfer")
+                let fake = aliases |> List.find (fun alias -> alias.Name = "Impostor.NoInfer")
+                Expect.equal (actual.TypeParameters |> List.map _.Name) [ "T" ] "the source binder is preserved"
+                Expect.equal actual.Target (if resolve then FsTypeVar "T" else FsApp("JS.NoInfer", [ FsTypeVar "T" ])) "only the authenticated symbol specializes"
+                Expect.equal fake.Target FsObj "the same name and type ID do not authenticate another symbol"
+                Expect.isNonEmpty (findings |> List.filter (fun finding -> finding.Key = "TR064" && finding.Symbol = "Impostor.NoInfer")) "the impostor retains its fallback finding"
+    ]
+
+[<Tests>]
+let inheritedCallableTests =
+    let invoke variable result =
+        FsInvoke { Docs = ""; Tags = []; TypeParameters = [ { Name = variable; Constraint = None } ]
+                   Parameters = [ { Name = "value"; Type = FsTypeVar variable; Optional = false; Rest = false } ]
+                   Return = result }
+    let interface_ name parameters bases members =
+        { Name = name; Callable = true; Docs = ""; Tags = []; Order = None
+          TypeParameters = parameters |> List.map (fun name -> { Name = name; Constraint = None })
+          Inherits = bases; Members = members; Entrypoint = None; CreateOverloads = []; Statics = [] }
+    let run baseMember childMember =
+        let parent = interface_ "Parent" [ "T" ] [] [ baseMember ]
+        let child = interface_ "Child" [] [ FsApp("Parent", [ FsString ]) ] [ childMember ]
+        let model = { Build.shapeModel Build.primitives with Decls = [ FsInterface parent; FsInterface child ] }
+        let shaped, _ = Build.runPass Inherited.dropInherited model
+        shaped.Decls |> List.pick (function FsInterface declaration when declaration.Name = "Child" -> Some declaration | _ -> None)
+    testList "inherited callable generic shaping" [
+        testCase "outer arguments are not captured by a method binder with the same spelling" <| fun _ ->
+            let parent = interface_ "Parent" [ "T" ] [] [ invoke "U" (FsTuple [ FsTypeVar "T"; FsTypeVar "U" ]) ]
+            let child = interface_ "Child" [ "U" ] [ FsApp("Parent", [ FsTypeVar "U" ]) ] [ invoke "V" (FsTuple [ FsTypeVar "U"; FsTypeVar "V" ]) ]
+            let model = { Build.shapeModel Build.primitives with Decls = [ FsInterface parent; FsInterface child ] }
+            let shaped, _ = Build.runPass Inherited.dropInherited model
+            let members = shaped.Decls |> List.pick (function FsInterface d when d.Name = "Child" -> Some d.Members | _ -> None)
+            Expect.isEmpty members "outer U and method V denote independent binders"
+        testCase "base arguments substitute through method return types" <| fun _ ->
+            let result = run (invoke "U" (FsTuple [ FsTypeVar "T"; FsTypeVar "U" ])) (invoke "U" (FsTuple [ FsString; FsTypeVar "U" ]))
+            Expect.isEmpty result.Members "the instantiated base owns the method"
+        testCase "method binders shadow outer substitution" <| fun _ ->
+            let member_ = invoke "T" (FsTypeVar "T")
+            Expect.isEmpty (run member_ member_).Members "invocation T stays independent of Parent<string>"
+        testCase "a distinct result contract remains declared" <| fun _ ->
+            let result = run (invoke "U" (FsTypeVar "T")) (invoke "U" FsFloat)
+            Expect.equal result.Members [ invoke "U" FsFloat ] "a string base cannot remove a number result"
+    ]
+
+[<Tests>]
+let genericCallableInterfaceTests =
+    testList "generic callable interfaces shaping" [
+        testCase "a single generic call keeps its binder on Invoke" <| fun _ ->
+            let parameter =
+                { Build.facts (Build.typeResponse 20 TypeFlags.TypeParameter) with SymbolName = Some("T" * uom<symbolName>) }
+            let callback =
+                { Build.facts (Build.typeResponse 10 TypeFlags.Object) with
+                    CallSignatures =
+                        [ { Build.signature [ Build.resolvedMember (Build.symbol 30 "value" SymbolFlags.Property) 20 ] 20 with
+                              TypeParameters = [ 20<typeId> ] } ] }
+            let model =
+                { Build.shapeModel (callback :: parameter :: Build.primitives) with DeclNames = Map.ofList [ 10<typeId>, "Identity" ] }
+            let bound, _ = Build.runPass FreeTypeParams.bindFreeTypeParams model
+            let callbacks, callbackFindings = Build.runPass Callbacks.shapeCallbacks bound
+            Expect.isEmpty callbacks.Decls "a generic call is represented by an interface"
+            Expect.isEmpty callbackFindings "its method binder is retained"
+            let interfaces, _ = Build.runPass Interfaces.shapeInterfaces bound
+            match interfaces.Decls with
+            | [ FsInterface declaration ] ->
+                Expect.isTrue declaration.Callable "the declaration retains its callable representation"
+                Expect.isEmpty declaration.TypeParameters "T belongs to each invocation"
+                match declaration.Members with
+                | [ FsInvoke invoke ] ->
+                    Expect.equal (invoke.TypeParameters |> List.map _.Name) [ "T" ] "the method binds T"
+                    Expect.equal (invoke.Parameters |> List.map _.Type) [ FsTypeVar "T" ] "the input retains T"
+                    Expect.equal invoke.Return (FsTypeVar "T") "the result retains T"
+                | members -> failtestf "Expected one Invoke, got %A" members
+            | declarations -> failtestf "Expected the Identity interface, got %A" declarations
+    ]
+
+[<Tests>]
+let genericCallableReferenceTests =
+    testList "generic callable references shaping" [
+        testCase "a declared generic callback application is not expanded into a new delegate" <| fun _ ->
+            let parameter =
+                { Build.facts (Build.typeResponse 20 TypeFlags.TypeParameter) with SymbolName = Some("T" * uom<symbolName>) }
+            let target =
+                { Build.facts { Build.typeResponse 10 TypeFlags.Object with Target = ValueSome 10; ObjectFlags = ValueSome ObjectFlags.Reference } with
+                    TypeArguments = [ 20<typeId> ] }
+            let application =
+                { Build.facts { Build.typeResponse 11 TypeFlags.Object with Target = ValueSome 10; ObjectFlags = ValueSome ObjectFlags.Reference } with
+                    TypeArguments = [ 1<typeId> ]
+                    CallSignatures = [ Build.signature [ Build.resolvedMember (Build.symbol 30 "left" SymbolFlags.Property) 1; Build.resolvedMember (Build.symbol 31 "right" SymbolFlags.Property) 1 ] 1 ] }
+            let model =
+                { Build.shapeModel (target :: application :: parameter :: Build.primitives) with DeclNames = Map.ofList [ 10<typeId>, "PairCallback" ] }
+            let reference, findings = Spec.objectRef Build.context model None "accept.value" application
+            Expect.equal reference (FsApp("PairCallback", [ FsString ])) "the existing declaration owns the callable contract"
+            Expect.isEmpty findings "using a declared application adds no callback-shaping loss"
+            let unnamed, _ = Spec.objectRef Build.context { model with DeclNames = Map.empty } None "accept.value" application
+            Expect.equal unnamed (FsDelegate([ FsString; FsString ], FsString)) "an undeclared callback keeps the ordinary fallback"
+    ]
+
+[<Tests>]
+let erasedObjectUnionTests =
+    let model rightSignatures =
+        let memberOf id name ty optional =
+            { Build.resolvedMember (Build.symbol id name SymbolFlags.Property) ty with Optional = optional }
+        let signature = Build.signature [ memberOf 100 "value" 2 false ] 2
+        let left =
+            { Build.facts (Build.typeResponse 10 TypeFlags.Object) with
+                Members = [ memberOf 101 "left" 2 false; memberOf 102 "right" 5 true ]
+                CallSignatures = [ signature ] }
+        let right =
+            { Build.facts (Build.typeResponse 11 TypeFlags.Object) with
+                Members = [ memberOf 103 "right" 1 false; memberOf 104 "left" 5 true ]
+                CallSignatures = rightSignatures signature }
+        let union =
+            { Build.facts (Build.typeResponse 12 TypeFlags.Union) with UnionMembers = [ 10<typeId>; 11<typeId> ] }
+        { Build.shapeModel (left :: right :: union :: Build.primitives) with
+            DeclNames = Map.ofList [ 10<typeId>, "Left"; 11<typeId>, "Right"; 12<typeId>, "Calls" ] }
+    let shaped model =
+        let result, _ = Build.runPass ErasedObjectUnions.detectErasedObjectUnions model
+        result.Decls |> List.pick (function FsErasedObjectUnion decl -> Some decl | _ -> None)
+    testList "erased object unions" [
+        testCase "shared calls require every arm to agree" <| fun _ ->
+            Expect.equal (shaped (model List.singleton)).Invokes.Length 1 "the same source call is shared"
+            Expect.isEmpty (shaped (model (fun _ -> []))).Invokes "data arms are not callable"
+            Expect.isEmpty (shaped (model (fun signature -> [ { signature with ReturnTypeId = 1<typeId> } ]))).Invokes "different returns are not shared"
+            Expect.isEmpty (shaped (model (fun signature -> [ { signature with HasRest = true } ]))).Invokes "different rest conventions are not shared"
+        testCase "typed payloads and defined-value tests are retained" <| fun _ ->
+            let decl = shaped (model List.singleton)
+            Expect.equal (decl.Cases |> List.map _.Payload) [ FsNamed "Left"; FsNamed "Right" ] "payloads keep arm types"
+            Expect.equal (decl.Cases |> List.map _.Test) [ IsDefined "left"; IsDefined "right" ] "undefined on the other arm cannot match"
+        testCase "an intersection must prove that its required discriminator is defined" <| fun _ ->
+            let source = model List.singleton
+            let left = source.Types[10<typeId>]
+            let source =
+                { source with
+                    Types = source.Types
+                            |> Map.add 20<typeId> (Build.facts (Build.typeResponse 20 TypeFlags.TypeParameter))
+                            |> Map.add 21<typeId> { Build.facts (Build.typeResponse 21 TypeFlags.Intersection) with IntersectionMembers = [ 20<typeId>; 5<typeId> ] }
+                            |> Map.add 10<typeId> { left with Members = left.Members |> List.map (fun m -> if m.Symbol.Name = "left" then { m with TypeId = 21<typeId> } else m) } }
+            Expect.isNone (Spec.erasedObjectUnionShape source source.Types[12<typeId>]) "T & undefined can be undefined"
+        testCase "generic calls compare parameter bindings and constraints" <| fun _ ->
+            let source = model List.singleton
+            let generic id bound =
+                { Build.facts (Build.typeResponse id TypeFlags.TypeParameter) with Constraint = bound }
+            let signature id =
+                { Build.signature [ Build.resolvedMember (Build.symbol 200 "value" SymbolFlags.Property) id ] id with
+                    TypeParameters = [ id * uom<typeId> ] }
+            let withConstraint bound =
+                { source with
+                    Types =
+                        source.Types
+                        |> Map.add 20<typeId> (generic 20 (Some 2<typeId>))
+                        |> Map.add 21<typeId> (generic 21 bound)
+                        |> Map.add 10<typeId> { source.Types[10<typeId>] with CallSignatures = [ signature 20 ] }
+                        |> Map.add 11<typeId> { source.Types[11<typeId>] with CallSignatures = [ signature 21 ] } }
+            Expect.equal (shaped (withConstraint (Some 2<typeId>))).Invokes.Length 1 "alpha-equivalent generic calls are shared"
+            Expect.isEmpty (shaped (withConstraint (Some 1<typeId>))).Invokes "different constraints are not shared"
+            Expect.isEmpty (shaped (withConstraint None)).Invokes "a missing constraint is not equivalent"
+            let union id variable =
+                { Build.facts (Build.typeResponse id TypeFlags.Union) with UnionMembers = [ variable; 1<typeId> ] }
+            let wrapped = withConstraint (Some 2<typeId>)
+            let wrapParameter unionId (arm: TypeFacts) =
+                let signatures =
+                    arm.CallSignatures |> List.map (fun signature ->
+                        { signature with Parameters = signature.Parameters |> List.map (fun parameter -> { parameter with TypeId = unionId }) })
+                { arm with CallSignatures = signatures }
+            let wrapped =
+                { wrapped with
+                    Types =
+                        wrapped.Types
+                        |> Map.add 30<typeId> (union 30 20<typeId>)
+                        |> Map.add 31<typeId> (union 31 21<typeId>)
+                        |> Map.add 10<typeId> (wrapParameter 30<typeId> wrapped.Types[10<typeId>])
+                        |> Map.add 11<typeId> (wrapParameter 31<typeId> wrapped.Types[11<typeId>]) }
+            Expect.equal (shaped wrapped).Invokes.Length 1 "union members compare in both directions under the same bindings"
+        testCase "widened shared overloads are deduplicated" <| fun _ ->
+            let decl = shaped (model List.singleton)
+            let source = { model List.singleton with Decls = [ FsErasedObjectUnion { decl with Invokes = decl.Invokes @ decl.Invokes } ] }
+            let result, findings = Build.runPass Overloads.dedupeOverloads source
+            let actual = result.Decls |> List.pick (function FsErasedObjectUnion value -> Some value | _ -> None)
+            Expect.equal actual.Invokes.Length 1 "the emitted CLR signature occurs once"
+            Expect.isTrue (findings |> List.exists (fun finding -> finding.Symbol = "Calls.Invoke" && finding.Key = "DO001")) "the loss is reported"
+    ]
 
 /// A string-literal type carrying its payload.
 let private stringLiteral (id: int) (text: string) =
@@ -88,7 +340,7 @@ let private genericTagModel () =
     let union id (arms: int list) argument =
         { Build.facts
             { Build.typeResponse id TypeFlags.Union with
-                AliasSymbol = ValueSome 900
+                AliasSymbol = ValueSome(Build.compact 900)
                 AliasTypeArguments = ValueSome [| argument |] } with
             UnionMembers = arms |> List.map (fun value -> value * uom<typeId>)
             AliasTypeArguments = [ argument * uom<typeId> ] }
@@ -124,7 +376,7 @@ let private phantomTagModel () =
     let union id argument =
         Build.facts
             { Build.typeResponse id TypeFlags.Union with
-                AliasSymbol = ValueSome 901
+                AliasSymbol = ValueSome(Build.compact 901)
                 AliasTypeArguments = ValueSome [| argument |] }
 
     { Build.shapeModel (
@@ -343,10 +595,10 @@ let private conditionalAliasModel (declaredOperands: int list) (appliedOperands:
           marker 32 "tag" 20
           marker 40 "toVar" 1
           marker 41 "tag" 2
-          { Build.facts { Build.typeResponse 50 TypeFlags.Intersection with AliasSymbol = ValueSome 100 } with
+          { Build.facts { Build.typeResponse 50 TypeFlags.Intersection with AliasSymbol = ValueSome(Build.compact 100) } with
               AliasTypeArguments = [ 20<typeId> ]
               IntersectionMembers = declaredOperands |> List.map (fun value -> value * uom<typeId>) }
-          { Build.facts { Build.typeResponse 60 TypeFlags.Intersection with AliasSymbol = ValueSome 100 } with
+          { Build.facts { Build.typeResponse 60 TypeFlags.Intersection with AliasSymbol = ValueSome(Build.compact 100) } with
               IntersectionMembers = appliedOperands |> List.map (fun value -> value * uom<typeId>)
               Members =
                 [ Build.resolvedMember (Build.symbol 300 "isNode" SymbolFlags.Property) 3
@@ -358,7 +610,7 @@ let private conditionalAliasModel (declaredOperands: int list) (appliedOperands:
                     Namespaces = Map.empty
                     ShadowedByLib = 0
                   }
-        ExportTypes = Map.ofList [ 400<symbolId>, { Declared = None; Value = Some 60<typeId> } ]
+        ExportTypes = Map.ofList [ (Build.symbolKey 400), { Declared = None; Value = Some 60<typeId>; AliasParameters = None } ]
         DeclNames = Map.ofList [ 50<typeId>, "Node" ] }
 
 [<Tests>]
@@ -446,8 +698,7 @@ let typeRefTests =
             Expect.equal (findings |> List.map _.Key) [ "TR040" ] "reported as the mapping it is, not as an unmapped flag"
             Expect.stringContains (List.head findings).Message "primitives" "obj admits what object excludes"
 
-        testCase "symbol and unique symbol widen, each naming its own construct" <| fun _ ->
-            // Fable.Core 5.2.0 declares no `JS.Symbol`, checked against the shipped assembly.
+        testCase "symbol and unique symbol widen where the Symbol interface has no name" <| fun _ ->
             let model =
                 Build.shapeModel (
                     intrinsic 10 TypeFlags.ESSymbol
@@ -461,12 +712,33 @@ let typeRefTests =
             Expect.equal plain FsObj "symbol"
             Expect.equal unique FsObj "unique symbol"
             Expect.equal (plainFindings |> List.map _.Key) [ "TR041" ] "symbol"
-            Expect.equal (uniqueFindings |> List.map _.Key) [ "TR042" ] "unique symbol"
+            Expect.equal (uniqueFindings |> List.map _.Key) [ "TR041"; "TR042" ] "unique symbol"
 
             Expect.stringContains
-                (List.head uniqueFindings).Message
-                "unique"
+                (List.item 1 uniqueFindings).Message
+                "identity"
                 "a unique symbol loses its identity on top of its type"
+
+        testCase "symbol and unique symbol read as the named Symbol interface" <| fun _ ->
+            let symbolInterface = Build.facts (Build.typeResponse 20 TypeFlags.Object)
+
+            let model =
+                { Build.shapeModel (
+                      { intrinsic 10 TypeFlags.ESSymbol with SymbolApparentType = Some 20<typeId> }
+                      :: { intrinsic 11 TypeFlags.UniqueESSymbol with SymbolApparentType = Some 20<typeId> }
+                      :: symbolInterface
+                      :: Build.primitives
+                  ) with
+                    DeclNames = Map.ofList [ 20<typeId>, "Symbol" ] }
+
+            let plain, plainFindings = Spec.typeRef Build.context model None "x" 10<typeId>
+            let unique, uniqueFindings = Spec.typeRef Build.context model None "x" 11<typeId>
+
+            Expect.equal plain (FsNamed "Symbol") "symbol"
+            Expect.equal unique (FsNamed "Symbol") "unique symbol"
+            Expect.equal (plainFindings |> List.map _.Key) [ "TR069" ] "symbol is ergonomic"
+            Expect.equal (uniqueFindings |> List.map _.Key) [ "TR069"; "TR042" ] "unique symbol keeps its identity loss"
+            Expect.equal (plainFindings |> List.map _.Tier) [ Ergonomic ] "ergonomic"
 
         testCase "a union with undefined hoists to option with an ergonomic finding" <| fun _ ->
             let union =
@@ -638,6 +910,93 @@ let typeRefTests =
 
             Expect.equal reference (FsArray FsString) "widened to its element"
             Expect.equal (findings |> List.map _.Tier) [ Widened ] "widened"
+
+        testCase "a rest parameter over a union of fixed tuples stands for one overload per tuple" <| fun _ ->
+            // `(...args: [string, number] | [] | [undefined] | [number])`: ascending arity, and
+            // `[undefined]` written once with `[]`, which F# compiles to the same call.
+            let arms =
+                { Build.facts (Build.typeResponse 14 TypeFlags.Union) with
+                    UnionMembers = [ 10<typeId>; 11<typeId>; 12<typeId>; 13<typeId> ] }
+
+            let labelled =
+                { tuple 10 [ 1; 2 ] [ ElementFlags.Required; ElementFlags.Required ] with
+                    TupleLabels = [ Some "key"; None ] }
+
+            let model =
+                Build.shapeModel (
+                    labelled
+                    :: tuple 11 [] []
+                    :: tuple 12 [ 5 ] [ ElementFlags.Required ]
+                    :: tuple 13 [ 2 ] [ ElementFlags.Required ]
+                    :: arms
+                    :: Build.primitives
+                )
+
+            let signature =
+                { Build.signature [ Build.resolvedMember (Build.symbol 30 "args" SymbolFlags.FunctionScopedVariable) 14 ] 4 with
+                    HasRest = true }
+
+            let overloads = Spec.restOverloads model signature
+
+            Expect.equal
+                (overloads |> List.map (fun s -> s.HasRest, s.Parameters |> List.map (fun p -> p.Symbol.Name, int p.TypeId)))
+                [ false, []; false, [ "args", 2 ]; false, [ "key", 1; "args1", 2 ] ]
+                "one overload per distinct call, a label naming its element"
+
+        testCase "arms differing only by optionality are written once, as the optional arm" <| fun _ ->
+            // `(...args: [number] | [number?])`: the optional arm admits both calls.
+            let arms =
+                { Build.facts (Build.typeResponse 14 TypeFlags.Union) with
+                    UnionMembers = [ 10<typeId>; 11<typeId> ] }
+
+            let model =
+                Build.shapeModel (
+                    tuple 10 [ 2 ] [ ElementFlags.Required ]
+                    :: tuple 11 [ 2 ] [ ElementFlags.Optional ]
+                    :: arms
+                    :: Build.primitives
+                )
+
+            let signature =
+                { Build.signature [ Build.resolvedMember (Build.symbol 30 "args" SymbolFlags.FunctionScopedVariable) 14 ] 4 with
+                    HasRest = true }
+
+            Expect.equal
+                (Spec.restOverloads model signature
+                 |> List.map (fun s -> s.Parameters |> List.map (fun p -> p.Symbol.Name, int p.TypeId, p.Optional)))
+                [ [ "args", 2, true ] ]
+                "one overload, its element optional"
+
+        testCase "a union with a variadic tuple arm keeps the rest form" <| fun _ ->
+            let arms =
+                { Build.facts (Build.typeResponse 14 TypeFlags.Union) with
+                    UnionMembers = [ 10<typeId>; 11<typeId> ] }
+
+            let model =
+                Build.shapeModel (
+                    tuple 10 [ 1 ] [ ElementFlags.Required ]
+                    :: tuple 11 [ 1; 2 ] [ ElementFlags.Required; ElementFlags.Rest ]
+                    :: arms
+                    :: Build.primitives
+                )
+
+            let signature =
+                { Build.signature [ Build.resolvedMember (Build.symbol 30 "args" SymbolFlags.FunctionScopedVariable) 14 ] 4 with
+                    HasRest = true }
+
+            Expect.equal (Spec.restOverloads model signature) [ signature ] "unchanged"
+
+        testCase "a binding pattern names a spread tuple's elements" <| fun _ ->
+            let model = Build.shapeModel (tuple 10 [ 1 ] [ ElementFlags.Required ] :: Build.primitives)
+
+            let signature =
+                { Build.signature [ Build.resolvedMember (Build.symbol 30 "__0" SymbolFlags.FunctionScopedVariable) 10 ] 4 with
+                    HasRest = true
+                    RestPatternNames = [ Some "value" ] }
+
+            let expanded = Spec.expandTupleRest model signature
+
+            Expect.equal (expanded.Parameters |> List.map _.Symbol.Name) [ "value" ] "`...[value]: [T]` is `value: T`"
 
         testCase "a type parameter in scope names its variable (§4.9)" <| fun _ ->
             let model =
@@ -1476,7 +1835,7 @@ let private ansiRegexShaped () =
     let functionSymbol = Build.symbol 200 "ansiRegex" SymbolFlags.Function
 
     let optionsType =
-        { Build.facts { Build.typeResponse 20 TypeFlags.Object with AliasSymbol = ValueSome 100 } with
+        { Build.facts { Build.typeResponse 20 TypeFlags.Object with AliasSymbol = ValueSome(Build.compact 100) } with
             Members =
                 [ { Build.resolvedMember (Build.symbol 101 "onlyFirst" SymbolFlags.Property) 3 with
                       ReadOnly = true } ] }
@@ -1503,8 +1862,8 @@ let private ansiRegexShaped () =
             }
         ExportTypes =
             Map.ofList
-                [ 100<symbolId>, { Declared = Some 20<typeId>; Value = None }
-                  200<symbolId>, { Declared = None; Value = Some 30<typeId> } ] }
+                [ (Build.symbolKey 100), { Declared = Some 20<typeId>; Value = None; AliasParameters = None }
+                  (Build.symbolKey 200), { Declared = None; Value = Some 30<typeId>; AliasParameters = None } ] }
 
 [<Tests>]
 let shapePassTests =
@@ -1555,7 +1914,7 @@ let shapePassTests =
                                 Namespaces = Map.empty
                                 ShadowedByLib = 0
                               }
-                    ExportTypes = Map.ofList [ 100<symbolId>, { Declared = Some 20<typeId>; Value = None } ] }
+                    ExportTypes = Map.ofList [ (Build.symbolKey 100), { Declared = Some 20<typeId>; Value = None; AliasParameters = None } ] }
 
             let named, _ = Build.runPass ExportNames.nameExports model
             let shaped, _ = Build.runPass Interfaces.shapeInterfaces named
@@ -1590,7 +1949,7 @@ let shapePassTests =
                                 Namespaces = Map.empty
                                 ShadowedByLib = 0
                               }
-                    ExportTypes = Map.ofList [ 100<symbolId>, { Declared = Some 20<typeId>; Value = None } ] }
+                    ExportTypes = Map.ofList [ (Build.symbolKey 100), { Declared = Some 20<typeId>; Value = None; AliasParameters = None } ] }
 
             let named, _ = Build.runPass ExportNames.nameExports model
             let shaped, _ = Build.runPass Interfaces.shapeInterfaces named
@@ -1622,7 +1981,7 @@ let shapePassTests =
                                 Namespaces = Map.empty
                                 ShadowedByLib = 0
                               }
-                    ExportTypes = Map.ofList [ 100<symbolId>, { Declared = Some 20<typeId>; Value = None } ] }
+                    ExportTypes = Map.ofList [ (Build.symbolKey 100), { Declared = Some 20<typeId>; Value = None; AliasParameters = None } ] }
 
             let named, _ = Build.runPass ExportNames.nameExports model
             let shaped, _ = Build.runPass Interfaces.shapeInterfaces named
@@ -1673,7 +2032,7 @@ let shapePassTests =
                                 Namespaces = Map.empty
                                 ShadowedByLib = 0
                               }
-                    ExportTypes = Map.ofList [ 400<symbolId>, { Declared = None; Value = Some 41<typeId> } ] }
+                    ExportTypes = Map.ofList [ (Build.symbolKey 400), { Declared = None; Value = Some 41<typeId>; AliasParameters = None } ] }
 
             let named, _ = Build.runPass Anonymous.synthesizeAnonymous model
 
@@ -1694,7 +2053,7 @@ let shapePassTests =
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
-                    ExportTypes = Map.ofList [ 400<symbolId>, { Declared = None; Value = Some 40<typeId> } ] }
+                    ExportTypes = Map.ofList [ (Build.symbolKey 400), { Declared = None; Value = Some 40<typeId>; AliasParameters = None } ] }
 
             let named, _ = Build.runPass Anonymous.synthesizeAnonymous model
 
@@ -1711,7 +2070,7 @@ let shapePassTests =
             let namespaced =
                 { Build.facts (Build.typeResponse 41 TypeFlags.Object) with
                     SymbolName = Some ((fun value -> value * uom<symbolName>) "Event")
-                    SymbolParent = Some 900<symbolId>
+                    SymbolParent = Some (Build.symbolKey 900)
                     Members = [ Build.resolvedMember (Build.symbol 402 "seq" SymbolFlags.Property) 2 ] }
 
             let holder =
@@ -1726,17 +2085,17 @@ let shapePassTests =
                     Harvest =
                         { Exports = [ Build.export "holder" (Build.symbol 400 "holder" SymbolFlags.BlockScopedVariable) ]
                           AmbientClasses = []
-                          Namespaces = Map.ofList [ 900<symbolId>, ((fun value -> value * uom<symbolName>) "TailStream") ]
+                          Namespaces = Map.ofList [ (Build.symbolKey 900), ((fun value -> value * uom<symbolName>) "TailStream") ]
                           ShadowedByLib = 0
                         }
-                    ExportTypes = Map.ofList [ 400<symbolId>, { Declared = None; Value = Some 42<typeId> } ] }
+                    ExportTypes = Map.ofList [ (Build.symbolKey 400), { Declared = None; Value = Some 42<typeId>; AliasParameters = None } ] }
 
             let named, findings = Build.runPass Anonymous.synthesizeAnonymous model
 
             Expect.equal (Map.tryFind 40<typeId> named.DeclNames) (Some "Event") "the first claimant keeps the bare name"
             Expect.equal (Map.tryFind 41<typeId> named.DeclNames) (Some "TailStream.Event") "the second nests under its namespace"
 
-            Expect.contains (findings |> List.map _.Key) "SY004" "and the nesting is reported like any other"
+            Expect.isFalse (findings |> List.exists (fun f -> f.Key = "SY004")) "source namespace spelling is exact"
 
         testCase "synthesize-anonymous keeps the number where no namespace names the second" <| fun _ ->
             // The fallback is still the fallback: a namespace this run has no module name for
@@ -1749,7 +2108,7 @@ let shapePassTests =
             let namespaced =
                 { Build.facts (Build.typeResponse 41 TypeFlags.Object) with
                     SymbolName = Some ((fun value -> value * uom<symbolName>) "Event")
-                    SymbolParent = Some 900<symbolId>
+                    SymbolParent = Some (Build.symbolKey 900)
                     Members = [ Build.resolvedMember (Build.symbol 402 "seq" SymbolFlags.Property) 2 ] }
 
             let holder =
@@ -1767,7 +2126,7 @@ let shapePassTests =
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
-                    ExportTypes = Map.ofList [ 400<symbolId>, { Declared = None; Value = Some 42<typeId> } ] }
+                    ExportTypes = Map.ofList [ (Build.symbolKey 400), { Declared = None; Value = Some 42<typeId>; AliasParameters = None } ] }
 
             let named, _ = Build.runPass Anonymous.synthesizeAnonymous model
 
@@ -1787,7 +2146,7 @@ let shapePassTests =
 
             let inNamespace =
                 { Build.symbol 100 "Event" SymbolFlags.Interface with
-                    Parent = ValueSome 900 }
+                    Parent = ValueSome(Build.compact 900) }
 
             let model =
                 { Build.shapeModel (namespaced :: global' :: Build.primitives) with
@@ -1796,19 +2155,97 @@ let shapePassTests =
                             [ Build.export "Event" inNamespace
                               Build.export "Event" (Build.symbol 101 "Event" SymbolFlags.Interface) ]
                           AmbientClasses = []
-                          Namespaces = Map.ofList [ 900<symbolId>, ((fun value -> value * uom<symbolName>) "TailStream") ]
+                          Namespaces = Map.ofList [ (Build.symbolKey 900), ((fun value -> value * uom<symbolName>) "TailStream") ]
                           ShadowedByLib = 0
                         }
                     ExportTypes =
                         Map.ofList
-                            [ 100<symbolId>, { Declared = Some 40<typeId>; Value = None }
-                              101<symbolId>, { Declared = Some 41<typeId>; Value = None } ] }
+                            [ (Build.symbolKey 100), { Declared = Some 40<typeId>; Value = None; AliasParameters = None }
+                              (Build.symbolKey 101), { Declared = Some 41<typeId>; Value = None; AliasParameters = None } ] }
 
             let named, findings = Build.runPass ExportNames.nameExports model
 
             Expect.equal (Map.tryFind 40<typeId> named.DeclNames) (Some "TailStream.Event") "the namespaced export nests"
             Expect.equal (Map.tryFind 41<typeId> named.DeclNames) (Some "Event") "and the global one keeps the bare name"
-            Expect.equal (findings |> List.map _.Key) [ "SY004" ] "the nesting is reported once"
+            Expect.isEmpty findings "source namespace spelling raises no finding"
+
+        testCase "a lib namespace member retains its Core.TS namespace path" <| fun _ ->
+            let options =
+                { Build.facts (Build.typeResponse 50 TypeFlags.Object) with
+                    Origin = CompilerLib
+                    SymbolName = Some("NumberFormatOptions" * uom<symbolName>)
+                    DeclFile = Some("/ts/lib/lib.es5.d.ts" * uom<declFile>)
+                    NamespacePath = [ "Intl" ] }
+
+            let reference, _ = Spec.typeRef Build.context (Build.shapeModel (options :: Build.primitives)) None "Holder.options" 50<typeId>
+            Expect.equal reference (FsNamed "Fable.Core.TS.Es.Intl.NumberFormatOptions") "the consumer names the producer's nested declaration"
+
+        testCase "a namespaced lib type does not take a global special binding" <| fun _ ->
+            let promise =
+                { Build.facts (Build.typeResponse 52 TypeFlags.Object) with
+                    Origin = CompilerLib
+                    SymbolName = Some("Promise" * uom<symbolName>)
+                    DeclFile = Some("/ts/lib/lib.es5.d.ts" * uom<declFile>)
+                    NamespacePath = [ "Vendor" ]
+                    TypeArguments = [ 1<typeId> ] }
+
+            let reference, _ = Spec.typeRef Build.context (Build.shapeModel (promise :: Build.primitives)) None "Holder.promise" 52<typeId>
+            Expect.equal reference (FsApp("Fable.Core.TS.Es.Vendor.Promise", [ FsString ])) "only the global Promise maps to Fable's promise binding"
+
+        testCase "a referenced namespace member retains its dependency namespace path" <| fun _ ->
+            let env =
+                { Build.facts (Build.typeResponse 51 TypeFlags.Object) with
+                    Origin = Dependency("ns-owner-lab" * uom<npmDependency>)
+                    SymbolName = Some("ProcessEnv" * uom<symbolName>)
+                    NamespacePath = [ "NodeJS" ] }
+
+            let ctx =
+                { Build.context with
+                    Config =
+                        { GeneratorConfig.Default with
+                            Groups = Map.ofList [ "ns-owner-lab" * uom<npmDependency>, Reference ] } }
+
+            let reference, _ = Spec.typeRef ctx (Build.shapeModel (env :: Build.primitives)) None "Exports.env" 51<typeId>
+            Expect.equal reference (FsNamed "NsOwnerLab.NodeJS.ProcessEnv") "the namespace belongs between the dependency module and member"
+
+        testCase "name-exports nests an uncontested namespace member along its full path" <| fun _ ->
+            let memberSymbol =
+                { Build.symbol 100 "Lonely" SymbolFlags.Interface with
+                    Parent = ValueSome(Build.compact 900) }
+
+            let model =
+                { Build.shapeModel Build.primitives with
+                    Harvest =
+                        { HarvestModel.Empty with
+                            Exports = [ Build.export "Lonely" memberSymbol ]
+                            Namespaces = Map.ofList [ Build.symbolKey 900, "Pool.Inner" * uom<symbolName> ] }
+                    ExportTypes =
+                        Map.ofList [ Build.symbolKey 100, { Declared = Some 40<typeId>; Value = None; AliasParameters = None } ] }
+
+            let named, findings = Build.runPass ExportNames.nameExports model
+            Expect.equal (Map.tryFind 40<typeId> named.DeclNames) (Some "Pool.Inner.Lonely") "no collision is needed to retain the namespace"
+            Expect.isEmpty findings "the source path is exact"
+
+        testCase "synthesize-anonymous keeps a reached namespace member outside minted names" <| fun _ ->
+            let memberType =
+                { Build.facts (Build.typeResponse 40 TypeFlags.Object) with
+                    SymbolName = Some("Lonely" * uom<symbolName>)
+                    SymbolParent = Some(Build.symbolKey 900)
+                    Members = [ Build.resolvedMember (Build.symbol 401 "value" SymbolFlags.Property) 2 ] }
+
+            let model =
+                { Build.shapeModel (memberType :: Build.primitives) with
+                    Harvest =
+                        { HarvestModel.Empty with
+                            Exports = [ Build.export "current" (Build.symbol 100 "current" SymbolFlags.BlockScopedVariable) ]
+                            Namespaces = Map.ofList [ Build.symbolKey 900, "Pool.Inner" * uom<symbolName> ] }
+                    ExportTypes =
+                        Map.ofList [ Build.symbolKey 100, { Declared = None; Value = Some 40<typeId>; AliasParameters = None } ] }
+
+            let named, findings = Build.runPass Anonymous.synthesizeAnonymous model
+            Expect.equal (Map.tryFind 40<typeId> named.DeclNames) (Some "Pool.Inner.Lonely") "a reached member keeps its source path"
+            Expect.isEmpty named.MintedNames "a source name is not derived from the value's position"
+            Expect.isFalse (findings |> List.exists (fun f -> f.Key = "SY004")) "the source path is exact"
 
         testCase "name-exports suffixes the second declaration under a name the first already claimed" <| fun _ ->
             // Neither declaration is namespaced, so `claim` cannot resolve the clash by nesting
@@ -1833,8 +2270,8 @@ let shapePassTests =
                         }
                     ExportTypes =
                         Map.ofList
-                            [ 100<symbolId>, { Declared = Some 40<typeId>; Value = None }
-                              101<symbolId>, { Declared = Some 41<typeId>; Value = None } ] }
+                            [ (Build.symbolKey 100), { Declared = Some 40<typeId>; Value = None; AliasParameters = None }
+                              (Build.symbolKey 101), { Declared = Some 41<typeId>; Value = None; AliasParameters = None } ] }
 
             let named, findings = Build.runPass ExportNames.nameExports model
 
@@ -1872,7 +2309,7 @@ let shapePassTests =
                                 Namespaces = Map.empty
                                 ShadowedByLib = 0
                               }
-                    ExportTypes = Map.ofList [ 400<symbolId>, { Declared = None; Value = Some 31<typeId> } ] }
+                    ExportTypes = Map.ofList [ (Build.symbolKey 400), { Declared = None; Value = Some 31<typeId>; AliasParameters = None } ] }
 
             let named, _ = Build.runPass Anonymous.synthesizeAnonymous model
 
@@ -2081,7 +2518,8 @@ let shapePassTests =
                      | FsConstructor _ -> "Create"
                      | FsIndexer _ -> "Item"
                      | FsInvoke _ -> "Invoke"
-                     | FsSymbolKeyed (symbol, _) -> symbol
+                     | FsSymbolKeyed (symbol, _)
+                     | FsStringKeyed (symbol, _) -> symbol
                      | FsLiteralKeyed (target, _, _) -> target))
                 [ "name"; "at" ]
                 "both member sets, in the checker's order"
@@ -2136,7 +2574,8 @@ let shapePassTests =
                      | FsIndexer _ -> "Item"
                      | FsConstructor _ -> "Create"
                      | FsInvoke _ -> "Invoke"
-                     | FsSymbolKeyed (symbol, _) -> symbol
+                     | FsSymbolKeyed (symbol, _)
+                     | FsStringKeyed (symbol, _) -> symbol
                      | FsLiteralKeyed (target, _, _) -> target))
                 [ "extra"; "name" ]
                 "and the inherited member is still declared here"
@@ -2296,7 +2735,7 @@ let shapePassTests =
             // inherit, so the edge goes rather than the generated file failing to compile.
             let interfaceDecl name parameters inherits =
                 FsInterface
-                    { Name = name
+                    { Callable = false; Name = name
                       Docs = ""
                       Tags = []
                       Order = None
@@ -2388,6 +2827,47 @@ let shapePassTests =
                 (findings |> List.map _.Key)
                 [ "TR018" ]
                 "under the case that describes it"
+
+        testCase "an operand restating a type parameter's bound reduces to the parameter (§4.6)" <| fun _ ->
+            // `R & { label: string }` over `R extends { label: string }` is `R`.
+            let label = Build.resolvedMember (Build.symbol 840 "label" SymbolFlags.Property) 1
+            let bound = { Build.facts (Build.typeResponse 84 TypeFlags.Object) with Members = [ label ] }
+            let parameter = { typeParam 20 "R" with Constraint = Some 84<typeId> }
+            let literal = { Build.facts (Build.typeResponse 85 TypeFlags.Object) with Members = [ label ] }
+
+            let intersection =
+                { Build.facts (Build.typeResponse 86 TypeFlags.Intersection) with IntersectionMembers = [ 20<typeId>; 85<typeId> ] }
+
+            let model =
+                { Build.shapeModel (bound :: parameter :: literal :: intersection :: Build.primitives) with
+                    TypeVars = Map.ofList [ 20<typeId>, "R" ] }
+
+            let reference, findings = Spec.typeRef Build.context model None "res" 86<typeId>
+            Expect.equal reference (FsTypeVar "R") "the parameter is the whole intersection"
+            Expect.equal (findings |> List.map _.Key) [ "TR073" ] "an exact restating reduction"
+
+        testCase "an operand adding members over a type parameter is carried beside it (§4.6)" <| fun _ ->
+            // `P & { count: number }`: `JS.Intersect` keeps the parameter and the declared operand.
+            let counted =
+                { Build.facts (Build.typeResponse 87 TypeFlags.Object) with
+                    Members = [ Build.resolvedMember (Build.symbol 870 "count" SymbolFlags.Property) 2 ] }
+
+            let intersection =
+                { Build.facts (Build.typeResponse 88 TypeFlags.Intersection) with IntersectionMembers = [ 20<typeId>; 87<typeId> ] }
+
+            let model =
+                { Build.shapeModel (typeParam 20 "P" :: counted :: intersection :: Build.primitives) with
+                    TypeVars = Map.ofList [ 20<typeId>, "P" ]
+                    DeclNames = Map.ofList [ 87<typeId>, "Counted.Members" ] }
+
+            let reference, findings = Spec.typeRef Build.context model None "Counted" 88<typeId>
+
+            Expect.equal
+                reference
+                (FsApp("JS.Intersect", [ FsTypeVar "P"; FsNamed "Counted.Members" ]))
+                "both operands stay typed"
+
+            Expect.equal (findings |> List.map _.Key) [ "TR072" ] "an ergonomic carrier"
 
         testCase "an intersection of callable operands renders from its call signatures" <| fun _ ->
             // `typeof round & Chained`: both operands carry signatures and no properties, so
@@ -3134,7 +3614,7 @@ let shapePassTests =
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
-                    ExportTypes = Map.ofList [ 800<symbolId>, { Declared = Some 80<typeId>; Value = Some 81<typeId> } ]
+                    ExportTypes = Map.ofList [ (Build.symbolKey 800), { Declared = Some 80<typeId>; Value = Some 81<typeId>; AliasParameters = None } ]
                     DeclNames = Map.ofList [ 80<typeId>, "Timer" ] }
 
             let shaped, findings = Build.runPass Classes.shapeClasses model
@@ -3177,7 +3657,7 @@ let shapePassTests =
             // it, and it is what the collision is judged against.
             let declared =
                 FsInterface
-                    { Name = "Clash"
+                    { Callable = false; Name = "Clash"
                       Docs = ""
                       Tags = []
                       Order = None
@@ -3197,7 +3677,7 @@ let shapePassTests =
                                 Tags = []
                                 ReadOnly = false
                                 Type = FsFloat
-                                Literal = None } ]
+                                Literal = None; NullKey = false } ]
                       Entrypoint = None
                       CreateOverloads = []
                       Statics = [] }
@@ -3211,7 +3691,7 @@ let shapePassTests =
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
-                    ExportTypes = Map.ofList [ 810<symbolId>, { Declared = Some 80<typeId>; Value = Some 81<typeId> } ]
+                    ExportTypes = Map.ofList [ (Build.symbolKey 810), { Declared = Some 80<typeId>; Value = Some 81<typeId>; AliasParameters = None } ]
                     DeclNames = Map.ofList [ 80<typeId>, "Clash" ]
                     Decls = [ declared ] }
 
@@ -3285,7 +3765,7 @@ let shapePassTests =
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
-                    ExportTypes = Map.ofList [ 600<symbolId>, { Declared = Some 60<typeId>; Value = Some 61<typeId> } ]
+                    ExportTypes = Map.ofList [ (Build.symbolKey 600), { Declared = Some 60<typeId>; Value = Some 61<typeId>; AliasParameters = None } ]
                     DeclNames = Map.ofList [ 60<typeId>, "Gauge" ] }
 
             let named, _ = Build.runPass ConstructorObjects.nameConstructorObjects model
@@ -3304,12 +3784,37 @@ let shapePassTests =
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
-                    ExportTypes = Map.ofList [ 600<symbolId>, { Declared = None; Value = Some 61<typeId> } ]
+                    ExportTypes = Map.ofList [ (Build.symbolKey 600), { Declared = None; Value = Some 61<typeId>; AliasParameters = None } ]
                     DeclNames = Map.ofList [ 60<typeId>, "Gauge" ] }
 
             let named, _ = Build.runPass ConstructorObjects.nameConstructorObjects model
 
             Expect.equal (Map.tryFind 61<typeId> named.DeclNames) (Some "WidgetsConstructor") "named after the export"
+
+        testCase "name-constructor-objects names a shared constructor object from the first root in source order" <| fun _ ->
+            // `interface Zed { Make: { new (): string } }` declared after `interface Alpha` with
+            // the same member, while the checker gave `Zed` the smaller type id.
+            let maker =
+                { Build.facts (Build.typeResponse 81 TypeFlags.Object) with
+                    SymbolName = Some ("__type" * uom<Measure.symbolName>)
+                    ConstructSignatures = [ Build.signature [] 1 ] }
+
+            let holder id =
+                { Build.facts (Build.typeResponse id TypeFlags.Object) with
+                    Members = [ Build.resolvedMember (Build.symbol (id + 100) "Make" SymbolFlags.Property) 81 ] }
+
+            let at index : DeclOrder option =
+                Some { File = "/packages/lab/index.d.ts" * uom<Measure.declFile>; NodeIndex = index * uom<Measure.nodeId> }
+
+            let model =
+                { Build.shapeModel (maker :: holder 70 :: holder 71 :: Build.primitives) with
+                    DeclNames = Map.ofList [ 70<typeId>, "Zed"; 71<typeId>, "Alpha" ]
+                    DeclOrders = Map.ofList [ 70<typeId>, at 20; 71<typeId>, at 10 ] }
+
+            let named, _ = Build.runPass ConstructorObjects.nameConstructorObjects model
+
+            Expect.equal (Map.tryFind 81<typeId> named.DeclNames) (Some "Alpha.MakeConstructor") "named under the earlier declaration"
+            Expect.equal (Map.tryFind 81<typeId> named.DeclOrders) (Some(at 10)) "placed with the earlier declaration"
 
         testCase "shape-interfaces reads construct signatures as EmitConstructor Create members" <| fun _ ->
             let model =
@@ -3387,7 +3892,7 @@ let shapePassTests =
 
                 let declaration =
                     FsInterface
-                        { Name = name
+                        { Callable = false; Name = name
                           Docs = ""
                           Tags = []
                           Order = None
@@ -3400,7 +3905,7 @@ let shapePassTests =
                                     Tags = []
                                     ReadOnly = true
                                     Type = FsString
-                                    Literal = None } ]
+                                    Literal = None; NullKey = false } ]
                           Entrypoint = None
                           CreateOverloads = []
                           Statics = [] }
@@ -3409,7 +3914,7 @@ let shapePassTests =
                     { Build.export name (Build.symbol (id + 2) name (SymbolFlags.Class ||| SymbolFlags.Value)) with
                         Origin = origin }
 
-                [ instance; static' ], declaration, export, ((fun value -> value * uom<symbolId>) (id + 2), { Declared = Some ((fun value -> value * uom<typeId>) id); Value = Some((fun value -> value * uom<typeId>) (id + 1)) })
+                [ instance; static' ], declaration, export, (Build.symbolKey (id + 2), { Declared = Some ((fun value -> value * uom<typeId>) id); Value = Some((fun value -> value * uom<typeId>) (id + 1)); AliasParameters = None })
 
             let cases =
                 [ entrypoint "Derived" 80 true [] (ExportOrigin.StringFromAmbientModule "lab:tools")
@@ -3477,7 +3982,7 @@ let shapePassTests =
 
                 let declaration =
                     FsInterface
-                        { Name = name
+                        { Callable = false; Name = name
                           Docs = ""
                           Tags = []
                           Order = None
@@ -3490,7 +3995,7 @@ let shapePassTests =
                                     Tags = []
                                     ReadOnly = true
                                     Type = FsFloat
-                                    Literal = None } ]
+                                    Literal = None; NullKey = false } ]
                           Entrypoint = None
                           CreateOverloads = []
                           Statics = [] }
@@ -3499,7 +4004,7 @@ let shapePassTests =
                     { Build.export name (Build.symbol (id + 2) name (SymbolFlags.Class ||| SymbolFlags.Value)) with
                         Origin = ExportOrigin.StringFromAmbientModule "lab:faults" }
 
-                [ instance; static' ], declaration, export, ((fun value -> value * uom<symbolId>) (id + 2), { Declared = Some ((fun value -> value * uom<typeId>) id); Value = Some((fun value -> value * uom<typeId>) (id + 1)) })
+                [ instance; static' ], declaration, export, (Build.symbolKey (id + 2), { Declared = Some ((fun value -> value * uom<typeId>) id); Value = Some((fun value -> value * uom<typeId>) (id + 1)); AliasParameters = None })
 
             let cases = [ entrypoint "Fault" 80 70; entrypoint "Tick" 90 71 ]
 
@@ -3554,7 +4059,7 @@ let shapePassTests =
 
             let declaration =
                 FsInterface
-                    { Name = "Vise"
+                    { Callable = false; Name = "Vise"
                       Docs = ""
                       Tags = []
                       Order = None
@@ -3575,7 +4080,7 @@ let shapePassTests =
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
-                    ExportTypes = Map.ofList [ 800<symbolId>, { Declared = Some 80<typeId>; Value = Some 81<typeId> } ]
+                    ExportTypes = Map.ofList [ (Build.symbolKey 800), { Declared = Some 80<typeId>; Value = Some 81<typeId>; AliasParameters = None } ]
                     Decls = [ declaration ] }
 
             let shaped, findings = Build.runPass Classes.shapeClasses model
@@ -3609,7 +4114,7 @@ let shapePassTests =
 
             let declared =
                 FsInterface
-                    { Name = "DOMException"
+                    { Callable = false; Name = "DOMException"
                       Docs = ""
                       Tags = []
                       Order = None
@@ -3631,7 +4136,7 @@ let shapePassTests =
                           Namespaces = Map.empty
                           ShadowedByLib = 0
                         }
-                    ExportTypes = Map.ofList [ 810<symbolId>, { Declared = Some 80<typeId>; Value = Some 81<typeId> } ]
+                    ExportTypes = Map.ofList [ (Build.symbolKey 810), { Declared = Some 80<typeId>; Value = Some 81<typeId>; AliasParameters = None } ]
                     DeclNames = Map.ofList [ 80<typeId>, "DOMException" ]
                     Decls = [ declared ] }
 
@@ -3650,7 +4155,7 @@ let shapePassTests =
         testCase "synthesize-paramobjects gives plain-data interfaces a Create overload (D3)" <| fun _ ->
             let decl =
                 FsInterface
-                    { Name = "Options"
+                    { Callable = false; Name = "Options"
                       Docs = ""
                       Tags = []
                       Order = None
@@ -3663,14 +4168,14 @@ let shapePassTests =
                                 Tags = []
                                 ReadOnly = false
                                 Type = FsOption FsFloat
-                                Literal = None }
+                                Literal = None; NullKey = false }
                           FsProperty
                               { Name = "target"
                                 Docs = ""
                                 Tags = []
                                 ReadOnly = false
                                 Type = FsString
-                                Literal = None } ]
+                                Literal = None; NullKey = false } ]
                       Entrypoint = None
                       CreateOverloads = []
                       Statics = [] }
@@ -3693,7 +4198,7 @@ let shapePassTests =
         // function-valued property of the same signature already carries.
         let paramObjectDecl name members =
             FsInterface
-                { Name = name
+                { Callable = false; Name = name
                   Docs = ""
                   Tags = []
                   Order = None
@@ -3711,7 +4216,7 @@ let shapePassTests =
                   Tags = []
                   ReadOnly = false
                   Type = reference
-                  Literal = None }
+                  Literal = None; NullKey = false }
 
         let paramObjectMethod name parameters returns =
             FsMethod
@@ -3842,7 +4347,7 @@ let shapePassTests =
                     match literal with
                     | LitString _ -> FsString
                     | _ -> FsFloat
-                  Literal = Some literal }
+                  Literal = Some literal; NullKey = false }
 
         testCase "a literal member is written by Create, not bound as a parameter" <| fun _ ->
             let decl =
@@ -3885,7 +4390,7 @@ let shapePassTests =
                 Expect.equal
                     decl.CreateOverloads
                     [ { Parameters = []
-                        Literals = [ "NONE", LitNumber 0.0; "DONE", LitNumber 1.0 ] } ]
+                        Literals = [ "NONE", LitNumber 0.0; "DONE", LitNumber 1.0 ]; NullKeys = []; StringKeys = Map.empty } ]
                     "every member is written"
             | decls -> failtest $"expected the interface back, got %A{decls}"
 
@@ -3946,7 +4451,7 @@ let shapePassTests =
                                 Namespaces = Map.empty
                                 ShadowedByLib = 0
                               }
-                    ExportTypes = Map.ofList [ 110<symbolId>, { Declared = Some 20<typeId>; Value = None } ] }
+                    ExportTypes = Map.ofList [ (Build.symbolKey 110), { Declared = Some 20<typeId>; Value = None; AliasParameters = None } ] }
 
             let named, _ = Build.runPass ExportNames.nameExports model
             let shaped, findings = Build.runPass Interfaces.shapeInterfaces named
@@ -4029,7 +4534,7 @@ let shapePassTests =
                         [ abbrev "DOMTargets"
                           abbrev "JSTargets"
                           FsInterface
-                              { Name = "Scope"
+                              { Callable = false; Name = "Scope"
                                 Docs = ""
                                 Tags = []
                                 Order = None
@@ -4061,6 +4566,7 @@ let shapePassTests =
                          | FsInvoke c -> c.Return
                          | FsIndexer i -> i.Value
                          | FsSymbolKeyed _
+                         | FsStringKeyed _
                          | FsLiteralKeyed _ -> failwith "no keyed member is expected"))
                     [ FsNamed "DOMTargets"; FsString ]
                     "first of the obj pair survives; the string overload is distinct"
@@ -4091,7 +4597,7 @@ let shapePassTests =
                 { Build.shapeModel [] with
                     Decls =
                         [ FsInterface
-                              { Name = "Store"
+                              { Callable = false; Name = "Store"
                                 Docs = ""
                                 Tags = []
                                 Order = None
@@ -4147,7 +4653,7 @@ let shapePassTests =
                 { Build.shapeModel [] with
                     Decls =
                         [ FsInterface
-                              { Name = "Store"
+                              { Callable = false; Name = "Store"
                                 Docs = ""
                                 Tags = []
                                 Order = None
@@ -4279,7 +4785,7 @@ let shapePassTests =
                     Owner = EntryModule
                     HarvestIndex = 0
                     ExportName = name
-                    SourceSymbolId = 0<symbolId>
+                    SourceSymbolId = (Build.symbolKey 0)
                     SignatureOrdinal = None
                     Member =
                         { Name = name
@@ -4361,16 +4867,11 @@ let shapePassTests =
 
             Expect.equal (findings |> List.map _.Tier) [ Exact ] "a tagged union costs no fidelity"
 
-        testCase "detect-tagged-unions leaves an arm that is not plain data alone" <| fun _ ->
-            let method' id =
-                { Build.facts (Build.typeResponse id TypeFlags.Object) with
-                    CallSignatures = [ Build.signature [] 4 ] }
-
+        testCase "detect-tagged-unions leaves a callable arm alone" <| fun _ ->
             let arm id tag =
                 { Build.facts (Build.typeResponse id TypeFlags.Object) with
-                    Members =
-                        [ Build.resolvedMember (Build.symbol (id * 10) "kind" SymbolFlags.Property) tag
-                          Build.resolvedMember (Build.symbol (id * 10 + 1) "run" SymbolFlags.Method) 30 ] }
+                    Members = [ Build.resolvedMember (Build.symbol (id * 10) "kind" SymbolFlags.Property) tag ]
+                    CallSignatures = [ Build.signature [] 4 ] }
 
             let union =
                 { Build.facts (Build.typeResponse 10 TypeFlags.Union) with UnionMembers = [ 20<typeId>; 21<typeId> ] }
@@ -4378,7 +4879,6 @@ let shapePassTests =
             let model =
                 { Build.shapeModel (
                       union
-                      :: method' 30
                       :: arm 20 7
                       :: arm 21 8
                       :: stringLiteral 7 "a"
@@ -4391,7 +4891,7 @@ let shapePassTests =
 
             Expect.isEmpty
                 (shaped.Decls |> List.choose (function FsTaggedUnion d -> Some d | _ -> None))
-                "a method has no case-field form, so the erased union stands"
+                "a callable arm has no case form, so the erased union stands"
 
             Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "the missed match is reported"
 
@@ -4559,7 +5059,7 @@ let shapePassTests =
                           AmbientClasses = []
                           Namespaces = Map.empty
                           ShadowedByLib = 0 }
-                    ExportTypes = Map.ofList [ 400<symbolId>, { Declared = None; Value = Some 40<typeId> } ] }
+                    ExportTypes = Map.ofList [ (Build.symbolKey 400), { Declared = None; Value = Some 40<typeId>; AliasParameters = None } ] }
 
             let named, findings = Build.runPass Anonymous.synthesizeAnonymous model
 
@@ -4572,7 +5072,7 @@ let shapePassTests =
 
         testCase "repair-arity widens a bare or mis-applied reference to a generic tagged union" <| fun _ ->
             let property name reference =
-                FsProperty { Name = name; Docs = ""; Tags = []; ReadOnly = true; Type = reference; Literal = None }
+                FsProperty { Name = name; Docs = ""; Tags = []; ReadOnly = true; Type = reference; Literal = None; NullKey = false }
 
             let model =
                 { Build.shapeModel [] with
@@ -4584,9 +5084,9 @@ let shapePassTests =
                                 Order = None
                                 TypeParameters = [ { Name = "T"; Constraint = None } ]
                                 Tag = "kind"
-                                Cases = [ { Name = "Once"; CompiledName = Some "once"; Fields = [ { Name = "payload"; Type = FsTypeVar "T" } ] } ] }
+                                Cases = [ { Name = "Once"; CompiledName = Some "once"; CaseTest = None; Inlines = false; Fields = [ { Name = "payload"; Docs = ""; Tags = []; Type = FsTypeVar "T"; Literal = None; NullKey = false } ]; Create = None } ] }
                           FsInterface
-                              { Name = "Holder"
+                              { Callable = false; Name = "Holder"
                                 Docs = ""
                                 Tags = []
                                 Order = None
@@ -4677,7 +5177,7 @@ let shapePassTests =
             let numberApplication =
                 { Build.facts
                     { Build.typeResponse 58 TypeFlags.Union with
-                        AliasSymbol = ValueSome 901
+                        AliasSymbol = ValueSome(Build.compact 901)
                         AliasTypeArguments = ValueSome [| 2 |] } with
                     UnionMembers = [ 51<typeId>; 52<typeId> ] }
 
@@ -4722,7 +5222,7 @@ let shapePassTests =
                           AmbientClasses = []
                           Namespaces = Map.empty
                           ShadowedByLib = 0 }
-                    ExportTypes = Map.ofList [ 400<symbolId>, { Declared = None; Value = Some 40<typeId> } ] }
+                    ExportTypes = Map.ofList [ (Build.symbolKey 400), { Declared = None; Value = Some 40<typeId>; AliasParameters = None } ] }
 
             let named, _ = Build.runPass Anonymous.synthesizeAnonymous model
 
@@ -4744,14 +5244,14 @@ let shapePassTests =
             let declared =
                 { Build.facts
                     { Build.typeResponse 60 TypeFlags.Intersection with
-                        AliasSymbol = ValueSome 902
+                        AliasSymbol = ValueSome(Build.compact 902)
                         AliasTypeArguments = ValueSome [| 30 |] } with
                     IntersectionMembers = [ 63<typeId>; 64<typeId> ]
                     Members = (objectWith 63 "base").Members @ (objectWith 64 "tag").Members
                     AliasTypeArguments = [ 30<typeId> ] }
 
             let distributed =
-                { Build.facts { Build.typeResponse 61 TypeFlags.Union with AliasSymbol = ValueSome 902 } with
+                { Build.facts { Build.typeResponse 61 TypeFlags.Union with AliasSymbol = ValueSome(Build.compact 902) } with
                     UnionMembers = [ 65<typeId>; 66<typeId> ] }
 
             let holder =
@@ -4768,7 +5268,7 @@ let shapePassTests =
                           AmbientClasses = []
                           Namespaces = Map.empty
                           ShadowedByLib = 0 }
-                    ExportTypes = Map.ofList [ 400<symbolId>, { Declared = None; Value = Some 40<typeId> } ] }
+                    ExportTypes = Map.ofList [ (Build.symbolKey 400), { Declared = None; Value = Some 40<typeId>; AliasParameters = None } ] }
 
             let named, _ = Build.runPass Anonymous.synthesizeAnonymous model
 
@@ -4936,6 +5436,29 @@ let shapePassTests =
 
             Expect.equal (findings |> List.map _.Tier) [ Ergonomic ] "the idiom is recorded once, at the declaration"
 
+        testCase "shape-aliases reads secondary binders from their owning declaration" <| fun _ ->
+            let primary = Build.export "Existing" (Build.symbol 100 "Existing" SymbolFlags.Interface)
+            let alias = Build.export "Alias" (Build.symbol 101 "Alias" SymbolFlags.TypeAlias)
+            let carrier = Build.facts (Build.typeResponse 10 TypeFlags.Object)
+            let declaration =
+                FsInterface
+                    { Name = "Existing"; Callable = false; Docs = ""; Tags = []; Order = None; TypeParameters = []
+                      Inherits = []; Members = []; Entrypoint = None; CreateOverloads = []; Statics = [] }
+            for owned, expected in [ None, []; Some [], []; Some [ 20<typeId> ], [ "T" ] ] do
+                let model =
+                    { Build.shapeModel (carrier :: typeParam 20 "T" :: Build.primitives) with
+                        Harvest = { HarvestModel.Empty with Exports = [ primary; alias ] }
+                        ExportTypes =
+                            Map.ofList
+                                [ primary.Symbol.SymbolId, { Declared = Some 10<typeId>; Value = None; AliasParameters = None }
+                                  alias.Symbol.SymbolId, { Declared = Some 10<typeId>; Value = None; AliasParameters = owned } ]
+                        DeclNames = Map.ofList [ 10<typeId>, "Existing" ]
+                        Decls = [ declaration ] }
+                let shaped, _ = Build.runPass Aliases.shapeAliases model
+                let result = shaped.Decls |> List.pick (function FsAbbrev d when d.Name = "Alias" -> Some d | _ -> None)
+                Expect.equal (result.TypeParameters |> List.map _.Name) expected "the alias owns its binders independently of its carrier"
+                Expect.equal result.Target (FsNamed "Existing") "the named carrier remains intact"
+
         testCase "shape-aliases emits a phantom for a computation that names none of its parameters" <| fun _ ->
             // `type Unwrap<T> = T extends Array<infer E> ? E : T`: a conditional the checker
             // could not finish. It binds `T` through the alias, but there is nothing on the
@@ -5021,7 +5544,7 @@ let shapePassTests =
         testCase "order-declarations puts declarations in source order, Exports last" <| fun _ ->
             let interface' name order =
                 FsInterface
-                    { Name = name
+                    { Callable = false; Name = name
                       Docs = ""
                       Tags = []
                       Order = Some order
@@ -5041,7 +5564,7 @@ let shapePassTests =
                         [ { Owner = EntryModule
                             HarvestIndex = 0
                             ExportName = "make"
-                            SourceSymbolId = 0<symbolId>
+                            SourceSymbolId = (Build.symbolKey 0)
                             SignatureOrdinal = None
                             Member =
                                 { Name = "make"
@@ -5069,7 +5592,7 @@ let shapePassTests =
                 { Owner = owner
                   HarvestIndex = index
                   ExportName = "check"
-                  SourceSymbolId = 41<symbolId>
+                  SourceSymbolId = (Build.symbolKey 41)
                   SignatureOrdinal = Some ordinal
                   Member =
                     { Name = "check"
@@ -5120,7 +5643,7 @@ let shapePassTests =
                                 TypeParameters = [ { Name = "P"; Constraint = None } ]
                                 Target = FsObj }
                           FsInterface
-                              { Name = "Context"
+                              { Callable = false; Name = "Context"
                                 Docs = ""
                                 Tags = []
                                 Order = None
@@ -5133,7 +5656,7 @@ let shapePassTests =
                                             Tags = []
                                             ReadOnly = true
                                             Type = FsApp("Params", [ FsString ])
-                                            Literal = None } ]
+                                            Literal = None; NullKey = false } ]
                                 Entrypoint = None
                                 CreateOverloads = []
                                 Statics = [] } ] }
@@ -5173,7 +5696,7 @@ let shapePassTests =
                                     [ { Name = "T"; Constraint = None }; { Name = "U"; Constraint = None } ]
                                 Target = FsTypeVar "T" }
                           FsInterface
-                              { Name = "Holder"
+                              { Callable = false; Name = "Holder"
                                 Docs = ""
                                 Tags = []
                                 Order = None
@@ -5186,7 +5709,7 @@ let shapePassTests =
                                             Tags = []
                                             ReadOnly = true
                                             Type = FsApp("ExcludeStrict", [ FsString; FsFloat ])
-                                            Literal = None } ]
+                                            Literal = None; NullKey = false } ]
                                 Entrypoint = None
                                 CreateOverloads = []
                                 Statics = [] } ] }
@@ -5302,7 +5825,7 @@ let shapePassTests =
             // FS0033: `PagesFunctionContext` takes three arguments and this position has none.
             let generic =
                 FsInterface
-                    { Name = "Ctx"
+                    { Callable = false; Name = "Ctx"
                       Docs = ""
                       Tags = []
                       Order = None
@@ -5343,7 +5866,7 @@ let shapePassTests =
                 { Build.shapeModel [] with
                     Decls =
                         [ FsInterface
-                              { Name = "Branded"
+                              { Callable = false; Name = "Branded"
                                 Docs = ""
                                 Tags = []
                                 Order = None
@@ -5356,7 +5879,7 @@ let shapePassTests =
                                             Tags = []
                                             ReadOnly = false
                                             Type = FsUnit
-                                            Literal = None } ]
+                                            Literal = None; NullKey = false } ]
                                 Entrypoint = None
                                 CreateOverloads = []
                                 Statics = [] } ] }
@@ -5387,6 +5910,69 @@ let shapePassTests =
                 (findings |> List.map (fun f -> f.Tier, f.Symbol))
                 [ Escape, "Gone" ]
                 "the dropped export is a finding, not silence"
+
+        testCase "audit-coverage represents nested namespaces through their harvested members" <| fun _ ->
+            let shapes = Build.symbol 310 "Shapes" SymbolFlags.NamespaceModule
+            let inner = { Build.symbol 311 "Inner" SymbolFlags.NamespaceModule with Parent = ValueSome (Build.compactOf shapes) }
+            let lonely = { Build.symbol 312 "Lonely" SymbolFlags.Interface with Parent = ValueSome (Build.compactOf inner) }
+
+            let declared =
+                FsInterface
+                    { Name = "Globals.Shapes.Inner.Lonely"
+                      Callable = false
+                      Docs = ""
+                      Tags = []
+                      Order = None
+                      TypeParameters = []
+                      Inherits = []
+                      Members = []
+                      Entrypoint = None
+                      CreateOverloads = []
+                      Statics = [] }
+
+            let model =
+                { Build.shapeModel [] with
+                    Decls = [ declared ]
+                    Harvest =
+                        { HarvestModel.Empty with
+                            Exports =
+                                [ { Build.export "Shapes" shapes with HasValueExport = false }
+                                  { Build.export "Inner" inner with HasValueExport = false }
+                                  { Build.export "Lonely" lonely with HasValueExport = false } ] } }
+
+            let _, findings = Build.runPass Coverage.auditCoverage model
+            Expect.isEmpty findings "both namespace modules are represented through the declared child"
+
+        testCase "audit-coverage reports a namespace whose harvested members are missing" <| fun _ ->
+            let shapes = Build.symbol 310 "Shapes" SymbolFlags.NamespaceModule
+            let lonely = { Build.symbol 311 "Lonely" SymbolFlags.Interface with Parent = ValueSome (Build.compactOf shapes) }
+
+            let model =
+                { Build.shapeModel [] with
+                    Harvest =
+                        { HarvestModel.Empty with
+                            Exports =
+                                [ { Build.export "Shapes" shapes with HasValueExport = false }
+                                  { Build.export "Lonely" lonely with HasValueExport = false } ] } }
+
+            let _, findings = Build.runPass Coverage.auditCoverage model
+
+            Expect.equal
+                (findings |> List.map (fun f -> f.Tier, f.Symbol))
+                [ Escape, "Shapes"; Escape, "Lonely" ]
+                "the absent namespace module and its child each remain visible in the findings"
+
+        testCase "audit-coverage excuses a namespace with no harvested member" <| fun _ ->
+            let empty = Build.symbol 320 "Empty" SymbolFlags.NamespaceModule
+
+            let model =
+                { Build.shapeModel [] with
+                    Harvest =
+                        { HarvestModel.Empty with
+                            Exports = [ { Build.export "Empty" empty with HasValueExport = false } ] } }
+
+            let _, findings = Build.runPass Coverage.auditCoverage model
+            Expect.isEmpty findings "an empty type-only namespace has no emitted API"
 
         testCase "the pipeline fold stamps findings with the pass that made them" <| fun _ ->
             let degrading: Pass<int> =
@@ -5438,7 +6024,7 @@ let private constraintParameters expected used =
             Harvest =
                 { HarvestModel.Empty with
                     Exports = [ Build.export "use" (Build.symbol 400 "use" SymbolFlags.Function) ] }
-            ExportTypes = Map.ofList [ 400<symbolId>, { Declared = None; Value = Some 40<typeId> } ] }
+            ExportTypes = Map.ofList [ (Build.symbolKey 400), { Declared = None; Value = Some 40<typeId>; AliasParameters = None } ] }
 
     let shaped, findings = Build.runPass Exports.shapeExports model
     let parameters = shaped.ExportMembers |> List.exactlyOne |> _.Member.TypeParameters
@@ -5638,7 +6224,7 @@ let unionArmOverloadTests =
             Owner = EntryModule
             HarvestIndex = 0
             ExportName = name
-            SourceSymbolId = 1<symbolId>
+            SourceSymbolId = (Build.symbolKey 1)
             SignatureOrdinal = None
             Member =
                 {
@@ -5845,7 +6431,7 @@ let symbolKeyedMemberTests =
         )
 
     let decl name typeParameters inherits members =
-        { Name = name
+        { Callable = false; Name = name
           Docs = ""
           Tags = []
           Order = None
@@ -6073,6 +6659,40 @@ let literalKeyedMethodTests =
           Build.signature [ param 105 "event" 31; param 106 "listener" 1 ] 4 ]
 
     testList "literal-keyed methods" [
+        testCase "checker escaped leading underscores retain the original JavaScript key" <| fun _ ->
+            let members, _ = shape [ methodMember 100 "___promisify__" 20 ] [ callable 20 onSignatures ]
+
+            Expect.equal
+                (members |> List.map describe)
+                [ "__promisify__", None
+                  "__promisify__Close", Some("__promisify__", [ 0, "close" ])
+                  "__promisify__End", Some("__promisify__", [ 0, "end" ]) ]
+                "the checker escape belongs to neither the F# spelling nor the JavaScript target"
+
+        testCase "checker escaped backtick keys retain the original JavaScript key" <| fun _ ->
+            let members, findings = shape [ methodMember 100 "___`promisify__" 20 ] [ callable 20 onSignatures ]
+
+            let targets =
+                members
+                |> List.choose (function
+                    | FsLiteralKeyed(key, _, _) -> Some key
+                    | FsStringKeyed(key, _) -> Some key
+                    | _ -> None)
+
+            Expect.equal targets [ "__`promisify__"; "__`promisify__"; "__`promisify__" ] "decode only the compiler's underscore escape"
+
+            let reportedKeys =
+                findings
+                |> List.choose (fun finding ->
+                    match finding.Kind with
+                    | :? Members as kind ->
+                        match kind with
+                        | Members.StringKeyedMemberAsEmit(key, _) -> Some key
+                        | _ -> None
+                    | _ -> None)
+
+            Expect.equal reportedKeys [ "__`promisify__"; "__`promisify__"; "__`promisify__" ] "MB012 reports the original JavaScript key for every overload"
+
         testCase "each literal overload is a method of its own beside the generic one" <| fun _ ->
             let members, _ = shape [ methodMember 100 "on" 20 ] [ callable 20 onSignatures ]
 
@@ -6211,7 +6831,7 @@ let literalKeyedMethodTests =
                 )
 
             let decl =
-                { Name = "Socket"
+                { Callable = false; Name = "Socket"
                   Docs = ""
                   Tags = []
                   Order = None
@@ -6248,7 +6868,7 @@ let literalKeyedMethodTests =
                 )
 
             let decl =
-                { Name = "Socket"
+                { Callable = false; Name = "Socket"
                   Docs = ""
                   Tags = []
                   Order = None
@@ -6391,6 +7011,35 @@ let typeParametersInScopeTests =
 
             Expect.equal structural (FsApp("ListOf", [ FsNamed "Node" ])) "EntryLike inherits nothing"
             Expect.equal (structuralFindings |> List.map _.Key) [ "TR027" ] "written as the bound"
+
+        testCase "compiled overload signatures ignore ParamArray metadata" <| fun _ ->
+            let parameter = { Name = "values"; Optional = false; Rest = true; Type = FsArray FsString }
+            let key rest = Spec.CompiledSignature.parameterKey Map.empty [] [ { parameter with Rest = rest } ]
+            Expect.equal (key true) (key false) "attributes do not distinguish .NET overloads"
+
+        testCase "recursive callback classification follows abbreviations and stops at object members" <| fun _ ->
+            let callback =
+                { named 40 "Thunk" with CallSignatures = [ Build.signature [] 41 ] }
+            let union =
+                { Build.facts (Build.typeResponse 41 TypeFlags.Union) with
+                    UnionMembers = [ 1<typeId>; 40<typeId> ] }
+            let model = Build.shapeModel (callback :: union :: Build.primitives)
+
+            Expect.isTrue (Spec.hasInterfaceCallSignatures model callback) "the union closes an abbreviation cycle"
+
+            let record =
+                { named 41 "Record" with
+                    Members = [ Build.resolvedMember (Build.symbol 410 "next" SymbolFlags.Property) 40 ] }
+            let throughRecord = { model with Types = Map.add 41<typeId> record model.Types }
+            Expect.isFalse (Spec.hasInterfaceCallSignatures throughRecord callback) "object members provide a nominal boundary"
+
+            let ordinary = { callback with CallSignatures = [ Build.signature [] 1 ] }
+            Expect.isFalse (Spec.hasInterfaceCallSignatures model ordinary) "a nonrecursive callback remains a function"
+
+            let delegateCallback =
+                { callback with
+                    CallSignatures = [ Build.signature [ parameterMember 411 "left" 1; parameterMember 412 "right" 1 ] 41 ] }
+            Expect.isFalse (Spec.hasInterfaceCallSignatures model delegateCallback) "a multiargument callback already has a nominal delegate"
 
         testCase "a function declaration is a method and a function-typed constant a property" <| fun _ ->
             let identity =

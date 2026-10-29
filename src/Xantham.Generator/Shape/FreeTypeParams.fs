@@ -186,6 +186,7 @@ let private reuseAnonymousApplications includeUnnamed (model: ShapeModel) =
             left.TypeParameters = right.TypeParameters
             && left.HasRest = right.HasRest
             && left.IsAbstract = right.IsAbstract
+            && left.IsPrivate = right.IsPrivate
             && pairwise members left.Parameters right.Parameters
             && same left.ReturnTypeId right.ReturnTypeId
 
@@ -247,7 +248,7 @@ let bindFreeTypeParams: Pass<ShapeModel> =
                      && (arrayElement model facts).IsNone
                      && not (isTuple facts))
                     || isFlattenable model facts
-                    || (isTaggedDeclaration model facts
+                    || (isObjectUnionDeclaration model facts
                         && not (Map.containsKey typeId model.AliasApplications))
                     ->
                     let own = declParamIds facts

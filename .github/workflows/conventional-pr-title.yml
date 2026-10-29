@@ -1,7 +1,6 @@
 name: PR title
 on:
   pull_request_target:
-    branches: [develop, master]
     types: [opened, edited, reopened, synchronize, ready_for_review, converted_to_draft]
   workflow_dispatch:
     inputs:

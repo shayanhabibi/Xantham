@@ -158,3 +158,37 @@ module Brand =
 
     /// <summary>Drop the brand from a char, recovering the primitive.</summary>
     let inline untagChar<[<Measure>] 'm> (value: char<'m>) : char = unbox value
+
+// Inline outside the reserved Fable.Core.JS namespace, for the reason the keyof extensions are.
+type Fable.Core.JS.JS.Intersect<'A, 'B> with
+    /// <summary>The value read as its first operand. Erased: no copy, no conversion.</summary>
+    member inline this.Left: 'A = unbox this
+
+    /// <summary>The value read as its second operand. Erased: no copy, no conversion.</summary>
+    member inline this.Right: 'B = unbox this
+
+/// <summary>
+/// Constructing an intersection with an operand F# cannot inherit (<c>Intersect&lt;'A, 'B&gt;</c>).
+/// </summary>
+module Intersect =
+
+    /// <summary>
+    /// Reads a value as the intersection, unchecked. Erased: the result is the value itself, so
+    /// its identity and prototype are preserved. The caller guarantees the value carries the
+    /// second operand's members.
+    /// </summary>
+    let inline unsafeCast<'A, 'B> (value: 'A) : Intersect<'A, 'B> = unbox value
+
+    /// <summary>
+    /// Copies the second operand's own enumerable properties onto the first, as
+    /// <c>Object.assign</c>, and returns the first. The first operand is mutated in place and
+    /// keeps its identity and prototype.
+    /// </summary>
+    [<Emit("Object.assign($0, $1)")>]
+    let assign (target: 'A) (members: 'B) : Intersect<'A, 'B> = jsNative
+
+    /// <summary>The value read as its first operand.</summary>
+    let inline left (value: Intersect<'A, 'B>) : 'A = unbox value
+
+    /// <summary>The value read as its second operand.</summary>
+    let inline right (value: Intersect<'A, 'B>) : 'B = unbox value

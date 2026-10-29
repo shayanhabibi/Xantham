@@ -558,6 +558,7 @@ module Replacement =
                         ReadOnly = p.ReadOnly
                         Type = p.Type
                         Literal = None
+                        NullKey = false
                     })
 
         ReplacementSpec(values, [], None)

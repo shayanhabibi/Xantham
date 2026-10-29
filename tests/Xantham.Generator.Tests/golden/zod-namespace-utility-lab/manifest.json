@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "package": "zod-namespace-utility-lab",
+  "module": "ZodNamespaceUtilityLab",
+  "counts": {
+    "exact": 0,
+    "ergonomic": 0,
+    "widened": 5,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SA - shape-aliases",
+      "total": 11,
+      "ergonomic": 5,
+      "widened": 6
+    }
+  ]
+}

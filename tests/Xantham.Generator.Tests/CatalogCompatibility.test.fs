@@ -44,8 +44,58 @@ let tests =
                  contract.ApiVersion,
                  contract.InferenceVersion,
                  contract.CustomizationVersion)
-                (1, 6, 8, 3, 1)
-                "identity 6 authenticates constructor fallback bounds and sanitized aliases; API 8 emits literal-keyed methods; inference 3 preserves source contracts at the width cutoff"
+                (1, 9, 14, 5, 1)
+                "Identity 9 authenticates namespace alias occurrences; API 14 normalizes faithful aliases and dependent applications"
+
+        testCase "the identity contract rejects namespace aliases with global parent identity even at API fourteen" <| fun _ ->
+            rejects "identity version" (fun () ->
+                validateContract 2 expected.Compiler expected.Generator "profile"
+                    (Some { expected.Contract with IdentityVersion = 8; ApiVersion = 14 }))
+
+        testCase "the API contract rejects catalogues built before dependent generic argument constraints" <| fun _ ->
+            rejects "API version" (fun () ->
+                validateContract 2 expected.Compiler expected.Generator "profile"
+                    (Some { expected.Contract with ApiVersion = 13 }))
+
+        testCase "the identity contract rejects catalogues built before source-anchored intersections" <| fun _ ->
+            rejects "identity version" (fun () ->
+                validateContract 2 expected.Compiler expected.Generator "profile"
+                    (Some { expected.Contract with IdentityVersion = 7 }))
+
+        testCase "the API contract rejects catalogues built before authenticated NoInfer declarations" <| fun _ ->
+            rejects "API version" (fun () ->
+                validateContract 2 expected.Compiler expected.Generator "profile"
+                    (Some { expected.Contract with ApiVersion = 12 }))
+
+        testCase "the API contract rejects catalogues built before ambient values and source overload selection" <| fun _ ->
+            rejects "API version" (fun () ->
+                validateContract 2 expected.Compiler expected.Generator "profile"
+                    (Some { expected.Contract with ApiVersion = 11 }))
+
+        testCase "the inference contract rejects catalogues built before source overload selection" <| fun _ ->
+            rejects "inference version" (fun () ->
+                validateContract 2 expected.Compiler expected.Generator "profile"
+                    (Some { expected.Contract with InferenceVersion = 4 }))
+
+        testCase "the API contract rejects catalogues built before merged callable methods" <| fun _ ->
+            rejects "API version" (fun () ->
+                validateContract 2 expected.Compiler expected.Generator "profile"
+                    (Some { expected.Contract with ApiVersion = 10 }))
+
+        testCase "the inference contract rejects catalogues built before callable declaration recovery" <| fun _ ->
+            rejects "inference version" (fun () ->
+                validateContract 2 expected.Compiler expected.Generator "profile"
+                    (Some { expected.Contract with InferenceVersion = 3 }))
+
+        testCase "the API contract rejects catalogues built before the lib Symbol mapping" <| fun _ ->
+            rejects "API version" (fun () ->
+                validateContract 2 expected.Compiler expected.Generator "profile"
+                    (Some { expected.Contract with ApiVersion = 9 }))
+
+        testCase "the API contract rejects catalogues built before namespace member nesting" <| fun _ ->
+            rejects "API version" (fun () ->
+                validateContract 2 expected.Compiler expected.Generator "profile"
+                    (Some { expected.Contract with ApiVersion = 8 }))
 
         testCase "the API contract rejects catalogues built before literal-keyed methods" <| fun _ ->
             rejects "API version" (fun () ->

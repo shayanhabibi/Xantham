@@ -149,6 +149,10 @@ module FindingCodes =
             "TR.ValueOfAsPropTypeLock", "TR066"
             "TR.MappedAsPropertyRecord", "TR067"
             "TR.ConditionalResolvedToConstraint", "TR068"
+            "TR.SymbolAsLibInterface", "TR069"
+            "TR.OpenIntersectionCarried", "TR072"
+            "TR.RestatingIntersectionOperandReduced", "TR073"
+            "TR.CyclicDependentConstraintApplicationToObj", "TR074"
             "TP.UnnamedTypeParameter", "TP001"
             "TP.ConstraintDropped", "TP002"
             "TP.GenericFunctionHoisted", "TP003"
@@ -160,6 +164,8 @@ module FindingCodes =
             "TP.DuplicateTypeParameterCollapsed", "TP009"
             "TP.FunctionConstraintDropped", "TP010"
             "TP.KeyOverDeclaredMap", "TP011"
+            "TP.ConstraintUnmetByReference", "TP012"
+            "TP.ConstraintOutOfScope", "TP013"
             "MB.OptionalParameterAsOption", "MB001"
             "MB.SymbolKeyedMemberDropped", "MB002"
             "MB.OptionalMemberAsOption", "MB003"
@@ -171,6 +177,7 @@ module FindingCodes =
             "MB.SymbolKeyedMemberAsEmit", "MB009"
             "MB.LiteralOverloadAsMethod", "MB010"
             "MB.LiteralMemberAsConstant", "MB011"
+            "MB.StringKeyedMemberAsEmit", "MB012"
             "NE.TypeNameSuffixed", "NE001"
             "HG.AmbientModuleDropped", "HG001"
             "HG.UnwritableGlobalDropped", "HG002"
@@ -191,12 +198,17 @@ module FindingCodes =
             "DT.TaggedUnion", "DT002"
             "DT.TagValueShared", "DT003"
             "DT.ArmsMergedOnSharedTag", "DT004"
+            "DT.CaseCreateSynthesized", "DT005"
+            "DT.CaseCreateNameTaken", "DT006"
+            "DT.ArmsSeparatedByCaseTest", "DT008"
+            "DT.CaseInlinesInterface", "DT009"
             "SY.InstantiationNamedOnce", "SY001"
             "SY.HoistArgumentsNotRecovered", "SY002"
             "SY.IntersectionOperandNotHoisted", "SY003"
             "SY.NameNestedUnderOwner", "SY004"
             "SY.NameSanitisedForIdentifier", "SY005"
             "SY.CallbackDelegateNamed", "SY006"
+            "SY.ValueSideNamed", "SY007"
             "SI.HybridLosesCallSignatures", "SI001"
             "SI.BaseMembersFlattened", "SI002"
             "SI.IntersectionFlattened", "SI003"
@@ -227,6 +239,7 @@ module FindingCodes =
             "SP.CreateNotSynthesized", "SP003"
             "SP.MethodTypeParametersBoundAtCreate", "SP004"
             "SP.LiteralMembersWrittenByCreate", "SP005"
+            "SP.NullKeysWrittenByCreate", "SP006"
             "DO.OverloadDropped", "DO001"
             "DO.OverloadsDistinguishedByLiteral", "DO002"
             "DO.OverloadsDistinguishedByLiteralUnion", "DO003"
@@ -248,6 +261,8 @@ module FindingCodes =
             "RA.AliasKeptAsPhantom", "RA006"
             "RA.DuplicateTypeParameterUnwritable", "RA007"
             "DD.DelegateReachedNoReference", "DD001"
+            "DD.TaggedArmReachedNoReference", "DD002"
+            "DD.ArmDeclarationReachedNoReference", "DD003"
             "AC.ExportNotRepresented", "AC001"
             "GE.GroupShipped", "GE001"
             "GE.ShippedGroupWithoutDeclarations", "GE002"
@@ -260,6 +275,7 @@ module FindingCodes =
             "CU.InteropReplaced", "CU004"
             "CU.DeclarationReplaced", "CU005"
             "CU.ProjectionEmitted", "CU006"
+            "EO.TypedArms", "EO001"
         ]
 
     let private byName = Map.ofList table
@@ -539,11 +555,26 @@ type TypeReference =
     /// instantiated at that bound (`InstanceType<Request>` as `IncomingMessage`).
     /// `resolveConditionalConstraints` selects it.
     | [<Widened>] ConditionalResolvedToConstraint of conditional: string
+    /// W1. `symbol` written as the compiler lib's own `Symbol` interface, under the name its
+    /// owner gives it (`Fable.Core.TS.Es.Symbol`). The interface also admits a boxed `Symbol`
+    /// object, which `symbol` excludes.
+    | [<Ergonomic>] SymbolAsLibInterface of name: string
+    /// An intersection over a type parameter whose other operands add members to the
+    /// parameter's bound, written as the support package's `JS.Intersect` over its operands. Each
+    /// operand stays typed and is read through `Left`/`Right` rather than by inheritance.
+    | [<Ergonomic>] OpenIntersectionCarried of operands: int
+    /// An object operand restating a type parameter's bound reduces away, and the parameter is
+    /// the type: `R & { req: Base }` over `R extends Wide` is `'R`.
+    | [<Exact>] RestatingIntersectionOperandReduced
+    /// <summary>Widens an application to <c>obj</c> when corrected arguments fail its cyclic dependent bounds.</summary>
+    | [<Widened>] CyclicDependentConstraintApplicationToObj of name: string
 
     interface IFindingKind with
         member this.Message =
             match this with
             | SelfReferenceThroughUnnamed -> "type refers to itself through unnamed shapes; widened to obj"
+            | CyclicDependentConstraintApplicationToObj name ->
+                $"{name}'s cyclic dependent constraints are not satisfied after argument correction; application widened to obj"
             | TypeNotResolved reason -> $"type not resolved ({reason}); widened to obj"
             | MissingFromTypeTable -> "referenced type missing from the type table; widened to obj"
             | LoneEnumMemberToFloat -> "lone enum member widened to float"
@@ -618,9 +649,9 @@ type TypeReference =
             | BigIntLiteralToBigInt -> "bigint literal type widened to bigint (doc-noted, §4.2)"
             | ObjectTypeToObj ->
                 "TypeScript's object maps to obj, which also admits the primitives object excludes (§4.1)"
-            | SymbolNoBinding -> "symbol has no binding in Fable.Core 5.2.0; widened to obj (§4.1)"
-            | UniqueSymbolNoBinding ->
-                "unique symbol has no binding in Fable.Core 5.2.0 and no F# form for its identity; widened to obj"
+            | SymbolNoBinding ->
+                "symbol has no binding: the compiler lib's Symbol interface has no name in this run; widened to obj (§4.1)"
+            | UniqueSymbolNoBinding -> "unique symbol has no F# form for its identity; the singleton is not carried"
             | ConstructorObjectNotDeclared constructs ->
                 $"typeof {constructs} is a constructor object this run does not declare; widened to obj (§4.4)"
             | ArgumentNotASubtypeOfConstraint(argument, name, bound) ->
@@ -666,6 +697,12 @@ type TypeReference =
                 $"{{ [P in keyof T]: V }} reads as PropertyRecord<'{operand}, V> (§4.10)"
             | ConditionalResolvedToConstraint conditional ->
                 $"{conditional} written as its value at the check type's bound; the parameter it is applied to is not carried (§4.11)"
+            | SymbolAsLibInterface name ->
+                $"symbol written as the compiler lib's Symbol interface {name}, which also admits a boxed Symbol object"
+            | OpenIntersectionCarried operands ->
+                $"intersection over a type parameter written as JS.Intersect over its {operands} operands; each is read through Left/Right, not by inheritance (§4.6)"
+            | RestatingIntersectionOperandReduced ->
+                "intersection operand restating the type parameter's bound reduced away; the parameter is the type (§4.6)"
 
 /// Type parameter binding: `Shape.typeParamsOf`, `aliasTypeParams`, key variables and erasure.
 [<Prefix "TP">]
@@ -692,6 +729,15 @@ type TypeParameters =
     /// `keyof<Map>`, or as `typekeyof<Map,'E>` with `'E` at `Map[K]` when the signature reads
     /// the value the key selects.
     | [<Ergonomic>] KeyOverDeclaredMap of map: string * result: string option
+    /// A reference applies the declaration to a variable whose own bound is absent or another
+    /// instantiation of the same generic: TypeScript's covariance admits it, F#'s invariant
+    /// generics do not (`Event<'UI_MESSAGE>` under `'UI_MESSAGE :> UIMessage<'M, ...>` against
+    /// `UIMessage<obj, ...>`). The head writes no constraint.
+    | [<Ergonomic>] ConstraintUnmetByReference of name: string * bound: string * reference: string
+    /// A bound reading a type parameter its declaration does not bind - a hoisted parameter
+    /// object over the signature's `UI_MESSAGE extends UIMessage<MESSAGE_METADATA>` - is
+    /// dropped rather than written with that parameter widened to `obj`.
+    | [<Ergonomic>] ConstraintOutOfScope of name: string
 
     interface IFindingKind with
         member this.Message =
@@ -715,6 +761,10 @@ type TypeParameters =
             | KeyOverDeclaredMap(map, Some result) ->
                 $"key over {map} with its indexed access reads as typekeyof<{map},'{result}> (§4.10)"
             | KeyOverDeclaredMap(map, None) -> $"key over {map} reads as keyof<{map}> (§4.10)"
+            | ConstraintUnmetByReference(name, bound, reference) ->
+                $"constraint {bound} on '{name}' is not met where {reference} applies it in F#; dropped from the head (§4.9)"
+            | ConstraintOutOfScope name ->
+                $"constraint on '{name}' reads a type parameter the declaration does not bind; dropped from the head (§4.9)"
 
 /// Member and parameter shaping: `Shape.parametersOf` and `membersOf`.
 [<Prefix "MB">]
@@ -740,6 +790,7 @@ type Members =
     /// primitive, the literal is a `[<Literal>]` in the declaration's same-named module, and
     /// `Create` writes it.
     | [<Ergonomic>] LiteralMemberAsConstant of literal: string
+    | [<Ergonomic>] StringKeyedMemberAsEmit of key: string * name: string
 
     interface IFindingKind with
         member this.Message =
@@ -757,6 +808,7 @@ type Members =
             | SymbolKeyedMemberAsEmit(symbol, name) -> $"[Symbol.{symbol}] reads as {name} through [<Emit>]"
             | LiteralOverloadAsMethod(literal, name) ->
                 $"overload on literal \"{literal}\" reads as {name} through [<Emit>]"
+            | StringKeyedMemberAsEmit(key, name) -> $"string-keyed member {key} reads as {name} through [<Emit>]"
             | LiteralMemberAsConstant literal ->
                 $"literal member {literal}: read as its primitive, declared as a [<Literal>], written by Create"
 
@@ -854,11 +906,23 @@ type ClassifyLiteralUnions =
 type DetectTaggedUnions =
     | [<Ergonomic>] ArmNotPlainData of tag: string
     | [<Exact>] TaggedUnion of tag: string
-    /// Two arms of a uniformly tagged union carry the same tag value, so a `match` on the tag
-    /// could not tell them apart. The union is retained as an erased union.
+    /// Arms of a uniformly tagged union carry the same tag value and no member test separates
+    /// them, so a `match` could not tell them apart. The union is retained as an erased union.
     | [<Ergonomic>] TagValueShared of tag: string * value: string
-    /// Arms sharing a tag value folded into one case, which carries the members they agree on.
+    /// Retired: retained so `DT004` stays reserved to this case.
     | [<Ergonomic>] ArmsMergedOnSharedTag of tag: string * value: string
+    /// The case has a `Create` static member building it with its optional fields omittable and
+    /// its literal fields written.
+    | [<Exact>] CaseCreateSynthesized of create: string
+    /// The case's `Create` name is a case of the same union, so the case has no `Create`.
+    | [<Ergonomic>] CaseCreateNameTaken of create: string
+    /// Arms sharing a tag value are each a case of their own, matched by the tag and then by
+    /// the case's `[<CaseTest>]`.
+    | [<Exact>] ArmsSeparatedByCaseTest of tag: string * value: string
+    /// The case's one field is the arm's interface, which `[<InlineInterface>]` compiles as the
+    /// arm itself with the tag set: a value of the interface constructs the case, and reading
+    /// the field returns the union value.
+    | [<Exact>] CaseInlinesInterface of arm: string
 
     interface IFindingKind with
         member this.Message =
@@ -866,9 +930,25 @@ type DetectTaggedUnions =
             | ArmNotPlainData tag -> $"discriminated by '{tag}', but an arm is not plain data; left as an erased union"
             | TaggedUnion tag -> $"discriminated union on '{tag}' (D4)"
             | TagValueShared(tag, value) ->
-                $"discriminated by '{tag}', but two arms carry '{value}'; left as an erased union"
+                $"discriminated by '{tag}', but no member test separates the arms carrying '{value}'; left as an erased union"
             | ArmsMergedOnSharedTag(tag, value) ->
                 $"arms sharing '{tag}' = '{value}' merged into one case, carrying the members they agree on"
+            | CaseCreateSynthesized create ->
+                $"case Create '{create}': optional fields omittable, literal fields written"
+            | CaseCreateNameTaken create -> $"no case Create: '{create}' is already a case of the union"
+            | ArmsSeparatedByCaseTest(tag, value) ->
+                $"arms sharing '{tag}' = '{value}' are separate cases, each matched by a CaseTest"
+            | CaseInlinesInterface arm -> $"case carries the arm interface '{arm}' whole (InlineInterface)"
+
+/// `detect-erased-object-unions`.
+[<Prefix("EO", "detect-erased-object-unions")>]
+type DetectErasedObjectUnions =
+    | [<Exact>] TypedArms of arms: int
+
+    interface IFindingKind with
+        member this.Message =
+            match this with
+            | TypedArms arms -> $"{arms} typed arms preserve identity and match through CaseTest predicates"
 
 /// `name-exports`.
 [<Prefix("NE", "name-exports")>]
@@ -912,6 +992,12 @@ type SynthesizeAnonymous =
     /// parameters carry the names TypeScript spelled, and its arity stays guaranteed.
     | [<Exact>] CallbackDelegateNamed of declaredAs: string
 
+    /// A merged export's value side, which TypeScript spells only as `typeof X`, declared under
+    /// its role (`<Stem>Enum`, `<Stem>Namespace`, `<Stem>Value`) beside the type side holding the
+    /// export's own name, and numbered only where the role name is taken. `Exports.Shape` reads
+    /// `ShapeNamespace`.
+    | [<Ergonomic>] ValueSideNamed of typeSide: string * declaredAs: string
+
     interface IFindingKind with
         member this.Message =
             match this with
@@ -922,6 +1008,8 @@ type SynthesizeAnonymous =
                 $"{name} intersects an operand no declaration names; that operand's members are dropped"
             | NameNestedUnderOwner nestedAs -> $"anonymous shape named {nestedAs} under the declaration that owns it"
             | CallbackDelegateNamed declaredAs -> $"callback declared as the named delegate {declaredAs}"
+            | ValueSideNamed(typeSide, declaredAs) ->
+                $"{typeSide}'s value side declared as {declaredAs}; {typeSide} is the type side"
             | NameSanitisedForIdentifier(key, sanitised) ->
                 $"{key} declared as {sanitised}; the source name spells characters an F# declaration name refuses"
 
@@ -1087,6 +1175,9 @@ type SynthesizeParamObjects =
     | [<Widened>] MethodTypeParametersBoundAtCreate of parameters: string
     /// W6. Literal members the `Create` Emit writes into the object in place of parameters.
     | [<Exact>] LiteralMembersWrittenByCreate of members: string
+    /// D3. Required members typed `T | null`, bound as omittable `Create` parameters: the Emit
+    /// writes each key, as `null` where the argument is absent or `undefined`.
+    | [<Exact>] NullKeysWrittenByCreate of members: string
 
     interface IFindingKind with
         member this.Message =
@@ -1099,6 +1190,8 @@ type SynthesizeParamObjects =
                 $"generic method's {parameters} bound once per Create call; the object holds one instantiation"
             | LiteralMembersWrittenByCreate members ->
                 $"Create writes the literal members {members} in its Emit; they are not parameters"
+            | NullKeysWrittenByCreate members ->
+                $"Create always writes the required nullable members {members}, as null when the argument is absent"
 
 /// `dedupe-overloads`.
 [<Prefix("DO", "dedupe-overloads")>]
@@ -1218,12 +1311,22 @@ type DropOrphanDelegates =
     /// The delegate was declared for a callback every reading position writes out in full, so the
     /// declaration is dropped.
     | [<Exact>] DelegateReachedNoReference
+    /// A dropped interface named for an anonymous arm: the tagged DU carries the arm whole, with
+    /// its fields, documentation and construction; its only readers were dropped.
+    | [<Exact>] TaggedArmReachedNoReference
+    /// A dropped generator-minted declaration under an arm root (a tagged union's `Cases`
+    /// module, a dropped arm's path, or an exclusive-fold union's path), read only by
+    /// declarations already dropped.
+    | [<Exact>] ArmDeclarationReachedNoReference
 
     interface IFindingKind with
         member this.Message =
             match this with
             | DelegateReachedNoReference ->
                 "delegate dropped: every position reading this callback writes its parameters directly"
+            | TaggedArmReachedNoReference ->
+                "arm interface dropped: the tagged union carries its fields and nothing else reads it"
+            | ArmDeclarationReachedNoReference -> "declaration dropped: only declarations already dropped read it"
 
 /// `audit-coverage`.
 [<Prefix("AC", "audit-coverage")>]
@@ -1298,6 +1401,7 @@ module FindingCatalogue =
             typeof<ResolveTypeTable>
             typeof<ClassifyLiteralUnions>
             typeof<DetectTaggedUnions>
+            typeof<DetectErasedObjectUnions>
             typeof<SynthesizeAnonymous>
             typeof<ShapeInterfaces>
             typeof<ShapeAliases>

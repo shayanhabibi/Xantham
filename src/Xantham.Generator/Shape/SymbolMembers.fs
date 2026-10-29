@@ -10,28 +10,6 @@ open Xantham.Generator.Shape.Spec
 // the one `seq` instantiation F# admits per interface (FS3360).
 // ---------------------------------------------------------------------------------------------
 
-/// `reference` with each bound type variable replaced.
-let rec private substitute (bindings: Map<string, FsTypeRef>) (reference: FsTypeRef) : FsTypeRef =
-    let go = substitute bindings
-
-    match reference with
-    | FsTypeVar name -> Map.tryFind name bindings |> Option.defaultValue reference
-    | FsOption inner -> FsOption(go inner)
-    | FsArray inner -> FsArray(go inner)
-    | FsTuple items -> FsTuple(List.map go items)
-    | FsErasedUnion items -> FsErasedUnion(List.map go items)
-    | FsDelegate(arguments, returns) -> FsDelegate(List.map go arguments, go returns)
-    | FsFunc(argument, returns) -> FsFunc(go argument, go returns)
-    | FsApp(name, arguments) -> FsApp(name, List.map go arguments)
-    | FsBranded(primitive, measure) -> FsBranded(go primitive, measure)
-    | FsBool
-    | FsString
-    | FsFloat
-    | FsBigInt
-    | FsUnit
-    | FsObj
-    | FsNamed _ -> reference
-
 let private isIterator (m: FsMember) =
     match m with
     | FsSymbolKeyed("iterator", _) -> true
@@ -92,7 +70,7 @@ let settleSymbolMembers: Pass<ShapeModel> =
                                                 (arguments |> List.truncate baseDecl.TypeParameters.Length)
                                             |> Map.ofList
 
-                                        settle visiting baseDecl |> snd |> List.map (substitute bindings)
+                                        settle visiting baseDecl |> snd |> List.map (Inherited.substitute bindings)
                                     | _ -> [])
                                 |> List.distinct
 

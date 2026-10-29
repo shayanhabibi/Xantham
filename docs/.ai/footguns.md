@@ -1,5 +1,20 @@
 # Footguns and carried-forward threads
 
+## Dependent application constraints (2026-10-26)
+
+Shape generic bounds under the target declaration's binders, then substitute the supplied
+argument references. Reading `T extends Internals<O, I>` directly in the caller's scope
+turns out-of-scope `O` and `I` into `obj` and can emit an application that violates its own
+constraint. Comparison binder names must avoid all existing `TypeVars`, including names
+introduced by nested comparison scopes. Forward-dependent arguments are corrected first.
+
+Compare complete applied nominal bases for dependent constraints; generic head equality
+does not establish F# subtyping. Validate cyclic bounds after correction. `Self<any>` for
+`T extends Box<T>` cannot be repaired as `Self<Box<obj>>`: the corrected argument would need
+to inherit `Box<Box<obj>>`. `TR074` widens the entire unproven cyclic application. Valid
+nominal self and mutual recursion retain their typed applications. Avoid a fixpoint loop
+that grows a fresh nested generic application on each iteration.
+
 Durable facts harvested from `docs/.ai/handovers/` before that directory was retired on
 2026-09-22. The handovers were lane bookkeeping for landed work; what survives here is the part
 that constrains future changes, plus the threads that were still open when their lane closed.
@@ -8,6 +23,24 @@ Log paths under `/tmp` and artefact paths in the sibling CloudEdge repository ar
 reproducible from this checkout and were dropped rather than carried.
 
 ## Compiler API
+
+**A global namespace can have a parent.** At TypeScript 7.1, a namespace inside `declare global`
+is parented by the augmentation's `__global` symbol. A parentless-symbol test misses it and can
+mistake module locals or an `export =` body for globals. `Ast.moduleAugmentations` identifies
+augmentation **name nodes**, not module declarations: select the identifier `global`, then read
+its parent module and body. The module's keyword is `ModuleKeyword`, not `GlobalKeyword`.
+
+**An export alias has its own namespace.** `getAliasedSymbol` returns the target's parent.
+Keep the harvested occurrence's `DeclaringNamespace` separately: `Pool.Depth = Pool.Inner.Deep`
+declares `Depth` in `Pool` without changing the `Deep` symbol's identity or defining namespace.
+
+**A symbol id alone does not identify a symbol.** At TypeScript 7.1 a symbol is a reference. A
+file-owned one, which a declaration's symbol, a module's and its exports are, carries its source
+file and an id unique within that file. A snapshot-owned one, a transient or merged symbol, carries
+a project and an id unique within the snapshot, offset by 2^48. Key by `SymbolKey` (`SymbolId`,
+owning file node id and `int64` id), and send a symbol back as its `SymbolResponse.Reference`; a
+compact reference (`TypeResponse.Symbol`, `SymbolResponse.Parent`) names the file by node id only and
+cannot be sent. A file-owned symbol names no project, so `Session.ForSymbol` leaves the session's.
 
 **`getTypeAtLocation` is wrong for class heritage.** It adds an internal trailing `this`
 argument, so `Model<string>` reads as two type arguments. Read heritage nodes and ask
@@ -22,7 +55,7 @@ constraint. For a conditional over a bounded, naked type parameter it is the con
 instantiated at the bound. Otherwise it is the union of both branches, which §4.11 rejects as a
 mapping, and over a union bound it is the union of each member's branch.
 
-**`TypeFlags.Any` is four intrinsic names.** `any` covers a written or omitted annotation, a shorthand ambient module and diagnosed circular return, accessor or import-alias annotations, so `TR008` is not proof an author wrote `any`; a circular type alias is the error type. `error` and `unresolved` stand for a reference the program leaves unresolved; `intrinsic` is the body of a compiler-implemented alias. Read `IntrinsicName`, never the flag alone. A union, an intersection or an optional position with an error constituent reduces to the nameless singleton error type, so its written name is lost; a qualified name survives only as the unresolved symbol's parent chain. Intrinsic type ids are singletons, and `shape-aliases` abbreviates every later alias of one to the first claimant: `NoInfer`, `Lowercase`, `Capitalize` and `Uncapitalize` read `= Uppercase` and carry its `TR064`.
+**`TypeFlags.Any` is four intrinsic names.** `any` covers a written or omitted annotation, a shorthand ambient module and diagnosed circular return, accessor or import-alias annotations, so `TR008` is not proof an author wrote `any`; a circular type alias is the error type. `error` and `unresolved` stand for a reference the program leaves unresolved; `intrinsic` is the body of a compiler-implemented alias. Read `IntrinsicName`, never the flag alone. A union, an intersection or an optional position with an error constituent reduces to the nameless singleton error type, so its written name is lost; a qualified name survives only as the unresolved symbol's parent chain. Intrinsic type ids are singletons. Compiler-authenticated `NoInfer` declarations specialize by complete symbol identity before the shared intrinsic fallback, preserving their own binder and the configured support-alias policy. Other intrinsic declarations retain `TR064`. Compiler `NoInfer<T>` reference substitution types still use the existing fallback; the indexed-access alias reference policy is a separate mapping.
 
 **`keyof` over a declared type reaches Shape as that type's key literals.** `K extends keyof
 TagMap` arrives with its constraint resolved to `"div" | "canvas"`; only a `keyof` over a type
@@ -53,9 +86,74 @@ Following an application's members again recreates substituted method binders in
 follow its arguments instead, and keep explicit structural promotion separate. A conditional
 alias can reduce to an anonymous type literal carrying `Instantiated`; that flag alone does
 not invalidate a nested contract reached from a canonical owner. Mapped computations remain
-outside that traversal. Successful derivation removes both pending and `NotFollowed` entries.
+outside that traversal. Successful derivation removes both pending and `NotFollowed` entries. The
+contract walk must stay linear in the table: memoise per type, never per path. Path-keyed
+memoisation enumerates every path through an interface diamond, and declaration ancestry alone
+admits one instantiation per permutation of mutually wrapping generic aliases. Moving a batch of
+checker queries changes the order checker type ids are assigned in; Shape naming must not read
+that order (see "A name, owner or placement must never depend on checker type-id order" under
+Generator passes). Regenerate Core.TS after reordering session queries, and diff its symbol
+names, not only its tiers.
+
+**Core.TS `WebAssembly.*Constructor` ownership varies between runs.** With an unchanged
+generator (abbdae07), `generate --only compiler-lib` places the ten constructor interfaces in
+`Dom.WebAssembly` on some runs and in `Dom.GlobalThis.WebAssembly` on others. Regenerate more
+than once before attributing that hunk to a change.
+
+**An empty module export list can hide an `export =` variable root.**
+`getExportsOfModule` lists namespace exports, while the direct export table retains the
+`export=` assignment. Follow that assignment to its declaring value and bind the root through
+the existing default-import policy. Symbol parents are absent for variable roots, so determine
+locality from every typed declaration's ancestors. A `declare global` block keeps a value
+global even inside an ambient module; one genuine global declaration preserves the global
+binding. A scope query at file position zero can select the first ambient module's inner
+scope and expose its local variable as a global candidate. The source-file node itself has
+the global scope for a script. The ambient-root lab begins with its module to retain this trap.
 
 ## Declaration catalogs
+
+**A complete constraint can disappear from naming without a resource omission.**
+An object alias such as `Env` has a TypeLiteral symbol; a consumer that reaches it only through
+a generic bound must retain the alias name. Catalog Resolve recovers the alias name only for
+actual Constraint/Default targets whose source TypeLiteral and TypeAlias declarations are
+authenticated and whose checker-declared alias type equals the bound type. Anonymous naming
+follows declaration and signature type parameters, then their source-named bounds/defaults.
+Inline structural bounds retain their existing constraint policy. A transformed application
+that keeps an alias symbol cannot claim the original alias name through this recovery.
+The bound-alias naming lab checks owner/consumer API agreement and imported nominal rejection.
+
+**Anonymous intersections can inherit different reachable parents in different runs.**
+`BotEnterprise.botManagement: BotBase & { ja3Hash: string }` is the same checker contract
+when reached through `Combined = BotEnterprise & Other`, but a producer reaches Combined
+while a consumer can reach only Enterprise. Parent-role minimum keys then disagree and change
+Enterprise's canonical API even though the child's emitted API agrees. Declaration-less,
+alias-less intersections with an actual compiler TypeLiteral constituent use ordered,
+source-authenticated constituent contracts and their declaration handles before parent roles.
+Every constituent must authenticate directly; incomplete or recursive evidence retains the
+existing fallback. Applied arguments and independent written literal handles remain distinct.
+The source-ownership snapshot still precedes parent-role inference. The
+`census-owner-intersection-identity-lab` covers differing reachability, generic applications,
+independent source contracts, consumer compilation and stale/API rejection. Identity contract 8
+requires regenerating earlier catalogues; this change alone alters neither API nor inference policy.
+
+**An anonymous union of nominal arms has a source contract independent of reachable parents.**
+The `tlsClientAuth: Auth | Placeholder` member can acquire Combined's parent role in a producer
+and Shield's in a consumer while both emit the same tagged union. Alias-less, declaration-less
+unions of actual source-declared interface/class arms use sorted direct arm identity contracts
+and normalized arm declaration handles. Two written anonymous unions over the same applied
+nominal arms intentionally share this contract; the compiler exposes no independent union
+occurrence handle. Distinct nominal source declarations, named aliases and concrete arguments
+retain their identities. Every arm must authenticate directly before parent-role inference;
+primitive, missing, cyclic or declaration-less arm evidence retains the existing fallback.
+API and source checks still reject incompatible representations or stale contracts. The
+`census-owner-union-identity-lab` covers reachability, order, repeated occurrences, independent
+source arms, generic applications, aliases and conservative fallback. This correction belongs
+to identity contract 8 alongside source-anchored intersections.
+When `namedUnionByMembers` elects a producer-only alias for such a union, publish its
+`source-union` key as an equivalent alongside the existing `union` keys. Otherwise a consumer
+which reaches only the anonymous member cannot reuse that alias, and its wrapper API diverges.
+The alias-election owner lab covers both identities, direct and transitive consumers, and a
+changed union case that must still fail the API check.
 
 **TypeScript library ownership is logical, not a platform distribution.** Installed
 `lib/lib.*.d.ts` files from `typescript` and recognized `@typescript/typescript-<rid>`
@@ -97,6 +195,11 @@ decoded UTF-8 bytes with an inclusive 128 MiB limit for JSON and Brotli. JsonDoc
 reads to logical EOF; compatibility, declarations and variants use that shared document.
 Compression belongs to Pipeline.run's disk boundary. Generation retains a declarations.json
 text entry, output reports the actual filename, and switching formats retains old output.
+
+**Namespace alias ownership requires identity contract 9.** Namespace export occurrences use
+their actual alias declaration handles, rather than the enclosing global namespace identity.
+Earlier identity-8 producers must be rejected even when they carry API contract 14. Canonical
+faithful-alias normalization remains in the unpublished API-14 batch; regenerate every producer.
 
 **Schema 2 compatibility is an explicit maintenance contract.** Assess every change to
 catalogue identity, source closure or ownership (`identityVersion`), canonical API/constraint
@@ -192,13 +295,42 @@ ambient modules are harvested alphabetically. "The declaring module wins" is uni
 `Shape/Classes.fs` uses the class's own binding specifier instead, falling back to the first
 harvested occurrence, and reports `SC010` per dropped member.
 
+**A name, owner or placement must never depend on checker type-id order or scope enumeration
+order.** Type ids follow the order of session queries, and `getSymbolsInScope` enumerates the
+checker's symbol tables in an order that varies between runs, so `Intl.Locale` and
+`globalThis.Intl.Locale` reach `harvest-order` in either order with an equal source position and
+export name. A first-wins choice over `Map.toList` of a type-id map, or over harvest order with
+an unbroken tie, moved sixteen `Intl.*Constructor` and `WebAssembly.*Constructor` declarations
+under `GlobalThis` between identical runs. `orderExports` therefore breaks ties by the
+declaring namespace's own path first, then ordinal path, leaving occurrences from different
+origins in harvest-pass order (an origin-string key moves solid-js's `For.Props` under `Web`); and `name-constructor-objects`
+descends its roots in source order, then by name. Order every root list that decides a claim by
+`DeclOrders` and name; prove a change deterministic by regenerating compiler-lib three times and
+comparing the `symbols.jsonl` hashes.
+
+**A frontier generation must never read what the same generation writes.** `resolve-type-table`
+derives a generation under `Async.Parallel`, and derivation both writes and reads the walk's
+registers: a union registers its operands as structural, a signature registers its type
+parameters, and an instantiation decides identity-versus-full derivation by reading both. With
+live `ConcurrentDictionary` reads, an operand derived in the same generation as its union came
+out identity or full depending on which answer arrived first, and solid-js's first
+`FrontierTooWide` count drifted between identical runs (280392, 281116, 281110, 280874). Each
+`Register` in `Resolve.fs` therefore answers from its state at the last `Commit`, and the walk
+commits only between generations (and after `boundedFrontier`, which writes but does not derive).
+A new register, or a new read of one, goes through `Register`; `XANTHAM_RESOLVE_COUNTERS=1`
+prints `staged-reads`, the reads per generation that a live read would have answered by timing.
+
 **`__@<name>@<id>` does not identify a well-known symbol.** A package's own `declare const
 iterator: unique symbol` escapes to the same `__@iterator@<id>` as `[Symbol.iterator]`. Resolve
 reads the declaration's computed name `Symbol.<name>` into `ResolvedMember.WellKnownSymbol`; a
 pass that decides on the escaped name alone emits the impostor as `[Symbol.iterator]`. The
 spelling `Symbol.<name>` is not proof either: a package's `declare global` augmentation of
 `SymbolConstructor` (`Symbol.observable`) names a key that is `undefined` at runtime, so Resolve
-also requires a `lib.*.d.ts` declaration of the property.
+also requires a `lib.*.d.ts` declaration of the property. The program's own lib files are not
+enough either: `@types/node` augments `Symbol.asyncDispose` because its `lib` omits
+`esnext.disposable`, so a key declared only by a package falls back to a second program over the
+compiler's `esnext` lib. That program must have a root file; with none, `resolveName` finds no
+global `Symbol`.
 
 **F# admits one `seq` instantiation per interface.** `NodeListOf<'TNode>` inheriting
 `NodeList`'s `seq<Node>` beside its own `seq<'TNode>` is FS3360 ("may unify"). Only
@@ -220,6 +352,13 @@ does: a candidate drops only where a harvested export stays represented without 
 (`Shape/Spec.fs`) is read with opposite signs by `declaresInterface` (`Shape/Interfaces.fs`,
 admits) and `shapeCallbacks` (`Shape/Callbacks.fs`, skips). Changing either sign alone mints a
 duplicate or an unnamed type.
+
+**A declared callable application must precede callback expansion.** `objectRef` uses the
+existing named instantiation and its checked arguments before `delegateRef`. Re-expanding
+`SetStoreFunction<T>` inside `StoreReturn<T>` discarded its overload binders and emitted an
+eight-argument `Action<obj, ...>` while direct uses referred to the existing interface. The
+generic-callable-reference lab compiles and runs transfers through inputs, returns and tuples,
+including a catalogue consumer; unnamed callbacks retain the ordinary fallback.
 
 **A return position widens on a concrete application, not on a type parameter.** Applying a
 declaration's own free parameter keeps the name; `Coalesce<string>` renders `obj -> obj` under
@@ -269,6 +408,35 @@ kind in `FindingCatalogue` is enough to compile and enough for the pass to run; 
 only throws at manifest render, from `Finding.get_Key`, which reads as a render bug rather than a
 missing table row.
 
+- **Inline object literals never share a type id.** Two arms spelling `owner: { name: string }`
+  identically carry two ids, so comparing member type ids calls them different. Compare with
+  `Spec.sameShape` wherever "the same type" means "reads as one F# type".
+- **A union case's XML doc documents all of its fields or none.** FS3390 checks `<param name>`
+  on union cases against field names and requires every field once one is documented; an empty
+  `<param>` satisfies it. A static member named like a case of its union is FS0023, which is why
+  case helpers are `Create<Case>`.
+- **A submodule spelled like a union case is unreachable from expressions.** With
+  `type Recovery = | Aborted …` and `module Recovery = module Aborted = type Type`,
+  `Recovery.Aborted.Type.User` resolves `Recovery.Aborted` to the case: FS0039, and FS1127 in a
+  pattern. Type annotations still resolve, so a compile gate over declarations alone misses it.
+  Case declarations nest under `Recovery.Cases.Aborted` instead.
+- **Two `TypeScriptTaggedUnion` cases sharing a `CompiledName` need a `CaseTest`.** Without one,
+  Fable compiles them with no warning and the later case owns the tag's `switch` slot: the first
+  is unreachable, and a value of its arm matches the second (spike S1(e),
+  `docs/.ai/plans/2026-10-15-pre158-findings.md`). `Spec.separateArms` gives every case of a
+  shared tag value its test, or `detect-tagged-unions` declines the DU (`DT003`). Each test must
+  be exclusive within its group, because a `match` checks cases in the order its clauses list
+  them. The attribute exists only in the Fable fork's `Fable.Core` (`tools/fable-fork/fork.json`).
+- **An arm interface drops only where its case carries the arm whole** (`Spec.caseCarriesArmWhole`):
+  a symbol-keyed member or an index signature is no case field, so such an arm keeps its
+  interface as the typed path to it. Such an arm is now an `[<InlineInterface>]` case, which
+  reads the interface, so it stays declared through that read.
+- **Only Fable checks an `[<InlineInterface>]` case.** The case must have one field whose type is
+  an interface; .NET compiles any field, so the compile gate passes a case Fable rejects ("the
+  case must have exactly one field, whose type is an interface"). A golden carrying a new inlined
+  shape needs the run gate (`build.fsx -- test --run-gate`), or a Fable compile of it, as
+  evidence.
+
 ## Fable runtime type tests
 
 Measured against Fable 5.13.0 on 2026-09-22 while designing erased-DU mapping for mixed
@@ -297,6 +465,15 @@ gets no coercion: a bare lambda into a `System.Func<…>` arm is FS0002, and a c
 same arm carried by a method parameter takes a bare lambda and emits `(a, b) => …`.
 
 ## Fable consumption of bindings
+
+**Imported class statics need native accessor metadata.** With Fickl 0.6.2, a type-level
+`Import` bypasses an ordinary F# static member body at the call site. A property-level
+`CompiledName` also leaves its allocated getter/setter spelling in the emitted JavaScript.
+For an exact string key, attach the constructor `Import` and bracket `Emit` to each native
+getter/setter, and to the native method. The backtick member lab proves reads, writes and
+constructor receivers through both source bindings and a raw `Reference`/`HintPath` DLL.
+An ambient entrypoint's abstract method needs separate override proof; retain `MB007` for
+an impossible key until that contract is supported.
 
 **`Xantham.Fable.Core.TS` reaches Fable as a DLL, never as source.** Fable merges a NuGet
 package's sources only when the package ships `fable/*.fsproj`, and this package ships `lib/`
@@ -375,12 +552,6 @@ Carried from lanes that closed without finishing these.
 - **Union arm overloads: implemented 2026-09-22, shipped disabled** behind
   `unionArmOverloads.enabled` in `xantham.json`: `plans/2026-09-22-union-arm-overloads.md`.
 
-- **`objectRef` ordering.** `Shape/Spec.fs`'s pure-callback branch sits ahead of its
-  named-instantiation lookup, so `type StoreReturn<'T> = 'T * Action<obj, …>` while
-  `createStore<'T>` returns `SetStoreFunction<'T>` from the same declaration. The candidate fix
-  orders the named-instantiation lookup first. It reaches every reference to a pure callable in
-  the corpus (`TR031` stood at 36), so it needs its own lab and a before/after `findings`
-  measurement per `.claude/rules/generator-fixtures.md`.
 - **`Exports` has no stable declaration parent role.** 22 of 38 catalog cases errored on this
   across the declaration-catalog, callable-signature, source-closure and anonymous-literal-union
   lists. Four cases stay disabled behind a TODO.
@@ -445,6 +616,23 @@ so both test packages use that override. Packing Core.TS alone can appear green 
 published stable support version satisfies its prerelease range, then fail with NU1102 after
 the next Core.TS bump. Downloaded-package verification still restores real published dependencies.
 
+## Fickl must be last in the tool manifest
+
+After a Fable/Fickl run, restore the solution before a quick .NET build: compilation can leave
+the multi-targeted support project's assets restored for netstandard2.1 only. Run
+`dotnet restore Xantham.slnx -v q` to restore every solution target.
+
+With SDK 10.0.402, a cold Linux `dotnet tool restore` fails if another tool follows Fickl:
+fsdocs-tool and Fantomas are reported as containing only the `fickl` command. The SDK's
+`ToolPackageDownloaderBase` reuses its local assets directory without clearing
+`project.assets.ridpackage.json`; `ToolPackageInstance` prefers that leftover file for the
+next package. See the [SDK implementation at 10.0.402](https://github.com/dotnet/sdk/blob/v10.0.402/src/Cli/dotnet/ToolPackage/ToolPackageDownloaderBase.cs).
+
+Keep Fickl last in `.config/dotnet-tools.json` until the SDK fixes this. `--disable-parallel`
+does not fix a cold restore; warm-cache retries can conceal the problem. `tools/verify-build.mjs`
+guards the ordering. The workaround was verified with separate empty `DOTNET_CLI_HOME` and
+`NUGET_PACKAGES` directories on Linux, using the CI SDK version.
+
 ## Release markers after a squashed release
 
 PR #117 was squashed into master at `500a04a`, which is the repository commit recorded by all
@@ -455,3 +643,204 @@ on either pre-join history counts the other copy of already released feature com
 The release markers therefore use `78de2edf` as the verified joined-history baseline. Preview
 after this correction advances only Core.TS and its Node consumer to 0.2.1 for catalogue
 packaging. Preserve release merge commits to avoid recreating this duplicated history.
+
+## Merged callable members retain declaration provenance (2026-10-25)
+
+`Window & typeof globalThis` gives structuredClone a transient Property symbol whose Method and
+Function flags are both absent. Its declarations retain MethodSignature and FunctionDeclaration;
+its single generic signature retains one binder shared by input and return. Reading flags alone
+sends that method through delegateRef and widens both positions with TR013. Resolve authenticates
+the retained declarations, including ExportSpecifier aliases resolved to Function symbols.
+A PropertySignature or PropertyDeclaration keeps the property form; required pure-callable
+guards still apply in Spec and customization Semantics. The namespace intersection lab reproduces
+the same compiler shape without importing the entire global scope.
+
+## Source-identical overloads precede emitted signature collisions (2026-10-25)
+
+Two source overloads with identical compiler parameter types and optionality select the first
+return in TypeScript. For example `readlinkSync(path, options?: EncodingOption): string`
+precedes an overload with the same inputs returning `string | Buffer`; unioning those returns
+loses precision. Compare source identities before shaping, rather than only the compiled F#
+parameter key. A receiver is separate from `getParametersOfSignature`: the compiler's
+`SignatureResponse.ThisParameter` supplies `ResolvedSignature.HasThisParameter`. Generic,
+rest and explicit-receiver signatures retain their existing collision policy. Assign expanded
+signature ordinals before filtering, so a later retained overload keeps its authenticated
+source ordinal rather than its new position.
+
+## Declared generic alias operands survive frontier pressure (2026-10-25)
+
+Catalogue discovery can add a non-exported generic alias's declared form after the initial
+Resolve seeds. That form is a source contract even when its response carries alias arguments.
+Protect its written operand closure only after authenticating actual generic TypeAliasDeclaration
+nodes and exact equality with getDeclaredTypeOfSymbol. All-type-parameter arguments alone are
+insufficient: a method's application has its own binders and is not the alias declaration.
+Cache authentication per type and declared-type lookup per alias symbol. Applications retain
+the existing ancestry/depth limits; unavailable source or compiler evidence grants no exemption.
+
+The real Hono JSONRespondReturn canonical intersection lost its TypedResponse operand at width
+32768 while complete method applications survived. Selecting a complete application as the
+canonical form would change binder provenance. Keep the canonical source form instead; do not
+raise the global width budget or relax catalogue API/source authentication. Simple reductions
+with array or conditional arguments did not reproduce the cutoff: retained real-source RED/GREEN
+evidence is required alongside the small width-one positive and bounded-expansion regressions.
+
+## Selected conditional branches are protected contract edges (2026-10-26)
+
+When Resolve has chosen Conditional.Branch for a protected source signature, the source-contract
+walk must retain that target and its selected closure. HonoRequest.param's outer sole-inhabited
+conditional was present in both producer and consumer, but the consumer's selected inner
+conditional was width-deferred. That made Spec emit TR045/obj before overload deduplication,
+while the producer followed the same branch policy to P2. Follow only the stored selected edge
+inside the existing expand guard, with the same ancestry/depth/memoization; do not crawl both
+raw branches or introduce a new conditional mapping policy to repair an incomplete closure.
+
+## Generic exclusive folds need canonical applications (2026-10-26)
+
+WorkflowBatchCreateOptions<P> in Workers is an exclusive object union. Folding its declaration
+while leaving applications as unions of anonymous arm references can emit references to arm
+declarations removed by the fold. Preserve the generic alias application and shape its folded
+properties/Create parameters in the alias's binder scope. An arm remains its own narrow
+contract when referenced independently; replacing that arm with the complete fold widens it.
+Do not authenticate an application by member spelling alone: compiler/source identity and
+complete one-to-one arm correspondence are required.
+
+## Source alias fallback uses the occurrence namespace (2026-10-26)
+
+A mapped result may intentionally have no reusable type identity. Its source alias still
+authenticates through the harvested export's declaration handles and order. Qualify that export
+with exportNamespacePath as well as ExportLayout.declPath, matching Shape.Aliases. Omitting
+the namespace loses V3.Util.Omit and eventually fails on a nonexistent V3 parent role. Recover
+the real source occurrence; do not derive identity from a rendered name, mapped result or
+invented namespace parent. Independent same-named namespace aliases must stay distinct.
+
+## Shared composite operands are not merged declarations (2026-10-26)
+
+An anonymous Omit intersection in Zod and one in Workers share the mapped-type declaration
+inside lib.es5.d.ts. Their source-intersection contracts still differ by their other handles
+and complete constituent keys. Treating any partial handle overlap as an incomplete merged
+declaration incorrectly rejects them. Source-union A|B and A|C have the same issue. Preserve
+the full authenticated identities and require complete key equality for ownership reuse;
+apply nominal declaration-set drift checks to nominal roles. Nominal augmentation inside a
+composition must still reject through the declaration/API guards.
+
+## A legal alias name is not necessarily a legal union case (2026-10-26)
+
+Zod exports lowercase phantom aliases such as objectInputType and flatten. Reusing the alias
+spelling as a private DU case still triggers FS0053; quoting it does not establish uppercase
+case naming. Prefix every private phantom case with a fixed uppercase marker while preserving
+the complete spelling. Capitalizing alone loses the distinction between lower and Lower.
+Keep the public alias, type binders, private payload and Erase contract unchanged.
+
+## Transparent occurrences need defining surfaces and noncyclic ownership (2026-10-26)
+
+Core.TS Omit and GlobalThis.Omit are the same source alias represented by a phantom definition
+and a forwarding abbreviation. Normalize their declaration surfaces only with the same full
+authenticated identity, actual target declaration and exact ordered binder/constraint forwarding.
+Shared carrier or rendered spelling is not evidence. Compute original customization APIs using
+the original declaration/alias maps, not targets from the changed shape.
+
+Prefer the defining representation to its faithful wrappers within an identity group. A lexical
+winner that merely forwards to another group member can become a self-alias after redirects.
+Keep genuine harvested public namespace occurrences after deduplication, while internal helper
+arms remain governed by their existing declaration policy. Bounded consumer compilation catches
+both dropped public paths and alias cycles without stranding the build lane.
+
+**Incomplete function signatures still have source parent roles.** A template-keyed Record
+in an inline function parameter can prevent a complete structural callable identity. Actual
+exported FunctionDeclaration handles may seed parameter/return traversal in that case; the
+source-function root is never inserted into byType/byName or published as a callable contract.
+Require every handle to be an actual function declaration and preserve existing complete
+identities. Unanchored synthetic callables must still fail.
+
+**Equal literal unions do not establish source enum ownership.** A declared keyof typeof
+string alias can share a compiler TypeId with unrelated aliases and inline literals. Preserve
+its nominal owner only at a source-authenticated property annotation, with the resolved full
+merged symbol and exact declared type. Keep inline literals anonymous, keep faithful alias
+chains abbreviations, and assign actual alias origin/family only to the nominal source alias.
+A merged const helper may need a fresh F# type name; its original JS import key must survive.
+
+**Export reach must not reach a catalogue identity.** A type without declarations of its own
+(an unaliased union, `keyof typeof X`) borrows nothing from whichever export happens to name it
+in one program: a producer that exports it and a consumer that only reaches it through a member
+must compute the same key, or every structural type keying a member by it diverges
+(`OmitKeys<ZodInvalidTypeIssue, "path">` through `ZodParsedType`). Inside other keys, literal
+unions are keyed by their values and unaliased unions by their anchored member contracts. A
+declaration row keyed by an export, or elected for a union by member set
+(`namedUnionByMembers`), records those value keys as `equivalents`; the row keeps its own
+identity for consumers that name it. Do not key a declared literal alias row by its values:
+Core.TS's `keyof` registries (`Intl.NumberFormatOptionsStyle`) lose their declaration identity.
+
+**An alias of an instantiation is a distinct checker type.** `type AnySchema = Schema` interns a
+new type id with the same target and arguments as `Schema`, and F# renders it as an abbreviation
+of that application. A nominal check that compares type ids, or declaration names, rejects a
+bound written as the target against a bound written as the alias; and since only a program that
+declares the alias renders it by name, the answer differs between producer and consumer. Compare
+target and type arguments (`satisfiesNominally`).
+
+**A type the shape tier reads for its structure must be registered `Structural`.** Resolve
+derives an instantiation as identity alone (no members) unless a seed, a union or intersection
+operand, or another explicit reader registers it. Whether some unrelated reader registered it
+depends on the program, so a pass that reads an instantiation's members without registering it
+works in one producer and fails in its consumer: the bound of an indexed-access operand was
+the case paid for (`I["def"]` with `I extends Internals<unknown>`).
+
+**A bare generic alias reference can come back without its arguments.** `T extends Tool` interns
+a copy of `Tool<any, any>` whose `getAliasTypeArgumentsOfType` is empty, and a later bare `Tool`
+may resolve to either copy depending on the program. Never key on the checker's alias arguments
+alone; `defaultAliasArguments` restores the defaults for a closed application. Do not verify by
+matching the alias body under the defaults: instantiation distributes intersections over
+unions, so `Tool<any, any, any>` has eight arms where its body has four.
+
+**A type parameter's own identity is its declaration.** Keyed outside a binding, `M` in
+`HttpTransport<M>` and `M` in `DefaultTransport<M>` are two keys, so anything reaching a
+parameter through an unbound path keys per owner. Every key computed for a declaration that
+Shape emits generically must bind that declaration's parameters positionally first
+(`boundParameters`), including hoisted anonymous intersections.
+
+**A consumer sees a reused declaration only to its own follow frontier.** The producer seeds the
+declaration; the consumer may reach it twenty generations deep, past `FollowDepth`, and render
+it with unbound parameters or `obj` members. Comparing that rendering against the producer row
+reports a mismatch that is only the frontier. `partial` in the reuse check skips the comparison
+for declarations reaching `NotFollowed`; do not tighten it back to a hard failure.
+
+**The checker shares one empty object type and hangs aliases on it.** `type X = Cond<..., {}>`
+resolving to `{}` attaches `X` to the type every bare `{}` in the program uses. Naming or keying
+`{}` by that alias is program-dependent; `isSharedEmptyObject` keeps it intrinsic.
+
+
+**An alias application is keyed by arguments the walk may never reach.** `deriveFacts` follows
+only the type-parameter alias arguments of a union or intersection. A consumer reaching
+`InferEvent<CallStartEvent>` through its flattened arms has no facts for `CallStartEvent`, the
+application loses its key, and the declaration falls back to a parent-role key the producer
+never wrote. With a catalogue in use, the type-table walk also follows every alias argument.
+
+**A method's type can also be a property's type.** `Pick<Container, "exec">` reads
+`Container.exec`'s function type as a property. `signatureShaped` skips naming delegates for
+method types, so once `Container` itself is in the table the picked property reads as `Func`.
+A method type that any member reads as a property keeps its delegate.
+
+**A shipped group's file compiles before the entry module.** Placement by origin and by
+hoisting root can still leave a group declaration reading an entry one: an entry alias over a
+dependency's anonymous shape hoists the shape's parts under the entry name; an entry value typed
+by the dependency's generic hoists entry-typed shapes under a dependency root; and a hoisted
+name's dotted prefix can be an entry subpath module (`Artifacts`) that a group's global type
+also spells. `groupModulesForScope` settles placement so no group reads the entry module; the
+compile gate is the check, and only `recursiveGroups` (one `namespace rec`) exempts it.
+
+**TypeScript bounds are covariant; F# bounds are invariant.** `UI_MESSAGE extends
+UIMessage<M, never>` satisfies a slot bounded by bare `UIMessage` in TypeScript, and never in F#:
+`UIMessage<'M, unit, ...>` is not `UIMessage<obj, UIDataTypes, ...>`. The type-id checks in
+`appliedRefTo` judge such a slot met. `repair-constraints` reads the rendered heads and
+applications instead and drops the slot's bound (`TP012`); it never lowers the variable. A
+bound naming a variable its declaration does not bind is dropped too (`TP013`), never written
+with that variable as `obj`.
+
+**A type and a module of one name compile the module as `XModule`.** `type Workspace` beside
+the `module Workspace` its nested names render under makes F# name the module `WorkspaceModule`,
+and an exported `WorkspaceModule` is then FS0037. `resolve-module-suffixes` suffixes the
+declaration (`WorkspaceModule2`, `NE001`); `CompiledName` on the module does not help.
+
+**A shipped group's module can be the producer's module.** A consumer's group for a catalogued
+dependency derives the same module name the dependency's own producer used
+(`FSharp.CloudEdge.Runtime.Agents`). An alias written there for a reused export names itself
+(FS0953); reuse omits it, since the producer's declaration already carries the name.

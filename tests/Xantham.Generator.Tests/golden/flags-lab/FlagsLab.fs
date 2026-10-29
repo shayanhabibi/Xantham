@@ -48,7 +48,7 @@ type ModeEvent =
 /// than collapsing to a bare <c>string</c> and losing its arity.
 /// </summary>
 [<Erase>]
-type Tagged<'T> = private Tagged__ of string
+type Tagged<'T> = private Phantom_Tagged__ of string
 
 [<Interface>]
 type Ledger =
@@ -73,9 +73,9 @@ type Registry =
 
 [<Interface>]
 type Keyed =
-    abstract id: obj with get, set
+    abstract id: Fable.Core.TS.Es.Symbol with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (id: obj) : Keyed = jsNative
+    static member Create (id: Fable.Core.TS.Es.Symbol) : Keyed = jsNative
 
 [<Interface>]
 type Plain =
@@ -114,6 +114,6 @@ type Exports =
     [<Import("freeze", "flags-lab")>]
     static member freeze (value: obj) : obj = jsNative
     [<Import("brandTag", "flags-lab")>]
-    static member brandTag: obj = jsNative
+    static member brandTag: Fable.Core.TS.Es.Symbol = jsNative
     [<Import("describe", "flags-lab")>]
-    static member describe (key: obj) : string = jsNative
+    static member describe (key: Fable.Core.TS.Es.Symbol) : string = jsNative

@@ -168,7 +168,7 @@ type FrozenOptions =
 /// A generic mapped type at an unresolved operand - cannot be expanded.
 /// </summary>
 [<Erase>]
-type DeepPartial<'T> = private DeepPartial__ of obj
+type DeepPartial<'T> = private Phantom_DeepPartial__ of obj
 
 /// <summary>
 /// A mapped type that changes the value type rather than the modifiers.
@@ -184,7 +184,7 @@ type ConcreteBranch = string
 /// A conditional in a generic signature - unresolved.
 /// </summary>
 [<Erase>]
-type Unwrap<'T> = private Unwrap__ of obj
+type Unwrap<'T> = private Phantom_Unwrap__ of obj
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type EventName =
@@ -195,7 +195,7 @@ type EventName =
 /// A template literal in a generic signature - unresolved.
 /// </summary>
 [<Erase>]
-type Prefixed<'T> = private Prefixed__ of string
+type Prefixed<'T> = private Phantom_Prefixed__ of string
 
 /// <summary>
 /// Uppercase over a concrete operand: an intrinsic string mapping.

@@ -11,7 +11,7 @@ order: 3
 In your Fable project directory:
 
 ```bash frame=terminal
-dotnet add package Fable.Core --version 5.2.0
+dotnet add package Fable.Core --version 5.5.0
 dotnet add package Xantham.Fable.Core
 dotnet add package Xantham.Fable.Core.TS
 ```
@@ -21,6 +21,13 @@ packages, add `--prerelease` to the corresponding install commands.
 
 Bindings target **Fable 5.x**. Use **net8.0 or later** for the F# project:
 generated object builders can use static interface members with bodies.
+
+Compile bindings that carry `[<Fickl.Core.InlineInterface>]`,
+`[<Fickl.Core.CallableInterface>]` or erased union case predicates with **Fickl 0.6.0**.
+Xantham's support package depends on Fickl.Core 0.6.0, which supplies those attributes.
+This compiler also supports `CaseTest` predicates on erased union cases, preserving the
+original callable or constructor value during construction and matching.
+Tagged-case `CaseTest` comes from Fable.Core 5.5.0; erased cases use `Fickl.Core.CaseTest`.
 
 ## Include files in order
 
@@ -92,12 +99,61 @@ A binding is rooted in a generated F# module.
   methods: `MyPackage.Exports.utils.clamp(5., 0., 1.)`. TypeScript does not allow
   assigning to them, so the binding has no setter; reassigning one needs dynamic access
   (`?` or `!!`).
+- **Intersections over a type parameter**, such as `P & { children?: JSX.Element }`, read as
+  `JS.Intersect<'P, ParentProps.Members>`. Read either side through `props.Left` (the `'P`
+  side) or `props.Right` (the added members); both compile to the value itself. Build one
+  with `Intersect.unsafeCast props`, an unchecked cast, or with
+  `Intersect.assign props (ParentProps.Members.Create(...))`, which copies the members onto
+  `props` in place (`Object.assign`) and returns the same object.
 - **A type parameter used only in a return**, such as `querySelectorAll<'E>`, is inferred
   from how the result is used inside a function. A module-level binding states it:
   `let items: NodeListOf<HTMLElement> = document.querySelectorAll "li"`.
 
 The same type exported through several paths has a shared canonical location.
 Use the emitted signature to find it.
+
+## Use generic callable values
+
+A callable with one generic call signature keeps that signature's parameters on `Invoke`.
+The same value can be called at different types without allocating another callback:
+
+```fsharp
+let identity = MyPackage.Exports.identity
+let number: int = identity.Invoke 42
+let text: string = identity.Invoke "hello"
+```
+
+For a generated `Identity` contract whose signature is `<T>(value: T): T`, construct a
+callback with an object expression:
+
+```fsharp
+let identity =
+    { new MyPackage.Identity with
+        member _.Invoke<'T>(value: 'T): 'T = value }
+```
+
+Fickl compiles an interface marked `CallableInterface` to a native JavaScript function.
+Passing it through a binding preserves its identity. Parameters belonging to the enclosing
+interface stay on that interface; parameters belonging to the call stay on `Invoke`.
+Review findings for constraints or overload combinations the binding cannot preserve.
+
+## Match callable alternatives
+
+When TypeScript gives each alternative a reliable exclusive property, a union containing
+functions or constructors becomes an erased DU with typed cases. Pass an existing arm to a
+case constructor; the same JavaScript value comes back when you match it:
+
+```fsharp
+let wrapped = Calls.LeftCall existingLeft
+match wrapped with
+| Calls.LeftCall left -> left.Invoke 3.
+| Calls.RightCall right -> right.Invoke 3.
+```
+
+Each arm retains its own members. The union also offers `Invoke` when all arms share that call
+signature. Constructor arms keep `Create` on their extracted payload. Wrapping adds no tag and
+does not copy the function or object. Where the source has no reliable discriminator, the
+binding retains the ordinary erased-union fallback.
 
 ## Build and run
 

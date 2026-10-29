@@ -304,7 +304,7 @@ let start (config: GeneratorConfig) (packageDir: string) : Async<TscMailbox * Co
             let! _ = AsyncApi.initialize mailbox
 
             let compilerOptions =
-                { CompilerOptions.Default with
+                { RawCompilerOptions.Default with
                     Lib = config.Lib |> Option.map List.toArray |> ValueOption.ofOption
                     Types = config.Types |> Option.map List.toArray |> ValueOption.ofOption
                 }
@@ -314,15 +314,18 @@ let start (config: GeneratorConfig) (packageDir: string) : Async<TscMailbox * Co
                 |> List.map (fun p -> DocumentIdentifier.FileName(p.File / uom<declFile>))
                 |> List.toArray
 
-            let! program =
-                mailbox.createProgram (
-                    { CreateProgramOptions.Default with
-                        CompilerOptions = compilerOptions
-                    },
-                    rootFiles = rootFiles
+            let! snapshot =
+                mailbox.createSnapshot (
+                    createPrograms =
+                        [|
+                            { CreateSnapshotProgramParams.Default with
+                                RootFiles = ValueSome rootFiles
+                                CompilerOptions = compilerOptions
+                            }
+                        |]
                 )
 
-            let session = mailbox.Session program
+            let session = mailbox.Session snapshot
 
             if
                 config.Types.IsSome

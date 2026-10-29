@@ -17,7 +17,8 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 3,
+      "total": 4,
+      "exact": 1,
       "ergonomic": 3
     },
     {

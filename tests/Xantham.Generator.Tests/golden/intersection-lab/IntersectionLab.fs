@@ -104,13 +104,10 @@ type Loose =
 /// <summary>
 /// A callable operand: the properties flatten and the call signature is the hybrid finding.
 /// </summary>
-[<Interface>]
 type Cancelable =
     abstract cancel: unit -> unit
     [<Emit("$0($1...)")>]
     abstract Invoke: unit -> unit
-    [<ParamObject; Emit("$0")>]
-    static member Create (cancel: (unit -> unit)) : Cancelable = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
@@ -121,10 +118,10 @@ type Exports =
     [<Import("label", "intersection-lab")>]
     static member label (target: Label.Target) : unit = jsNative
     /// <summary>
-    /// Not flattened: a type-parameter operand has no members to read, so it widens loudly.
+    /// Not flattened: a type-parameter operand has no members to read, so it is carried beside the literal.
     /// </summary>
     [<Import("merge", "intersection-lab")>]
-    static member merge<'T> (``base``: obj) : 'T = jsNative
+    static member merge<'T> (``base``: JS.Intersect<'T, Merge.Base>) : 'T = jsNative
 
 module Label =
     [<Interface>]
@@ -133,3 +130,10 @@ module Label =
         abstract id: float with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (name: string, id: float) : Target = jsNative
+
+module Merge =
+    [<Interface>]
+    type Base =
+        abstract id: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (id: float) : Base = jsNative

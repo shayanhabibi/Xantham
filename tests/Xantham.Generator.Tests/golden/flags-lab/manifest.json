@@ -4,16 +4,16 @@
   "module": "FlagsLab",
   "counts": {
     "exact": 4,
-    "ergonomic": 2,
-    "widened": 11,
+    "ergonomic": 4,
+    "widened": 9,
     "escape": 0
   },
   "passes": [
     {
       "pass": "SI - shape-interfaces",
       "total": 7,
-      "ergonomic": 1,
-      "widened": 6
+      "ergonomic": 2,
+      "widened": 5
     },
     {
       "pass": "SA - shape-aliases",
@@ -23,8 +23,9 @@
     },
     {
       "pass": "SE - shape-exports",
-      "total": 7,
-      "widened": 7
+      "total": 8,
+      "ergonomic": 2,
+      "widened": 6
     },
     {
       "pass": "SP - synthesize-paramobjects",

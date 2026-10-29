@@ -11,10 +11,11 @@
     <ItemGroup>
         <Compile Include="..\Xantham.Generator.Tests\golden\compiler-lib-ownership-lab\groups\TypeScript.Lib.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\compiler-lib-ownership-lab\CompilerLibOwnershipLab.fs" />
+        <Compile Include="NamespaceAliases.fs" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Fable.Core" Version="5.2.0" />
+        <PackageReference Include="Fable.Core" Version="5.6.0" />
         <ProjectReference Include="..\..\src\Xantham.Fable.Core.TS\Xantham.Fable.Core.TS.fsproj" />
         <ProjectReference Include="..\..\src\Xantham.Fable.Core\Xantham.Fable.Core.fsproj" />
     </ItemGroup>

@@ -1,4 +1,4 @@
-﻿module Xantham.Generator.Shape.ParamObjects
+module Xantham.Generator.Shape.ParamObjects
 
 open Xantham.Generator
 open Xantham.TypeScript.Wire
@@ -29,6 +29,13 @@ module private Reason =
         "the declaration is a class a consumer inherits, where `new` is the construction"
 
     [<Literal>]
+    let Callable = "the declaration is callable, which no object literal is"
+
+    [<Literal>]
+    let PrivateMembers =
+        "the declaration has a private member, so TypeScript admits only its class's instances"
+
+    [<Literal>]
     let SymbolKeyed =
         "a required well-known symbol member has no key a ParamObject literal can write"
 
@@ -52,31 +59,43 @@ let private isSymbolKeyed' =
     | FsSymbolKeyed _ -> true
     | _ -> false
 
-let private isLiteralKeyed' =
+let rec private isLiteralKeyed' =
     function
     | FsLiteralKeyed _ -> true
+    | FsStringKeyed(_, inner) -> isLiteralKeyed' inner
     | _ -> false
 
 /// The JavaScript key and value of a literal member.
-let private literalMember =
+let rec private literalMember =
     function
     | FsProperty p -> p.Literal |> Option.map (fun value -> p.Name, value)
+    | FsStringKeyed(key, inner) -> literalMember inner |> Option.map (fun (_, value) -> key, value)
     | _ -> None
 
 let private isLiteralMember (m: FsMember) = (literalMember m).IsSome
 
+let rec private stringMemberBody =
+    function
+    | FsStringKeyed(_, inner) -> stringMemberBody inner
+    | member_ -> member_
+
 /// Why the declaration carries no `Create`, or `None` where one is synthesized. `members` is the
 /// property/method set the `Create` binds - a hybrid's `Invoke` reads its own call signatures
 /// and carries no `Create` parameter of its own.
-let private refusal (decl: FsInterfaceDecl) (members: FsMember list) =
+let private refusal (callable: bool) (nominal: bool) (decl: FsInterfaceDecl) (members: FsMember list) =
     let methodNames =
         members
+        |> List.map stringMemberBody
         |> List.choose (function
             | FsMethod m -> Some m.Name
             | _ -> None)
 
     if decl.Entrypoint.IsSome then
         Some Reason.EntrypointClass
+    elif callable || decl.Members |> List.exists isInvoke then
+        Some Reason.Callable
+    elif nominal then
+        Some Reason.PrivateMembers
     elif
         decl.Members |> List.exists isSymbolKeyed'
         || decl.Inherits |> List.exists (sequenceElement >> Option.isSome)
@@ -99,8 +118,9 @@ let private refusal (decl: FsInterfaceDecl) (members: FsMember list) =
 
 /// The `Create` parameter a member binds. A method binds the callback that a function-valued
 /// property of the same signature carries (D5), and binds it as a required parameter.
-let private parameterFor (owner: string) (m: FsMember) : FsParam * Finding list =
+let rec private parameterFor (owner: string) (m: FsMember) : FsParam * Finding list =
     match m with
+    | FsStringKeyed(_, inner) -> parameterFor owner inner
     | FsProperty p ->
         {
             Name = p.Name
@@ -129,6 +149,14 @@ let private parameterFor (owner: string) (m: FsMember) : FsParam * Finding list 
     | FsSymbolKeyed _
     | FsLiteralKeyed _ -> failwith "unreachable: refused above, or excluded from the members Create binds"
 
+let private nullKeysWritten (owner: string) (keys: string list) =
+    if keys.IsEmpty then
+        []
+    else
+        [
+            Finding.make owner (SynthesizeParamObjects.NullKeysWrittenByCreate(String.concat ", " keys))
+        ]
+
 /// Construction ergonomics (D3, §4.4): an interface gains a `[<ParamObject; Emit("$0")>]`
 /// Create overload mirroring its members, required members first, so consumers never hand-build
 /// objects. A method member reads as a delegate-typed parameter (§3 of the Fable 5 workarounds
@@ -141,6 +169,28 @@ let synthesizeParamObjects: Pass<ShapeModel> =
             fun _ model ->
                 async {
                     let mutable findings = []
+
+                    // A declaration whose type is callable, whether or not its call signatures
+                    // reached `Invoke` (SI001 leaves none when a member is named `Invoke`).
+                    let callable =
+                        model.DeclNames
+                        |> Map.toList
+                        |> List.choose (fun (typeId, name) ->
+                            match Map.tryFind typeId model.Types with
+                            | Some facts when not facts.CallSignatures.IsEmpty -> Some name
+                            | _ -> None)
+                        |> Set.ofList
+
+                    // A declaration whose type has a private member admits only its class's
+                    // instances, never an object literal.
+                    let nominal =
+                        model.DeclNames
+                        |> Map.toList
+                        |> List.choose (fun (typeId, name) ->
+                            match Map.tryFind typeId model.Types with
+                            | Some facts when facts.PrivateMembers -> Some name
+                            | _ -> None)
+                        |> Set.ofList
 
                     let decls =
                         model.Decls
@@ -158,7 +208,13 @@ let synthesizeParamObjects: Pass<ShapeModel> =
                                 // binds only the properties and methods beside it.
                                 let members = decl.Members |> List.filter (isInvoke >> not)
 
-                                match refusal decl members with
+                                match
+                                    refusal
+                                        (Set.contains decl.Name callable)
+                                        (Set.contains decl.Name nominal)
+                                        decl
+                                        members
+                                with
                                 | Some reason ->
                                     findings <-
                                         findings
@@ -177,6 +233,7 @@ let synthesizeParamObjects: Pass<ShapeModel> =
 
                                     let carried =
                                         bound
+                                        |> List.map stringMemberBody
                                         |> List.collect (function
                                             | FsMethod method' ->
                                                 let symbol = $"{decl.Name}.{method'.Name}"
@@ -210,10 +267,18 @@ let synthesizeParamObjects: Pass<ShapeModel> =
                                                     ))
                                             ]
 
+                                    let nullKeys =
+                                        bound
+                                        |> List.map stringMemberBody
+                                        |> List.choose (function
+                                            | FsProperty p when p.NullKey -> Some p.Name
+                                            | _ -> None)
+
                                     findings <-
                                         findings
                                         @ [ Finding.make decl.Name SynthesizeParamObjects.ParamObjectSynthesized ]
                                         @ written
+                                        @ nullKeysWritten decl.Name nullKeys
                                         @ carried
                                         @ List.concat callbacks
 
@@ -224,9 +289,28 @@ let synthesizeParamObjects: Pass<ShapeModel> =
                                                     {
                                                         Parameters = required @ optional
                                                         Literals = literals
+                                                        NullKeys = nullKeys
+                                                        StringKeys =
+                                                            bound
+                                                            |> List.choose (function
+                                                                | FsStringKeyed(key, FsProperty property) ->
+                                                                    Some(property.Name, key)
+                                                                | FsStringKeyed(key, FsMethod method_) ->
+                                                                    Some(method_.Name, key)
+                                                                | _ -> None)
+                                                            |> Map.ofList
                                                     }
                                                 ]
                                         }
+                            // The exclusive-arm fold's overloads write their null keys too.
+                            | FsInterface decl as kept ->
+                                findings <-
+                                    findings
+                                    @ nullKeysWritten
+                                        decl.Name
+                                        (decl.CreateOverloads |> List.collect _.NullKeys |> List.distinct)
+
+                                kept
                             | decl -> decl)
 
                     let model = { model with Decls = decls }

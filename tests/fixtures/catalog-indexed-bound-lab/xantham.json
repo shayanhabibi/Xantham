@@ -1,0 +1,12 @@
+{
+  "module": "CatalogIndexedBoundLab",
+  "namespace": "Identity.Support",
+  "lib": [
+    "esnext"
+  ],
+  "types": [],
+  "groups": {
+    "indexed-bound-owner-lab": "ship"
+  },
+  "declarationCatalog": true
+}

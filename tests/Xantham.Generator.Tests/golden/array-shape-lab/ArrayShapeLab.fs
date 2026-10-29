@@ -23,12 +23,14 @@ type Tagged = float[]
 /// <summary>
 /// A tuple the checker cannot collapse before the mapped type applies.
 /// </summary>
-type TupleOf = obj
+[<Erase>]
+type TupleOf<'Length, 'Fill> = private Phantom_TupleOf__ of obj
 
 /// <summary>
 /// A mapped type over a deferred tuple operand: the symbol is <c>__type</c>.
 /// </summary>
-type ReadonlyTuple = obj[]
+[<Erase>]
+type ReadonlyTuple<'Element, 'Length> = private Phantom_ReadonlyTuple__ of 'Element[]
 
 /// <summary>
 /// Indexable by number and carrying <c>length</c>, with none of <c>Array</c>'s members.

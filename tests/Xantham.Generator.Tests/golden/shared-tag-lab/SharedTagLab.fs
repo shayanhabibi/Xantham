@@ -16,191 +16,48 @@ type Distinct =
     | [<CompiledName("square")>] Square of side: float
     | [<CompiledName("point")>] Point
 
-[<Interface>]
-type Distinct2 =
-    /// <remarks>TypeScript type: <c>"circle"</c></remarks>
-    abstract kind: string
-    abstract radius: float
-    [<ParamObject; Emit("({ kind: 'circle', ...$0 })")>]
-    static member Create (radius: float) : Distinct2 = jsNative
-
-module Distinct2 =
-    /// <remarks>TypeScript type: <c>"circle"</c></remarks>
-    [<Literal>]
-    let kind = "circle"
-
-[<Interface>]
-type Distinct3 =
-    /// <remarks>TypeScript type: <c>"square"</c></remarks>
-    abstract kind: string
-    abstract side: float
-    [<ParamObject; Emit("({ kind: 'square', ...$0 })")>]
-    static member Create (side: float) : Distinct3 = jsNative
-
-module Distinct3 =
-    /// <remarks>TypeScript type: <c>"square"</c></remarks>
-    [<Literal>]
-    let kind = "square"
-
-[<Interface>]
-type Distinct4 =
-    /// <remarks>TypeScript type: <c>"point"</c></remarks>
-    abstract kind: string
-    [<Emit("({ kind: 'point' })")>]
-    static member Create () : Distinct4 = jsNative
-
-module Distinct4 =
-    /// <remarks>TypeScript type: <c>"point"</c></remarks>
-    [<Literal>]
-    let kind = "point"
-
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("verb", CaseRules.None)>]
 type Signal =
+    /// <param name="channel">TypeScript type: <c>"bus"</c></param>
+    /// <param name="at"></param>
     | [<CompiledName("start")>] Start of channel: string * at: float
+    /// <param name="channel">TypeScript type: <c>"bus"</c></param>
+    /// <param name="reason"></param>
     | [<CompiledName("stop")>] Stop of channel: string * reason: string
-
-[<Interface>]
-type Signal2 =
-    /// <remarks>TypeScript type: <c>"bus"</c></remarks>
-    abstract channel: string
-    /// <remarks>TypeScript type: <c>"start"</c></remarks>
-    abstract verb: string
-    abstract at: float
-    [<ParamObject; Emit("({ channel: 'bus', verb: 'start', ...$0 })")>]
-    static member Create (at: float) : Signal2 = jsNative
-
-module Signal2 =
-    /// <remarks>TypeScript type: <c>"bus"</c></remarks>
-    [<Literal>]
-    let channel = "bus"
-    /// <remarks>TypeScript type: <c>"start"</c></remarks>
-    [<Literal>]
-    let verb = "start"
-
-[<Interface>]
-type Signal3 =
-    /// <remarks>TypeScript type: <c>"bus"</c></remarks>
-    abstract channel: string
-    /// <remarks>TypeScript type: <c>"stop"</c></remarks>
-    abstract verb: string
-    abstract reason: string
-    [<ParamObject; Emit("({ channel: 'bus', verb: 'stop', ...$0 })")>]
-    static member Create (reason: string) : Signal3 = jsNative
-
-module Signal3 =
-    /// <remarks>TypeScript type: <c>"bus"</c></remarks>
-    [<Literal>]
-    let channel = "bus"
-    /// <remarks>TypeScript type: <c>"stop"</c></remarks>
-    [<Literal>]
-    let verb = "stop"
+    [<ParamObject; Emit("({ verb: 'start', channel: 'bus', ...$0 })")>]
+    static member CreateStart (at: float) : Signal = jsNative
+    [<ParamObject; Emit("({ verb: 'stop', channel: 'bus', ...$0 })")>]
+    static member CreateStop (reason: string) : Signal = jsNative
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("state", CaseRules.None)>]
 type Terminal =
-    | [<CompiledName("done")>] Done
+    | [<CompiledName("done"); CaseTest("'value' in $0")>] Done of value: float
+    | [<CompiledName("done"); CaseTest("'error' in $0")>] Done2 of error: string
     | [<CompiledName("pending")>] Pending
 
-[<Interface>]
-type Terminal2 =
-    /// <remarks>TypeScript type: <c>"done"</c></remarks>
-    abstract state: string
-    abstract value: float
-    [<ParamObject; Emit("({ state: 'done', ...$0 })")>]
-    static member Create (value: float) : Terminal2 = jsNative
-
-module Terminal2 =
-    /// <remarks>TypeScript type: <c>"done"</c></remarks>
-    [<Literal>]
-    let state = "done"
-
-[<Interface>]
-type Terminal3 =
-    /// <remarks>TypeScript type: <c>"done"</c></remarks>
-    abstract state: string
-    abstract error: string
-    [<ParamObject; Emit("({ state: 'done', ...$0 })")>]
-    static member Create (error: string) : Terminal3 = jsNative
-
-module Terminal3 =
-    /// <remarks>TypeScript type: <c>"done"</c></remarks>
-    [<Literal>]
-    let state = "done"
-
-[<Interface>]
-type Terminal4 =
-    /// <remarks>TypeScript type: <c>"pending"</c></remarks>
-    abstract state: string
-    [<Emit("({ state: 'pending' })")>]
-    static member Create () : Terminal4 = jsNative
-
-module Terminal4 =
-    /// <remarks>TypeScript type: <c>"pending"</c></remarks>
-    [<Literal>]
-    let state = "pending"
-
-type Onset = U2<Onset2, Onset3>
-
-[<Interface>]
-type Onset2 =
-    /// <remarks>TypeScript type: <c>"log"</c></remarks>
-    abstract ``type``: string
-    abstract level: string
-    abstract message: obj
-    abstract truncated: bool option
+[<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+type Onset =
+    | [<CompiledName("log"); CaseTest("($0.truncated === false || $0.truncated === undefined)")>] Log of level: string * message: obj * truncated: bool option
+    /// <param name="level"></param>
+    /// <param name="message"></param>
+    /// <param name="truncated">TypeScript type: <c>true</c></param>
+    | [<CompiledName("log"); CaseTest("$0.truncated === true")>] Log2 of level: string * message: string * truncated: bool
     [<ParamObject; Emit("({ type: 'log', ...$0 })")>]
-    static member Create (level: string, message: obj, ?truncated: bool) : Onset2 = jsNative
+    static member CreateLog (level: string, message: obj, ?truncated: bool) : Onset = jsNative
+    [<ParamObject; Emit("({ type: 'log', truncated: true, ...$0 })")>]
+    static member CreateLog2 (level: string, message: string) : Onset = jsNative
 
-module Onset2 =
-    /// <remarks>TypeScript type: <c>"log"</c></remarks>
-    [<Literal>]
-    let ``type`` = "log"
-
-[<Interface>]
-type Onset3 =
-    /// <remarks>TypeScript type: <c>"log"</c></remarks>
-    abstract ``type``: string
-    abstract level: string
-    abstract message: string
-    abstract truncated: bool
+[<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+type Log =
+    | [<CompiledName("log"); CaseTest("($0.truncated === false || $0.truncated === undefined)")>] Log of level: string * message: obj * truncated: bool option
+    /// <param name="level"></param>
+    /// <param name="message"></param>
+    /// <param name="truncated">TypeScript type: <c>true</c></param>
+    | [<CompiledName("log"); CaseTest("$0.truncated === true")>] Log2 of level: string * message: string * truncated: bool
     [<ParamObject; Emit("({ type: 'log', ...$0 })")>]
-    static member Create (level: string, message: string, truncated: bool) : Onset3 = jsNative
-
-module Onset3 =
-    /// <remarks>TypeScript type: <c>"log"</c></remarks>
-    [<Literal>]
-    let ``type`` = "log"
-
-type Log = U2<Log2, Log3>
-
-[<Interface>]
-type Log2 =
-    /// <remarks>TypeScript type: <c>"log"</c></remarks>
-    abstract ``type``: string
-    abstract level: string
-    abstract message: obj
-    abstract truncated: bool option
-    [<ParamObject; Emit("({ type: 'log', ...$0 })")>]
-    static member Create (level: string, message: obj, ?truncated: bool) : Log2 = jsNative
-
-module Log2 =
-    /// <remarks>TypeScript type: <c>"log"</c></remarks>
-    [<Literal>]
-    let ``type`` = "log"
-
-[<Interface>]
-type Log3 =
-    /// <remarks>TypeScript type: <c>"log"</c></remarks>
-    abstract ``type``: string
-    abstract level: string
-    abstract message: string
-    abstract truncated: bool
-    [<ParamObject; Emit("({ type: 'log', ...$0 })")>]
-    static member Create (level: string, message: string, truncated: bool) : Log3 = jsNative
-
-module Log3 =
-    /// <remarks>TypeScript type: <c>"log"</c></remarks>
-    [<Literal>]
-    let ``type`` = "log"
+    static member CreateLog (level: string, message: obj, ?truncated: bool) : Log = jsNative
+    [<ParamObject; Emit("({ type: 'log', truncated: true, ...$0 })")>]
+    static member CreateLog2 (level: string, message: string) : Log = jsNative
 
 type Loose = U2<Loose2, Loose3>
 
@@ -357,9 +214,9 @@ type OnWide = (Wide.Event -> unit)
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type Named =
-    | [<CompiledName("alarm")>] Alarm of scheduledTime: float
-    | [<CompiledName("fetch")>] Fetch of url: string
-    | [<CompiledName("jsrpc")>] Jsrpc of methodName: string
+    | [<CompiledName("alarm"); Fickl.Core.InlineInterface>] Alarm of AlarmInfo
+    | [<CompiledName("fetch"); Fickl.Core.InlineInterface>] Fetch of FetchInfo
+    | [<CompiledName("jsrpc"); Fickl.Core.InlineInterface>] Jsrpc of JsRpcInfo
 
 [<Interface>]
 type Alias =
@@ -379,33 +236,8 @@ type OnEvent = (OnEvent.Event -> unit)
 type Scheduled<'T> =
     | [<CompiledName("once")>] Once of payload: 'T
     | [<CompiledName("repeat")>] Repeat of payload: 'T * previous: 'T option
-
-[<Interface>]
-type Scheduled2<'T> =
-    /// <remarks>TypeScript type: <c>"once"</c></remarks>
-    abstract kind: string
-    abstract payload: 'T
-    [<ParamObject; Emit("({ kind: 'once', ...$0 })")>]
-    static member Create (payload: 'T) : Scheduled2<'T> = jsNative
-
-module Scheduled2 =
-    /// <remarks>TypeScript type: <c>"once"</c></remarks>
-    [<Literal>]
-    let kind = "once"
-
-[<Interface>]
-type Scheduled3<'T> =
-    /// <remarks>TypeScript type: <c>"repeat"</c></remarks>
-    abstract kind: string
-    abstract payload: 'T
-    abstract previous: 'T option
     [<ParamObject; Emit("({ kind: 'repeat', ...$0 })")>]
-    static member Create (payload: 'T, ?previous: 'T) : Scheduled3<'T> = jsNative
-
-module Scheduled3 =
-    /// <remarks>TypeScript type: <c>"repeat"</c></remarks>
-    [<Literal>]
-    let kind = "repeat"
+    static member CreateRepeat (payload: 'T, ?previous: 'T) : Scheduled<'T> = jsNative
 
 [<Interface>]
 type Scheduler =
@@ -417,23 +249,31 @@ type Scheduler =
 module Narrow =
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type Event =
-        | [<CompiledName("email")>] Email
-        | [<CompiledName("queue")>] Queue
-        | [<CompiledName("scheduled")>] Scheduled
+        | [<CompiledName("email"); Fickl.Core.InlineInterface>] Email of EmailInfo
+        | [<CompiledName("queue"); Fickl.Core.InlineInterface>] Queue of QueueInfo
+        | [<CompiledName("scheduled"); Fickl.Core.InlineInterface>] Scheduled of ScheduledInfo
 
 module OnEvent =
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type Event =
-        | [<CompiledName("alarm")>] Alarm of scheduledTime: float
-        | [<CompiledName("custom")>] Custom
-        | [<CompiledName("email")>] Email
-        | [<CompiledName("fetch")>] Fetch of url: string
-        | [<CompiledName("jsrpc")>] Jsrpc of methodName: string
-        | [<CompiledName("queue")>] Queue
-        | [<CompiledName("scheduled")>] Scheduled
-        | [<CompiledName("socket")>] Socket
-        | [<CompiledName("trace")>] Trace
-        | [<CompiledName("log")>] Log of level: string
+        | [<CompiledName("alarm"); Fickl.Core.InlineInterface>] Alarm of AlarmInfo
+        | [<CompiledName("custom"); Fickl.Core.InlineInterface>] Custom of CustomInfo
+        | [<CompiledName("email"); Fickl.Core.InlineInterface>] Email of EmailInfo
+        | [<CompiledName("fetch"); Fickl.Core.InlineInterface>] Fetch of FetchInfo
+        | [<CompiledName("jsrpc"); Fickl.Core.InlineInterface>] Jsrpc of JsRpcInfo
+        | [<CompiledName("queue"); Fickl.Core.InlineInterface>] Queue of QueueInfo
+        | [<CompiledName("scheduled"); Fickl.Core.InlineInterface>] Scheduled of ScheduledInfo
+        | [<CompiledName("socket"); Fickl.Core.InlineInterface>] Socket of SocketInfo
+        | [<CompiledName("trace"); Fickl.Core.InlineInterface>] Trace of TraceInfo
+        | [<CompiledName("log"); CaseTest("($0.truncated === false || $0.truncated === undefined)")>] Log of level: string * message: obj * truncated: bool option
+        /// <param name="level"></param>
+        /// <param name="message"></param>
+        /// <param name="truncated">TypeScript type: <c>true</c></param>
+        | [<CompiledName("log"); CaseTest("$0.truncated === true")>] Log2 of level: string * message: string * truncated: bool
+        [<ParamObject; Emit("({ type: 'log', ...$0 })")>]
+        static member CreateLog (level: string, message: obj, ?truncated: bool) : Event = jsNative
+        [<ParamObject; Emit("({ type: 'log', truncated: true, ...$0 })")>]
+        static member CreateLog2 (level: string, message: string) : Event = jsNative
 
 module Scheduler =
     module Current =
@@ -441,43 +281,19 @@ module Scheduler =
         type Result<'T> =
             | [<CompiledName("ready")>] Ready of payload: 'T
             | [<CompiledName("waiting")>] Waiting of previous: 'T option
-
-        [<Interface>]
-        type Result2<'T> =
-            /// <remarks>TypeScript type: <c>"ready"</c></remarks>
-            abstract kind: string
-            abstract payload: 'T
-            [<ParamObject; Emit("({ kind: 'ready', ...$0 })")>]
-            static member Create (payload: 'T) : Result2<'T> = jsNative
-
-        module Result2 =
-            /// <remarks>TypeScript type: <c>"ready"</c></remarks>
-            [<Literal>]
-            let kind = "ready"
-
-        [<Interface>]
-        type Result3<'T> =
-            /// <remarks>TypeScript type: <c>"waiting"</c></remarks>
-            abstract kind: string
-            abstract previous: 'T option
             [<ParamObject; Emit("({ kind: 'waiting', ...$0 })")>]
-            static member Create (?previous: 'T) : Result3<'T> = jsNative
-
-        module Result3 =
-            /// <remarks>TypeScript type: <c>"waiting"</c></remarks>
-            [<Literal>]
-            let kind = "waiting"
+            static member CreateWaiting (?previous: 'T) : Result<'T> = jsNative
 
 module Wide =
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type Event =
-        | [<CompiledName("alarm")>] Alarm of scheduledTime: float
-        | [<CompiledName("connect")>] Connect
-        | [<CompiledName("custom")>] Custom
-        | [<CompiledName("email")>] Email
-        | [<CompiledName("fetch")>] Fetch of url: string
-        | [<CompiledName("jsrpc")>] Jsrpc of methodName: string
-        | [<CompiledName("queue")>] Queue
-        | [<CompiledName("scheduled")>] Scheduled
-        | [<CompiledName("socket")>] Socket
-        | [<CompiledName("trace")>] Trace
+        | [<CompiledName("alarm"); Fickl.Core.InlineInterface>] Alarm of AlarmInfo
+        | [<CompiledName("connect"); Fickl.Core.InlineInterface>] Connect of ConnectInfo
+        | [<CompiledName("custom"); Fickl.Core.InlineInterface>] Custom of CustomInfo
+        | [<CompiledName("email"); Fickl.Core.InlineInterface>] Email of EmailInfo
+        | [<CompiledName("fetch"); Fickl.Core.InlineInterface>] Fetch of FetchInfo
+        | [<CompiledName("jsrpc"); Fickl.Core.InlineInterface>] Jsrpc of JsRpcInfo
+        | [<CompiledName("queue"); Fickl.Core.InlineInterface>] Queue of QueueInfo
+        | [<CompiledName("scheduled"); Fickl.Core.InlineInterface>] Scheduled of ScheduledInfo
+        | [<CompiledName("socket"); Fickl.Core.InlineInterface>] Socket of SocketInfo
+        | [<CompiledName("trace"); Fickl.Core.InlineInterface>] Trace of TraceInfo

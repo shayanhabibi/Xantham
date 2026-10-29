@@ -70,3 +70,7 @@ tools/tsc-ast/upstream/
 .archive/tests/Xantham.EndToEnd/output/
 .archive/tests/Xantham.EndToEnd/verify/
 *.fs.js.map
+
+# Historical local Fable fork artifacts; the build now uses released Fable.Core and Fickl.
+tools/fable-fork/upstream/
+tools/fable-fork/packages/

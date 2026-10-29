@@ -11,13 +11,18 @@ open Fable.Core.JS
 open Fable.Core.TS.Dom
 
 [<Erase>]
-type Setter<'T, 'U> = private Setter__ of (obj -> obj)
+type Setter<'T, 'U> = private Phantom_Setter__ of (obj -> obj)
 
 [<Erase>]
-type Distinct<'T, 'A, 'B> = private Distinct__ of ('A -> 'A)
+type Distinct<'T, 'A, 'B> = private Phantom_Distinct__ of ('A -> 'A)
 
-[<Erase>]
-type Single<'T, 'U> = private Single__ of ('U -> 'U)
+/// <summary>
+/// Negative: a single signature has nothing to collapse.
+/// </summary>
+[<Fickl.Core.CallableInterface>]
+type Single<'T> =
+    [<Emit("$0($1...)")>]
+    abstract Invoke<'U>: value: 'U -> 'U
 
 /// <summary>
 /// One name, two bounds: one variable cannot stand for both.
@@ -30,12 +35,18 @@ type DivergentBound<'T> =
 /// Reference positions, including the empty-tuple rest <c>Setter&lt;string | undefined&gt;</c> reaches.
 /// </summary>
 type Holder =
-    abstract setter<'U>: args: U2<'U, (string -> 'U)> -> 'U
+    abstract setter<'U>: value: U2<'U, (string -> 'U)> -> 'U
     abstract setter<'U>: value: (string -> 'U) -> 'U
     abstract setter<'U>: value: 'U -> 'U
     abstract optional: unit -> unit
     abstract optional<'U>: value: (string option -> 'U) -> 'U
     abstract optional<'U>: value: 'U -> 'U
     abstract distinct<'A>: value: 'A -> 'A
-    abstract single: (obj -> obj) with get, set
+    abstract single: Holder.Single with get, set
     abstract divergent<'U>: value: 'U -> 'U
+
+module Holder =
+    [<Fickl.Core.CallableInterface>]
+    type Single =
+        [<Emit("$0($1...)")>]
+        abstract Invoke<'U>: value: 'U -> 'U

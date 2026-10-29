@@ -11,7 +11,7 @@ open Fable.Core.JS
 open Fable.Core.TS.Dom
 
 [<Erase>]
-type Marker<'T> = private Marker__ of obj
+type Marker<'T> = private Phantom_Marker__ of obj
 
 [<Interface>]
 type Options<'T> =

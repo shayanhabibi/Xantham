@@ -4,7 +4,7 @@
   "module": "CatalogAliasApiLab",
   "counts": {
     "exact": 1,
-    "ergonomic": 8,
+    "ergonomic": 6,
     "widened": 0,
     "escape": 1
   },
@@ -16,8 +16,8 @@
     },
     {
       "pass": "DT - detect-tagged-unions",
-      "total": 2,
-      "exact": 1,
+      "total": 3,
+      "exact": 2,
       "ergonomic": 1
     },
     {
@@ -27,9 +27,14 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 13,
-      "exact": 4,
+      "total": 14,
+      "exact": 5,
       "ergonomic": 9
+    },
+    {
+      "pass": "DD - drop-orphan-delegates",
+      "total": 2,
+      "exact": 2
     },
     {
       "pass": "",

@@ -17,7 +17,7 @@ type CondExtensions<'TNodeType> =
     static member Create (toVar: (string option -> obj)) : CondExtensions<'TNodeType> = jsNative
 
 [<Erase>]
-type CondNode<'TNodeType> = private CondNode__ of obj
+type CondNode<'TNodeType> = private Phantom_CondNode__ of obj
 
 [<Interface>]
 type CondVarNodeInterface<'TNode> =
@@ -27,7 +27,7 @@ type CondVarNodeInterface<'TNode> =
     static member Create (node: 'TNode, isVarNode: bool) : CondVarNodeInterface<'TNode> = jsNative
 
 [<Erase>]
-type CondVarNode<'TNodeType, 'TNode> = private CondVarNode__ of obj
+type CondVarNode<'TNodeType, 'TNode> = private Phantom_CondVarNode__ of obj
 
 [<Interface>]
 type DirectExtensions<'TNodeType> =

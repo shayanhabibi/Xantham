@@ -11,7 +11,7 @@ open Fable.Core.JS
 open Fable.Core.TS.Dom
 
 [<Erase>]
-type SurplusParameter<'T, 'Reserved> = private SurplusParameter__ of ('T -> unit)
+type SurplusParameter<'T, 'Reserved> = private Phantom_SurplusParameter__ of ('T -> unit)
 
 type EveryParameter<'T, 'Reserved> = ('T -> 'Reserved)
 

@@ -105,14 +105,14 @@ let tests =
 
               Expect.equal (occurrences "static member convert " source) 2 "the legal overload set remains intact"
 
-              Expect.equal (occurrences "[<Import(\"pick\", \"layout-lab\")>]" source) 1 "the return-only pair binds pick once"
+              Expect.equal (occurrences "[<Import(\"pick\", \"layout-lab\")>]" source) 1 "the source-identical pair binds pick once"
 
               Expect.stringContains
                   source
-                  "static member pick (value: string) : U2<string, float> = jsNative"
-                  "the return-only pair reads as one member returning the union of both returns"
+                  "static member pick (value: string) : string = jsNative"
+                  "the first source-identical input signature determines the return"
 
-              Expect.isFalse (source.Contains "pick_Overload2") "a return-only pair is unioned, not renamed"
+              Expect.isFalse (source.Contains "pick_Overload2") "an unreachable source-identical overload needs no renamed member"
 
               Expect.stringContains
                   source
@@ -150,7 +150,7 @@ let tests =
                   |> List.filter (fun finding -> finding.Key = "DO008")
                   |> List.map _.Symbol
 
-              Expect.equal unioned [ "Exports.pick"; "Exports.locate_Overload2" ] "each union is recorded against the container-qualified member it widened"
+              Expect.equal unioned [ "Exports.locate_Overload2" ] "each union is recorded against the container-qualified member it widened"
 
               let dropped =
                   rendered.Findings
@@ -163,7 +163,8 @@ let tests =
               let rendered = generate ()
               let rows = Render.symbolTiers rendered |> List.map (fun (name, tier, _) -> name, tier)
 
-              Expect.contains rows ("Exports.pick", Widened) "the unioned member grades widened on its own row"
+              Expect.contains rows ("Exports.pick", Exact) "the first source-identical overload retains its exact return"
+              Expect.contains rows ("Exports.locate_Overload2", Widened) "the compiled-only collision remains widened on its own row"
 
               Expect.isFalse
                   (rows |> List.exists (fun (name, _) -> name = "entry" || name = "global" || name.StartsWith "ambient:"))

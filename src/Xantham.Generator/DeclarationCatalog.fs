@@ -32,6 +32,9 @@ type Declaration =
         Constraints: string array
         Api: string
         Owner: string
+        /// Structural identities of unaliased unions written under this declaration's name.
+        [<Serialization.JsonIgnore(Condition = Serialization.JsonIgnoreCondition.WhenWritingNull)>]
+        Equivalents: string array
     }
 
 [<CLIMutable>]
@@ -316,6 +319,7 @@ let private parameters =
     | FsDelegateType decl -> decl.TypeParameters
     | FsPhantom decl -> decl.TypeParameters
     | FsTaggedUnion decl -> decl.TypeParameters
+    | FsErasedObjectUnion decl -> decl.TypeParameters
     | _ -> []
 
 let private order =
@@ -327,6 +331,7 @@ let private order =
     | FsMeasure decl -> decl.Order
     | FsStringEnum decl -> decl.Order
     | FsTaggedUnion decl -> decl.Order
+    | FsErasedObjectUnion decl -> decl.Order
     | FsEnum decl -> decl.Order
     | FsExports _ -> None
 
@@ -336,6 +341,7 @@ type private Identity =
         Handles: string list
         Sources: Source list
         Role: string
+        Equivalents: string list
     }
 
 let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<string, Source>) =
@@ -357,6 +363,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
             Handles = handles
             Sources = sources
             Role = role
+            Equivalents = []
         }
 
     let exportHandles =
@@ -463,6 +470,26 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                 // Intrinsic checker types are shared by unrelated exports. Their aliases
                 // belong to the individual declaration, never the aggregate export handles.
                 None
+            | Some facts when
+                Shape.Spec.isSharedEmptyObject facts
+                && not (Map.containsKey id shape.NotFollowed)
+                ->
+                // Every bare `{}` is this one type; an alias the checker hangs on it in one
+                // program (`MainModule`) is absent from another.
+                Some(identity "empty-object" [] [])
+            | Some facts when
+                (facts.Response.ObjectFlags
+                 |> ValueOption.exists (fun flags ->
+                     flags.HasFlag ObjectFlags.Mapped && flags.HasFlag ObjectFlags.Instantiated))
+                && facts.Members.IsEmpty
+                && facts.IndexInfos.IsEmpty
+                && facts.MappedRecord.IsNone
+                ->
+                // An instantiated mapped type with unresolved members is keyed by nothing but its
+                // declaration, which every instantiation shares: `{ [P in keyof T]?: U[] }` over
+                // `T` and over `output<T>` would claim one identity. It has none, so the
+                // declaration reading it is keyed by its own alias.
+                None
             | Some facts ->
                 let flags = facts.Response.ObjectFlags |> ValueOption.defaultValue ObjectFlags.None
 
@@ -488,14 +515,108 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                     && (flags.HasFlag ObjectFlags.Anonymous || flags.HasFlag ObjectFlags.Mapped)
 
                 let handles =
-                    if List.isEmpty facts.Declarations then
-                        Map.tryFind id exportHandles |> Option.defaultValue []
-                    else
+                    if not (List.isEmpty facts.Declarations) then
                         facts.Declarations
+                    elif
+                        not (List.isEmpty visited)
+                        && facts.AliasDeclarations.IsEmpty
+                        && (literalUnionIdentity true facts).IsSome
+                    then
+                        // Inside another type's key, an unaliased literal union (`keyof typeof
+                        // Kind`) is one interned type whether or not this program exports a name
+                        // for it. Its own declaration row keeps the export's identity.
+                        []
+                    else
+                        Map.tryFind id exportHandles |> Option.defaultValue []
 
                 if List.isEmpty handles then
-                    match facts.NonNullableAlias with
-                    | Some alias ->
+                    let unionIdentity =
+                        if facts.AliasDeclarations.IsEmpty && not facts.UnionMembers.IsEmpty then
+                            let constituents =
+                                facts.UnionMembers |> List.choose (fun child -> Map.tryFind child shape.Types)
+
+                            let nominal (constituent: TypeFacts) =
+                                not constituent.Declarations.IsEmpty
+                                && constituent.Declarations
+                                   |> List.forall (fun handle ->
+                                       NodeHandle.parse (handle / uom<declHandle>)
+                                       |> ValueOption.exists (fun node ->
+                                           node.Kind = SyntaxKind.InterfaceDeclaration
+                                           || node.Kind = SyntaxKind.ClassDeclaration))
+
+                            if
+                                constituents.Length = facts.UnionMembers.Length
+                                && List.forall nominal constituents
+                            then
+                                let contracts =
+                                    facts.UnionMembers |> List.choose (typeIdentity (id :: visited) bindings)
+
+                                if contracts.Length = facts.UnionMembers.Length then
+                                    Some(
+                                        identity
+                                            "source-union"
+                                            (constituents |> List.collect _.Declarations)
+                                            (contracts |> List.map _.Key |> List.sort)
+                                    )
+                                else
+                                    None
+                            else
+                                None
+                        else
+                            None
+
+                    let intersectionIdentity =
+                        if facts.AliasDeclarations.IsEmpty && not facts.IntersectionMembers.IsEmpty then
+                            let constituents =
+                                facts.IntersectionMembers
+                                |> List.choose (fun child -> Map.tryFind child shape.Types)
+
+                            let anchors = constituents |> List.collect _.Declarations
+
+                            let hasWrittenLiteral =
+                                anchors
+                                |> List.exists (fun handle ->
+                                    NodeHandle.parse (handle / uom<declHandle>)
+                                    |> ValueOption.exists (fun node -> node.Kind = SyntaxKind.TypeLiteral))
+
+                            if hasWrittenLiteral && constituents.Length = facts.IntersectionMembers.Length then
+                                // The hoisted declaration binds the parameters it reads from its
+                                // scope positionally, with their bounds, so copies over each
+                                // owner's own equally bounded parameter key alike.
+                                let bindings =
+                                    boundParameters id facts
+                                    |> List.mapi (fun index parameter ->
+                                        let bound =
+                                            Map.tryFind parameter shape.Types
+                                            |> Option.bind _.Constraint
+                                            |> Option.map (fun bound ->
+                                                typeIdentity (id :: visited) bindings bound
+                                                |> Option.map _.Key
+                                                |> Option.defaultValue "")
+
+                                        parameter,
+                                        match bound with
+                                        | None -> "parameter:" + string index
+                                        | Some bound -> json ("parameter", index, bound))
+                                    |> List.fold
+                                        (fun bindings (parameter, key) -> Map.add parameter key bindings)
+                                        bindings
+
+                                let contracts =
+                                    facts.IntersectionMembers |> List.choose (typeIdentity (id :: visited) bindings)
+
+                                if contracts.Length = facts.IntersectionMembers.Length then
+                                    Some(identity "source-intersection" anchors (contracts |> List.map _.Key))
+                                else
+                                    None
+                            else
+                                None
+                        else
+                            None
+
+                    match Option.orElse unionIdentity intersectionIdentity, facts.NonNullableAlias with
+                    | Some identity, _ -> Some identity
+                    | None, Some alias ->
                         typeIdentity (id :: visited) bindings alias
                         |> Option.map (fun identity ->
                             // Nullable identity retains the alias used by the shaped F# reference.
@@ -511,7 +632,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                                 Key = hashText (json ("nullable-alias", identity.Key, nullish))
                                 Role = "nullable-alias"
                             })
-                    | None ->
+                    | None, None ->
                         if
                             structural
                             && facts.Response.Flags.HasFlag TypeFlags.Object
@@ -538,6 +659,31 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                             Some(identity "empty-object" [] [])
                         else
                             literalUnionIdentity true facts
+                            |> Option.orElseWith (fun () ->
+                                // An unaliased union is one interned checker type wherever it is
+                                // reached; its member contracts define it.
+                                if facts.AliasDeclarations.IsEmpty && facts.UnionMembers.Length >= 2 then
+                                    // Each arm's own key must rest on its declarations or its
+                                    // composition, never on an export handle.
+                                    let anchored member_ =
+                                        Map.tryFind member_ shape.Types
+                                        |> Option.exists (fun (arm: TypeFacts) ->
+                                            not arm.Declarations.IsEmpty
+                                            || not arm.AliasDeclarations.IsEmpty
+                                            || not arm.IntersectionMembers.IsEmpty)
+
+                                    let contracts =
+                                        facts.UnionMembers |> List.choose (typeIdentity (id :: visited) bindings)
+
+                                    if
+                                        contracts.Length = facts.UnionMembers.Length
+                                        && List.forall anchored facts.UnionMembers
+                                    then
+                                        Some(identity "union" [] (contracts |> List.map _.Key |> List.sort))
+                                    else
+                                        None
+                                else
+                                    None)
                 else
                     let role =
                         if List.isEmpty facts.ConstructSignatures then
@@ -604,6 +750,23 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                                     | None -> ""
 
                     let argumentKey = argumentKeyWith (id :: visited) bindings
+
+                    // An argument whose bound differs from the alias's declared bound carries it.
+                    let declarationArgumentKeys (key: int<typeId> -> string) (facts: TypeFacts) =
+                        facts.DeclarationArguments
+                        |> List.mapi (fun index argument ->
+                            let argumentKey =
+                                if Map.containsKey argument.TypeId shape.Types then
+                                    key argument.TypeId
+                                else
+                                    intrinsicArgumentKey argument
+
+                            match List.tryItem index facts.DeclarationArgumentBounds |> Option.flatten with
+                            | Some bound when argumentKey <> "" ->
+                                match key bound with
+                                | "" -> ""
+                                | boundKey -> json ("bounded", argumentKey, boundKey)
+                            | _ -> argumentKey)
 
                     let arguments =
                         match facts.Response.TargetTypeId with
@@ -692,15 +855,13 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                         if structural && not (List.isEmpty arguments) then
                             // Populated structural keys already describe the applied members,
                             // including transparent aliases that carry different alias arguments.
-                            arguments
+                            // Members name a type parameter only by its name, so a bound that
+                            // differs from the alias's declared one is keyed beside them.
+                            match facts.DeclarationArgumentBounds |> List.choose (fun bound -> bound) with
+                            | [] -> arguments
+                            | bounds -> arguments @ [ json ("argument-bounds", bounds |> List.map partKey) ]
                         else
-                            let declarationArguments =
-                                facts.DeclarationArguments
-                                |> List.map (fun argument ->
-                                    if Map.containsKey argument.TypeId shape.Types then
-                                        partKey argument.TypeId
-                                    else
-                                        intrinsicArgumentKey argument)
+                            let declarationArguments = declarationArgumentKeys partKey facts
 
                             if not structural then
                                 arguments @ declarationArguments
@@ -725,13 +886,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                     if not boundsComplete then
                         None
                     elif not complete || List.contains "" arguments then
-                        let aliasArguments =
-                            facts.DeclarationArguments
-                            |> List.map (fun argument ->
-                                if Map.containsKey argument.TypeId shape.Types then
-                                    argumentKey argument.TypeId
-                                else
-                                    intrinsicArgumentKey argument)
+                        let aliasArguments = declarationArgumentKeys argumentKey facts
 
                         if List.isEmpty facts.AliasDeclarations || List.contains "" aliasArguments then
                             if role = "constructor" && not (List.contains "" aliasArguments) then
@@ -817,6 +972,28 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
         sources |> Seq.sortBy sourceKey |> Seq.toList
 
     // Parent roles cover checker-synthesized types whose symbol has no declaration handle.
+    // A source function can have an unkeyable structural signature (for example an inline
+    // parameter containing a template-keyed Record). Its declaration still authenticates
+    // parameter/return roles. These roots are traversal anchors, not callable identities.
+    let sourceFunctionParents =
+        exportHandles
+        |> Map.toList
+        |> List.choose (fun (id, handles) ->
+            if
+                not (Map.containsKey id byType)
+                && not handles.IsEmpty
+                && handles
+                   |> List.forall (fun declaration ->
+                       NodeHandle.parse (declaration / uom<_>)
+                       |> ValueOption.exists (fun handle -> handle.Kind = SyntaxKind.FunctionDeclaration))
+                && Map.tryFind id shape.Types
+                   |> Option.exists (fun facts -> not facts.CallSignatures.IsEmpty)
+            then
+                Some(id, identity "source-function-parent" handles [])
+            else
+                None)
+        |> Map.ofList
+
     let edges (facts: TypeFacts) =
         [
             for member_ in facts.Members do
@@ -848,13 +1025,21 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
 
     while changed do
         let additions =
-            byType
+            sourceFunctionParents
+            |> Map.fold
+                (fun parents id parent ->
+                    if Map.containsKey id parents then
+                        parents
+                    else
+                        Map.add id parent parents)
+                byType
             |> Map.toList
             |> List.collect (fun (id, parent) ->
                 edges shape.Types[id]
                 |> List.choose (fun (child, role) ->
                     if
                         Map.containsKey child byType
+                        || Map.containsKey child sourceFunctionParents
                         || not (Map.containsKey child shape.Types)
                         || intrinsicArgumentKey shape.Types[child].Response <> ""
                     then
@@ -865,6 +1050,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                             { parent with
                                 Key = hashText (parent.Key + "/" + role)
                                 Role = role
+                                Equivalents = []
                             }
                         )))
             |> List.groupBy fst
@@ -879,6 +1065,42 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
             | FsStringEnum enum -> Some enum.Name
             | _ -> None)
         |> Set.ofList
+
+    // A reference to an unaliased union resolves by member set to a declared union
+    // (`namedUnionByMembers`), so that declaration also answers for the union's own identity,
+    // including source-union identities whose arms are declared interfaces or classes.
+    // A declared literal union identified only by its export's handles (`type Kind = keyof typeof
+    // Kind`) answers for its value key too, which a program without that export computes.
+    let equivalents =
+        [
+            yield!
+                byType
+                |> Map.toList
+                |> List.choose (fun (id, identity) ->
+                    if
+                        (identity.Role = "union" || identity.Role = "source-union")
+                        && not (Map.containsKey id shape.DeclNames)
+                    then
+                        Shape.Spec.namedUnionByMembers ctx shape (Shape.Spec.nonNullishMemberSet shape shape.Types[id])
+                        |> Option.map (fun (_, name) -> name, identity.Key)
+                    else
+                        None)
+            yield!
+                shape.DeclNames
+                |> Map.toList
+                |> List.choose (fun (id, name) ->
+                    match Map.tryFind id shape.Types with
+                    | Some facts when
+                        facts.Declarations.IsEmpty
+                        && facts.AliasDeclarations.IsEmpty
+                        && Map.containsKey id exportHandles
+                        ->
+                        literalUnionIdentity true facts |> Option.map (fun literal -> name, literal.Key)
+                    | _ -> None)
+        ]
+        |> List.groupBy fst
+        |> List.map (fun (name, keys) -> name, keys |> List.map snd |> List.distinct |> List.sort)
+        |> Map.ofList
 
     let byName =
         shape.DeclNames
@@ -897,6 +1119,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                 name,
                 { identity with
                     Sources = identity.Sources @ closure id |> List.distinct |> List.sortBy sourceKey
+                    Equivalents = Map.tryFind name equivalents |> Option.defaultValue []
                 }))
         |> List.groupBy fst
         |> List.map (fun (name, entries) ->
@@ -910,8 +1133,39 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
     let exportPath =
         Shape.ExportLayout.declPath (Shape.ExportLayout.modulePaths shape) shape
 
+    let sourceStringAliases =
+        shape.SourceStringAliases
+        |> Map.toList
+        |> List.map (fun (_, alias) ->
+            alias.Name,
+            identity
+                (if alias.ForwardTo.IsSome then "alias" else "type")
+                (alias.AliasSymbol.DeclarationHandles
+                 |> ValueOption.defaultValue [||]
+                 |> Array.toList)
+                [])
+        |> Map.ofList
+
+    let sourceLiteralEnums =
+        shape.SourceStringAliases
+        |> Map.toList
+        |> List.choose (fun (_, alias) ->
+            alias.LiteralName
+            |> Option.bind (fun name ->
+                literalUnionIdentity
+                    false
+                    { shape.Types[alias.DeclaredTypeId] with
+                        AliasDeclarations = []
+                    }
+                |> Option.map (fun identity -> name, identity)))
+        |> Map.ofList
+
     let rec forDecl name decl =
-        match Map.tryFind name byName with
+        match
+            Map.tryFind name sourceStringAliases
+            |> Option.orElseWith (fun () -> Map.tryFind name sourceLiteralEnums)
+            |> Option.orElseWith (fun () -> Map.tryFind name byName)
+        with
         | Some identity -> identity
         | None ->
             let exported =
@@ -920,7 +1174,14 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                     let exportedName = Shape.Spec.fsName (Shape.Spec.defaultExportName ctx) export
 
                     let qualified leaf =
-                        String.concat "." (exportPath export @ [ leaf ])
+                        String.concat
+                            "."
+                            (exportPath export
+                             @ [
+                                 Shape.Spec.underNamespace
+                                     (Shape.Spec.exportNamespacePath shape.Harvest.Namespaces export)
+                                     leaf
+                             ])
 
                     export.Order.IsSome
                     && export.Order = order decl
@@ -947,6 +1208,7 @@ let private identities (ctx: Context) (shape: ShapeModel) (sourceFiles: Map<stri
                     { origin with
                         Key = hashText (origin.Key + "/" + role)
                         Role = role
+                        Equivalents = []
                     }
 
     reusableDeclarations shape.Decls
@@ -1154,6 +1416,7 @@ let private classValues (ctx: Context) (shape: ShapeModel) (groups: Render.Group
                                             ReadOnly = not member_.Settable
                                             Type = reference
                                             Literal = None
+                                            NullKey = false
                                         }
                                 | ExportConstructor(parameters, returns) ->
                                     FsConstructor
@@ -1297,6 +1560,23 @@ let internal applyWithProducer
                     | _ -> fail $"references disagree on declaration {key}")
                 |> Map.ofList
 
+            let inheritedEquivalents =
+                inherited
+                |> Map.toList
+                |> List.collect (fun (_, entry) ->
+                    entry.Equivalents
+                    |> Option.ofObj
+                    |> Option.map Array.toList
+                    |> Option.defaultValue []
+                    |> List.map (fun key -> key, entry))
+                |> List.filter (fun (key, _) -> not (Map.containsKey key inherited))
+                |> List.groupBy fst
+                |> List.map (fun (key, entries) ->
+                    match entries |> List.map snd |> List.distinct with
+                    | [ entry ] -> key, entry
+                    | _ -> fail $"references disagree on union equivalent {key}")
+                |> Map.ofList
+
             let inheritedVariants =
                 loaded
                 |> List.collect _.Variants
@@ -1325,6 +1605,8 @@ let internal applyWithProducer
                     yield! shape.Types |> Map.toList |> List.collect (snd >> _.Declarations)
                     for export in shape.Harvest.Exports do
                         yield! export.Symbol.DeclarationHandles |> ValueOption.defaultValue [||]
+                    for KeyValue(_, alias) in shape.SourceStringAliases do
+                        yield! alias.AliasSymbol.DeclarationHandles |> ValueOption.defaultValue [||]
                 ]
                 |> List.distinct
 
@@ -1373,18 +1655,33 @@ let internal applyWithProducer
                 identities
                 |> Map.toList
                 |> List.choose (fun (name, identity) ->
-                    match Map.tryFind identity.Key inherited with
+                    match
+                        Map.tryFind identity.Key inherited
+                        |> Option.orElseWith (fun () -> Map.tryFind identity.Key inheritedEquivalents)
+                        // A union this program names by an export of its own is the producer's
+                        // anonymous union when an equivalent of its row is that union's key.
+                        |> Option.orElseWith (fun () ->
+                            identity.Equivalents |> List.tryPick (fun key -> Map.tryFind key inherited))
+                    with
                     | Some producer ->
                         // Closure traversal depends on which types the checker reached in this
                         // program. Authenticate the producer's required sources against actual
                         // inputs, including every installed copy of a source key. A matching
                         // copy must not conceal a conflicting same-version installation.
+                        // A union reused through an equivalent is defined by its own members; the
+                        // alias naming it may sit in a file this program never loads.
+                        let aliasAnchor (source: Source) =
+                            producer.Identity <> identity.Key
+                            && producer.Handles
+                               |> Array.exists (fun handle ->
+                                   handle.StartsWith(sourceKey source + "#", StringComparison.Ordinal))
+
                         let authenticated =
                             producer.Sources
                             |> Array.forall (fun source ->
                                 match Map.tryFind (sourceKey source) currentInputs with
                                 | Some candidates -> candidates |> List.forall ((=) source)
-                                | None -> false)
+                                | None -> aliasAnchor source)
 
                         // A catalog cannot discard the sources anchoring its own handles.
                         // Literal-union identities intentionally have no declaration handles.
@@ -1404,6 +1701,11 @@ let internal applyWithProducer
                         |> Map.iter (fun _ producer ->
                             if
                                 producer.Role = identity.Role
+                                // Composite keys include every constituent contract. Different
+                                // compositions may share an operand without merging declarations;
+                                // only the complete key above can grant producer ownership.
+                                && identity.Role <> "source-intersection"
+                                && identity.Role <> "source-union"
                                 && Set.ofArray producer.Handles <> Set.ofList identity.Handles
                                 && producer.Handles
                                    |> Array.exists (fun handle -> List.contains handle identity.Handles)
@@ -1418,7 +1720,11 @@ let internal applyWithProducer
                     yield!
                         identities
                         |> Map.toList
-                        |> List.map (fun (name, identity) -> name, identity.Key)
+                        |> List.map (fun (name, identity) ->
+                            name,
+                            Map.tryFind name reused
+                            |> Option.map _.Identity
+                            |> Option.defaultValue identity.Key)
                     yield!
                         inherited
                         |> Map.toList
@@ -1433,8 +1739,8 @@ let internal applyWithProducer
                     | _ -> None)
                 |> Map.ofList
 
-            let rec canonicalReference visited vars reference =
-                let canonical = canonicalReference visited vars
+            let rec canonicalReference (abbreviations: Map<string, FsAbbrevDecl>) visited vars reference =
+                let canonical = canonicalReference abbreviations visited vars
 
                 let named name arguments applied =
                     let arguments = List.map canonical arguments
@@ -1447,7 +1753,7 @@ let internal applyWithProducer
                         let bindings =
                             List.zip (alias.TypeParameters |> List.map _.Name) arguments |> Map.ofList
 
-                        canonicalReference (Set.add name visited) bindings alias.Target
+                        canonicalReference abbreviations (Set.add name visited) bindings alias.Target
                     | _ ->
                         let name = Map.tryFind name canonicalNames |> Option.defaultValue name
                         if applied then FsApp(name, arguments) else FsNamed name
@@ -1466,7 +1772,7 @@ let internal applyWithProducer
                     FsBranded(canonical primitive, Map.tryFind measure canonicalNames |> Option.defaultValue measure)
                 | other -> other
 
-            let constraints decl =
+            let constraintsFor abbreviations decl =
                 let parameters = parameters decl
 
                 let vars =
@@ -1474,20 +1780,71 @@ let internal applyWithProducer
                     |> List.mapi (fun index parameter -> parameter.Name, FsTypeVar(string index))
                     |> Map.ofList
 
-                let canonical = canonicalReference Set.empty vars
+                let canonical = canonicalReference abbreviations Set.empty vars
 
                 parameters
                 |> List.map (fun parameter ->
                     parameter.Constraint |> Canonical.option (canonical >> Canonical.reference))
                 |> List.toArray
 
-            let surface decl =
+            let constraints = constraintsFor abbreviations
+
+            let declarationsByName =
+                shape.Decls |> List.map (fun decl -> Render.declName decl, decl) |> Map.ofList
+
+            let originalDeclarationsByName =
+                originalShape.Decls
+                |> List.map (fun decl -> Render.declName decl, decl)
+                |> Map.ofList
+
+            let originalAbbreviations =
+                originalShape.Decls
+                |> List.choose (function
+                    | FsAbbrev alias -> Some(alias.Name, alias)
+                    | _ -> None)
+                |> Map.ofList
+
+            let rec forwardedDeclaration declarationsByName abbreviations visited decl =
+                let name = Render.declName decl
+
+                match decl with
+                | FsAbbrev alias when alias.Value.IsNone && not (Set.contains name visited) ->
+                    let target =
+                        match alias.Target with
+                        | FsNamed target when alias.TypeParameters.IsEmpty -> Some(target, [])
+                        | FsApp(target, arguments) -> Some(target, arguments)
+                        | _ -> None
+
+                    match target with
+                    | Some(target, arguments) when
+                        arguments = (alias.TypeParameters |> List.map (fun parameter -> FsTypeVar parameter.Name))
+                        ->
+                        match
+                            Map.tryFind name identities,
+                            Map.tryFind target identities,
+                            Map.tryFind target declarationsByName
+                        with
+                        | Some own, Some defining, Some declaration when
+                            own.Key = defining.Key
+                            && (parameters declaration).Length = alias.TypeParameters.Length
+                            && constraintsFor abbreviations declaration = constraintsFor abbreviations decl
+                            ->
+                            forwardedDeclaration declarationsByName abbreviations (Set.add name visited) declaration
+                        | _ -> decl
+                    | _ -> decl
+                | _ -> decl
+
+            let surfaceWith declarationsByName abbreviations decl =
+                // A type-only occurrence forwarding the exact binders of the same authenticated
+                // declaration has its defining surface, not a new abbreviation representation.
+                let decl = forwardedDeclaration declarationsByName abbreviations Set.empty decl
+
                 let bind prefix (parameters: FsTypeParam list) vars =
                     parameters
                     |> List.mapi (fun index parameter -> parameter.Name, FsTypeVar(prefix + string index))
                     |> List.fold (fun vars (name, key) -> Map.add name key vars) vars
 
-                let reference = canonicalReference Set.empty
+                let reference = canonicalReference abbreviations Set.empty
 
                 let vars = bind "type:" (parameters decl) Map.empty
 
@@ -1517,6 +1874,7 @@ let internal applyWithProducer
                 let rec member_ =
                     function
                     | FsSymbolKeyed(symbol, inner) -> Canonical.node "symbol" [ Canonical.text symbol; member_ inner ]
+                    | FsStringKeyed(key, inner) -> Canonical.node "string-key" [ Canonical.text key; member_ inner ]
                     | FsLiteralKeyed(target, literals, inner) ->
                         Canonical.node
                             "literal"
@@ -1567,9 +1925,40 @@ let internal applyWithProducer
                         Canonical.node
                             "interface"
                             [
-                                Canonical.list (typeText vars) interface_.Inherits
-                                interface_.Members |> List.map member_ |> List.sort |> Canonical.list id
-                                entrypoint
+                                yield Canonical.list (typeText vars) interface_.Inherits
+                                yield interface_.Members |> List.map member_ |> List.sort |> Canonical.list id
+                                for overload in interface_.CreateOverloads do
+                                    if not overload.StringKeys.IsEmpty then
+                                        yield
+                                            overload.StringKeys
+                                            |> Map.toList
+                                            |> Canonical.list (fun (name, key) ->
+                                                Canonical.node "key" [ Canonical.text name; Canonical.text key ])
+                                            |> List.singleton
+                                            |> Canonical.node "string-keyed-create"
+                                for static_ in interface_.Statics do
+                                    match static_.Binding with
+                                    | ImportKeyed(_, key) ->
+                                        let body =
+                                            match static_.Body with
+                                            | ExportValue reference -> typeText vars reference
+                                            | ExportFunction(args, returns)
+                                            | ExportConstructor(args, returns) ->
+                                                signature static_.TypeParameters args returns
+
+                                        yield
+                                            Canonical.node
+                                                "string-keyed-static"
+                                                [
+                                                    Canonical.text static_.Name
+                                                    Canonical.text key
+                                                    body
+                                                    string static_.Settable
+                                                ]
+                                    | _ -> ()
+                                yield entrypoint
+                                if interface_.Callable then
+                                    yield "callable"
                             ]
                     | FsAbbrev abbrev -> Canonical.node "alias" [ typeText vars abbrev.Target ]
                     | FsDelegateType delegate_ ->
@@ -1617,13 +2006,97 @@ let internal applyWithProducer
                                                     [ Canonical.text field.Name; typeText vars field.Type ])
                                         ])
                             ]
+                    | FsErasedObjectUnion union ->
+                        Canonical.node
+                            "erased-object-union"
+                            [
+                                union.Cases
+                                |> Canonical.list (fun case ->
+                                    Canonical.node
+                                        "case"
+                                        [
+                                            Canonical.text case.Name
+                                            typeText vars case.Payload
+                                            Canonical.text (Render.caseTestSource case.Test)
+                                        ])
+                                union.Invokes |> List.map (FsInvoke >> member_) |> Canonical.list id
+                            ]
                     | FsPhantom phantom -> Canonical.node "phantom" [ typeText vars phantom.Carrier ]
                     | FsMeasure measure -> Canonical.node "measure" [ typeText vars measure.Primitive ]
                     | FsExports _ -> "exports"
 
                 hashText api
 
+            let surface = surfaceWith declarationsByName abbreviations
+            let originalSurface = surfaceWith originalDeclarationsByName originalAbbreviations
+
             let mutable ownedVariants = []
+
+            let declarationIds =
+                shape.DeclNames
+                |> Map.toList
+                |> List.groupBy snd
+                |> List.map (fun (name, ids) -> name, ids |> List.map fst)
+                |> Map.ofList
+
+            let references (facts: TypeFacts) =
+                [
+                    yield! facts.Members |> List.map _.TypeId
+                    for index in facts.IndexInfos do
+                        yield index.KeyTypeId
+                        yield index.ValueTypeId
+                    for signature in facts.CallSignatures @ facts.ConstructSignatures do
+                        yield! signature.TypeParameters
+                        yield! signature.Parameters |> List.map _.TypeId
+                        yield signature.ReturnTypeId
+                    yield! facts.BaseTypes
+                    yield! facts.TypeArguments
+                    yield! facts.AliasTypeArguments
+                    yield! facts.IntersectionMembers
+                    yield! facts.UnionMembers
+                    yield! Option.toList facts.Constraint
+                    yield! Option.toList facts.Default
+                    match facts.Response.TargetTypeId with
+                    | ValueSome target when target <> facts.Response.TypeId -> yield target
+                    | _ -> ()
+                ]
+
+            // Whether a declaration's own structure reaches past the frontier, and the
+            // declarations it names.
+            let direct =
+                let memo = System.Collections.Generic.Dictionary<string, bool * Set<string>>()
+
+                fun name ->
+                    match memo.TryGetValue name with
+                    | true, result -> result
+                    | false, _ ->
+                        let rec walk visited cut named ids =
+                            match ids with
+                            | [] -> cut, named
+                            | id :: rest when Set.contains id visited -> walk visited cut named rest
+                            | id :: rest when Map.containsKey id shape.NotFollowed ->
+                                walk (Set.add id visited) true named rest
+                            | id :: rest ->
+                                match Map.tryFind id shape.Types, Map.tryFind id shape.DeclNames with
+                                | Some facts, declared when declared |> Option.forall ((=) name) ->
+                                    walk (Set.add id visited) cut named (references facts @ rest)
+                                | _, Some declared -> walk (Set.add id visited) cut (Set.add declared named) rest
+                                | _ -> walk (Set.add id visited) cut named rest
+
+                        let result =
+                            walk Set.empty false Set.empty (Map.tryFind name declarationIds |> Option.defaultValue [])
+
+                        memo[name] <- result
+                        result
+
+            // A consumer resolves a reused declaration only as far as its follow frontier. Past it
+            // the consumer's rendering is incomplete; the identity and the authenticated sources
+            // fix the declaration, so the producer's row stands unverified. A declaration naming
+            // a partly resolved one renders that reference at the wrong arity and is partial too;
+            // a name further away carries only its identity.
+            let partial name =
+                let cut, named = direct name
+                cut || named |> Set.exists (fun other -> fst (direct other))
 
             let owned =
                 reusableDeclarations shape.Decls
@@ -1633,6 +2106,7 @@ let internal applyWithProducer
                         let constraints = constraints decl
 
                         match Map.tryFind name reused with
+                        | Some _ when partial name -> None
                         | Some producer ->
                             if producer.Arity <> List.length (parameters decl) then
                                 fail $"arity mismatch for {name} ({producer.FSharpName})"
@@ -1671,7 +2145,7 @@ let internal applyWithProducer
                             let originalApi =
                                 originalShape.Decls
                                 |> List.tryFind (fun d -> Render.declName d = name)
-                                |> Option.map surface
+                                |> Option.map originalSurface
                                 |> Option.defaultValue (surface decl)
 
                             let api =
@@ -1709,16 +2183,44 @@ let internal applyWithProducer
                                     Constraints = constraints
                                     Api = api
                                     Owner = owner
+                                    Equivalents =
+                                        match identity.Equivalents with
+                                        | [] -> null
+                                        | keys -> List.toArray keys
                                 }))
 
             let exportedNames =
-                shape.Harvest.Exports
-                |> List.map (fun export ->
-                    shape.ExportTypes
-                    |> Map.tryFind export.Symbol.SymbolId
-                    |> Option.bind _.Declared
-                    |> Option.bind (fun typeId -> Map.tryFind typeId shape.DeclNames)
-                    |> Option.defaultValue (Shape.Spec.fsName (Shape.Spec.defaultExportName ctx) export))
+                let exportPath =
+                    Shape.ExportLayout.declPath (Shape.ExportLayout.modulePaths shape) shape
+
+                [
+                    yield!
+                        shape.Harvest.Exports
+                        |> List.map (fun export ->
+                            shape.ExportTypes
+                            |> Map.tryFind export.Symbol.SymbolId
+                            |> Option.bind _.Declared
+                            |> Option.bind (fun typeId -> Map.tryFind typeId shape.DeclNames)
+                            |> Option.defaultValue (Shape.Spec.fsName (Shape.Spec.defaultExportName ctx) export))
+                    yield!
+                        shape.Harvest.Exports
+                        |> List.choose (fun export ->
+                            if (export.Symbol.Flags &&& SymbolFlags.Type) = SymbolFlags.None then
+                                None
+                            else
+                                Some(
+                                    String.concat
+                                        "."
+                                        (exportPath export
+                                         @ [
+                                             Shape.Spec.underNamespace
+                                                 (Shape.Spec.exportNamespacePath shape.Harvest.Namespaces export)
+                                                 (Naming.typeNameSegment (
+                                                     Shape.Spec.fsName (Shape.Spec.defaultExportName ctx) export
+                                                 ))
+                                         ])
+                                ))
+                ]
                 |> Set.ofList
 
             let localName (declaration: Declaration) =
@@ -1737,23 +2239,62 @@ let internal applyWithProducer
                 owned
                 |> List.groupBy _.Identity
                 |> List.map (fun (identity, entries) ->
+                    // The least constrained declaration is the canonical one: an application of
+                    // one alias over a use site's constrained parameter is that alias with the
+                    // use site's bound added, which an abbreviation of the canonical can carry.
+                    let constrainedCount (entry: Declaration) =
+                        entry.Constraints
+                        |> Array.filter (fun bound -> bound <> Canonical.option id None)
+                        |> Array.length
+
                     let entries =
                         entries
                         |> List.sortBy (fun entry ->
                             let name = localName entry
-                            not (Set.contains name exportedNames), name.Split('.').Length, name)
 
-                    let canonical = List.head entries
+                            let forwarding =
+                                declarationsByName
+                                |> Map.tryFind name
+                                |> Option.exists (fun decl ->
+                                    forwardedDeclaration declarationsByName abbreviations Set.empty decl
+                                    |> Render.declName
+                                    |> ((<>) name))
+
+                            constrainedCount entry,
+                            forwarding,
+                            not (Set.contains name exportedNames),
+                            name.Split('.').Length,
+                            name)
+
+                    // Copies of one type may be resolved to different depths, so their source
+                    // closures differ; the row authenticates every file either copy depends on.
+                    let canonical =
+                        { List.head entries with
+                            Sources =
+                                entries
+                                |> Seq.collect _.Sources
+                                |> Seq.distinct
+                                |> Seq.sortBy sourceKey
+                                |> Seq.toArray
+                        }
+
+                    // Every bound the canonical declares, the entry declares too.
+                    let narrows (entry: Declaration) =
+                        entry.Constraints.Length = canonical.Constraints.Length
+                        && Array.forall2
+                            (fun (canonicalBound: string) entryBound ->
+                                canonicalBound = Canonical.option id None || canonicalBound = entryBound)
+                            canonical.Constraints
+                            entry.Constraints
 
                     for entry in List.tail entries do
                         if
                             entry.Arity <> canonical.Arity
-                            || entry.Constraints <> canonical.Constraints
-                            || entry.Sources <> canonical.Sources
+                            || not (narrows entry)
                             || entry.Api <> canonical.Api
                         then
                             fail
-                                $"incompatible F# declarations claim identity {identity}: {canonical.FSharpName}, {entry.FSharpName} (arity {canonical.Arity}/{entry.Arity}, constraints {canonical.Constraints = entry.Constraints}, sources {canonical.Sources.Length}/{entry.Sources.Length})"
+                                $"incompatible F# declarations claim identity {identity}: {canonical.FSharpName}, {entry.FSharpName} (arity {canonical.Arity}/{entry.Arity}, constraints {canonical.Constraints = entry.Constraints}, sources {canonical.Sources.Length}/{entry.Sources.Length}, api {canonical.Api = entry.Api})"
 
                     canonical, List.tail entries |> List.map (fun entry -> localName entry, canonical))
                 |> List.unzip
@@ -1765,6 +2306,13 @@ let internal applyWithProducer
 
             let redirects = reused |> Map.map (fun _ producer -> producer.FSharpName)
 
+            // A group whose module the producer also owns (`FSharp.CloudEdge.Runtime.Agents` beside
+            // the agents producer) already carries the producer's name; an alias there names itself.
+            let qualifiedName name =
+                groups
+                |> List.tryFind (fun group -> group.Decls |> List.exists (fun decl -> Render.declName decl = name))
+                |> Option.map (fun group -> group.Module + "." + name)
+
             let declarations =
                 shape.Decls
                 |> List.choose (fun decl ->
@@ -1773,6 +2321,7 @@ let internal applyWithProducer
                         |> (fun name -> Map.tryFind name reused |> Option.map (fun producer -> name, producer))
                     with
                     | None -> Some(Render.qualifyDecl redirects decl)
+                    | Some(name, producer) when qualifiedName name = Some producer.FSharpName -> None
                     | Some(name, producer) when Set.contains name exportedNames ->
                         let parameters = parameters decl
 

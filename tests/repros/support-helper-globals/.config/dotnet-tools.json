@@ -2,9 +2,9 @@
   "version": 1,
   "isRoot": true,
   "tools": {
-    "fable": {
-      "version": "5.17.2",
-      "commands": ["fable"],
+    "fickl": {
+      "version": "0.5.4",
+      "commands": ["fickl"],
       "rollForward": false
     }
   }

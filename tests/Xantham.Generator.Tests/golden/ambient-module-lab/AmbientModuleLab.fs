@@ -19,15 +19,9 @@ type Payload =
     /// The payload's label.
     /// </summary>
     abstract label: string with get, set
-    abstract at: Point with get, set
+    abstract at: Shapes.Point with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (label: string, at: Point) : Payload = jsNative
-
-[<Interface>]
-type Point =
-    abstract x: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (x: float) : Point = jsNative
+    static member Create (label: string, at: Shapes.Point) : Payload = jsNative
 
 [<Interface>]
 type Telemetry =
@@ -53,6 +47,11 @@ type Anvil =
     abstract mass: float
     [<ParamObject; Emit("$0")>]
     static member Create (mass: float) : Anvil = jsNative
+
+type MirrorConstructor =
+    abstract Mirror: MirrorConstructor with get, set
+    [<EmitConstructor>]
+    abstract Create: unit -> AmbientLab.Mirror.Mirror
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
@@ -115,7 +114,30 @@ module AmbientLab =
                 [<Import("Session", "ambient-lab:lab/promises"); EmitConstructor>]
                 static member Session (id: string) : Session = jsNative
                 [<Import("describe", "ambient-lab:lab/promises")>]
-                static member describe (session: Lab.Session) : string = jsNative
+                static member describe (session: AmbientModuleLab.AmbientLab.Lab.Session) : string = jsNative
+
+    /// <summary>ambient-lab:mirror</summary>
+    module Mirror =
+        [<Interface>]
+        [<Import("Mirror", "ambient-lab:mirror")>]
+        type Mirror =
+            abstract value: string
+            [<ParamObject; Emit("$0")>]
+            static member Create (value: string) : Mirror = jsNative
+            static member Mirror
+                with get (): MirrorConstructor = jsNative
+                and set (_: MirrorConstructor): unit = jsNative
+
+        /// <summary>The package's value exports, each bound to its import.</summary>
+        [<Erase>]
+        type Exports =
+            [<Import("Mirror", "ambient-lab:mirror"); EmitConstructor>]
+            static member Mirror () : Mirror = jsNative
+            [<Import("prototype", "ambient-lab:mirror")>]
+            static member prototype: Mirror = jsNative
+
+        module Mirror =
+            type Mirror = AmbientModuleLab.AmbientLab.Mirror.Mirror
 
     /// <summary>ambient-lab:runtime</summary>
     module Runtime =
@@ -141,8 +163,13 @@ module AmbientLab =
             [<Import("connect", "ambient-lab:sockets")>]
             static member connect (label: string) : Payload = jsNative
 
+        module Identifiers =
+            type RequestId = string
+
     /// <summary>ambient-lab:tools</summary>
     module Tools =
+        type ToolId = string
+
         /// <summary>
         /// A class exported from a specifier rather than from <c>globalThis</c>.
         /// </summary>
@@ -195,6 +222,11 @@ module AmbientLab =
             member _.cause
                 with get (): obj option = jsNative
                 and set (_: obj option): unit = jsNative
+            /// <summary>
+            /// Indicates whether the argument provided is a built-in Error instance or not.
+            /// </summary>
+            [<Import("Snag.isError", "ambient-lab:tools")>]
+            static member isError (error: obj) : bool = jsNative
 
         /// <summary>
         /// A class whose base this run declares. An F# class reaches its base through a constructor
@@ -240,3 +272,13 @@ module AmbientLab =
             /// </summary>
             [<Import("Vise", "ambient-lab:tools"); EmitConstructor>]
             static member Vise (weight: float, jaw: float) : Vise = jsNative
+
+module Shapes =
+    /// <summary>
+    /// A type reached only through a reference to it.
+    /// </summary>
+    [<Interface>]
+    type Point =
+        abstract x: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (x: float) : Point = jsNative

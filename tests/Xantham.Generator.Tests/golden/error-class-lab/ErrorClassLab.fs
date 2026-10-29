@@ -23,6 +23,11 @@ type Mishap =
     abstract cause: obj option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (at: float, name: string, message: string, ?stack: string, ?cause: obj) : Mishap = jsNative
+    /// <summary>
+    /// Indicates whether the argument provided is a built-in Error instance or not.
+    /// </summary>
+    [<Global("Mishap.isError")>]
+    static member isError (error: obj) : bool = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
@@ -64,6 +69,11 @@ module ErrorLab =
             member _.cause
                 with get (): obj option = jsNative
                 and set (_: obj option): unit = jsNative
+            /// <summary>
+            /// Indicates whether the argument provided is a built-in Error instance or not.
+            /// </summary>
+            [<Import("Fault.isError", "error-lab:faults")>]
+            static member isError (error: obj) : bool = jsNative
 
         /// <summary>
         /// A second entrypoint over the same base, declared <c>abstract</c>. Both halves of the entrypoint
@@ -85,6 +95,11 @@ module ErrorLab =
             member _.stack
                 with get (): string option = jsNative
                 and set (_: string option): unit = jsNative
+            /// <summary>
+            /// Indicates whether the argument provided is a built-in Error instance or not.
+            /// </summary>
+            [<Import("Halt.isError", "error-lab:faults")>]
+            static member isError (error: obj) : bool = jsNative
 
         /// <summary>
         /// The negative for the class form: an entrypoint with no base at all, which carries no

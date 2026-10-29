@@ -98,38 +98,54 @@ type Request =
     abstract clone: unit -> Request
     abstract cf: string
     /// <summary>
+    /// The <b><c>body</c></b> read-only property of the Request interface contains a ReadableStream with the body contents that have been added to the request. Note that a request using the GET or HEAD method cannot have a body and null is returned in these cases.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request/body">MDN Reference</a>
     /// </summary>
     abstract body: Fable.Core.TS.Dom.ReadableStream<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>> option
     /// <summary>
+    /// The <b><c>bodyUsed</c></b> read-only property of the Request interface is a boolean value that indicates whether the request body has been read yet.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request/bodyUsed">MDN Reference</a>
     /// </summary>
     abstract bodyUsed: bool
     /// <summary>
+    /// The <b><c>arrayBuffer()</c></b> method of the Request interface reads the request body and returns it as a promise that resolves with an ArrayBuffer.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request/arrayBuffer">MDN Reference</a>
     /// </summary>
     abstract arrayBuffer: unit -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>
     /// <summary>
+    /// The <b><c>blob()</c></b> method of the Request interface reads the request body and returns it as a promise that resolves with a Blob.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request/blob">MDN Reference</a>
     /// </summary>
     abstract blob: unit -> JS.Promise<Fable.Core.TS.Dom.Blob>
     /// <summary>
+    /// The <b><c>bytes()</c></b> method of the Request interface reads the request body and returns it as a promise that resolves with a Uint8Array.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request/bytes">MDN Reference</a>
     /// </summary>
     abstract bytes: unit -> JS.Promise<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>>
     /// <summary>
+    /// The <b><c>formData()</c></b> method of the Request interface reads the request body and returns it as a promise that resolves with a FormData object.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request/formData">MDN Reference</a>
     /// </summary>
     abstract formData: unit -> JS.Promise<Fable.Core.TS.Dom.FormData>
     /// <summary>
+    /// The <b><c>json()</c></b> method of the Request interface reads the request body and returns it as a promise that resolves with the result of parsing the body text as JSON.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request/json">MDN Reference</a>
     /// </summary>
     abstract json: unit -> JS.Promise<obj>
     /// <summary>
+    /// The <b><c>text()</c></b> method of the Request interface reads the request body and returns it as a promise that resolves with a String. The response is always decoded using UTF-8.
+    /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/Request/text">MDN Reference</a>
     /// </summary>
     abstract text: unit -> JS.Promise<string>
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"body\": o[\"body\"] ?? null}))($0)")>]
     static member Create (cache: Request.Cache, credentials: Request.Credentials, destination: Request.Destination, headers: Fable.Core.TS.Dom.Headers, integrity: string, keepalive: bool, ``method``: string, mode: Request.Mode, redirect: Request.Redirect, referrer: string, referrerPolicy: Request.ReferrerPolicy, signal: Fable.Core.TS.Dom.AbortSignal, url: string, clone: (unit -> Request), cf: string, bodyUsed: bool, arrayBuffer: (unit -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>), blob: (unit -> JS.Promise<Fable.Core.TS.Dom.Blob>), bytes: (unit -> JS.Promise<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>>), formData: (unit -> JS.Promise<Fable.Core.TS.Dom.FormData>), json: (unit -> JS.Promise<obj>), text: (unit -> JS.Promise<string>), ?body: Fable.Core.TS.Dom.ReadableStream<Fable.Core.TS.Es.Uint8Array<Fable.Core.TS.Es.ArrayBuffer>>) : Request = jsNative
 
 module Request =
@@ -159,6 +175,7 @@ module Request =
         | [<CompiledName("frame")>] Frame
         | [<CompiledName("iframe")>] Iframe
         | [<CompiledName("image")>] Image
+        | [<CompiledName("json")>] Json
         | [<CompiledName("manifest")>] Manifest
         | [<CompiledName("object")>] Object
         | [<CompiledName("paintworklet")>] Paintworklet

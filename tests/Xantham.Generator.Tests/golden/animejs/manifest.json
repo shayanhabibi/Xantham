@@ -28,9 +28,9 @@
     },
     {
       "pass": "SI - shape-interfaces",
-      "total": 1906,
+      "total": 1910,
       "exact": 24,
-      "ergonomic": 1826,
+      "ergonomic": 1830,
       "widened": 47,
       "escape": 9
     },
@@ -55,7 +55,8 @@
     },
     {
       "pass": "SP - synthesize-paramobjects",
-      "total": 165,
+      "total": 170,
+      "exact": 5,
       "ergonomic": 165
     }
   ]

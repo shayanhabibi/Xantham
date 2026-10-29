@@ -6,4 +6,4 @@
 // </auto-generated>
 
 [<Literal>]
-let tscVersion = "7.1.0-dev.20260902.1"
+let tscVersion = "7.1.0-beta"

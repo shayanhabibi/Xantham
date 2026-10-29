@@ -153,7 +153,7 @@ let compile directory files =
         $"""<Project Sdk="Microsoft.NET.Sdk">
 <PropertyGroup><TargetFramework>net10.0</TargetFramework><NuGetAudit>false</NuGetAudit></PropertyGroup>
 <ItemGroup>{includes}<Compile Include="Consumer.fs" /></ItemGroup>
-<ItemGroup><PackageReference Include="Fable.Core" Version="5.2.0" /><ProjectReference Include="{support}" /></ItemGroup>
+<ItemGroup><PackageReference Include="Fable.Core" Version="5.5.0" /><ProjectReference Include="{support}" /></ItemGroup>
 </Project>"""
     )
 

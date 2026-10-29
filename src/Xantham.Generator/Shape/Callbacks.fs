@@ -60,7 +60,7 @@ let shapeCallbacks: Pass<ShapeModel> =
                             | Some facts when
                                 flag TypeFlags.Object facts
                                 && isPureCallback facts
-                                && not (hasIncompatibleOverloadedTypeParameters model facts)
+                                && not (hasInterfaceCallSignatures model facts)
                                 ->
                                 let typeParameters, scope, parameterFindings = aliasTypeParams ctx model name facts
 

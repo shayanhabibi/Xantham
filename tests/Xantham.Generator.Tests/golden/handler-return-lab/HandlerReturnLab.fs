@@ -21,7 +21,7 @@ type Upload =
     abstract onnamed: Handler with get, set
     abstract onpair: Upload.Onpair with get, set
     abstract onmixed: U2<string, (Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget> -> unit)> with get, set
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"onprogress\": o[\"onprogress\"] ?? null}))($0)")>]
     static member Create (transform: (Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget> -> obj), onstate: obj, onregister: ((string -> obj) -> unit), onclose: (Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget> -> obj), onnamed: Handler, onpair: Upload.Onpair, onmixed: U2<string, (Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget> -> unit)>, ?onprogress: (Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget> -> unit), ?onready: (unit -> unit)) : Upload = jsNative
 
 type Handler = (Fable.Core.TS.Dom.ProgressEvent<Fable.Core.TS.Dom.EventTarget> -> obj)

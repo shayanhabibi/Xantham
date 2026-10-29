@@ -102,7 +102,7 @@ module Player =
             type Self =
                 inherit Player
                 abstract ``then``: obj with get, set
-                [<ParamObject; Emit("$0")>]
+                [<ParamObject; Emit("(o => ({...o, \"then\": o[\"then\"] ?? null}))($0)")>]
                 static member Create (play: ((Self -> obj) option -> unit), ``then``: obj) : Self = jsNative
 
 module Ticking =

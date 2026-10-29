@@ -216,11 +216,8 @@ module Browser =
     /// <summary>
     /// Represents an Automation SAFEARRAY
     /// </summary>
-    [<Interface>]
     type SafeArray<'T> =
-        abstract SafeArray_typekey: SafeArray<'T> with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (SafeArray_typekey: SafeArray<'T>) : SafeArray<'T> = jsNative
+        interface end
 
     /// <summary>
     /// Allows enumerating over a COM collection, which may not have indexed item access.
@@ -296,11 +293,8 @@ module Browser =
     /// <summary>
     /// Automation date (VT_DATE)
     /// </summary>
-    [<Interface>]
     type VarDate =
-        abstract VarDate_typekey: VarDate with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (VarDate_typekey: VarDate) : VarDate = jsNative
+        interface end
 
     type DateConstructor =
         [<EmitConstructor>]
@@ -318,6 +312,45 @@ module Browser =
             abstract Item: index: obj -> 'T
             [<ParamObject; Emit("$0")>]
             static member Create (Item: (obj -> 'T)) : Collection<'T> = jsNative
+
+    module GlobalThis =
+        type ActiveXObject = Fable.Core.TS.Browser.ActiveXObject
+
+        type ITextWriter = Fable.Core.TS.Browser.ITextWriter
+
+        type TextStreamBase = Fable.Core.TS.Browser.TextStreamBase
+
+        type TextStreamWriter = Fable.Core.TS.Browser.TextStreamWriter
+
+        type TextStreamReader = Fable.Core.TS.Browser.TextStreamReader
+
+        /// <summary>
+        /// Represents an Automation SAFEARRAY
+        /// </summary>
+        type SafeArray<'T> = Fable.Core.TS.Browser.SafeArray<'T>
+
+        /// <summary>
+        /// Allows enumerating over a COM collection, which may not have indexed item access.
+        /// </summary>
+        type Enumerator<'T> = Fable.Core.TS.Browser.Enumerator<'T>
+
+        type EnumeratorConstructor = Fable.Core.TS.Browser.EnumeratorConstructor
+
+        /// <summary>
+        /// Enables reading from a COM safe array, which might have an alternate lower bound, or multiple dimensions.
+        /// </summary>
+        type VBArray<'T> = Fable.Core.TS.Browser.VBArray<'T>
+
+        type VBArrayConstructor = Fable.Core.TS.Browser.VBArrayConstructor
+
+        /// <summary>
+        /// Automation date (VT_DATE)
+        /// </summary>
+        type VarDate = Fable.Core.TS.Browser.VarDate
+
+        type DateConstructor = Fable.Core.TS.Browser.DateConstructor
+
+        type Date = Fable.Core.TS.Browser.Date
 
     module WScript =
         [<Interface>]

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <Version>0.3.0-beta.1</Version>
+    <Version>0.3.0-beta.3</Version>
     <FSharpCoreImplicitPackageVersion>9.0.100</FSharpCoreImplicitPackageVersion>
     <AssemblyVersion>0.0.0.0</AssemblyVersion>
     <IsPackable>true</IsPackable>
@@ -34,11 +34,13 @@
     <Compile Include="Shape\Spec.fs" />
     <Compile Include="Shape\ExportNames.fs" />
     <Compile Include="Shape\Anonymous.fs" />
+    <Compile Include="Shape\SourceStringAliases.fs" />
     <Compile Include="Shape\ConstructorObjects.fs" />
     <Compile Include="Shape\FreeTypeParams.fs" />
     <Compile Include="Shape\MixedUnionCensus.fs" />
     <Compile Include="Shape\LiteralUnions.fs" />
     <Compile Include="Shape\TaggedUnions.fs" />
+    <Compile Include="Shape\ErasedObjectUnions.fs" />
     <Compile Include="Shape\Callbacks.fs" />
     <Compile Include="Shape\Interfaces.fs" />
     <Compile Include="Shape\Aliases.fs" />

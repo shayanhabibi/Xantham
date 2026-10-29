@@ -26,6 +26,9 @@ let private equal (claim: string) (expected: 'T) (actual: 'T) =
 /// The JSON of a value as JavaScript sees it: the shape an erased type really has.
 let private json (value: obj) : string = emitJsExpr value "JSON.stringify($0)"
 
+let private jsonFlatObject (value: obj) : string =
+    emitJsExpr value "JSON.stringify($0, Object.keys($0).sort())"
+
 let private patternParameters () =
     let omitted = PatternParameterLab.Keys.Create(__None = "none", _None = "underscore")
 
@@ -190,7 +193,7 @@ let private bigints () =
     check "what came back is still a BigInt, not a number" (emitJsExpr (ledger.balance) "typeof $0 === \"bigint\"")
 
     // The neighbours, at runtime: a template literal really is a string on the way in and out,
-    // and `symbol` really is a symbol - which is why `obj` is where the binding had to stop.
+    // and a value typed as the lib's `Symbol` interface really is a primitive symbol.
     equal
         "a template literal parameter is a string JavaScript can call string methods on"
         "onsave"
@@ -312,25 +315,25 @@ let private nestedNames () =
         (emitJsExpr () "globalThis.__nestedNameLabConfigure.verbose")
 
 let private taggedUnions () =
-    let circle = PhaseBLab.Shape.Circle 2.0
-    equal "a tagged-union case erases to the tagged object" """{"kind":"circle","radius":2}""" (json circle)
+    let circle = PhaseBLab.Shape.Circle(PhaseBLab.CircleShape.Create 2.0)
+    equal "a tagged-union case erases to the tagged object" """{"kind":"circle","radius":2}""" (jsonFlatObject circle)
     equal "and JavaScript reads it off the tag" (System.Math.PI * 4.0) (PhaseBLab.Exports.area circle)
-    let rect = PhaseBLab.Shape.RoundRect(2.0, 3.0, 1.0)
+    let rect = PhaseBLab.Shape.RoundRect(PhaseBLab.RoundRectShape.Create(2.0, 3.0, 1.0))
 
     equal
-        "a multi-field case carries its CompiledName tag"
-        """{"kind":"round-rect","width":2,"height":3,"radius":1}"""
-        (json rect)
+        "a case built from its arm interface carries its CompiledName tag"
+        """{"height":3,"kind":"round-rect","radius":1,"width":2}"""
+        (jsonFlatObject rect)
 
     equal "and the JavaScript side agrees on its arm" 6.0 (PhaseBLab.Exports.area rect)
 
     match PhaseBLab.Exports.makeRoundRect (4.0, 5.0, 0.5) with
-    | PhaseBLab.Shape.RoundRect(width, height, radius) ->
+    | PhaseBLab.Shape.RoundRect rect ->
         equal
-            "a JavaScript-built tagged object matches the F# case with its fields"
+            "a JavaScript-built tagged object matches the F# case as its arm interface"
             (4.0, 5.0, 0.5)
-            (width, height, radius)
-    | PhaseBLab.Shape.Circle radius -> check $"a JavaScript-built round-rect matched Circle {radius}" false
+            (rect.width, rect.height, rect.radius)
+    | PhaseBLab.Shape.Circle circle -> check $"a JavaScript-built round-rect matched Circle {circle.radius}" false
 
 /// The workarounds of docs/.ai/fable5-workarounds.md, each read back through
 /// `tests/fixtures/fable-workaround-lab/index.js`. Where the document says the direct F#
@@ -403,19 +406,23 @@ let private workarounds () =
     equal "though JavaScript still tells the two apart" "null" (FableWorkaroundLab.Exports.describe slots[1])
     equal "as it does the absent one" "absent" (FableWorkaroundLab.Exports.describe slots[2])
 
+    // D3: the Create writes a required `string | null` key, as null when the argument is absent.
     equal
-        "None omits the property rather than writing null"
-        "absent"
+        "an omitted argument writes the required key as null"
+        "null"
         (FableWorkaroundLab.Exports.describe (FableWorkaroundLab.Slot.Create()))
 
-    // The value that is `None` to F# and `null` to JavaScript: the only thing that reaches a
-    // declaration whose type is `string | null` with the null it declares.
-    let asNull: string option = emitJsExpr () "null"
+    let absent: string option = None
 
     equal
-        "a null passed through the option reaches the property as null"
+        "and so does a None held in a variable"
         "null"
-        (FableWorkaroundLab.Exports.describe (FableWorkaroundLab.Slot.Create(?value = asNull)))
+        (FableWorkaroundLab.Exports.describe (FableWorkaroundLab.Slot.Create(?value = absent)))
+
+    equal
+        "a supplied argument is written as given"
+        "string"
+        (FableWorkaroundLab.Exports.describe (FableWorkaroundLab.Slot.Create(value = "a")))
 
     let explicitNull: FableWorkaroundLab.Slot = !! createObj [ "value" ==> (null: obj) ]
 
@@ -906,12 +913,10 @@ let private callbackFunctionForms () =
 
     let fromJs = Probes.CallbackFunctions.handlers
     equal "a callback read off an interface member applies with all its arguments" "js:1:2" (fromJs.onTick 1.0 2.0)
-    // Measured, not wanted. Reading a function-typed member back out hands F# a curry wrapper of
-    // length 1 rather than the JavaScript function itself, so a consumer that passes the value on
-    // to JavaScript passes a unary function. `Func` reads back as the function JavaScript holds.
+
     equal
-        "reading a function-typed member back hands F# a unary curry wrapper"
-        1.0
+        "reading a function-typed member back preserves its JavaScript arity"
+        2.0
         (emitJsExpr fromJs.onTick "$0.length")
 
     let attempt (f: unit -> string) =
@@ -922,9 +927,7 @@ let private callbackFunctionForms () =
 
     let factory = Probes.CallbackFunctions.factory
 
-    // A function-typed *property*: the value is read off the member and applied at the call site.
-    // The wrapper applies correctly from F#; its arity is what is lost.
-    equal "a function-typed property reads back as a unary curry wrapper too" 1.0 (emitJsExpr factory.pair "$0.length")
+    equal "a function-typed property preserves its JavaScript arity too" 2.0 (emitJsExpr factory.pair "$0.length")
     equal "and applies with all its arguments" "pair:1:2" (attempt (fun () -> factory.pair 1.0 2.0))
     equal "a function-typed member of arity 0 applies" "ready" (attempt factory.ready)
 
@@ -1095,6 +1098,8 @@ let private callbackGoldenForms () =
 /// compiles an F# tuple to a JavaScript array, so each claim below reads the `length` of the
 /// function JavaScript received beside the result of calling it with all its arguments at once.
 let private callbackTupledForms () =
+    let show (value: float) : string = emitJsExpr value "String($0)"
+
     let attempt (f: unit -> string) =
         try
             f ()
@@ -1109,16 +1114,17 @@ let private callbackTupledForms () =
 
     // Measured, not wanted. A tupled parameter crosses as a one-argument JavaScript function
     // taking an array, so the runtime's `fn(1, 2)` binds the array slot to `1` and the
-    // destructuring reads `undefined`. The value is wrong and nothing throws.
+    // destructuring reads `undefined`. JavaScript String coercion exposes these invalid numeric
+    // values; Fable numeric interpolation would throw while formatting them.
     equal
         "a tupled function of arity 2 crosses as a unary function over an array"
         "1:got:undefined:undefined"
-        (attempt (fun () -> Probes.CallbackTuples.callTwo (fun (a, b) -> $"got:{a}:{b}")))
+        (attempt (fun () -> Probes.CallbackTuples.callTwo (fun (a, b) -> $"got:{show a}:{show b}")))
 
     equal
         "and arity 3 the same way"
         "1:got:undefined:undefined:undefined"
-        (attempt (fun () -> Probes.CallbackTuples.callThree (fun (a, b, c) -> $"got:{a}:{b}:{c}")))
+        (attempt (fun () -> Probes.CallbackTuples.callThree (fun (a, b, c) -> $"got:{show a}:{show b}:{show c}")))
 
     let mutable sawVoidTwo = 0.0
 
@@ -1132,10 +1138,10 @@ let private callbackTupledForms () =
     equal
         "a named tupled abbreviation crosses at arity 1 too"
         "1:undefined|undefined"
-        (attempt (fun () -> Probes.CallbackTuples.callNamed (fun (value, digits) -> $"{value}|{digits}")))
+        (attempt (fun () -> Probes.CallbackTuples.callNamed (fun (value, digits) -> $"{show value}|{show digits}")))
 
     let built =
-        Probes.TupledHandlers.Create(onTick = (fun (a, b) -> $"tick:{a}:{b}"), onDone = (fun _ -> ()))
+        Probes.TupledHandlers.Create(onTick = (fun (a, b) -> $"tick:{show a}:{show b}"), onDone = (fun _ -> ()))
 
     equal
         "a tupled callback in a ParamObject literal crosses at arity 1"
@@ -1143,7 +1149,11 @@ let private callbackTupledForms () =
         (attempt (fun () -> Probes.CallbackTuples.fire built))
 
     let options =
-        Probes.TupledOptions.Create(label = "b", transform = (fun (a, b) -> $"t:{a}:{b}"), finish = (fun () -> ()))
+        Probes.TupledOptions.Create(
+            label = "b",
+            transform = (fun (a, b) -> $"t:{show a}:{show b}"),
+            finish = (fun () -> ())
+        )
 
     equal
         "a tupled method-shaped ParamObject parameter crosses at arity 1"
@@ -1842,22 +1852,91 @@ let private generatedDelegateForms () =
             DelegateNameLab.CallNesting.Outer(fun seed -> (fun x -> $"one:{seed}:{x}"))
         ))
 
-/// A case folded from arms sharing a tag value agrees on the tag alone, so it carries no field.
-/// What the fold claims is that the tag still reaches JavaScript from a payload-free case.
-let private foldedTaggedCases () =
+/// Arms sharing a tag value are cases of their own, told apart by each case's `CaseTest`. What
+/// the cases claim is both directions: each case writes its own arm, and a JavaScript-built
+/// object of either arm reaches its own case, whichever order the match lists them in.
+let private separatedTaggedCases () =
     equal
-        "a folded case carrying no field still erases to the tagged object"
-        """{"state":"done"}"""
-        (json SharedTagLab.Terminal.Done)
+        "a case separated by presence writes its own arm"
+        """{"state":"done","error":"boom"}"""
+        (json (SharedTagLab.Terminal.Done2 "boom"))
+
+    let describeTerminal (terminal: SharedTagLab.Terminal) =
+        match terminal with
+        | SharedTagLab.Terminal.Done2 error -> $"error:{error}"
+        | SharedTagLab.Terminal.Done value -> $"value:{value}"
+        | SharedTagLab.Terminal.Pending -> "pending"
 
     equal
-        "and a sibling case the fold left alone carries its own tag"
-        """{"state":"pending"}"""
-        (json SharedTagLab.Terminal.Pending)
+        "a value arm reaches its case by presence"
+        "value:1"
+        (describeTerminal (emitJsExpr () """({ state: "done", value: 1 })"""))
 
-    match SharedTagLab.Terminal.Done with
-    | SharedTagLab.Terminal.Done -> check "a folded case matches itself on the tag" true
-    | SharedTagLab.Terminal.Pending -> check "a folded case matched Pending" false
+    equal
+        "an error arm reaches its case by presence"
+        "error:boom"
+        (describeTerminal (emitJsExpr () """({ state: "done", error: "boom" })"""))
+
+    equal "a distinct arm still matches on the tag" "pending" (describeTerminal SharedTagLab.Terminal.Pending)
+
+    let describeOnset (onset: SharedTagLab.Onset) =
+        match onset with
+        | SharedTagLab.Onset.Log2(_, message, _) -> $"truncated:{message}"
+        | SharedTagLab.Onset.Log(_, _, _) -> "whole"
+
+    equal
+        "an optional literal arm matches when the literal is absent"
+        "whole"
+        (describeOnset (emitJsExpr () """({ type: "log", level: "info", message: {} })"""))
+
+    equal
+        "and when it is written"
+        "whole"
+        (describeOnset (emitJsExpr () """({ type: "log", level: "info", message: {}, truncated: false })"""))
+
+    equal
+        "the required literal arm matches its own literal"
+        "truncated:cut"
+        (describeOnset (emitJsExpr () """({ type: "log", level: "info", message: "cut", truncated: true })"""))
+
+    equal
+        "a case separated by a literal writes the literal from its Create"
+        """{"state":"done","ok":false,"owner":{"name":"n","tags":[]},"note":{"text":2}}"""
+        (json (
+            TaggedArmLab.Task.CreateDone2(
+                emitJsExpr () """({ name: "n", tags: [] })""",
+                emitJsExpr () """({ text: 2 })"""
+            )
+        ))
+
+    let describeJob (job: TaggedArmLab.Job) =
+        match job with
+        | TaggedArmLab.Job.Done _ -> "plain"
+        | TaggedArmLab.Job.Done2(_, code) -> $"code:{code}"
+        | TaggedArmLab.Job.Queued -> "queued"
+
+    equal
+        "an arm without a member of its own matches by lacking the other's"
+        "plain"
+        (describeJob (emitJsExpr () """({ state: "done", level: "info" })"""))
+
+    equal
+        "and the arm carrying it matches by presence"
+        "code:3"
+        (describeJob (emitJsExpr () """({ state: "done", level: "warn", code: 3 })"""))
+
+    let describeMixed (mixed: TaggedArmLab.Mixed) =
+        match mixed with
+        | TaggedArmLab.Mixed.Done2 payload -> $"number:{payload}"
+        | TaggedArmLab.Mixed.Done payload -> $"string:{payload}"
+        | TaggedArmLab.Mixed.Queued -> "queued"
+
+    equal
+        "arms sharing every member name match by the member's typeof"
+        "string:a"
+        (describeMixed (emitJsExpr () """({ state: "done", payload: "a" })"""))
+
+    equal "for either class" "number:4" (describeMixed (emitJsExpr () """({ state: "done", payload: 4 })"""))
 
 /// A union written inline at a member position, declared under a name of its own. What the mint
 /// claims is the read: `workarounds` item 1 measures an erased union over interface arms
@@ -1867,19 +1946,19 @@ let private mintedTaggedCases () =
     equal
         "a case minted from an inline union erases to the tagged object"
         """{"type":"fetch","url":"/x"}"""
-        (json (SharedTagLab.Wide.Event.Fetch "/x"))
+        (jsonFlatObject (SharedTagLab.Wide.Event.Fetch(SharedTagLab.FetchInfo.Create "/x")))
 
     equal
         "and an arm carrying the tag alone erases to it alone"
         """{"type":"queue"}"""
-        (json SharedTagLab.Wide.Event.Queue)
+        (json (SharedTagLab.Wide.Event.Queue(SharedTagLab.QueueInfo.Create())))
 
     let above: SharedTagLab.Wide.Event =
         emitJsExpr () """({ type: "jsrpc", methodName: "ping" })"""
 
     match above with
-    | SharedTagLab.Wide.Event.Jsrpc methodName ->
-        equal "a JavaScript-built object reaches the case its tag names" "ping" methodName
+    | SharedTagLab.Wide.Event.Jsrpc info ->
+        equal "a JavaScript-built object reaches the case its tag names" "ping" info.methodName
     | _ -> check "a JavaScript-built jsrpc reached another case" false
 
     // Three arms, below the erased-union cap: the arm an erased union would have written under
@@ -1887,7 +1966,7 @@ let private mintedTaggedCases () =
     let below: SharedTagLab.Narrow.Event = emitJsExpr () """({ type: "email" })"""
 
     match below with
-    | SharedTagLab.Narrow.Event.Email -> check "a union claimed below the cap matches on its tag too" true
+    | SharedTagLab.Narrow.Event.Email _ -> check "a union claimed below the cap matches on its tag too" true
     | _ -> check "a JavaScript-built email reached another case" false
 
 /// A tagged union over a type parameter. The case fields read `'T`, and Fable erases a generic
@@ -1911,6 +1990,71 @@ let private genericTaggedCases () =
     | SharedTagLab.Scheduled.Repeat(payload, Some previous) ->
         equal "a JavaScript-built object reaches its case with both payloads" "1:0" $"{payload}:{previous}"
     | _ -> check "a JavaScript-built repeat reached another case" false
+
+/// A case carrying its arm's interface is the arm value with the tag set: a value of the interface
+/// constructs it, and a match reaches the interface again.
+let private inlinedArmCases () =
+    let ping = InlineArmLab.Ping.Create(at = 5.0)
+
+    equal
+        "a case built from its arm interface is the arm, tagged"
+        """{"at":5,"op":"ping"}"""
+        (jsonFlatObject (InlineArmLab.Message.Ping ping))
+
+    let received: InlineArmLab.Message = emitJsExpr () """({ op: "pong", at: 2 })"""
+
+    match received with
+    | InlineArmLab.Message.Pong pong -> equal "a JavaScript-built object reaches its case as the arm" (Some 2.0) pong.at
+    | _ -> check "a JavaScript-built pong reached another case" false
+
+    let outcome: InlineArmLab.Outcome =
+        emitJsExpr () """({ state: "done", reason: "stop" })"""
+
+    match outcome with
+    | InlineArmLab.Outcome.Aborted aborted -> equal "named arms sharing a tag match by their test" "stop" aborted.reason
+    | _ -> check "an aborted outcome reached another case" false
+
+    let handle: InlineArmLab.Handle =
+        emitJsExpr () """({ kind: "file", path: "/a", close() { this.path = "closed" } })"""
+
+    match handle with
+    | InlineArmLab.Handle.File file ->
+        file.close ()
+        equal "an arm with a method reaches its case with the method" "closed" file.path
+    | _ -> check "a file handle reached another case" false
+
+/// A case `Create` builds the object its case builds, absent optional fields omitted and literal
+/// fields written, and the result matches the case its tag names.
+let private taggedCaseCreates () =
+    equal
+        "a case Create with no argument writes the tag alone"
+        """{"status":"completed"}"""
+        (json (TaggedArmLab.Recovery.CreateCompleted()))
+
+    equal
+        "a case Create and its case build the same object"
+        (json (TaggedArmLab.Recovery.Completed(Some(box 1), None)))
+        (json (TaggedArmLab.Recovery.CreateCompleted(snapshot = 1)))
+
+    equal
+        "a case Create writes a literal field"
+        """{"verb":"start","channel":"bus","at":2}"""
+        (json (TaggedArmLab.Signal.CreateStart 2.0))
+
+    match TaggedArmLab.Recovery.CreateAborted(TaggedArmLab.Recovery.Cases.Aborted.Type.User, reason = "r") with
+    | TaggedArmLab.Recovery.Aborted(reason, _) ->
+        equal "a case Create with an escaped field matches its case" "r" (Option.defaultValue "" reason)
+    | _ -> check "a case Create reached another case" false
+
+    equal
+        "an escaped field is written under its JS key"
+        """{"status":"aborted","type":"user"}"""
+        (json (TaggedArmLab.Recovery.CreateAborted TaggedArmLab.Recovery.Cases.Aborted.Type.User))
+
+    equal
+        "a generic case Create writes its payload"
+        """{"kind":"repeat","payload":1}"""
+        (json (SharedTagLab.Scheduled.CreateRepeat 1.0))
 
 /// §4.10's pure index signatures, resolved to `Record`/`ReadonlyRecord`
 /// rather than a minted interface. Every property below is one of those types; reading and
@@ -1946,10 +2090,8 @@ let private recordIndex () =
 
 /// §4.4's call side: a hybrid's own call signature reaches Invoke, so `x.Invoke(a)` compiles to
 /// `x(a)` rather than a method call named `Invoke`, mirroring `[<EmitConstructor>]` on the
-/// construct side. `widget.handler` is the one value in this fixture reached at a member
-/// position, so it is the one case that still exposes an explicit `.Invoke` to call through;
-/// every other export is itself the callable value, so `Exports` (unrelated to this pass) already
-/// renders it as a direct static function rather than an object carrying an `Invoke` member.
+/// construct side. A callable export carrying members is bound as that object, so its call and
+/// its members read off the one value; a function standing alone stays a direct static method.
 let private callableHybrids () =
     let widget = CallableHybridLab.Exports.widget
 
@@ -1961,36 +2103,45 @@ let private callableHybrids () =
     equal "and its sibling property still reads off the same object" true widget.handler.enabled
 
     equal
-        "a named-declaration hybrid's export calls straight through to the same function"
+        "a named-declaration hybrid's export calls through Invoke"
         42.0
-        (CallableHybridLab.Exports.trigger 21.0)
+        (CallableHybridLab.Exports.trigger.Invoke 21.0)
+
+    equal "and reads its property off the same function" "double" CallableHybridLab.Exports.trigger.label
 
     equal
-        "an overloaded hybrid's export reaches the two-argument arity"
+        "an overloaded hybrid's Invoke reaches the two-argument arity"
         7.0
-        (CallableHybridLab.Exports.multi (3.0, 4.0))
+        (CallableHybridLab.Exports.multi.Invoke(3.0, 4.0))
 
-    equal "and the one-argument arity" 4.0 (CallableHybridLab.Exports.multi 3.0)
+    equal "and the one-argument arity" 4.0 (CallableHybridLab.Exports.multi.Invoke 3.0)
 
     equal
         "a hybrid whose overloads collided on their parameters calls the one function, under the union of their returns"
         30.0
-        (unbox<float>(CallableHybridLab.Exports.ambiguous 3.0))
+        (unbox<float>(CallableHybridLab.Exports.ambiguous.Invoke 3.0))
 
     equal
         "a call signature's own type parameter reaches through generically"
         "id"
-        (CallableHybridLab.Exports.identity "id")
+        (CallableHybridLab.Exports.identity.Invoke "id")
 
     equal
         "a generic interface's call signature reads its own type parameter"
         42.0
-        (CallableHybridLab.Exports.boxedNumber ())
+        (CallableHybridLab.Exports.boxedNumber.Invoke())
 
     equal
-        "a hybrid whose member is already named Invoke keeps the plain call"
-        6.0
-        (CallableHybridLab.Exports.collides 5.0)
+        "a hybrid whose member is already named Invoke reads that member; its call is the SI001 loss"
+        "not-a-function"
+        CallableHybridLab.Exports.collides.Invoke
+
+    equal "a function merged with a namespace calls through Invoke" 3.0 (CallableHybridLab.Exports.stamp.Invoke "abc")
+    equal "and reads the namespace's value off the same function" "1.0" CallableHybridLab.Exports.stamp.version
+    equal "an interface-merged function calls through Invoke" "made" (CallableHybridLab.Exports.Merged.Invoke()).m
+    equal "and reads its namespace value" "2.0" CallableHybridLab.Exports.Merged.version
+    equal "a function standing alone stays a method" 5.0 (CallableHybridLab.Exports.solo "hello")
+    equal "as does one merged with a type alone" 4.0 (CallableHybridLab.Exports.Fn 4.0).value
 
 /// §4.4's routing counterpart: two call signatures sharing a hoisted type-parameter name under
 /// different bounds reach an interface, each keeping its own `Invoke` overload. `makeCoalescer`
@@ -2032,10 +2183,7 @@ let private exportLayout () =
     LayoutLab.Globals.Exports.sharedFlag <- true
     check "a mutable global writes through to globalThis" (emitJsExpr () "globalThis.sharedFlag === true")
 
-    equal
-        "a return-only overload pair is one member whose union carries what the function returns"
-        "x"
-        (unbox<string>(LayoutLab.Exports.pick "x"))
+    equal "source-identical overloads retain the first applicable string return" "x" (LayoutLab.Exports.pick "x")
 
     equal
         "a literal-separated overload selects the one exported function"
@@ -2286,7 +2434,25 @@ let private tagMapKeys () =
 let main _ =
     dependencyEntrypoint ()
     SupportHelpers.run check
+    ErasedCases.run check
+    GeneratedErasedCases.run check
+    GenericCallableReferences.run check
     ExportProvenance.run check
+    let clonedNumber: float = CensusCallableProvenanceLab.Exports.cloneSelf.clone 42.0
+    let clonedText: string = CensusCallableProvenanceLab.Exports.cloneSelf.clone "clone"
+    equal "merged generic method preserves numbers" 42.0 clonedNumber
+    equal "merged generic method preserves strings" "clone" clonedText
+
+    equal
+        "renamed merged method invokes its function"
+        "echo"
+        (CensusCallableProvenanceLab.Exports.renamedSelf.echo "echo")
+
+    equal
+        "merged re-exported function invokes its target"
+        7.0
+        (CensusCallableProvenanceLab.Exports.aliasSelf.aliased 7.0)
+
     bindingExtensions ()
     globals ()
     imports ()
@@ -2298,9 +2464,11 @@ let main _ =
     constructorObjects ()
     heritage ()
     taggedUnions ()
-    foldedTaggedCases ()
+    separatedTaggedCases ()
     mintedTaggedCases ()
     genericTaggedCases ()
+    inlinedArmCases ()
+    taggedCaseCreates ()
     nestedNames ()
     optionalHooks ()
     renamedStatics ()
@@ -2354,6 +2522,18 @@ let main _ =
         "html:<p>test</p>"
         (ExclusiveSignatureLab.Exports.render (U2.Case1(ExclusiveSignatureLab.HtmlPage.Create "<p>test</p>")))
 
+    let ambientRoot = CensusAmbientExportValueLab.CensusRoot.Direct.Exports.state
+    let forwardedRoot = CensusAmbientExportValueLab.CensusRoot.Alias.Exports.state
+    check "ambient export-equals aliases preserve object identity" (obj.ReferenceEquals(ambientRoot, forwardedRoot))
+    equal "ambient export-equals reads its root member" "root-value" ambientRoot.marker
+    ambientRoot.value <- "written"
+    equal "ambient export-equals aliases share property writes" "written" forwardedRoot.value
+    equal "ambient export-equals method keeps its receiver" "root-value:called" (forwardedRoot.update "called")
+    equal "ambient export-equals method updates the original object" "called" ambientRoot.value
+
+    GenericCallableInterfaces.run check
+    RecursiveCallbacks.run check
+    BacktickMembers.run check
     Projections.run check
 
     match failures with

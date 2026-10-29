@@ -1,4 +1,4 @@
-﻿namespace Xantham.Generator
+namespace Xantham.Generator
 
 open System
 open System.ComponentModel.DataAnnotations
@@ -1132,6 +1132,12 @@ type HarvestedExport =
         ExportName: string
         /// The origin symbol (`getAliasedSymbol` applied until stable).
         Symbol: SymbolResponse
+        /// The namespace exporting this occurrence. An alias can be exported from a different
+        /// namespace than its resolved target symbol, whose identity remains unchanged.
+        DeclaringNamespace: SymbolKey option
+        /// Public namespace path for this export occurrence, including namespace aliases.
+        /// The canonical namespace map remains keyed by the resolved source symbol.
+        NamespacePath: string option
         /// The entry exposes this symbol as a value, through no type-only import/export edge.
         /// The origin symbol's value flags alone do not establish a runtime export.
         HasValueExport: bool
@@ -1147,10 +1153,9 @@ type HarvestModel =
         Exports: HarvestedExport list
         /// Runtime class exports from ambient modules, available to reached declarations.
         AmbientClasses: HarvestedExport list
-        /// The namespaces the entry package declares, by symbol id, under names an F# module
-        /// can be spelled with. A declaration written inside one nests under it where a second
-        /// declaration claims the same name.
-        Namespaces: Map<int<symbolId>, string<symbolName>>
+        /// Namespace module paths keyed by complete symbol identity. Nested namespaces carry
+        /// dotted paths, and their exported declarations retain that source namespace.
+        Namespaces: Map<SymbolKey, string<symbolName>>
         /// Count of the entry package's own declared names that a `lib.*.d.ts` declaration of
         /// the same name precedes: `harvest-globals` groups such a name as the compiler lib
         /// (`Grouping.classify`) and it does not reach `Exports` - unless the compiler-lib
@@ -1173,6 +1178,13 @@ type HarvestModel =
 // Tier 2 - Resolve: what the checker says everything is. A type table keyed by TypeResponse.Id.
 // ---------------------------------------------------------------------------------------------
 
+/// <summary>Source annotation evidence for a direct closed string-union property occurrence.</summary>
+type SourceStringAnnotation =
+    /// <summary>The actual source alias chain, annotation first and enum declaration last.</summary>
+    | NamedStringAlias of SymbolResponse list
+    /// <summary>A direct anonymous union of string literals written at this occurrence.</summary>
+    | InlineStringLiterals
+
 /// A property or parameter, resolved: the symbol plus the derived facts every shape pass
 /// would otherwise re-ask the wire for.
 type ResolvedMember =
@@ -1186,9 +1198,11 @@ type ResolvedMember =
         /// The well-known symbol keying the member, as `Symbol.<name>` spells it: `Some "iterator"`
         /// for `[Symbol.iterator]`.
         WellKnownSymbol: string option
-        /// Whether the member's symbol is a `function` declaration, read through the export alias
-        /// of a re-exported namespace member.
+        /// <summary>Function-declaration provenance, including namespace export aliases and
+        /// transient intersections of method and function declarations.</summary>
         ResolvesToFunction: bool
+        /// <summary>The actual source alias explicitly annotating this direct closed string-union property.</summary>
+        SourceStringAnnotation: SourceStringAnnotation option
     }
 
 /// One index signature (`[key: string]: V`) as the resolve tier records it. These are
@@ -1220,6 +1234,8 @@ type OverloadDoc =
 type ResolvedSignature =
     {
         Parameters: ResolvedMember list
+        /// The signature declares an explicit TypeScript receiver parameter.
+        HasThisParameter: bool
         /// The signature's last parameter is a rest parameter (`...args`).
         HasRest: bool
         /// The signature's own type parameters (§4.9). A generic *function* carries them here
@@ -1228,6 +1244,9 @@ type ResolvedSignature =
         /// A construct signature of an `abstract class`, which TypeScript refuses `new` on. It
         /// marks the class as one written to be derived from (§4.4).
         IsAbstract: bool
+        /// A construct signature of a `private constructor`, which TypeScript admits `new` on only
+        /// inside the class. The class stays a class; the binding carries no constructor for it.
+        IsPrivate: bool
         ReturnTypeId: int<typeId>
         /// The declaration's source text on one line, and the description of its own JSDoc.
         /// Carried by each signature of a set of two or more.
@@ -1235,6 +1254,9 @@ type ResolvedSignature =
         /// The JSDoc of the signature's own declaration, where the signature is one of several
         /// overloads and the declaration is available.
         OwnDoc: OverloadDoc option
+        /// The names an array binding pattern on the rest parameter writes, by position:
+        /// `...[value]` carries `[ Some "value" ]`, a hole or a nested pattern `None`.
+        RestPatternNames: string option list
     }
 
 /// A conditional type's mapping facts (§4.11).
@@ -1269,12 +1291,26 @@ type TypeFacts =
         Declarations: string<declHandle> list
         /// Alias arguments retain concrete substitutions for declaration catalog specialization keys.
         DeclarationArguments: TypeResponse list
+        /// Per `DeclarationArguments` position, the bound of a type-parameter argument whose bound
+        /// differs from the bound the alias declares there; empty when no argument differs.
+        DeclarationArgumentBounds: int<typeId> option list
         /// Declaration handles of the alias applied at this type occurrence.
         AliasDeclarations: string<declHandle> list
         /// Symbol id of the declaration the type's own symbol is written inside - a namespace,
         /// where `HarvestModel.Namespaces` has a name for it.
-        SymbolParent: int<symbolId> option
+        SymbolParent: SymbolKey option
+        /// Source namespaces enclosing the declaration, outermost first. Module specifiers
+        /// and the global augmentation wrapper are not namespace segments.
+        NamespacePath: string list
+        /// Flags of the type's own symbol: `Class`, or `Interface` merged with a variable for a
+        /// constructable host interface. `None` where the type has no symbol.
+        SymbolFlags: SymbolFlags
+        /// Public and protected members. A TypeScript-private member (the `private` modifier or a
+        /// `#name`) is inaccessible outside its class and is absent.
         Members: ResolvedMember list
+        /// The type has a TypeScript-private member. TypeScript then admits only the class's own
+        /// instances, never an object literal.
+        PrivateMembers: bool
         /// Index signatures (§4.10). Kept apart from `Members` because they are not properties:
         /// they have no name, and a type may carry one with no members at all.
         IndexInfos: ResolvedIndex list
@@ -1294,6 +1330,10 @@ type TypeFacts =
         /// of the table: deriving it drags all of `Array.prototype` in again for every distinct
         /// tuple shape, and nothing but these flags is wanted from it.
         TupleElements: ElementFlags list
+        /// The element labels of a tuple a rest parameter is typed by, in element order:
+        /// `[start: number]` carries `Some "start"`, an unlabelled element `None`. Empty for an
+        /// unlabelled tuple and for every other type.
+        TupleLabels: string option list
         /// The arguments the type's *alias* was written with, by id (§4.9). On the declaration
         /// form of a generic alias these are its own parameters - `type Mapper<T> = (t: T) => T`
         /// leaves the function type itself parameterless, so this is the only place `T` appears.
@@ -1331,6 +1371,9 @@ type TypeFacts =
         AliasIdentity: (string<symbolName> * int<typeId>) option
         /// The name an error type's reference was written with, where the checker retains it.
         UnresolvedName: string<symbolName> option
+        /// The global `Symbol` interface type, as the checker's apparent type of a `symbol` or
+        /// `unique symbol`. Populated only on those two primitives.
+        SymbolApparentType: int<typeId> option
     }
 
 module TypeFacts =
@@ -1343,9 +1386,13 @@ module TypeFacts =
             DeclFile = None
             Declarations = []
             DeclarationArguments = []
+            DeclarationArgumentBounds = []
             AliasDeclarations = []
             SymbolParent = None
+            NamespacePath = []
+            SymbolFlags = SymbolFlags.None
             Members = []
+            PrivateMembers = false
             IndexInfos = []
             CallSignatures = []
             ConstructSignatures = []
@@ -1354,6 +1401,7 @@ module TypeFacts =
             AmbientClass = None
             TypeArguments = []
             TupleElements = []
+            TupleLabels = []
             AliasTypeArguments = []
             IntersectionMembers = []
             Constraint = None
@@ -1367,6 +1415,7 @@ module TypeFacts =
             NonNullableApplication = None
             AliasIdentity = None
             UnresolvedName = None
+            SymbolApparentType = None
         }
 
 /// The type ids an export resolves to. A symbol can be both a type and a value (a class), so
@@ -1375,13 +1424,17 @@ type ExportTypeIds =
     {
         Declared: int<typeId> option
         Value: int<typeId> option
+        /// Source alias parameters in declaration order, independent of shared checker types.
+        AliasParameters: int<typeId> list option
     }
 
 type ResolveModel =
     {
         Harvest: HarvestModel
+        /// <summary>Complete identities of intrinsic NoInfer declarations in the selected compiler's default library.</summary>
+        CompilerNoInferSymbols: Set<SymbolKey>
         /// Export symbol id -> the type ids the checker gave for it.
-        ExportTypes: Map<int<symbolId>, ExportTypeIds>
+        ExportTypes: Map<SymbolKey, ExportTypeIds>
         /// The type table. Closed: every id referenced by a `TypeFacts` is a key here or in
         /// `NotFollowed` - that closure is the tier's invariant.
         Types: Map<int<typeId>, TypeFacts>
@@ -1459,6 +1512,9 @@ type FsPropertyMember =
         /// The value of a literal member: a required property typed by one string or
         /// numeric literal. `Type` is the literal's primitive.
         Literal: FsLiteral option
+        /// A required key whose type admits `null` and not `undefined` (D3): a `Create` writes
+        /// the key as `null` when its argument is absent or `undefined`.
+        NullKey: bool
     }
 
 /// A type parameter (§4.9), bound by a declaration or by a generic signature of its own. The
@@ -1539,6 +1595,8 @@ type FsMember =
     /// reached as `$0[Symbol.<symbol>]` through `[<Emit>]`. The inner member is an
     /// `FsProperty` or an `FsMethod`.
     | FsSymbolKeyed of symbol: string * FsMember
+    /// A member accessed through its exact JavaScript string key under an allocated F# name.
+    | FsStringKeyed of key: string * FsMember
     /// An overload keyed by string literals, declared as a method of its own and reached
     /// through `[<Emit>]` as a call to `target` with each literal written before the F#
     /// argument at its index: `onClose` is `$0.on('close', $1)`. The inner member is an
@@ -1555,6 +1613,8 @@ type ImportBinding =
     /// An export of an ambient module, under the specifier that module declares. The specifier
     /// is the declaration's own rather than the run's runtime package.
     | ImportFrom of name: string * specifier: string<importSpecifier>
+    /// A constructor object's member accessed through its exact JavaScript string key.
+    | ImportKeyed of binding: ImportBinding * key: string
 
 /// What one *bound* member is - a member whose body is not F# but a reference into JavaScript,
 /// carried by an `ImportBinding`. Two kinds of declaration hold these: the `Exports` type, whose
@@ -1593,7 +1653,7 @@ type OwnedExportMember =
         Owner: ExportOwner
         HarvestIndex: int
         ExportName: string
-        SourceSymbolId: int<symbolId>
+        SourceSymbolId: SymbolKey
         SignatureOrdinal: int option
         Member: FsExportMember
     }
@@ -1629,11 +1689,18 @@ type FsCreateOverload =
         /// Literal members the Emit writes into the object, as JavaScript key and value, in
         /// member order, inherited ones included.
         Literals: (string * FsLiteral) list
+        /// The parameters whose key the Emit writes as `null` when the argument is absent or
+        /// `undefined` (D3), by parameter name.
+        NullKeys: string list
+        /// Allocated parameter names paired with their original JavaScript string keys.
+        StringKeys: Map<string, string>
     }
 
 type FsInterfaceDecl =
     {
         Name: string
+        /// Object expressions implementing this contract represent JavaScript functions.
+        Callable: bool
         Docs: string
         Tags: JSDocTagInfo list
         Order: DeclOrder option
@@ -1682,7 +1749,44 @@ type FsDelegateParam = { Name: string; Type: FsTypeRef }
 /// One field of a tagged-union case. The name is the JS property key verbatim: Fable emits the
 /// field under its F# name, and backtick escaping is transparent there (`` ``type`` `` reaches
 /// JS as `type`), so no separate compiled name is needed.
-type FsTaggedField = { Name: string; Type: FsTypeRef }
+type FsTaggedField =
+    {
+        Name: string
+        Docs: string
+        Tags: JSDocTagInfo list
+        Type: FsTypeRef
+        /// The value of a literal field: a required property typed by one string or numeric
+        /// literal. `Type` is the literal's primitive.
+        Literal: FsLiteral option
+        /// A required key whose type admits `null` and not `undefined` (D3): the case's `Create`
+        /// writes the key as `null` when its argument is absent or `undefined`.
+        NullKey: bool
+    }
+
+/// The JavaScript `typeof` class of a value.
+type FsTypeofClass =
+    | TypeofString
+    | TypeofNumber
+    | TypeofBoolean
+    | TypeofBigInt
+    | TypeofSymbol
+    | TypeofFunction
+    | TypeofObject
+
+/// A test on the tested object separating one arm from the others sharing its tag value, in the
+/// order TypeScript narrows by.
+type FsCaseTest =
+    /// The property holds the literal. With `orAbsent`, the property may also be missing or
+    /// `undefined`.
+    | LiteralEquals of name: string * value: FsLiteral * orAbsent: bool
+    /// The object carries the property.
+    | HasProperty of name: string
+    /// The object carries none of the properties.
+    | LacksProperties of names: string list
+    /// The property's value is of the `typeof` class.
+    | TypeofIs of name: string * typeofClass: FsTypeofClass
+    /// The property's value differs from the undefined value admitted by every other arm.
+    | IsDefined of name: string
 
 /// One case of a `[<TypeScriptTaggedUnion>]` DU: the case name, the tag literal when it does
 /// not spell the case name, and the arm's own properties as case fields.
@@ -1691,13 +1795,22 @@ type FsTaggedField = { Name: string; Type: FsTypeRef }
 /// itself from the case's compiled name. Verified against Fable 5.13: `Circle(radius = 2.0)`
 /// emits `{ kind: "circle", radius: 2 }`, and a `None` in an optional field omits the key
 /// rather than writing `undefined`, which is exactly TypeScript's optional-property semantics.
-/// Carrying the arm type as a single payload field instead does *not* work - Fable wraps it as
-/// `{ kind: "circle", Item: x }`, an object no TypeScript signature would accept.
+/// A plain single payload field is wrapped as `{ kind: "circle", Item: x }`; an `Inlines` case
+/// is the arm itself.
 type FsTaggedCase =
     {
         Name: string
         CompiledName: string option
+        /// The test separating the case from other cases sharing its tag value, checked after
+        /// the tag matches. Rendered as the case's `[<CaseTest>]`.
+        CaseTest: FsCaseTest option
+        /// Whether the case's one field is the arm's interface, rendered `[<InlineInterface>]`:
+        /// the case compiles as the arm with the tag set, and `Fields` holds that one field.
+        Inlines: bool
         Fields: FsTaggedField list
+        /// The name of the case's `Create` static member, which builds the case with its optional
+        /// fields omittable and its literal fields written.
+        Create: string option
     }
 
 /// A discriminated union the checker proved is tagged (D4, §4.5(2)): every member is an object
@@ -1716,6 +1829,26 @@ type FsTaggedUnionDecl =
         /// The discriminant property's name, as TypeScript spells it.
         Tag: string
         Cases: FsTaggedCase list
+    }
+
+/// An identity-preserving case carrying an existing object, function or constructor.
+type FsErasedObjectCase =
+    {
+        Name: string
+        Payload: FsTypeRef
+        Test: FsCaseTest
+    }
+
+/// A union of typed object arms distinguished by runtime predicates.
+type FsErasedObjectUnionDecl =
+    {
+        Name: string
+        Docs: string
+        Tags: JSDocTagInfo list
+        Order: DeclOrder option
+        TypeParameters: FsTypeParam list
+        Cases: FsErasedObjectCase list
+        Invokes: FsConstructorMember list
     }
 
 /// A numeric TS enum as an F# enum - `type E = A = 1` (§4.7).
@@ -1801,6 +1934,7 @@ type FsDecl =
     | FsPhantom of FsPhantomDecl
     | FsMeasure of FsMeasureDecl
     | FsTaggedUnion of FsTaggedUnionDecl
+    | FsErasedObjectUnion of FsErasedObjectUnionDecl
     | FsEnum of FsEnumDecl
     | FsAbbrev of FsAbbrevDecl
     | FsDelegateType of FsDelegateDecl
@@ -1823,10 +1957,27 @@ type KeyBinding =
     /// constraint of the generic parameter the access is applied at.
     | TypedKeyOf of operand: FsTypeRef * operandId: int<typeId> * result: string * bound: FsTypeRef option
 
+/// <summary>A source-authenticated string alias and the separate anonymous literal representation.</summary>
+type SourceStringAliasDecl =
+    {
+        /// <summary>The allocated declaration name for this source symbol.</summary>
+        Name: string
+        /// <summary>The anonymous enum name used by unannotated occurrences of the same checker union.</summary>
+        LiteralName: string option
+        /// <summary>The complete resolved source symbol, including merged declaration handles.</summary>
+        AliasSymbol: SymbolResponse
+        /// <summary>The exact declared checker type authenticated at the annotation.</summary>
+        DeclaredTypeId: int<typeId>
+        /// <summary>A transparent, source-authenticated zero-argument alias target.</summary>
+        ForwardTo: SymbolKey option
+    }
+
 type ShapeModel =
     {
         Harvest: HarvestModel
-        ExportTypes: Map<int<symbolId>, ExportTypeIds>
+        /// <summary>Complete identities of intrinsic NoInfer declarations in the selected compiler's default library.</summary>
+        CompilerNoInferSymbols: Set<SymbolKey>
+        ExportTypes: Map<SymbolKey, ExportTypeIds>
         Types: Map<int<typeId>, TypeFacts>
         NotFollowed: Map<int<typeId>, string>
         /// Type id -> the F# type name this run declares for it - exports named first, then
@@ -1843,6 +1994,11 @@ type ShapeModel =
         DeclParams: Map<int<typeId>, int<typeId> list>
         /// Recognized generic application id -> the declaration id whose name it references.
         AliasApplications: Map<int<typeId>, int<typeId>>
+        /// <summary>Explicit source string-alias occurrences, keyed by full source symbol identity.</summary>
+        SourceStringAliases: Map<SymbolKey, SourceStringAliasDecl>
+        /// Names claimed from derived member, argument or arm positions. Source export roots,
+        /// including namespace members, are excluded even when their types are anonymous.
+        MintedNames: Set<string>
         /// `Exports` members accumulated by the class/function/value passes, keyed by harvest
         /// position so `order-declarations` can assemble them in source order.
         ExportMembers: OwnedExportMember list

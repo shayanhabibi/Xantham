@@ -22,8 +22,14 @@ type Coalesce<'T> =
     [<Emit("$0($1...)")>]
     abstract Invoke<'U>: value: 'U * fallback: 'U -> 'U
 
-[<Erase>]
-type OneShot<'T, 'U> = private OneShot__ of ('U -> 'U)
+/// <summary>
+/// One generic call signature keeps its invocation-owned parameter separate from the
+/// interface's own parameter.
+/// </summary>
+[<Fickl.Core.CallableInterface>]
+type OneShot<'T> =
+    [<Emit("$0($1...)")>]
+    abstract Invoke<'U>: value: 'U -> 'U
 
 type Multiplex = (float -> float)
 
@@ -31,13 +37,10 @@ type Multiplex = (float -> float)
 /// Negative: a member beside the call signature routes through the existing hybrid path (§4.4),
 /// regardless of the call signature's own shape.
 /// </summary>
-[<Interface>]
 type Ledger =
     abstract count: float with get, set
     [<Emit("$0($1...)")>]
     abstract Invoke: id: float -> string
-    [<ParamObject; Emit("$0")>]
-    static member Create (count: float) : Ledger = jsNative
 
 /// <summary>
 /// <c>Coalesce</c> at a member position: both call signatures recover as separable overloads under
@@ -58,16 +61,14 @@ type Exports =
     [<Import("makeCoalescer", "callable-overloads-lab")>]
     static member makeCoalescer<'T> () : 'T * Coalesce<'T> = jsNative
     [<Import("coalesce", "callable-overloads-lab")>]
-    static member coalesce<'U> (value: 'U) : 'U = jsNative
-    [<Import("coalesce", "callable-overloads-lab")>]
-    static member coalesce<'U> (value: 'U, fallback: 'U) : 'U = jsNative
+    static member coalesce: Coalesce<string> = jsNative
     [<Import("oneShot", "callable-overloads-lab")>]
-    static member oneShot<'U> (value: 'U) : 'U = jsNative
+    static member oneShot: OneShot<string> = jsNative
     [<Import("multiplex", "callable-overloads-lab")>]
     static member multiplex (value: float) : float = jsNative
     [<Import("multiplex", "callable-overloads-lab")>]
     static member multiplex (value: float, extra: float) : float = jsNative
     [<Import("ledger", "callable-overloads-lab")>]
-    static member ledger (id: float) : string = jsNative
+    static member ledger: Ledger = jsNative
     [<Import("holder", "callable-overloads-lab")>]
     static member holder: Holder = jsNative

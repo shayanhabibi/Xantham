@@ -96,7 +96,6 @@ type Labelled<'T> =
 type Tagged =
     inherit Box<string>
     abstract tag: string with get, set
-    abstract value: string with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (tag: string, value: string) : Tagged = jsNative
 

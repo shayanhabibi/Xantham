@@ -27,7 +27,7 @@ let private withSession (test: Session<TscChannel> -> unit) =
         | Some exe ->
             use channel = new TscChannel(exe, fixtures)
             Api.initialize channel |> ignore
-            let snapshot = channel.updateSnapshot(openProjects = [| file "tsconfig.json" |])
+            let snapshot = channel.createSnapshot(openProjects = [| file "tsconfig.json" |])
             test (channel.Session snapshot)
 
 let private withMailboxSession (test: Session<TscMailbox> -> unit) =
@@ -37,7 +37,7 @@ let private withMailboxSession (test: Session<TscMailbox> -> unit) =
         | Some exe ->
             use mailbox = new TscMailbox(exe, fixtures)
             mailbox.initialize() |> Async.RunSynchronously |> ignore
-            let snapshot = mailbox.updateSnapshot(openProjects = [| file "tsconfig.json" |]) |> Async.RunSynchronously
+            let snapshot = mailbox.createSnapshot(openProjects = [| file "tsconfig.json" |]) |> Async.RunSynchronously
             test (mailbox.Session snapshot)
 
 /// The extension members of one generated class, by name. `[<Extension>]` classes are static, and
@@ -87,17 +87,14 @@ let sessionCoverageTests =
             Set.difference (membersOf "SessionlessExtensions") (membersOf "AsyncSessionlessExtensions")
             |> Flip.Expect.equal "only batchRequests is absent asynchronously" (Set.ofList [ "batchRequests" ])
 
-        // The partition is the claim the layer rests on: a method belongs on the session when it
-        // names a snapshot, and on `Sessionless` when it does not. `updateSnapshot` creates one
-        // and so cannot presuppose it; `getSourceFile` reads one and so can.
-        testCase "the partition puts snapshot-creating methods outside the session" <| fun _ ->
+        testCase "the partition binds methods that take an existing snapshot" <| fun _ ->
             let session = membersOf "SessionExtensions"
             let sessionless = membersOf "SessionlessExtensions"
-            for method in [ "updateSnapshot"; "createProgram"; "initialize"; "transpileModule" ] do
+            for method in [ "createSnapshot"; "initialize"; "transpileModule" ] do
                 Set.contains method sessionless
                 |> Flip.Expect.isTrue $"{method} takes no snapshot, so it belongs on Sessionless"
                 Set.contains method session |> Flip.Expect.isFalse $"{method} is not a session method"
-            for method in [ "getSourceFile"; "getSymbolAtPosition"; "getAnyType"; "release" ] do
+            for method in [ "updateSnapshot"; "getSourceFile"; "getSymbolAtPosition"; "getAnyType"; "release" ] do
                 Set.contains method session |> Flip.Expect.isTrue $"{method} names a snapshot"
                 Set.contains method sessionless |> Flip.Expect.isFalse $"{method} is not sessionless"
     ]
@@ -149,7 +146,7 @@ let sessionLiveTests =
         // `WithSnapshot` is how the result gets used. Together they are the loop a caller runs
         // when a file changes.
         testCase "Sessionless opens a snapshot the session can move to" <| withSession (fun session ->
-            let updated = session.Sessionless.updateSnapshot(openProjects = [| file "tsconfig.json" |])
+            let updated = session.Sessionless.createSnapshot(openProjects = [| file "tsconfig.json" |])
             updated.Snapshot > 0 |> Flip.Expect.isTrue "a snapshot id came back"
 
             let moved = session.WithSnapshot updated.Snapshot
@@ -157,21 +154,23 @@ let sessionLiveTests =
             moved.Project |> Flip.Expect.equal "and stayed in its project" session.Project
             moved.getSourceFileNames() |> Array.isEmpty |> Flip.Expect.isFalse "the moved session works")
 
-        // A symbol names the project its follow-up lookups should use, which is the whole reason
-        // rebinding exists rather than a per-call project argument.
+        // A snapshot-owned symbol names the project its follow-up lookups should use, which is the
+        // whole reason rebinding exists rather than a per-call project argument. A file-owned one,
+        // as a module's symbol is, names none and leaves the session where it was.
         testCase "ForSymbol retargets to the project the symbol names" <| withSession (fun session ->
             match session.getSymbolOfSourceFile(file "main.ts") with
             | ValueNone -> skiptest "main.ts has no module symbol to follow"
             | ValueSome symbol ->
                 let rebound = session.ForSymbol symbol
-                rebound.Project |> Flip.Expect.equal "the session took the symbol's project" symbol.Project
+                let expected = symbol.Reference.Project |> ValueOption.defaultValue session.Project
+                rebound.Project |> Flip.Expect.equal "the session took the symbol's project" expected
                 rebound.Snapshot |> Flip.Expect.equal "and kept its snapshot" session.Snapshot
 
                 let direct =
                     Api.getTypeOfSymbol session.Transport
-                        { Snapshot = session.Snapshot; Project = symbol.Project; Symbol = symbol.Id }
+                        { Snapshot = session.Snapshot; Project = expected; Symbol = symbol.Reference }
 
-                rebound.getTypeOfSymbol(symbol.Id).Id
+                rebound.getTypeOfSymbol(symbol.Reference).Id
                 |> Flip.Expect.equal "the rebound session agrees with the explicit call" direct.Id)
 
         // The constructor overloads exist so a caller never pairs a snapshot with another
@@ -183,7 +182,7 @@ let sessionLiveTests =
             | Some exe ->
                 use channel = new TscChannel(exe, fixtures)
                 Api.initialize channel |> ignore
-                let snapshot = channel.updateSnapshot(openProjects = [| file "tsconfig.json" |])
+                let snapshot = channel.createSnapshot(openProjects = [| file "tsconfig.json" |])
                 let inferred = channel.Session snapshot
                 let named = channel.Session(snapshot, snapshot.Projects[0].Id)
                 inferred |> Flip.Expect.equal "inferring the only project matches naming it" named

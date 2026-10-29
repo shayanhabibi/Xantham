@@ -302,30 +302,30 @@ type Exports =
     /// <summary>
     /// Provides functionality common to all JavaScript objects.
     /// </summary>
-    [<Global("Object")>]
-    static member Object () : obj = jsNative
-    /// <summary>
-    /// Provides functionality common to all JavaScript objects.
-    /// </summary>
-    [<Global("Object")>]
-    static member Object (value: obj) : obj = jsNative
+    static member Object
+        with get (): TypeScript.Lib.Es.ObjectConstructor = jsNative
+        and set (_: TypeScript.Lib.Es.ObjectConstructor): unit = jsNative
     /// <summary>
     /// Creates a new function.
     /// </summary>
-    [<Global("Function")>]
-    static member Function ([<ParamArray>] args: string[]) : TypeScript.Lib.Es.Function = jsNative
+    static member Function
+        with get (): TypeScript.Lib.Es.FunctionConstructor = jsNative
+        and set (_: TypeScript.Lib.Es.FunctionConstructor): unit = jsNative
     /// <summary>
     /// Allows manipulation and formatting of text strings and determination and location of substrings within strings.
     /// </summary>
-    [<Global("String")>]
-    static member String (?value: obj) : string = jsNative
-    [<Global("Boolean")>]
-    static member Boolean<'T> (?value: 'T) : bool = jsNative
+    static member String
+        with get (): TypeScript.Lib.Es.StringConstructor = jsNative
+        and set (_: TypeScript.Lib.Es.StringConstructor): unit = jsNative
+    static member Boolean
+        with get (): TypeScript.Lib.Es.BooleanConstructor = jsNative
+        and set (_: TypeScript.Lib.Es.BooleanConstructor): unit = jsNative
     /// <summary>
     /// An object that represents a number of any kind. All JavaScript numbers are 64-bit floating-point numbers.
     /// </summary>
-    [<Global("Number")>]
-    static member Number (?value: obj) : float = jsNative
+    static member Number
+        with get (): TypeScript.Lib.Es.NumberConstructor = jsNative
+        and set (_: TypeScript.Lib.Es.NumberConstructor): unit = jsNative
     /// <summary>
     /// An intrinsic object that provides basic mathematics functionality and constants.
     /// </summary>
@@ -335,38 +335,42 @@ type Exports =
     /// <summary>
     /// Enables basic storage and retrieval of dates and times.
     /// </summary>
-    [<Global("Date")>]
-    static member Date () : string = jsNative
-    [<Global("RegExp")>]
-    static member RegExp (pattern: U2<string, TypeScript.Lib.Es.RegExp>) : TypeScript.Lib.Es.RegExp = jsNative
-    [<Global("RegExp")>]
-    static member RegExp (pattern: string, ?flags: string) : TypeScript.Lib.Es.RegExp = jsNative
-    [<Global("Error")>]
-    static member Error (?message: string) : TypeScript.Lib.Es.Error = jsNative
-    [<Global("EvalError")>]
-    static member EvalError (?message: string) : U2<TypeScript.Lib.Es.EvalError, TypeScript.Lib.Es.Error> = jsNative
-    [<Global("RangeError")>]
-    static member RangeError (?message: string) : U2<TypeScript.Lib.Es.RangeError, TypeScript.Lib.Es.Error> = jsNative
-    [<Global("ReferenceError")>]
-    static member ReferenceError (?message: string) : U2<TypeScript.Lib.Es.ReferenceError, TypeScript.Lib.Es.Error> = jsNative
-    [<Global("SyntaxError")>]
-    static member SyntaxError (?message: string) : U2<TypeScript.Lib.Es.SyntaxError, TypeScript.Lib.Es.Error> = jsNative
-    [<Global("TypeError")>]
-    static member TypeError (?message: string) : U2<TypeScript.Lib.Es.TypeError, TypeScript.Lib.Es.Error> = jsNative
-    [<Global("URIError")>]
-    static member URIError (?message: string) : U2<TypeScript.Lib.Es.URIError, TypeScript.Lib.Es.Error> = jsNative
+    static member Date
+        with get (): TypeScript.Lib.Es.DateConstructor = jsNative
+        and set (_: TypeScript.Lib.Es.DateConstructor): unit = jsNative
+    static member RegExp
+        with get (): TypeScript.Lib.Es.RegExpConstructor = jsNative
+        and set (_: TypeScript.Lib.Es.RegExpConstructor): unit = jsNative
+    static member Error
+        with get (): TypeScript.Lib.Es.ErrorConstructor = jsNative
+        and set (_: TypeScript.Lib.Es.ErrorConstructor): unit = jsNative
+    static member EvalError
+        with get (): TypeScript.Lib.Es.EvalErrorConstructor = jsNative
+        and set (_: TypeScript.Lib.Es.EvalErrorConstructor): unit = jsNative
+    static member RangeError
+        with get (): TypeScript.Lib.Es.RangeErrorConstructor = jsNative
+        and set (_: TypeScript.Lib.Es.RangeErrorConstructor): unit = jsNative
+    static member ReferenceError
+        with get (): TypeScript.Lib.Es.ReferenceErrorConstructor = jsNative
+        and set (_: TypeScript.Lib.Es.ReferenceErrorConstructor): unit = jsNative
+    static member SyntaxError
+        with get (): TypeScript.Lib.Es.SyntaxErrorConstructor = jsNative
+        and set (_: TypeScript.Lib.Es.SyntaxErrorConstructor): unit = jsNative
+    static member TypeError
+        with get (): TypeScript.Lib.Es.TypeErrorConstructor = jsNative
+        and set (_: TypeScript.Lib.Es.TypeErrorConstructor): unit = jsNative
+    static member URIError
+        with get (): TypeScript.Lib.Es.URIErrorConstructor = jsNative
+        and set (_: TypeScript.Lib.Es.URIErrorConstructor): unit = jsNative
     /// <summary>
     /// An intrinsic object that provides functions to convert JavaScript values to and from the JavaScript Object Notation (JSON) format.
     /// </summary>
     static member JSON
         with get (): TypeScript.Lib.Es.JSON = jsNative
         and set (_: TypeScript.Lib.Es.JSON): unit = jsNative
-    [<Global("Array")>]
-    static member Array (?arrayLength: float) : obj[] = jsNative
-    [<Global("Array")>]
-    static member Array<'T> (arrayLength: float) : 'T[] = jsNative
-    [<Global("Array")>]
-    static member Array<'T> ([<ParamArray>] items: 'T[]) : 'T[] = jsNative
+    static member Array
+        with get (): TypeScript.Lib.Es.ArrayConstructor = jsNative
+        and set (_: TypeScript.Lib.Es.ArrayConstructor): unit = jsNative
     /// <summary>
     /// Represents a raw buffer of binary data, which is used to store data for the
     /// different typed arrays. ArrayBuffers cannot be read from or written to directly,
@@ -446,6 +450,19 @@ type Exports =
     static member Intl: TypeScript.Lib.Es.Intl = jsNative
     [<Global("globalThis")>]
     static member globalThis: GlobalThis = jsNative
+
+module GlobalThis =
+    type Item = CompilerLibOwnershipLab.Item
+
+    type Items = CompilerLibOwnershipLab.Items
+
+    type Brief = CompilerLibOwnershipLab.Brief
+
+    type LocalDate = TypeScript.Lib.Es.Date
+
+    type Store = CompilerLibOwnershipLab.Store
+
+    type WindowLike = CompilerLibOwnershipLab.WindowLike
 
 module Store =
     module Update =

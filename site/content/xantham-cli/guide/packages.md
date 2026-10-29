@@ -9,7 +9,7 @@ order: 4
 <div class="xantham-welcome__copy"><p class="xantham-lead">Shared utility types and standard-library bindings keep generated packages working with the same F# types.</p></div>
 </div>
 
-Use these alongside `Fable.Core` **5.2.0**, with Xantham package versions matching
+Use these alongside `Fable.Core` **5.5.0**, with Xantham package versions matching
 your generator release.
 
 Add the [temporary Cloudsmith source](installation.md#install-xantham) before
@@ -29,6 +29,7 @@ indexed access, and nominal brands. Its utility types erase at runtime.
 <div class="xantham-grid">
 <div class="card xantham-card"><h3>Property keys</h3><p><code>keyof&lt;'T&gt;</code> carries a property name. <code>typekeyof&lt;'T, 'Value&gt;</code> also retains its value type.</p></div>
 <div class="card xantham-card"><h3>Indexed values</h3><p>Property locks, keys, and record helpers represent access to TypeScript object properties.</p></div>
+<div class="card xantham-card"><h3>Open intersections</h3><p><code>Intersect&lt;'A, 'B&gt;</code> carries <code>P &amp; { ... }</code> over a type parameter. <code>Left</code> and <code>Right</code> read each side; <code>Intersect.unsafeCast</code> and <code>Intersect.assign</code> build one without copying the object.</p></div>
 </div>
 
 ```fsharp

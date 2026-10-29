@@ -1,4 +1,4 @@
-﻿#i "nuget: https://nuget.cloudsmith.io/shayanhabibi/shayanhabibi-partas-build/v3/index.json"
+#i "nuget: https://nuget.cloudsmith.io/shayanhabibi/shayanhabibi-partas-build/v3/index.json"
 #r "nuget: Partas.Build, 0.8.0"
 #r "nuget: Partas.Build.Baked, 0.2.0"
 #r "nuget: Partas.Build.EasyBuild.ShipIt, 0.1.0"
@@ -676,14 +676,14 @@ module Stages =
                     // by Fable and executed under node against the fixtures' JavaScript runtimes.
                     // `--noCache` because Fable's up-to-date check missed a changed linked golden once,
                     // and a gate that skips its compile is not a gate.
-                    // `--exclude Xantham.Fable.Core.TS` references the bindings as a built DLL, as a
-                    // NuGet consumer receives them, rather than transpiling their sources.
+                    // The bindings compile from source, as a Fable consumer of the shipped package
+                    // compiles them.
                     stage "run gate" {
                         when' runGate
                         workingDir "tests/Xantham.Generator.RunGate"
 
                         run
-                            "dotnet fable . -o fable-out --noCache --exclude Xantham.Fable.Core.TS --run node --import ./register.mjs fable-out/Program.js"
+                            "dotnet fickl . -o fable-out --noCache --run node --import ./register.mjs fable-out/Program.js"
                     }
 
                     stage "customization Partas gate" {
@@ -842,7 +842,7 @@ module Stages =
 
                     for project in projects do
                         stage $"pack-{project.Name}" {
-                            // `dotnet fable` in the run gate restores the support package for
+                            // `dotnet fickl` in the run gate restores the support package for
                             // netstandard2.1 alone, and `--no-build` implies `--no-restore`.
                             // The restore puts every target framework back into the assets file.
                             run (cmd $"dotnet restore {project.Path} -v q")

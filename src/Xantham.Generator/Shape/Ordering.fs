@@ -22,6 +22,7 @@ let private nameFor =
     | FsInterface decl -> decl.Name
     | FsStringEnum decl -> decl.Name
     | FsTaggedUnion decl -> decl.Name
+    | FsErasedObjectUnion decl -> decl.Name
     | FsEnum decl -> decl.Name
     | FsAbbrev decl -> decl.Name
     | FsDelegateType decl -> decl.Name
@@ -52,6 +53,7 @@ let orderDeclarations: Pass<ShapeModel> =
                 | FsInterface decl -> orderKey decl.Order decl.Name
                 | FsStringEnum decl -> orderKey decl.Order decl.Name
                 | FsTaggedUnion decl -> orderKey decl.Order decl.Name
+                | FsErasedObjectUnion decl -> orderKey decl.Order decl.Name
                 | FsEnum decl -> orderKey decl.Order decl.Name
                 | FsAbbrev decl -> orderKey decl.Order decl.Name
                 | FsDelegateType decl -> orderKey decl.Order decl.Name
@@ -62,6 +64,7 @@ let orderDeclarations: Pass<ShapeModel> =
                 | FsInterface decl as declWrap -> decl.Name, declWrap
                 | FsStringEnum decl as declWrap -> decl.Name, declWrap
                 | FsTaggedUnion decl as declWrap -> decl.Name, declWrap
+                | FsErasedObjectUnion decl as declWrap -> decl.Name, declWrap
                 | FsEnum decl as declWrap -> decl.Name, declWrap
                 | FsAbbrev decl as declWrap -> decl.Name, declWrap
                 | FsDelegateType decl as declWrap -> decl.Name, declWrap

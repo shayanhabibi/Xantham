@@ -1,4 +1,4 @@
-﻿/// The renderer against hand-built models: identifier escaping, the printed source, and the
+/// The renderer against hand-built models: identifier escaping, the printed source, and the
 /// manifest, each asserted byte-for-byte - the renderer's contract is byte-identical output.
 module Xantham.Generator.Tests.RenderTests
 
@@ -25,7 +25,7 @@ let private owned index (member_: FsExportMember) =
     { Owner = EntryModule
       HarvestIndex = index
       ExportName = member_.Name
-      SourceSymbolId = index * uom<symbolId>
+      SourceSymbolId = Build.symbolKey index
       SignatureOrdinal = None
       Member = member_ }
 
@@ -102,7 +102,7 @@ let renderTests =
 
             let interface' name members =
                 FsInterface
-                    { Name = name
+                    { Callable = false; Name = name
                       Docs = ""
                       Tags = []
                       Order = None
@@ -123,7 +123,7 @@ let renderTests =
                   ModuleSpecifiers = Map.empty
                   Decls =
                     [ interface' "EsName"
-                        [ FsProperty { Name = "dom"; Docs = ""; Tags = []; ReadOnly = true; Type = FsNamed "DomName"; Literal = None } ] ] }
+                        [ FsProperty { Name = "dom"; Docs = ""; Tags = []; ReadOnly = true; Type = FsNamed "DomName"; Literal = None; NullKey = false } ] ] }
 
             let dom: Render.GroupModule =
                 { Group = "typescript/lib" * uom<npmDependency>
@@ -135,7 +135,7 @@ let renderTests =
                   ModuleSpecifiers = Map.empty
                   Decls =
                     [ interface' "DomName"
-                        [ FsProperty { Name = "es"; Docs = ""; Tags = []; ReadOnly = true; Type = FsNamed "EsName"; Literal = None } ] ] }
+                        [ FsProperty { Name = "es"; Docs = ""; Tags = []; ReadOnly = true; Type = FsNamed "EsName"; Literal = None; NullKey = false } ] ] }
 
             let files = renderGroups ctx [ es; dom ] baseModel
             Expect.equal (files |> Map.keys |> Seq.toList) [ "groups/Fable.Core.TS.fs" ] "one combined source file"
@@ -190,7 +190,7 @@ let renderTests =
         testCase "nested declarations qualify shadowed root types" <| fun _ ->
             let interface' name inherits members =
                 FsInterface
-                    { Name = name
+                    { Callable = false; Name = name
                       Docs = ""
                       Tags = []
                       Order = None
@@ -202,7 +202,7 @@ let renderTests =
                       Statics = [] }
 
             let property name reference =
-                FsProperty { Name = name; Docs = ""; Tags = []; ReadOnly = true; Type = reference; Literal = None }
+                FsProperty { Name = name; Docs = ""; Tags = []; ReadOnly = true; Type = reference; Literal = None; NullKey = false }
 
             let model =
                 { baseModel with
@@ -262,9 +262,10 @@ let renderTests =
                               Tag = "kind"
                               Cases =
                                 [ { Name = "Circle"
-                                    CompiledName = Some "circle"
-                                    Fields = [ { Name = "radius"; Type = FsFloat } ] }
-                                  { Name = "Blank"; CompiledName = None; Fields = [] } ] } ] }
+                                    CompiledName = Some "circle"; CaseTest = None; Inlines = false
+                                    Fields = [ { Name = "radius"; Docs = ""; Tags = []; Type = FsFloat; Literal = None; NullKey = false } ]
+                                    Create = None }
+                                  { Name = "Blank"; CompiledName = None; CaseTest = None; Inlines = false; Fields = []; Create = None } ] } ] }
 
             let source = renderAll model |> Map.find "TestPkg.fs"
 
@@ -293,8 +294,9 @@ let renderTests =
                       Tag = "kind"
                       Cases =
                         [ { Name = "Circle"
-                            CompiledName = Some "circle"
-                            Fields = [ { Name = "radius"; Type = FsTypeVar "T" } ] } ] }
+                            CompiledName = Some "circle"; CaseTest = None; Inlines = false
+                            Fields = [ { Name = "radius"; Docs = ""; Tags = []; Type = FsTypeVar "T"; Literal = None; NullKey = false } ]
+                            Create = None } ] }
 
             let model =
                 { baseModel with
@@ -307,6 +309,86 @@ let renderTests =
             Expect.stringContains source "type Shape<'T> =" "the head binds the payload parameter"
             Expect.stringContains source "type Owned<'T when 'T :> Base> =" "a constraint is written at the head"
             Expect.stringContains source "Circle of radius: 'T" "the case reads the bound parameter"
+
+        testCase "a tagged case documents every field once any field carries text" <| fun _ ->
+            let field name docs literal : FsTaggedField =
+                { Name = name; Docs = docs; Tags = []; Type = FsString; Literal = literal; NullKey = false }
+
+            let model =
+                { baseModel with
+                    Decls =
+                        [ FsTaggedUnion
+                            { Name = "Signal"
+                              Docs = "A signal."
+                              Tags = []
+                              Order = None
+                              TypeParameters = []
+                              Tag = "verb"
+                              Cases =
+                                [ { Name = "Start"
+                                    CompiledName = Some "start"; CaseTest = None; Inlines = false
+                                    Fields =
+                                      [ field "channel" "" (Some(LitString "bus"))
+                                        field "at" "When it started." None
+                                        field "note" "" None ]
+                                    Create = None }
+                                  { Name = "Stop"; CompiledName = Some "stop"; CaseTest = None; Inlines = false; Fields = [ field "reason" "" None ]; Create = None } ] } ] }
+
+            let source = renderAll model |> Map.find "TestPkg.fs"
+
+            Expect.stringContains source "/// A signal." "the union carries its own comment"
+            Expect.stringContains source "    /// <param name=\"at\">When it started.</param>" "a documented field"
+
+            Expect.stringContains
+                source
+                "    /// <param name=\"note\"></param>"
+                "an undocumented field beside a documented one is written empty"
+
+            Expect.stringContains
+                source
+                "    /// <param name=\"channel\">TypeScript type: <c>"
+                "a literal field carries its TypeScript type"
+
+            Expect.isFalse (source.Contains "<param name=\"reason\">") "a case with no field text carries no doc"
+
+        testCase "a tagged case with an optional or literal field has a Create" <| fun _ ->
+            let field name ty literal : FsTaggedField =
+                { Name = name; Docs = ""; Tags = []; Type = ty; Literal = literal; NullKey = false }
+
+            let model =
+                { baseModel with
+                    Decls =
+                        [ FsTaggedUnion
+                            { Name = "Signal"
+                              Docs = ""
+                              Tags = []
+                              Order = None
+                              TypeParameters = []
+                              Tag = "verb"
+                              Cases =
+                                [ { Name = "Start"
+                                    CompiledName = Some "start"; CaseTest = None; Inlines = false
+                                    Fields = [ field "channel" FsString (Some(LitString "bus")); field "at" FsFloat None ]
+                                    Create = Some "CreateStart" }
+                                  { Name = "Stop"
+                                    CompiledName = Some "stop"; CaseTest = None; Inlines = false
+                                    Fields = [ field "reason" (FsOption FsString) None; field "code" FsFloat None ]
+                                    Create = Some "CreateStop" }
+                                  { Name = "Halt"; CompiledName = Some "halt"; CaseTest = None; Inlines = false; Fields = []; Create = None } ] } ] }
+
+            let source = renderAll model |> Map.find "TestPkg.fs"
+
+            Expect.stringContains
+                source
+                "    [<ParamObject; Emit(\"({ verb: 'start', channel: 'bus', ...$0 })\")>]\n    static member CreateStart (at: float) : Signal = jsNative"
+                "the tag and literal fields are written, the rest bound"
+
+            Expect.stringContains
+                source
+                "    static member CreateStop (code: float, ?reason: string) : Signal = jsNative"
+                "required parameters first, optional ones omittable"
+
+            Expect.isFalse (source.Contains "CreateHalt") "a case without the field kinds has no Create"
 
         testCase "type variables and applications print in F# order" <| fun _ ->
             Expect.equal (Render.printType (FsTypeVar "T")) "'T" "the tick is the renderer's"
@@ -326,7 +408,7 @@ let renderTests =
                 { baseModel with
                     Decls =
                         [ FsInterface
-                              { Name = "Holder"
+                              { Callable = false; Name = "Holder"
                                 Docs = ""
                                 Tags = []
                                 Order = None
@@ -339,7 +421,7 @@ let renderTests =
                                         Tags = []
                                         ReadOnly = false
                                         Type = FsTypeVar "T"
-                                        Literal = None } ]
+                                        Literal = None; NullKey = false } ]
                                 Entrypoint = None
                                 CreateOverloads =
                                   [ { Parameters =
@@ -347,7 +429,7 @@ let renderTests =
                                             Type = FsTypeVar "T"
                                             Optional = false
                                             Rest = false } ]
-                                      Literals = [] } ]
+                                      Literals = []; NullKeys = []; StringKeys = Map.empty } ]
                                 Statics = [] }
                           FsAbbrev
                               { Value = None; Name = "Mapper"
@@ -376,7 +458,7 @@ let renderTests =
                 { baseModel with
                     Decls =
                         [ FsInterface
-                              { Name = "Labelled"
+                              { Callable = false; Name = "Labelled"
                                 Docs = ""
                                 Tags = []
                                 Order = None
@@ -418,7 +500,7 @@ let renderTests =
                 { baseModel with
                     Decls =
                         [ FsInterface
-                              { Name = "Caster"
+                              { Callable = false; Name = "Caster"
                                 Docs = ""
                                 Tags = []
                                 Order = None
@@ -448,7 +530,7 @@ let renderTests =
                 { baseModel with
                     Decls =
                         [ FsInterface
-                              { Name = "Options"
+                              { Callable = false; Name = "Options"
                                 Docs = "Opts."
                                 Tags = []
                                 Order = None
@@ -461,14 +543,14 @@ let renderTests =
                                           Tags = []
                                           ReadOnly = true
                                           Type = FsBool
-                                          Literal = None }
+                                          Literal = None; NullKey = false }
                                     FsProperty
                                         { Name = "count"
                                           Docs = ""
                                           Tags = []
                                           ReadOnly = false
                                           Type = FsOption FsFloat
-                                          Literal = None }
+                                          Literal = None; NullKey = false }
                                     FsMethod
                                         { Name = "reset"
                                           Docs = ""
@@ -491,7 +573,7 @@ let renderTests =
                                             Optional = true
                                             Rest = false
                                             Type = FsOption FsFloat } ]
-                                      Literals = [] } ]
+                                      Literals = []; NullKeys = []; StringKeys = Map.empty } ]
                                 Statics = [] }
                           FsStringEnum
                               { Name = "TimeUnit"
@@ -762,7 +844,7 @@ let renderTests =
                 { baseModel with
                     Decls =
                         [ FsInterface
-                              { Name = "Options"
+                              { Callable = false; Name = "Options"
                                 Docs = ""
                                 Tags = []
                                 Order = Some { File = "/pkg/test-pkg/index.d.ts" * uom<declFile>; NodeIndex = 3<nodeId> }
@@ -887,7 +969,7 @@ let renderTests =
         testCase "nested exports qualify local shadows and foreign group results" <| fun _ ->
             let interface_ name =
                 FsInterface
-                    { Name = name; Docs = ""; Tags = []; Order = None; TypeParameters = []; Inherits = []
+                    { Callable = false; Name = name; Docs = ""; Tags = []; Order = None; TypeParameters = []; Inherits = []
                       Members = []; Entrypoint = None; CreateOverloads = []; Statics = [] }
             let entry: Render.GroupModule =
                 { Group = "test-pkg" * uom<npmDependency>; Module = "TestPkg"; IsEntry = true; Namespace = None
@@ -928,7 +1010,7 @@ let renderTests =
 let symbolKeyedRenderTests =
     let interface' inherits members =
         FsInterface
-            { Name = "Holder"
+            { Callable = false; Name = "Holder"
               Docs = ""
               Tags = []
               Order = None
@@ -955,7 +1037,7 @@ let symbolKeyedRenderTests =
         )
 
     let property symbol name readOnly reference =
-        FsSymbolKeyed(symbol, FsProperty { Name = name; Docs = ""; Tags = []; ReadOnly = readOnly; Type = reference; Literal = None })
+        FsSymbolKeyed(symbol, FsProperty { Name = name; Docs = ""; Tags = []; ReadOnly = readOnly; Type = reference; Literal = None; NullKey = false })
 
     testList "render symbol-keyed members" [
         testCase "an inherited seq renders as an inherit line" <| fun _ ->
@@ -1003,7 +1085,7 @@ let literalKeyedRenderTests =
 
     let decl entrypoint members =
         FsInterface
-            { Name = "Socket"
+            { Callable = false; Name = "Socket"
               Docs = ""
               Tags = []
               Order = None
@@ -1074,7 +1156,7 @@ let literalKeyedRenderTests =
 let literalMemberRenderTests =
     let interface' name members creates =
         FsInterface
-            { Name = name
+            { Callable = false; Name = name
               Docs = ""
               Tags = []
               Order = None
@@ -1095,7 +1177,7 @@ let literalMemberRenderTests =
                 match value with
                 | LitString _ -> FsString
                 | _ -> FsFloat
-              Literal = Some value }
+              Literal = Some value; NullKey = false }
 
     let property name reference =
         FsProperty
@@ -1104,7 +1186,7 @@ let literalMemberRenderTests =
               Tags = []
               ReadOnly = true
               Type = reference
-              Literal = None }
+              Literal = None; NullKey = false }
 
     let parameter name reference =
         { Name = name
@@ -1123,7 +1205,7 @@ let literalMemberRenderTests =
                           "Event"
                           [ property "eventPhase" FsFloat; literal "AT_TARGET" (LitNumber 2.0) ]
                           [ { Parameters = [ parameter "eventPhase" FsFloat ]
-                              Literals = [ "AT_TARGET", LitNumber 2.0 ] } ] ]
+                              Literals = [ "AT_TARGET", LitNumber 2.0 ]; NullKeys = []; StringKeys = Map.empty } ] ]
 
             Expect.stringContains
                 source
@@ -1146,7 +1228,7 @@ let literalMemberRenderTests =
                     [ interface'
                           "Phases"
                           [ literal "NONE" (LitNumber 0.0) ]
-                          [ { Parameters = []; Literals = [ "NONE", LitNumber 0.0 ] } ] ]
+                          [ { Parameters = []; Literals = [ "NONE", LitNumber 0.0 ]; NullKeys = []; StringKeys = Map.empty } ] ]
 
             Expect.stringContains
                 source
@@ -1197,7 +1279,7 @@ let literalMemberRenderTests =
                               "Signal"
                               [ literal "kind" (LitString "method"); property "None" FsString ]
                               [ { Parameters = [ parameter "None" FsString ]
-                                  Literals = [ "kind", LitString "method" ] } ] ] }
+                                  Literals = [ "kind", LitString "method" ]; NullKeys = []; StringKeys = Map.empty } ] ] }
 
             let rendered, _ = Async.RunSynchronously(Pipeline.runTier Build.context Render.passes model)
             let source = rendered.Files |> Map.ofList |> Map.find "TestPkg.fs"
@@ -1207,6 +1289,24 @@ let literalMemberRenderTests =
                 source
                 "    [<Emit(\"({kind: 'method', \\\"None\\\": $0})\")>]"
                 "the literal precedes the renamed field"
+
+        testCase "a renamed parameter writes its null key positionally" <| fun _ ->
+            let model =
+                { baseModel with
+                    Decls =
+                        [ interface'
+                              "Signal"
+                              [ literal "kind" (LitString "method"); property "None" FsString; property "count" FsFloat ]
+                              [ { Parameters = [ parameter "None" FsString; parameter "count" FsFloat ]
+                                  Literals = [ "kind", LitString "method" ]; NullKeys = [ "None" ]; StringKeys = Map.empty } ] ] }
+
+            let rendered, _ = Async.RunSynchronously(Pipeline.runTier Build.context Render.passes model)
+            let source = rendered.Files |> Map.ofList |> Map.find "TestPkg.fs"
+
+            Expect.stringContains
+                source
+                "    [<Emit(\"({kind: 'method', \\\"None\\\": ($0) ?? null, \\\"count\\\": $1})\")>]"
+                "the null key falls back to null by position, the other field is written as is"
 
         testCase "a JavaScript string escapes quotes, line breaks and Emit holes" <| fun _ ->
             Expect.equal

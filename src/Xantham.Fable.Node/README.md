@@ -16,6 +16,11 @@ open Fable.Core.TS
 open Node
 ```
 
+TypeScript namespace members now retain their namespace path. For example,
+`Node.ProcessEnv` moves to `Node.NodeJS.ProcessEnv`. Update references to former flat
+names when upgrading, and regenerate dependent bindings against the matching Core.TS
+catalogue (API contract 9).
+
 The source file is generated from `node_modules/@types/node` with the settings in
 `xantham.json`; regenerate it with:
 

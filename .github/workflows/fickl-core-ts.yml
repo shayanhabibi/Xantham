@@ -1,0 +1,95 @@
+name: One-shot Fickl.Core.Ts
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
+    paths:
+      - 'tools/package-fickl-core-ts*'
+      - 'tools/fable-core-ts-input/**'
+      - 'src/Xantham.Fable.Core/**'
+      - 'src/Xantham.Fable.Core.TS/**'
+      - 'src/Xantham.Generator/**'
+      - 'src/Xantham.Cli/**'
+      - 'src/Xantham.TypeScript.Wire/**'
+      - 'package*.json'
+      - '.github/workflows/fickl-core-ts.yml'
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish the verified one-shot package to NuGet.org (master only)
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: fickl-core-ts-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  package:
+    name: one-shot package
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Check one-shot packaging contracts
+        run: node --test tools/package-fickl-core-ts.test.mjs
+      - name: Install pinned compiler
+        run: npm ci
+      - name: Generate, package and restore standalone bindings
+        id: package
+        run: node tools/package-fickl-core-ts.mjs
+      - name: Upload verified package
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: fickl-core-ts-${{ github.sha }}
+          path: ${{ steps.package.outputs.package }}
+          if-no-files-found: error
+          retention-days: 14
+
+  verification:
+    name: one-shot verification
+    if: github.event_name == 'workflow_dispatch' && inputs.publish && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    outputs:
+      verified: ${{ steps.tests.outputs.verified }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Require full tests for this master commit
+        id: tests
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            await require('./.github/scripts/require-master-tests.cjs')({ github, context, core });
+
+  publish:
+    name: one-shot publish
+    needs: [package, verification]
+    if: github.event_name == 'workflow_dispatch' && inputs.publish && github.ref == 'refs/heads/master' && needs.verification.outputs.verified == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          npm-cache: 'false'
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: fickl-core-ts-${{ github.sha }}
+          path: bin/fickl-core-ts
+      - name: Publish the verified one-shot package
+        env:
+          NUGET_KEY: ${{ secrets.NUGET_KEY }}
+        run: dotnet nuget push bin/fickl-core-ts/Fickl.Core.Ts.*.nupkg --source https://api.nuget.org/v3/index.json --api-key "$NUGET_KEY"

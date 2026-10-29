@@ -1,0 +1,12 @@
+{
+  "module": "CatalogAliasArgumentLab",
+  "namespace": "Identity.Support",
+  "lib": [
+    "esnext"
+  ],
+  "types": [],
+  "groups": {
+    "alias-argument-owner-lab": "ship"
+  },
+  "declarationCatalog": true
+}

@@ -1,6 +1,6 @@
-// Tag values that collide. `taggedUnionShape` requires every arm's tag value to be distinct,
-// and the refusal used to be silent: the union fell through to the erased-union mapping and
-// the manifest carried no `DT` finding for it under any name.
+// Tag values that collide. Arms sharing a tag value are each a case of their own, told apart
+// by a `CaseTest`; a union whose shared arms no test separates stays an erased union under a
+// `DT003` finding.
 //
 // Reduced from `@cloudflare/workers-types`' `TailStream.EventType`, where an intersection over
 // a union distributes into two members both tagged `"log"`.
@@ -18,24 +18,22 @@ export type Signal =
     | { readonly channel: "bus"; readonly verb: "start"; readonly at: number }
     | { readonly channel: "bus"; readonly verb: "stop"; readonly reason: string };
 
-// The fold. Two arms share `state: "done"` and a third discriminates, so the shared pair folds
-// into one case and the union survives with two. The folded arms agree on the tag alone, so
-// `value` and `error` are what the fold costs.
+// Two arms share `state: "done"` and a third discriminates. The shared pair are two cases,
+// told apart by `'value' in $0` and `'error' in $0`.
 export type Terminal =
     | { readonly state: "done"; readonly value: number }
     | { readonly state: "done"; readonly error: string }
     | { readonly state: "pending" };
 
-// The refusal. Every arm carries `type: "log"`, so the fold leaves one case and there is
-// nothing to discriminate. Written flat: this is the pair the checker produces from the
-// `Log` intersection below.
+// Every arm carries `type: "log"`, and the literal `truncated` tells them apart: one case per
+// arm, the optional `false` arm also matching an absent `truncated`. Written flat: this is the
+// pair the checker produces from the `Log` intersection below.
 export type Onset =
     | { readonly type: "log"; readonly level: string; readonly message: object; readonly truncated?: false }
     | { readonly type: "log"; readonly level: string; readonly message: string; readonly truncated: true };
 
 // The `TailStream.EventType` shape verbatim. The checker distributes the intersection over the
-// union, so the two arms arrive flagged `Intersection` rather than `Object` and the union is
-// not considered a tagged one at all - a gap upstream of the fold, recorded here as a negative.
+// union, and the two arms it produces are separated as `Onset`'s are.
 export type Log = { readonly type: "log"; readonly level: string } & (
     | { readonly message: object; readonly truncated?: false }
     | { readonly message: string; readonly truncated: true }

@@ -55,7 +55,7 @@ open Fable.Core.TS.Dom
 /// </example>
 /// <remarks>@category Numeric</remarks>
 [<Erase>]
-type Absolute<'N> = private Absolute__ of obj
+type Absolute<'N> = private Phantom_Absolute__ of obj
 
 /// <remarks>@see {@link AllExtend}</remarks>
 [<Interface>]
@@ -149,7 +149,7 @@ type AllExtendOptions =
 /// <remarks>@category Utilities</remarks>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type AllExtend<'TArray, 'Type, 'Options> = private AllExtend__ of obj
+type AllExtend<'TArray, 'Type, 'Options> = private Phantom_AllExtend__ of obj
 
 /// <summary>
 /// Create a type with all fields from a union of object types.
@@ -216,7 +216,7 @@ type AllExtend<'TArray, 'Type, 'Options> = private AllExtend__ of obj
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Union</remarks>
 [<Erase>]
-type AllUnionFields<'Union> = private AllUnionFields__ of obj
+type AllUnionFields<'Union> = private Phantom_AllUnionFields__ of obj
 
 /// <summary>
 /// Returns a boolean for whether all of the given elements are <c>true</c>.
@@ -297,7 +297,7 @@ type AllUnionFields<'Union> = private AllUnionFields__ of obj
 /// <remarks>@see {@link And}</remarks>
 /// <remarks>@see {@link OrAll}</remarks>
 [<Erase>]
-type AndAll<'T> = private AndAll__ of obj
+type AndAll<'T> = private Phantom_AndAll__ of obj
 
 /// <summary>
 /// Returns a boolean for whether two given types are both <c>true</c>.
@@ -381,7 +381,8 @@ type AndAll<'T> = private AndAll__ of obj
 /// <remarks>@see {@link AndAll}</remarks>
 /// <remarks>@see {@link Or}</remarks>
 /// <remarks>@see {@link Xor}</remarks>
-type And = obj
+[<Erase>]
+type And<'A, 'B> = private Phantom_And__ of obj
 
 /// <summary>
 /// Extracts the element type of an array or tuple.
@@ -422,7 +423,7 @@ type And = obj
 /// <remarks>@see {@link IterableElement} - For iterables like <c>Set</c>, <c>Map</c>, and generators (not suitable for all use cases due to different inference behavior).</remarks>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type ArrayElement<'T> = private ArrayElement__ of obj
+type ArrayElement<'T> = private Phantom_ArrayElement__ of obj
 
 /// <summary>
 /// Provides valid indices for a constant array or tuple.
@@ -446,7 +447,7 @@ type ArrayElement<'T> = private ArrayElement__ of obj
 /// <remarks>@see {@link ArrayValues}</remarks>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type ArrayIndices<'Element> = private ArrayIndices__ of obj
+type ArrayIndices<'Element> = private Phantom_ArrayIndices__ of float
 
 /// <summary>
 /// Return the length of an array. Equivalent to <c>T['length']</c> where <c>T</c> extends any array.
@@ -482,7 +483,8 @@ type ArrayIndices<'Element> = private ArrayIndices__ of obj
 /// </code>
 /// </example>
 /// <remarks>@category Array</remarks>
-type ArrayLength = obj
+[<Erase>]
+type ArrayLength<'T> = private Phantom_ArrayLength__ of obj
 
 /// <summary>
 /// Reverse the order of elements in a tuple type.
@@ -537,7 +539,7 @@ type ArrayLength = obj
 /// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type ArrayReverse<'TArray> = private ArrayReverse__ of obj
+type ArrayReverse<'TArray> = private Phantom_ArrayReverse__ of obj
 
 /// <summary>
 /// Returns an array slice of a given range, just like <c>Array#slice()</c>.
@@ -588,7 +590,7 @@ type ArrayReverse<'TArray> = private ArrayReverse__ of obj
 /// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type ArraySlice<'Array_, 'Start, 'End> = private ArraySlice__ of obj
+type ArraySlice<'Array_, 'Start, 'End> = private Phantom_ArraySlice__ of obj
 
 /// <summary>
 /// Create a new array type by adding or removing elements at a specified index range in the original array.
@@ -618,7 +620,7 @@ type ArraySlice<'Array_, 'Start, 'End> = private ArraySlice__ of obj
 /// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type ArraySplice<'T, 'Start, 'DeleteCount, 'Items> = private ArraySplice__ of obj
+type ArraySplice<'T, 'Start, 'DeleteCount, 'Items> = private Phantom_ArraySplice__ of obj[]
 
 /// <summary>
 /// Extract the type of an array or tuple minus the first element.
@@ -673,7 +675,7 @@ type ArraySplice<'T, 'Start, 'DeleteCount, 'Items> = private ArraySplice__ of ob
 /// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type ArrayTail<'TArray> = private ArrayTail__ of obj
+type ArrayTail<'TArray> = private Phantom_ArrayTail__ of obj
 
 /// <summary>
 /// Provides all values for a constant array or tuple.
@@ -696,7 +698,8 @@ type ArrayTail<'TArray> = private ArrayTail__ of obj
 /// </example>
 /// <remarks>@see {@link ArrayIndices}</remarks>
 /// <remarks>@category Array</remarks>
-type ArrayValues = obj
+[<Erase>]
+type ArrayValues<'T> = private Phantom_ArrayValues__ of obj
 
 /// <summary>
 /// Create a type that represents either the value or an array of the value.
@@ -751,7 +754,7 @@ type Arrayable<'T> = U2<'T, 'T[]>
 /// </example>
 /// <remarks>@category Async</remarks>
 [<Erase>]
-type AsyncReturnType<'Target> = private AsyncReturnType__ of obj
+type AsyncReturnType<'Target> = private Phantom_AsyncReturnType__ of obj
 
 /// <summary>
 /// Create an async version of the given function type, by boxing the return type in <c>Promise</c> while keeping the same parameter types.
@@ -775,7 +778,7 @@ type AsyncReturnType<'Target> = private AsyncReturnType__ of obj
 /// </example>
 /// <remarks>@category Async</remarks>
 [<Erase>]
-type Asyncify<'Function_> = private Asyncify__ of obj
+type Asyncify<'Function_> = private Phantom_Asyncify__ of obj
 
 /// <summary>
 /// Matches a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes"><c>class</c></a>.
@@ -882,7 +885,7 @@ type CamelCaseOptions =
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type CamelCase<'Type, 'Options> = private CamelCase__ of obj
+type CamelCase<'Type, 'Options> = private Phantom_CamelCase__ of obj
 
 /// <summary>
 /// Convert object properties to camel case recursively.
@@ -944,7 +947,7 @@ type CamelCase<'Type, 'Options> = private CamelCase__ of obj
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type CamelCasedPropertiesDeep<'Value, 'Options> = private CamelCasedPropertiesDeep__ of obj
+type CamelCasedPropertiesDeep<'Value, 'Options> = private Phantom_CamelCasedPropertiesDeep__ of obj
 
 /// <summary>
 /// Convert top-level object properties to camel case.
@@ -982,7 +985,7 @@ type CamelCasedPropertiesDeep<'Value, 'Options> = private CamelCasedPropertiesDe
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type CamelCasedProperties<'Value, 'Options> = private CamelCasedProperties__ of obj
+type CamelCasedProperties<'Value, 'Options> = private Phantom_CamelCasedProperties__ of obj
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type UppercaseLetter =
@@ -1161,7 +1164,8 @@ type Alphanumeric =
 /// </code>
 /// </example>
 /// <remarks>@category Object</remarks>
-type ConditionalExcept = obj
+[<Erase>]
+type ConditionalExcept<'Base, 'Condition> = private Phantom_ConditionalExcept__ of obj
 
 /// <summary>
 /// Extract the keys from a type where the value type of the key extends the given <c>Condition</c>.
@@ -1213,7 +1217,7 @@ type ConditionalExcept = obj
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type ConditionalKeys<'Base, 'Condition> = private ConditionalKeys__ of obj
+type ConditionalKeys<'Base, 'Condition> = private Phantom_ConditionalKeys__ of obj
 
 /// <summary>
 /// ConditionalPickDeep options.
@@ -1288,7 +1292,7 @@ type ConditionalPickDeepOptions =
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type ConditionalPickDeep<'Type, 'Condition, 'Options> = private ConditionalPickDeep__ of obj
+type ConditionalPickDeep<'Type, 'Condition, 'Options> = private Phantom_ConditionalPickDeep__ of obj
 
 /// <summary>
 /// Pick keys from the shape that matches the given <c>Condition</c>.
@@ -1332,7 +1336,7 @@ type ConditionalPickDeep<'Type, 'Condition, 'Options> = private ConditionalPickD
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type ConditionalPick<'Base, 'Condition> = private ConditionalPick__ of obj
+type ConditionalPick<'Base, 'Condition> = private Phantom_ConditionalPick__ of obj
 
 /// <summary>
 /// Recursively simplifies a type while including and/or excluding certain types from being simplified.
@@ -1404,7 +1408,7 @@ type ConditionalPick<'Base, 'Condition> = private ConditionalPick__ of obj
 /// <remarks>@see {@link SimplifyDeep}</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type ConditionalSimplifyDeep<'Type, 'ExcludeType, 'IncludeType> = private ConditionalSimplifyDeep__ of obj
+type ConditionalSimplifyDeep<'Type, 'ExcludeType, 'IncludeType> = private Phantom_ConditionalSimplifyDeep__ of obj
 
 /// <summary>
 /// Simplifies a type while including and/or excluding certain types from being simplified.
@@ -1453,7 +1457,7 @@ type ConditionalSimplifyDeep<'Type, 'ExcludeType, 'IncludeType> = private Condit
 /// <remarks>@see {@link ConditionalSimplifyDeep}</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type ConditionalSimplify<'Type, 'ExcludeType, 'IncludeType> = private ConditionalSimplify__ of obj
+type ConditionalSimplify<'Type, 'ExcludeType, 'IncludeType> = private Phantom_ConditionalSimplify__ of obj
 
 /// <summary>
 /// Convert a string literal to a custom string delimiter casing.
@@ -1496,7 +1500,7 @@ type ConditionalSimplify<'Type, 'ExcludeType, 'IncludeType> = private Conditiona
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type DelimiterCase<'Value, 'Delimiter, 'Options> = private DelimiterCase__ of obj
+type DelimiterCase<'Value, 'Delimiter, 'Options> = private Phantom_DelimiterCase__ of obj
 
 /// <summary>
 /// Convert object properties to a custom string delimiter casing recursively.
@@ -1560,7 +1564,7 @@ type DelimiterCase<'Value, 'Delimiter, 'Options> = private DelimiterCase__ of ob
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type DelimiterCasedPropertiesDeep<'Value, 'Delimiter, 'Options> = private DelimiterCasedPropertiesDeep__ of obj
+type DelimiterCasedPropertiesDeep<'Value, 'Delimiter, 'Options> = private Phantom_DelimiterCasedPropertiesDeep__ of obj
 
 /// <summary>
 /// Convert object properties to a custom string delimiter casing.
@@ -1598,7 +1602,7 @@ type DelimiterCasedPropertiesDeep<'Value, 'Delimiter, 'Options> = private Delimi
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type DelimiterCasedProperties<'Value, 'Delimiter, 'Options> = private DelimiterCasedProperties__ of obj
+type DelimiterCasedProperties<'Value, 'Delimiter, 'Options> = private Phantom_DelimiterCasedProperties__ of obj
 
 /// <summary>
 /// Omits keys from a type, distributing the operation over a union.
@@ -1689,7 +1693,7 @@ type DelimiterCasedProperties<'Value, 'Delimiter, 'Options> = private DelimiterC
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type DistributedOmit<'ObjectType, 'KeyType> = private DistributedOmit__ of obj
+type DistributedOmit<'ObjectType, 'KeyType> = private Phantom_DistributedOmit__ of obj
 
 /// <summary>
 /// Pick keys from a type, distributing the operation over a union.
@@ -1776,7 +1780,7 @@ type DistributedOmit<'ObjectType, 'KeyType> = private DistributedOmit__ of obj
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type DistributedPick<'ObjectType, 'KeyType> = private DistributedPick__ of obj
+type DistributedPick<'ObjectType, 'KeyType> = private Phantom_DistributedPick__ of obj
 
 /// <summary>
 /// Represents a strictly empty plain object, the <c>{}</c> value.
@@ -1828,7 +1832,7 @@ type EmptyObject =
 /// <remarks>@see {@link EmptyObject}</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type IsEmptyObject<'T> = private IsEmptyObject__ of obj
+type IsEmptyObject<'T> = private Phantom_IsEmptyObject__ of obj
 
 /// <summary>
 /// Create a type that describes the key-value pairs produced when calling a collection’s <c>entries</c> method.
@@ -1880,7 +1884,7 @@ type IsEmptyObject<'T> = private IsEmptyObject__ of obj
 /// <remarks>@category Set</remarks>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type Entries<'BaseType> = private Entries__ of obj
+type Entries<'BaseType> = private Phantom_Entries__ of obj
 
 /// <summary>
 /// Create a type that describes a single key-value pair produced when calling a collection’s <c>entries</c> method.
@@ -1934,7 +1938,7 @@ type Entries<'BaseType> = private Entries__ of obj
 /// <remarks>@category Array</remarks>
 /// <remarks>@category Set</remarks>
 [<Erase>]
-type Entry<'BaseType> = private Entry__ of obj
+type Entry<'BaseType> = private Phantom_Entry__ of obj
 
 /// <summary>
 /// Create a type that does not allow extra properties, meaning it only allows properties that are explicitly declared.
@@ -1982,7 +1986,7 @@ type Entry<'BaseType> = private Entry__ of obj
 /// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type Exact<'ParameterType, 'InputType> = private Exact__ of obj
+type Exact<'ParameterType, 'InputType> = private Phantom_Exact__ of obj
 
 [<Interface>]
 type ExceptOptions =
@@ -2053,7 +2057,7 @@ type ExceptOptions =
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type Except<'ObjectType, 'KeysType, 'Options> = private Except__ of obj
+type Except<'ObjectType, 'KeysType, 'Options> = private Phantom_Except__ of obj
 
 /// <summary>
 /// A stricter version of <c>Exclude&lt;T, U&gt;</c> that excludes types only when they are exactly identical.
@@ -2085,7 +2089,7 @@ type Except<'ObjectType, 'KeysType, 'Options> = private Except__ of obj
 /// </example>
 /// <remarks>@category Improved Built-in</remarks>
 [<Erase>]
-type ExcludeExactly<'Union, 'Delete> = private ExcludeExactly__ of obj
+type ExcludeExactly<'Union, 'Delete> = private Phantom_ExcludeExactly__ of obj
 
 /// <summary>
 /// Create a tuple with the <a href="https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types"><c>rest</c></a> element removed.
@@ -2113,7 +2117,7 @@ type ExcludeExactly<'Union, 'Delete> = private ExcludeExactly__ of obj
 /// <remarks>@see {@link SplitOnRestElement}</remarks>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type ExcludeRestElement<'Array_> = private ExcludeRestElement__ of obj
+type ExcludeRestElement<'Array_> = private Phantom_ExcludeRestElement__ of obj
 
 /// <summary>
 /// A stricter version of &lt;T, U&gt; that ensures every member of <c>U</c> can successfully exclude something from <c>T</c>.
@@ -2159,7 +2163,7 @@ type ExcludeRestElement<'Array_> = private ExcludeRestElement__ of obj
 /// </example>
 /// <remarks>@category Improved Built-in</remarks>
 [<Erase>]
-type ExcludeStrict<'T, 'U> = private ExcludeStrict__ of 'T
+type ExcludeStrict<'T, 'U> = private Phantom_ExcludeStrict__ of 'T
 
 /// <summary>
 /// Ensure mutual exclusivity in object unions by adding other members’ keys as <c>?: never</c>.
@@ -2288,7 +2292,7 @@ type ExcludeStrict<'T, 'U> = private ExcludeStrict__ of 'T
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Union</remarks>
 [<Erase>]
-type ExclusifyUnion<'Union> = private ExclusifyUnion__ of obj
+type ExclusifyUnion<'Union> = private Phantom_ExclusifyUnion__ of obj
 
 [<Interface>]
 type ExtendsStrictOptions =
@@ -2414,7 +2418,7 @@ type ExtendsStrictOptions =
 /// <remarks>@see {@link ExtendsStrictOptions}</remarks>
 /// <remarks>@category Improved Built-in</remarks>
 [<Erase>]
-type ExtendsStrict<'Left, 'Right, 'Options> = private ExtendsStrict__ of obj
+type ExtendsStrict<'Left, 'Right, 'Options> = private Phantom_ExtendsStrict__ of obj
 
 /// <summary>
 /// A stricter version of <c>Extract&lt;T, U&gt;</c> that extracts types only when they are exactly identical.
@@ -2446,7 +2450,7 @@ type ExtendsStrict<'Left, 'Right, 'Options> = private ExtendsStrict__ of obj
 /// </example>
 /// <remarks>@category Improved Built-in</remarks>
 [<Erase>]
-type ExtractExactly<'Union, 'Match> = private ExtractExactly__ of obj
+type ExtractExactly<'Union, 'Match> = private Phantom_ExtractExactly__ of obj
 
 /// <summary>
 /// Extract the <a href="https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types"><c>rest</c></a> element type from an array.
@@ -2473,7 +2477,8 @@ type ExtractExactly<'Union, 'Match> = private ExtractExactly__ of obj
 /// <remarks>@see {@link ExcludeRestElement}</remarks>
 /// <remarks>@see {@link SplitOnRestElement}</remarks>
 /// <remarks>@category Array</remarks>
-type ExtractRestElement = obj
+[<Erase>]
+type ExtractRestElement<'T> = private Phantom_ExtractRestElement__ of obj
 
 /// <summary>
 /// A stricter version of &lt;T, U&gt; that ensures every member of <c>U</c> can successfully extract something from <c>T</c>.
@@ -2519,7 +2524,7 @@ type ExtractRestElement = obj
 /// </example>
 /// <remarks>@category Improved Built-in</remarks>
 [<Erase>]
-type ExtractStrict<'T, 'U> = private ExtractStrict__ of 'T
+type ExtractStrict<'T, 'U> = private Phantom_ExtractStrict__ of 'T
 
 /// <summary>
 /// Tries to find the type of a global with the given name.
@@ -2544,7 +2549,7 @@ type ExtractStrict<'T, 'U> = private ExtractStrict__ of 'T
 /// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type FindGlobalType<'Name> = private FindGlobalType__ of obj
+type FindGlobalType<'Name> = private Phantom_FindGlobalType__ of obj
 
 /// <summary>
 /// Tries to find one or more types from their globally-defined constructors.
@@ -2589,7 +2594,7 @@ type FindGlobalType<'Name> = private FindGlobalType__ of obj
 /// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type FindGlobalInstanceType<'Name> = private FindGlobalInstanceType__ of obj
+type FindGlobalInstanceType<'Name> = private Phantom_FindGlobalInstanceType__ of obj
 
 /// <summary>
 /// Create a type that represents an array of the given type and length. The <c>Array</c> prototype methods that manipulate its length are excluded from the resulting type.
@@ -2680,7 +2685,7 @@ type FindGlobalInstanceType<'Name> = private FindGlobalInstanceType__ of obj
 /// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type FixedLengthArray<'Element, 'Length> = private FixedLengthArray__ of obj
+type FixedLengthArray<'Element, 'Length> = private Phantom_FixedLengthArray__ of obj
 
 [<Interface>]
 type GetOptions =
@@ -2747,7 +2752,7 @@ type GetOptions =
 /// <remarks>@category Array</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type Get<'BaseType, 'Path, 'Options> = private Get__ of obj
+type Get<'BaseType, 'Path, 'Options> = private Phantom_Get__ of obj
 
 /// <summary>
 /// Declare locally scoped properties on <c>globalThis</c>.
@@ -2830,7 +2835,7 @@ type GlobalThis = obj
 /// </code>
 /// </example>
 [<Erase>]
-type GreaterThanOrEqual<'A, 'B> = private GreaterThanOrEqual__ of obj
+type GreaterThanOrEqual<'A, 'B> = private Phantom_GreaterThanOrEqual__ of obj
 
 /// <summary>
 /// Returns a boolean for whether a given number is greater than another number.
@@ -2889,7 +2894,7 @@ type GreaterThanOrEqual<'A, 'B> = private GreaterThanOrEqual__ of obj
 /// </code>
 /// </example>
 [<Erase>]
-type GreaterThan<'A, 'B> = private GreaterThan__ of obj
+type GreaterThan<'A, 'B> = private Phantom_GreaterThan__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type has any optional fields.
@@ -2911,7 +2916,7 @@ type GreaterThan<'A, 'B> = private GreaterThan__ of obj
 /// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type HasOptionalKeys<'BaseType> = private HasOptionalKeys__ of obj
+type HasOptionalKeys<'BaseType> = private Phantom_HasOptionalKeys__ of bool
 
 /// <summary>
 /// Returns a boolean for whether the given type has any readonly fields.
@@ -2933,7 +2938,7 @@ type HasOptionalKeys<'BaseType> = private HasOptionalKeys__ of obj
 /// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type HasReadonlyKeys<'BaseType> = private HasReadonlyKeys__ of obj
+type HasReadonlyKeys<'BaseType> = private Phantom_HasReadonlyKeys__ of bool
 
 /// <summary>
 /// Returns a boolean for whether the given type has any required fields.
@@ -2992,7 +2997,7 @@ type HasReadonlyKeys<'BaseType> = private HasReadonlyKeys__ of obj
 /// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type HasRequiredKeys<'BaseType> = private HasRequiredKeys__ of obj
+type HasRequiredKeys<'BaseType> = private Phantom_HasRequiredKeys__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type has any writable fields.
@@ -3014,7 +3019,7 @@ type HasRequiredKeys<'BaseType> = private HasRequiredKeys__ of obj
 /// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type HasWritableKeys<'BaseType> = private HasWritableKeys__ of obj
+type HasWritableKeys<'BaseType> = private Phantom_HasWritableKeys__ of obj
 
 /// <summary>
 /// An if-else-like type that resolves depending on whether the given type is <c>any</c>.
@@ -3037,7 +3042,7 @@ type HasWritableKeys<'BaseType> = private HasWritableKeys__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IfAny<'T, 'TypeIfAny, 'TypeIfNotAny> = private IfAny__ of obj
+type IfAny<'T, 'TypeIfAny, 'TypeIfNotAny> = private Phantom_IfAny__ of obj
 
 /// <summary>
 /// An if-else-like type that resolves depending on whether the given type is <c>{}</c>.
@@ -3060,7 +3065,7 @@ type IfAny<'T, 'TypeIfAny, 'TypeIfNotAny> = private IfAny__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IfEmptyObject<'T, 'TypeIfEmptyObject, 'TypeIfNotEmptyObject> = private IfEmptyObject__ of obj
+type IfEmptyObject<'T, 'TypeIfEmptyObject, 'TypeIfNotEmptyObject> = private Phantom_IfEmptyObject__ of obj
 
 /// <summary>
 /// An if-else-like type that resolves depending on whether the given type is <c>never</c>.
@@ -3083,7 +3088,7 @@ type IfEmptyObject<'T, 'TypeIfEmptyObject, 'TypeIfNotEmptyObject> = private IfEm
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IfNever<'T, 'TypeIfNever, 'TypeIfNotNever> = private IfNever__ of obj
+type IfNever<'T, 'TypeIfNever, 'TypeIfNotNever> = private Phantom_IfNever__ of obj
 
 /// <summary>
 /// An if-else-like type that resolves depending on whether the given type is <c>null</c>.
@@ -3106,7 +3111,7 @@ type IfNever<'T, 'TypeIfNever, 'TypeIfNotNever> = private IfNever__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IfNull<'T, 'TypeIfNull, 'TypeIfNotNull> = private IfNull__ of obj
+type IfNull<'T, 'TypeIfNull, 'TypeIfNotNull> = private Phantom_IfNull__ of obj
 
 /// <summary>
 /// An if-else-like type that resolves depending on whether the given type is <c>unknown</c>.
@@ -3129,7 +3134,7 @@ type IfNull<'T, 'TypeIfNull, 'TypeIfNotNull> = private IfNull__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IfUnknown<'T, 'TypeIfUnknown, 'TypeIfNotUnknown> = private IfUnknown__ of obj
+type IfUnknown<'T, 'TypeIfUnknown, 'TypeIfNotUnknown> = private Phantom_IfUnknown__ of obj
 
 /// <summary>
 /// An if-else-like type that resolves depending on whether the given <c>boolean</c> type is <c>true</c> or <c>false</c>.
@@ -3231,7 +3236,7 @@ type IfUnknown<'T, 'TypeIfUnknown, 'TypeIfNotUnknown> = private IfUnknown__ of o
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type If<'Type, 'IfBranch, 'ElseBranch> = private If__ of obj
+type If<'Type, 'IfBranch, 'ElseBranch> = private Phantom_If__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given array includes the given item.
@@ -3249,7 +3254,7 @@ type If<'Type, 'IfBranch, 'ElseBranch> = private If__ of obj
 /// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type Includes<'Value, 'Item> = private Includes__ of obj
+type Includes<'Value, 'Item> = private Phantom_Includes__ of obj
 
 /// <summary>
 /// Generate a union of numbers between a specified start and end (both inclusive), with an optional step.
@@ -3294,7 +3299,7 @@ type Includes<'Value, 'Item> = private Includes__ of obj
 /// </example>
 /// <remarks>@see {@link IntRange}</remarks>
 [<Erase>]
-type IntClosedRange<'Start, 'End, 'Skip> = private IntClosedRange__ of obj
+type IntClosedRange<'Start, 'End, 'Skip> = private Phantom_IntClosedRange__ of obj
 
 /// <summary>
 /// Generate a union of numbers between a specified start (inclusive) and end (exclusive), with an optional step.
@@ -3339,7 +3344,7 @@ type IntClosedRange<'Start, 'End, 'Skip> = private IntClosedRange__ of obj
 /// </example>
 /// <remarks>@see {@link IntClosedRange}</remarks>
 [<Erase>]
-type IntRange<'Start, 'End, 'Step> = private IntRange__ of obj
+type IntRange<'Start, 'End, 'Step> = private Phantom_IntRange__ of obj
 
 /// <summary>
 /// Create an <a href="https://basarat.gitbook.io/typescript/type-system/type-compatibility#footnote-invariance">invariant type</a>, which is a type that does not accept supertypes and subtypes.
@@ -3424,8 +3429,7 @@ type IntRange<'Start, 'End, 'Step> = private IntRange__ of obj
 /// </code>
 /// </example>
 /// <remarks>@category Type</remarks>
-[<Erase>]
-type InvariantOf<'Type> = private InvariantOf__ of obj
+type InvariantOf<'Type> = JS.Intersect<'Type, InvariantOf.Members<'Type>>
 
 /// <summary>
 /// Returns a boolean for whether the given type is <c>any</c>.
@@ -3459,7 +3463,7 @@ type InvariantOf<'Type> = private InvariantOf__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsAny<'T> = private IsAny__ of obj
+type IsAny<'T> = private Phantom_IsAny__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type is a <c>true</c> or <c>false</c> <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types">literal type</a>.
@@ -3486,7 +3490,7 @@ type IsAny<'T> = private IsAny__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsBooleanLiteral<'T> = private IsBooleanLiteral__ of obj
+type IsBooleanLiteral<'T> = private Phantom_IsBooleanLiteral__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the two given types are equal.
@@ -3518,7 +3522,7 @@ type IsBooleanLiteral<'T> = private IsBooleanLiteral__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsEqual<'A, 'B> = private IsEqual__ of obj
+type IsEqual<'A, 'B> = private Phantom_IsEqual__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given number is a float, like <c>1.5</c> or <c>-1.5</c>.
@@ -3554,7 +3558,7 @@ type IsEqual<'A, 'B> = private IsEqual__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Numeric</remarks>
 [<Erase>]
-type IsFloat<'T> = private IsFloat__ of obj
+type IsFloat<'T> = private Phantom_IsFloat__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given number is an integer, like <c>-5</c>, <c>1.0</c>, or <c>100</c>.
@@ -3602,7 +3606,7 @@ type IsFloat<'T> = private IsFloat__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Numeric</remarks>
 [<Erase>]
-type IsInteger<'T> = private IsInteger__ of obj
+type IsInteger<'T> = private Phantom_IsInteger__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type is a <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types">literal type</a>.
@@ -3663,7 +3667,7 @@ type IsInteger<'T> = private IsInteger__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsLiteral<'T> = private IsLiteral__ of obj
+type IsLiteral<'T> = private Phantom_IsLiteral__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given string literal is lowercase.
@@ -3685,7 +3689,7 @@ type IsLiteral<'T> = private IsLiteral__ of obj
 /// </code>
 /// </example>
 [<Erase>]
-type IsLowercase<'S> = private IsLowercase__ of obj
+type IsLowercase<'S> = private Phantom_IsLowercase__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type is <c>never</c>.
@@ -3746,7 +3750,7 @@ type IsLowercase<'S> = private IsLowercase__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsNever<'T> = private IsNever__ of obj
+type IsNever<'T> = private Phantom_IsNever__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type is <c>null</c>.
@@ -3769,7 +3773,7 @@ type IsNever<'T> = private IsNever__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsNull<'T> = private IsNull__ of obj
+type IsNull<'T> = private Phantom_IsNull__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type includes <c>null</c>.
@@ -3799,7 +3803,7 @@ type IsNull<'T> = private IsNull__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsNullable<'T> = private IsNullable__ of obj
+type IsNullable<'T> = private Phantom_IsNullable__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type is a <c>number</c> or <c>bigint</c> <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types">literal type</a>.
@@ -3835,7 +3839,7 @@ type IsNullable<'T> = private IsNullable__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsNumericLiteral<'T> = private IsNumericLiteral__ of obj
+type IsNumericLiteral<'T> = private Phantom_IsNumericLiteral__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given key is an optional key of type.
@@ -3879,7 +3883,7 @@ type IsNumericLiteral<'T> = private IsNumericLiteral__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsOptionalKeyOf<'Type, 'Key> = private IsOptionalKeyOf__ of obj
+type IsOptionalKeyOf<'Type, 'Key> = private Phantom_IsOptionalKeyOf__ of bool
 
 /// <summary>
 /// Returns a boolean for whether the given type includes <c>undefined</c>.
@@ -3907,7 +3911,7 @@ type IsOptionalKeyOf<'Type, 'Key> = private IsOptionalKeyOf__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsOptional<'T> = private IsOptional__ of obj
+type IsOptional<'T> = private Phantom_IsOptional__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given key is a readonly key of type.
@@ -3951,7 +3955,7 @@ type IsOptional<'T> = private IsOptional__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsReadonlyKeyOf<'Type, 'Key> = private IsReadonlyKeyOf__ of obj
+type IsReadonlyKeyOf<'Type, 'Key> = private Phantom_IsReadonlyKeyOf__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given key is a required key of type.
@@ -3995,7 +3999,7 @@ type IsReadonlyKeyOf<'Type, 'Key> = private IsReadonlyKeyOf__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsRequiredKeyOf<'Type, 'Key> = private IsRequiredKeyOf__ of obj
+type IsRequiredKeyOf<'Type, 'Key> = private Phantom_IsRequiredKeyOf__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type is a <c>string</c> <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types">literal type</a>.
@@ -4054,7 +4058,7 @@ type IsRequiredKeyOf<'Type, 'Key> = private IsRequiredKeyOf__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsStringLiteral<'S> = private IsStringLiteral__ of obj
+type IsStringLiteral<'S> = private Phantom_IsStringLiteral__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type is a <c>symbol</c> <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types">literal type</a>.
@@ -4081,7 +4085,7 @@ type IsStringLiteral<'S> = private IsStringLiteral__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsSymbolLiteral<'T> = private IsSymbolLiteral__ of obj
+type IsSymbolLiteral<'T> = private Phantom_IsSymbolLiteral__ of obj
 
 /// <remarks>@see {@link IsTuple}</remarks>
 [<Interface>]
@@ -4146,7 +4150,7 @@ type IsTupleOptions =
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsTuple<'TArray, 'Options> = private IsTuple__ of obj
+type IsTuple<'TArray, 'Options> = private Phantom_IsTuple__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type is <c>undefined</c>.
@@ -4169,7 +4173,7 @@ type IsTuple<'TArray, 'Options> = private IsTuple__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsUndefined<'T> = private IsUndefined__ of obj
+type IsUndefined<'T> = private Phantom_IsUndefined__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type is a union.
@@ -4188,7 +4192,7 @@ type IsUndefined<'T> = private IsUndefined__ of obj
 /// </code>
 /// </example>
 [<Erase>]
-type IsUnion<'T> = private IsUnion__ of obj
+type IsUnion<'T> = private Phantom_IsUnion__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given type is <c>unknown</c>.
@@ -4226,7 +4230,7 @@ type IsUnion<'T> = private IsUnion__ of obj
 /// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsUnknown<'T> = private IsUnknown__ of obj
+type IsUnknown<'T> = private Phantom_IsUnknown__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given string literal is uppercase.
@@ -4248,7 +4252,7 @@ type IsUnknown<'T> = private IsUnknown__ of obj
 /// </code>
 /// </example>
 [<Erase>]
-type IsUppercase<'S> = private IsUppercase__ of obj
+type IsUppercase<'S> = private Phantom_IsUppercase__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given key is a writable key of type.
@@ -4292,7 +4296,7 @@ type IsUppercase<'S> = private IsUppercase__ of obj
 /// <remarks>@category Type Guard</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type IsWritableKeyOf<'Type, 'Key> = private IsWritableKeyOf__ of obj
+type IsWritableKeyOf<'Type, 'Key> = private Phantom_IsWritableKeyOf__ of obj
 
 /// <summary>
 /// Get the element type of an <c>Iterable</c>/<c>AsyncIterable</c>. For example, <c>Array</c>, <c>Set</c>, <c>Map</c>, generator, stream, etc.
@@ -4360,7 +4364,7 @@ type IsWritableKeyOf<'Type, 'Key> = private IsWritableKeyOf__ of obj
 /// </example>
 /// <remarks>@category Iterable</remarks>
 [<Erase>]
-type IterableElement<'TargetIterable> = private IterableElement__ of obj
+type IterableElement<'TargetIterable> = private Phantom_IterableElement__ of obj
 
 /// <summary>
 /// Join an array of strings and/or numbers using the given string as a delimiter.
@@ -4413,7 +4417,7 @@ type IterableElement<'TargetIterable> = private IterableElement__ of obj
 /// <remarks>@category Array</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type Join<'Items, 'Delimiter> = private Join__ of obj
+type Join<'Items, 'Delimiter> = private Phantom_Join__ of obj
 
 /// <summary>
 /// Matches a JSON object.
@@ -4536,7 +4540,7 @@ type Jsonifiable2 =
 /// <remarks>@link https://github.com/Microsoft/TypeScript/issues/1897#issuecomment-710744173</remarks>
 /// <remarks>@category JSON</remarks>
 [<Erase>]
-type Jsonify<'T> = private Jsonify__ of obj
+type Jsonify<'T> = private Phantom_Jsonify__ of obj
 
 /// <summary>
 /// Convert a string literal to kebab-case.
@@ -4577,7 +4581,7 @@ type Jsonify<'T> = private Jsonify__ of obj
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type KebabCase<'Value, 'Options> = private KebabCase__ of obj
+type KebabCase<'Value, 'Options> = private Phantom_KebabCase__ of obj
 
 /// <summary>
 /// Convert object properties to kebab case recursively.
@@ -4641,7 +4645,7 @@ type KebabCase<'Value, 'Options> = private KebabCase__ of obj
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type KebabCasedPropertiesDeep<'Value, 'Options> = private KebabCasedPropertiesDeep__ of obj
+type KebabCasedPropertiesDeep<'Value, 'Options> = private Phantom_KebabCasedPropertiesDeep__ of obj
 
 /// <summary>
 /// Convert top-level object properties to kebab case.
@@ -4679,7 +4683,7 @@ type KebabCasedPropertiesDeep<'Value, 'Options> = private KebabCasedPropertiesDe
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type KebabCasedProperties<'Value, 'Options> = private KebabCasedProperties__ of obj
+type KebabCasedProperties<'Value, 'Options> = private Phantom_KebabCasedProperties__ of obj
 
 /// <summary>
 /// Get keys of the given type as strings.
@@ -4706,7 +4710,8 @@ type KebabCasedProperties<'Value, 'Options> = private KebabCasedProperties__ of 
 /// </code>
 /// </example>
 /// <remarks>@category Object</remarks>
-type KeyAsString = string
+[<Erase>]
+type KeyAsString<'BaseType> = private Phantom_KeyAsString__ of string
 
 /// <summary>
 /// Create a union of all keys from a given type, even those exclusive to specific union members.
@@ -4745,7 +4750,8 @@ type KeyAsString = string
 /// </code>
 /// </example>
 /// <remarks>@category Object</remarks>
-type KeysOfUnion = obj
+[<Erase>]
+type KeysOfUnion<'ObjectType> = private Phantom_KeysOfUnion__ of obj
 
 /// <summary>
 /// Extract the type of the last element of an array.
@@ -4809,7 +4815,7 @@ type KeysOfUnion = obj
 /// <remarks>@category Array</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type LastArrayElement<'TArray> = private LastArrayElement__ of obj
+type LastArrayElement<'TArray> = private Phantom_LastArrayElement__ of obj
 
 /// <summary>
 /// Returns a boolean for whether a given number is less than or equal to another number.
@@ -4868,7 +4874,7 @@ type LastArrayElement<'TArray> = private LastArrayElement__ of obj
 /// </code>
 /// </example>
 [<Erase>]
-type LessThanOrEqual<'A, 'B> = private LessThanOrEqual__ of obj
+type LessThanOrEqual<'A, 'B> = private Phantom_LessThanOrEqual__ of obj
 
 /// <summary>
 /// Returns a boolean for whether a given number is less than another number.
@@ -4927,7 +4933,7 @@ type LessThanOrEqual<'A, 'B> = private LessThanOrEqual__ of obj
 /// </code>
 /// </example>
 [<Erase>]
-type LessThan<'A, 'B> = private LessThan__ of obj
+type LessThan<'A, 'B> = private Phantom_LessThan__ of obj
 
 /// <summary>
 /// Like <c>LiteralToPrimitive</c> except it converts literal types inside an object or array deeply.
@@ -4987,7 +4993,7 @@ type LessThan<'A, 'B> = private LessThan__ of obj
 /// <remarks>@category Type</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type LiteralToPrimitiveDeep<'T> = private LiteralToPrimitiveDeep__ of obj
+type LiteralToPrimitiveDeep<'T> = private Phantom_LiteralToPrimitiveDeep__ of obj
 
 /// <summary>
 /// Given a <a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types">literal type</a> return the <a href="https://developer.mozilla.org/en-US/docs/Glossary/Primitive">primitive type</a> it belongs to, or <c>never</c> if it's not a primitive.
@@ -5012,7 +5018,7 @@ type LiteralToPrimitiveDeep<'T> = private LiteralToPrimitiveDeep__ of obj
 /// </example>
 /// <remarks>@category Type</remarks>
 [<Erase>]
-type LiteralToPrimitive<'T> = private LiteralToPrimitive__ of obj
+type LiteralToPrimitive<'T> = private Phantom_LiteralToPrimitive__ of obj
 
 /// <summary>
 /// Create a union type by combining primitive types and literal types without sacrificing auto-completion in IDEs for the literal type part of the union.
@@ -5191,7 +5197,7 @@ type MergeDeepOptions =
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type MergeDeep<'Destination, 'Source, 'Options> = private MergeDeep__ of obj
+type MergeDeep<'Destination, 'Source, 'Options> = private Phantom_MergeDeep__ of obj
 
 /// <summary>
 /// Create a type that has mutually exclusive keys.
@@ -5231,7 +5237,7 @@ type MergeDeep<'Destination, 'Source, 'Options> = private MergeDeep__ of obj
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type MergeExclusive<'FirstType, 'SecondType> = private MergeExclusive__ of obj
+type MergeExclusive<'FirstType, 'SecondType> = private Phantom_MergeExclusive__ of obj
 
 /// <summary>
 /// Merge two types into a new type. Keys of the second type overrides keys of the first type.
@@ -5299,7 +5305,7 @@ type MergeExclusive<'FirstType, 'SecondType> = private MergeExclusive__ of obj
 /// <remarks>@see {@link ObjectMerge}</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type Merge<'Destination, 'Source> = private Merge__ of obj
+type Merge<'Destination, 'Source> = private Phantom_Merge__ of obj
 
 /// <summary>
 /// Create a type that represents a multidimensional array of the given type and dimension.
@@ -5329,7 +5335,7 @@ type Merge<'Destination, 'Source> = private Merge__ of obj
 /// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type MultidimensionalArray<'Element, 'Dimensions> = private MultidimensionalArray__ of obj
+type MultidimensionalArray<'Element, 'Dimensions> = private Phantom_MultidimensionalArray__ of obj
 
 /// <summary>
 /// Create a type that represents a multidimensional readonly array of the given type and dimension.
@@ -5359,7 +5365,7 @@ type MultidimensionalArray<'Element, 'Dimensions> = private MultidimensionalArra
 /// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type MultidimensionalReadonlyArray<'Element, 'Dimensions> = private MultidimensionalReadonlyArray__ of obj
+type MultidimensionalReadonlyArray<'Element, 'Dimensions> = private Phantom_MultidimensionalReadonlyArray__ of obj
 
 /// <summary>
 /// Represents an object with at least 1 non-optional key.
@@ -5394,7 +5400,7 @@ type MultidimensionalReadonlyArray<'Element, 'Dimensions> = private Multidimensi
 /// <remarks>@see Use <c>IsEmptyObject</c> to check whether an object is empty.</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type NonEmptyObject<'T> = private NonEmptyObject__ of obj
+type NonEmptyObject<'T> = private Phantom_NonEmptyObject__ of obj
 
 /// <summary>
 /// Matches any non-empty string.
@@ -5524,7 +5530,25 @@ type NonEmptyTuple<'T> = 'T[]
 /// <remarks>@category Set</remarks>
 /// <remarks>@category Map</remarks>
 [<Erase>]
-type NonNullableDeep<'T> = private NonNullableDeep__ of obj
+type NonNullableDeep<'T> = private Phantom_NonNullableDeep__ of obj
+
+/// <summary>
+/// Matches the hidden <c>Infinity</c> type.
+/// <br /><br />
+/// Please upvote <a href="https://github.com/microsoft/TypeScript/issues/32277">this issue</a> if you want to have this type as a built-in in TypeScript.
+/// </summary>
+/// <remarks>@see {@link NegativeInfinity}</remarks>
+/// <remarks>@category Numeric</remarks>
+type PositiveInfinity = float
+
+/// <summary>
+/// Matches the hidden <c>-Infinity</c> type.
+/// <br /><br />
+/// Please upvote <a href="https://github.com/microsoft/TypeScript/issues/32277">this issue</a> if you want to have this type as a built-in in TypeScript.
+/// </summary>
+/// <remarks>@see {@link PositiveInfinity}</remarks>
+/// <remarks>@category Numeric</remarks>
+type NegativeInfinity = float
 
 /// <summary>
 /// A finite <c>number</c>.
@@ -5667,7 +5691,7 @@ type NegativeInteger<'T> = 'T
 /// </example>
 /// <remarks>@category Numeric</remarks>
 [<Erase>]
-type NonNegative<'T> = private NonNegative__ of obj
+type NonNegative<'T> = private Phantom_NonNegative__ of obj
 
 /// <summary>
 /// A non-negative (<c>0 &lt;= x &lt; ∞</c>) <c>number</c> that is an integer.
@@ -5690,7 +5714,7 @@ type NonNegative<'T> = private NonNegative__ of obj
 /// </example>
 /// <remarks>@category Numeric</remarks>
 [<Erase>]
-type NonNegativeInteger<'T> = private NonNegativeInteger__ of obj
+type NonNegativeInteger<'T> = private Phantom_NonNegativeInteger__ of obj
 
 /// <summary>
 /// Returns a boolean for whether the given number is a negative number.
@@ -5708,7 +5732,7 @@ type NonNegativeInteger<'T> = private NonNegativeInteger__ of obj
 /// </example>
 /// <remarks>@category Numeric</remarks>
 [<Erase>]
-type IsNegative<'T> = private IsNegative__ of obj
+type IsNegative<'T> = private Phantom_IsNegative__ of obj
 
 /// <summary>
 /// Merge two object types into a new object type, where keys from the second override keys from the first.
@@ -5800,7 +5824,7 @@ type IsNegative<'T> = private IsNegative__ of obj
 /// <remarks>@see {@link Merge}</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type ObjectMerge<'First, 'Second> = private ObjectMerge__ of obj
+type ObjectMerge<'First, 'Second> = private Phantom_ObjectMerge__ of obj
 
 /// <summary>
 /// Omit properties from a deeply-nested object.
@@ -5870,7 +5894,7 @@ type ObjectMerge<'First, 'Second> = private ObjectMerge__ of obj
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type OmitDeep<'T, 'PathUnion> = private OmitDeep__ of obj
+type OmitDeep<'T, 'PathUnion> = private Phantom_OmitDeep__ of obj
 
 /// <summary>
 /// Omit any index signatures from the given object type, leaving only explicitly defined properties.
@@ -5961,7 +5985,7 @@ type OmitDeep<'T, 'PathUnion> = private OmitDeep__ of obj
 /// <remarks>@see {@link PickIndexSignature}</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type OmitIndexSignature<'ObjectType> = private OmitIndexSignature__ of obj
+type OmitIndexSignature<'ObjectType> = private Phantom_OmitIndexSignature__ of obj
 
 /// <summary>
 /// Extract all optional keys from the given type.
@@ -5998,7 +6022,7 @@ type OmitIndexSignature<'ObjectType> = private OmitIndexSignature__ of obj
 /// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type OptionalKeysOf<'Type> = private OptionalKeysOf__ of obj
+type OptionalKeysOf<'Type> = private Phantom_OptionalKeysOf__ of obj
 
 /// <summary>
 /// Create a type that represents either the value or <c>undefined</c>, while stripping <c>null</c> from the type.
@@ -6107,7 +6131,7 @@ type Optional<'Value> = 'Value option
 /// <remarks>@see {@link Or}</remarks>
 /// <remarks>@see {@link AndAll}</remarks>
 [<Erase>]
-type OrAll<'T> = private OrAll__ of obj
+type OrAll<'T> = private Phantom_OrAll__ of obj
 
 /// <summary>
 /// Returns a boolean for whether either of two given types is <c>true</c>.
@@ -6191,7 +6215,8 @@ type OrAll<'T> = private OrAll__ of obj
 /// <remarks>@see {@link OrAll}</remarks>
 /// <remarks>@see {@link And}</remarks>
 /// <remarks>@see {@link Xor}</remarks>
-type Or = obj
+[<Erase>]
+type Or<'A, 'B> = private Phantom_Or__ of obj
 
 /// <summary>
 /// Override existing properties of the given type. Similar to <c>Merge</c>, but enforces that the original type has the properties you want to override.
@@ -6223,7 +6248,7 @@ type Or = obj
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type OverrideProperties<'TOriginal, 'TOverride> = private OverrideProperties__ of obj
+type OverrideProperties<'TOriginal, 'TOverride> = private Phantom_OverrideProperties__ of obj
 
 /// <summary>
 /// Type for <a href="https://docs.npmjs.com/creating-a-package-json-file">npm's <c>package.json</c> file</a>. Also includes types for fields used by other popular projects, like TypeScript and Yarn.
@@ -6231,234 +6256,12 @@ type OverrideProperties<'TOriginal, 'TOverride> = private OverrideProperties__ o
 /// <remarks>@category File</remarks>
 type PackageJson =
     inherit JsonObject
-    /// <summary>
-    /// Defines which package manager is expected to be used when working on the current project. It can set to any of the <a href="https://nodejs.org/api/corepack.html#supported-package-managers">supported package managers</a>, and will ensure that your teams use the exact same package manager versions without having to install anything else than Node.js.
-    /// <br /><br />
-    /// __This field is currently experimental and needs to be opted-in; check the <a href="https://nodejs.org/api/corepack.html">Corepack</a> page for details about the procedure.__
-    /// </summary>
-    /// <example>
-    /// <code>
-    /// ```json
-    /// {
-    /// 	"packageManager": "&lt;package manager name&gt;@&lt;version&gt;"
-    /// }
-    /// </code>
-    /// <code>
-    /// </code>
-    /// </example>
-    abstract packageManager: string option with get, set
-    /// <summary>
-    /// The name of the package.
-    /// </summary>
-    abstract name: string option with get, set
-    /// <summary>
-    /// Package version, parseable by <a href="https://github.com/npm/node-semver"><c>node-semver</c></a>.
-    /// </summary>
-    abstract version: string option with get, set
-    /// <summary>
-    /// Package description, listed in <c>npm search</c>.
-    /// </summary>
-    abstract description: string option with get, set
-    /// <summary>
-    /// Keywords associated with package, listed in <c>npm search</c>.
-    /// </summary>
-    abstract keywords: string[] option with get, set
-    /// <summary>
-    /// The URL to the package's homepage.
-    /// </summary>
-    abstract homepage: string option with get, set
-    /// <summary>
-    /// The URL to the package's issue tracker and/or the email address to which issues should be reported.
-    /// </summary>
-    abstract bugs: U2<string, PackageJson.Bugs> option with get, set
-    /// <summary>
-    /// The license for the package.
-    /// </summary>
-    abstract license: string option with get, set
-    /// <summary>
-    /// The licenses for the package.
-    /// </summary>
-    abstract licenses: PackageJson.Licenses.Item[] option with get, set
-    abstract author: U2<string, PackageJson.Author> option with get, set
-    /// <summary>
-    /// A list of people who contributed to the package.
-    /// </summary>
-    abstract contributors: U2<string, PackageJson.Author>[] option with get, set
-    /// <summary>
-    /// A list of people who maintain the package.
-    /// </summary>
-    abstract maintainers: U2<string, PackageJson.Author>[] option with get, set
-    /// <summary>
-    /// The files included in the package.
-    /// </summary>
-    abstract files: string[] option with get, set
-    /// <summary>
-    /// Resolution algorithm for importing ".js" files from the package's scope.
-    /// <br /><br />
-    /// <a href="https://nodejs.org/api/esm.html#esm_package_json_type_field">Read more.</a>
-    /// </summary>
-    abstract ``type``: PackageJson.Type option with get, set
-    /// <summary>
-    /// The module ID that is the primary entry point to the program.
-    /// </summary>
-    abstract main: string option with get, set
-    /// <summary>
-    /// Subpath exports to define entry points of the package.
-    /// <br /><br />
-    /// <a href="https://nodejs.org/api/packages.html#subpath-exports">Read more.</a>
-    /// </summary>
-    abstract exports: U3<string, U2<string, PackageJson.Exports.Item>[], PackageJson.Exports.Item> option with get, set
-    /// <summary>
-    /// Subpath imports to define internal package import maps that only apply to import specifiers from within the package itself.
-    /// <br /><br />
-    /// <a href="https://nodejs.org/api/packages.html#subpath-imports">Read more.</a>
-    /// </summary>
-    abstract imports: JS.Record<string, U3<string, U2<string, PackageJson.Exports.Item>[], PackageJson.Exports.Item> option> option with get, set
-    /// <summary>
-    /// The executable files that should be installed into the <c>PATH</c>.
-    /// </summary>
-    abstract bin: U2<string, JS.Record<string, string option>> option with get, set
-    /// <summary>
-    /// Filenames to put in place for the <c>man</c> program to find.
-    /// </summary>
-    abstract man: U2<string, string[]> option with get, set
-    /// <summary>
-    /// Indicates the structure of the package.
-    /// </summary>
-    abstract directories: PackageJson.Directories option with get, set
-    /// <summary>
-    /// Location for the code repository.
-    /// </summary>
-    abstract repository: U2<string, PackageJson.Repository> option with get, set
-    /// <summary>
-    /// Script commands that are run at various times in the lifecycle of the package. The key is the lifecycle event, and the value is the command to run at that point.
-    /// </summary>
-    abstract scripts: PackageJson.Scripts option with get, set
-    /// <summary>
-    /// Is used to set configuration parameters used in package scripts that persist across upgrades.
-    /// </summary>
-    abstract config: JsonObject option with get, set
-    /// <summary>
-    /// The dependencies of the package.
-    /// </summary>
-    abstract dependencies: JS.Record<string, string option> option with get, set
-    /// <summary>
-    /// Additional tooling dependencies that are not required for the package to work. Usually test, build, or documentation tooling.
-    /// </summary>
-    abstract devDependencies: JS.Record<string, string option> option with get, set
-    /// <summary>
-    /// Dependencies that are skipped if they fail to install.
-    /// </summary>
-    abstract optionalDependencies: JS.Record<string, string option> option with get, set
-    /// <summary>
-    /// Dependencies that will usually be required by the package user directly or via another dependency.
-    /// </summary>
-    abstract peerDependencies: JS.Record<string, string option> option with get, set
-    /// <summary>
-    /// Indicate peer dependencies that are optional.
-    /// </summary>
-    abstract peerDependenciesMeta: JS.Record<string, PackageJson.PeerDependenciesMeta.Item option> option with get, set
-    /// <summary>
-    /// Package names that are bundled when the package is published.
-    /// </summary>
-    abstract bundledDependencies: string[] option with get, set
-    /// <summary>
-    /// Alias of <c>bundledDependencies</c>.
-    /// </summary>
-    abstract bundleDependencies: string[] option with get, set
-    /// <summary>
-    /// Overrides is used to support selective version overrides using npm, which lets you define custom package versions or ranges inside your dependencies.
-    /// </summary>
-    abstract overrides: PackageJson.Overrides option with get, set
-    /// <summary>
-    /// Engines that this package runs on.
-    /// </summary>
-    abstract engines: PackageJson.Engines option with get, set
-    /// <remarks>@deprecated</remarks>
-    abstract engineStrict: bool option with get, set
-    /// <summary>
-    /// Operating systems the module runs on.
-    /// </summary>
-    abstract os: string[] option with get, set
-    /// <summary>
-    /// CPU architectures the module runs on.
-    /// </summary>
-    abstract cpu: string[] option with get, set
-    /// <summary>
-    /// Define the runtime and package manager for developing the current project.
-    /// </summary>
-    abstract devEngines: PackageJson.DevEngines option with get, set
-    /// <summary>
-    /// If set to <c>true</c>, a warning will be shown if package is installed locally. Useful if the package is primarily a command-line application that should be installed globally.
-    /// </summary>
-    /// <remarks>@deprecated</remarks>
-    abstract preferGlobal: bool option with get, set
-    /// <summary>
-    /// If set to <c>true</c>, then npm will refuse to publish it.
-    /// </summary>
-    abstract ``private``: bool option with get, set
-    /// <summary>
-    /// A set of config values that will be used at publish-time. It's especially handy to set the tag, registry or access, to ensure that a given package is not tagged with 'latest', published to the global public registry or that a scoped module is private by default.
-    /// </summary>
-    abstract publishConfig: PackageJson.PublishConfig option with get, set
-    /// <summary>
-    /// Describes and notifies consumers of a package's monetary support information.
-    /// <br /><br />
-    /// <a href="https://github.com/npm/rfcs/blob/main/implemented/0017-add-funding-support.md">Read more.</a>
-    /// </summary>
-    abstract funding: U2<string, PackageJson.Funding> option with get, set
-    /// <summary>
-    /// Used to configure <a href="https://docs.npmjs.com/cli/using-npm/workspaces">npm workspaces</a> / <a href="https://classic.yarnpkg.com/docs/workspaces/">Yarn workspaces</a>.
-    /// <br /><br />
-    /// Workspaces allow you to manage multiple packages within the same repository in such a way that you only need to run your install command once in order to install all of them in a single pass.
-    /// <br /><br />
-    /// Please note that the top-level <c>private</c> property of <c>package.json</c> <b>must</b> be set to <c>true</c> in order to use workspaces.
-    /// </summary>
-    abstract workspaces: U2<string[], PackageJson.Workspaces> option with get, set
-    /// <summary>
-    /// An ECMAScript module ID that is the primary entry point to the program.
-    /// </summary>
-    abstract ``module``: string option with get, set
-    /// <summary>
-    /// A module ID with untranspiled code that is the primary entry point to the program.
-    /// </summary>
-    abstract esnext: U2<string, PackageJson.Esnext> option with get, set
-    /// <summary>
-    /// A hint to JavaScript bundlers or component tools when packaging modules for client side use.
-    /// </summary>
-    abstract browser: U2<string, JS.Record<string, U2<string, bool> option>> option with get, set
-    /// <summary>
-    /// Denote which files in your project are "pure" and therefore safe for Webpack to prune if unused.
-    /// <br /><br />
-    /// <a href="https://webpack.js.org/guides/tree-shaking/">Read more.</a>
-    /// </summary>
-    abstract sideEffects: U2<bool, string[]> option with get, set
-    /// <summary>
-    /// Location of the bundled TypeScript declaration file.
-    /// </summary>
-    abstract types: string option with get, set
-    /// <summary>
-    /// Version selection map of TypeScript.
-    /// </summary>
-    abstract typesVersions: JS.Record<string, JS.Record<string, string[] option> option> option with get, set
-    /// <summary>
-    /// Location of the bundled TypeScript declaration file. Alias of <c>types</c>.
-    /// </summary>
-    abstract typings: string option with get, set
-    /// <summary>
-    /// If your package only allows one version of a given dependency, and you’d like to enforce the same behavior as <c>yarn install --flat</c> on the command-line, set this to <c>true</c>.
-    /// <br /><br />
-    /// Note that if your <c>package.json</c> contains <c>"flat": true</c> and other packages depend on yours (e.g. you are building a library rather than an app), those other packages will also need <c>"flat": true</c> in their <c>package.json</c> or be installed with <c>yarn install --flat</c> on the command-line.
-    /// </summary>
-    abstract flat: bool option with get, set
-    /// <summary>
-    /// Selective version resolutions. Allows the definition of custom package versions inside dependencies without manual edits in the <c>yarn.lock</c> file.
-    /// </summary>
-    abstract resolutions: JS.Record<string, string option> option with get, set
-    /// <summary>
-    /// JSPM configuration.
-    /// </summary>
-    abstract jspm: PackageJson option with get, set
+    inherit PackageJson.NodeJsStandard
+    inherit PackageJson.PackageJsonStandard
+    inherit PackageJson.NonStandardEntryPoints
+    inherit PackageJson.TypeScriptConfiguration
+    inherit PackageJson.YarnConfiguration
+    inherit PackageJson.JSPMConfiguration
 
 /// <remarks>@see {@link PartialDeep}</remarks>
 [<Interface>]
@@ -6550,7 +6353,7 @@ type PartialDeepOptions =
 /// <remarks>@category Set</remarks>
 /// <remarks>@category Map</remarks>
 [<Erase>]
-type PartialDeep<'T, 'Options> = private PartialDeep__ of obj
+type PartialDeep<'T, 'Options> = private Phantom_PartialDeep__ of obj
 
 /// <remarks>@see {@link PartialOnUndefinedDeep}</remarks>
 [<Interface>]
@@ -6598,7 +6401,7 @@ type PartialOnUndefinedDeepOptions =
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type PartialOnUndefinedDeep<'T, 'Options> = private PartialOnUndefinedDeep__ of obj
+type PartialOnUndefinedDeep<'T, 'Options> = private Phantom_PartialOnUndefinedDeep__ of obj
 
 /// <summary>
 /// Convert a string literal to pascal-case.
@@ -6643,7 +6446,7 @@ type PartialOnUndefinedDeep<'T, 'Options> = private PartialOnUndefinedDeep__ of 
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type PascalCase<'Value, 'Options> = private PascalCase__ of obj
+type PascalCase<'Value, 'Options> = private Phantom_PascalCase__ of obj
 
 /// <summary>
 /// Convert object properties to pascal case recursively.
@@ -6705,7 +6508,7 @@ type PascalCase<'Value, 'Options> = private PascalCase__ of obj
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type PascalCasedPropertiesDeep<'Value, 'Options> = private PascalCasedPropertiesDeep__ of obj
+type PascalCasedPropertiesDeep<'Value, 'Options> = private Phantom_PascalCasedPropertiesDeep__ of obj
 
 /// <summary>
 /// Convert top-level object properties to pascal case.
@@ -6743,7 +6546,7 @@ type PascalCasedPropertiesDeep<'Value, 'Options> = private PascalCasedProperties
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type PascalCasedProperties<'Value, 'Options> = private PascalCasedProperties__ of obj
+type PascalCasedProperties<'Value, 'Options> = private Phantom_PascalCasedProperties__ of obj
 
 /// <summary>
 /// Paths options.
@@ -6927,7 +6730,7 @@ type PathsOptions =
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type Paths<'T, 'Options> = private Paths__ of obj
+type Paths<'T, 'Options> = private Phantom_Paths__ of obj
 
 /// <summary>
 /// Pick properties from a deeply-nested object.
@@ -6988,7 +6791,7 @@ type Paths<'T, 'Options> = private Paths__ of obj
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type PickDeep<'T, 'PathUnion> = private PickDeep__ of obj
+type PickDeep<'T, 'PathUnion> = private Phantom_PickDeep__ of obj
 
 /// <summary>
 /// Pick only index signatures from the given object type, leaving out all explicitly defined properties.
@@ -7037,13 +6840,13 @@ type PickDeep<'T, 'PathUnion> = private PickDeep__ of obj
 /// <remarks>@see {@link OmitIndexSignature}</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type PickIndexSignature<'ObjectType> = private PickIndexSignature__ of obj
+type PickIndexSignature<'ObjectType> = private Phantom_PickIndexSignature__ of obj
 
 /// <summary>
 /// Matches any <a href="https://developer.mozilla.org/en-US/docs/Glossary/Primitive">primitive value</a>.
 /// </summary>
 /// <remarks>@category Type</remarks>
-type Primitive = obj option
+type Primitive = U5<string, float, bigint, Fable.Core.TS.Es.Symbol, bool> option
 
 /// <summary>
 /// Create a type that represents either the value or the value wrapped in <c>PromiseLike</c>.
@@ -7145,7 +6948,7 @@ type Promisable<'T> = U2<'T, JS.Promise<'T>>
 /// <remarks>@category Set</remarks>
 /// <remarks>@category Map</remarks>
 [<Erase>]
-type ReadonlyDeep<'T> = private ReadonlyDeep__ of obj
+type ReadonlyDeep<'T> = private Phantom_ReadonlyDeep__ of obj
 
 /// <summary>
 /// Extract all readonly keys from the given type.
@@ -7174,7 +6977,7 @@ type ReadonlyDeep<'T> = private ReadonlyDeep__ of obj
 /// </example>
 /// <remarks>@category Utilities</remarks>
 [<Erase>]
-type ReadonlyKeysOf<'Type> = private ReadonlyKeysOf__ of obj
+type ReadonlyKeysOf<'Type> = private Phantom_ReadonlyKeysOf__ of obj
 
 /// <summary>
 /// Create a type that represents a read-only tuple of the given type and length.
@@ -7205,7 +7008,8 @@ type ReadonlyKeysOf<'Type> = private ReadonlyKeysOf__ of obj
 /// </example>
 /// <remarks>@deprecated This type will be removed in the next major version. Use the built-in <c>Readonly</c> type in combination with the {@link TupleOf} type instead, like <c>Readonly&lt;TupleOf&lt;Length, Element&gt;&gt;</c>.</remarks>
 /// <remarks>@category Utilities</remarks>
-type ReadonlyTuple = obj[]
+[<Erase>]
+type ReadonlyTuple<'Element, 'Length> = private Phantom_ReadonlyTuple__ of 'Element[]
 
 /// <remarks>@see {@link RemovePrefix}</remarks>
 [<Interface>]
@@ -7295,7 +7099,7 @@ type RemovePrefixOptions =
 /// <remarks>@category String</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type RemovePrefix<'S, 'Prefix, 'Options> = private RemovePrefix__ of obj
+type RemovePrefix<'S, 'Prefix, 'Options> = private Phantom_RemovePrefix__ of obj
 
 /// <remarks>@see {@link RemoveSuffix}</remarks>
 [<Interface>]
@@ -7385,7 +7189,7 @@ type RemoveSuffixOptions =
 /// <remarks>@category String</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type RemoveSuffix<'S, 'Suffix, 'Options> = private RemoveSuffix__ of obj
+type RemoveSuffix<'S, 'Suffix, 'Options> = private Phantom_RemoveSuffix__ of obj
 
 /// <summary>
 /// Rename keys in an object type according to a map of old-to-new names.
@@ -7500,7 +7304,7 @@ type RemoveSuffix<'S, 'Suffix, 'Options> = private RemoveSuffix__ of obj
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type RenameKeys<'BaseType, 'RenameMap> = private RenameKeys__ of obj
+type RenameKeys<'BaseType, 'RenameMap> = private Phantom_RenameKeys__ of obj
 
 [<Interface>]
 type ReplaceOptions =
@@ -7563,7 +7367,7 @@ type ReplaceOptions =
 /// <remarks>@category String</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type Replace<'Input, 'Search, 'Replacement, 'Options> = private Replace__ of obj
+type Replace<'Input, 'Search, 'Replacement, 'Options> = private Phantom_Replace__ of obj
 
 /// <summary>
 /// Create a type that requires all of the given keys or none of the given keys, while keeping the remaining keys as is.
@@ -7598,7 +7402,7 @@ type Replace<'Input, 'Search, 'Replacement, 'Options> = private Replace__ of obj
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type RequireAllOrNone<'ObjectType, 'KeysType> = private RequireAllOrNone__ of obj
+type RequireAllOrNone<'ObjectType, 'KeysType> = private Phantom_RequireAllOrNone__ of obj
 
 /// <summary>
 /// Create a type that requires at least one of the given keys, while keeping the remaining keys as is.
@@ -7623,7 +7427,7 @@ type RequireAllOrNone<'ObjectType, 'KeysType> = private RequireAllOrNone__ of ob
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type RequireAtLeastOne<'ObjectType, 'KeysType> = private RequireAtLeastOne__ of obj
+type RequireAtLeastOne<'ObjectType, 'KeysType> = private Phantom_RequireAtLeastOne__ of obj
 
 /// <summary>
 /// Create a type that requires exactly one of the given keys and disallows more, while keeping the remaining keys as is.
@@ -7656,7 +7460,7 @@ type RequireAtLeastOne<'ObjectType, 'KeysType> = private RequireAtLeastOne__ of 
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type RequireExactlyOne<'ObjectType, 'KeysType> = private RequireExactlyOne__ of obj
+type RequireExactlyOne<'ObjectType, 'KeysType> = private Phantom_RequireExactlyOne__ of obj
 
 /// <summary>
 /// Create a type that requires exactly one of the given keys or none of the given keys, while keeping the remaining keys as is.
@@ -7690,7 +7494,7 @@ type RequireExactlyOne<'ObjectType, 'KeysType> = private RequireExactlyOne__ of 
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type RequireOneOrNone<'ObjectType, 'KeysType> = private RequireOneOrNone__ of obj
+type RequireOneOrNone<'ObjectType, 'KeysType> = private Phantom_RequireOneOrNone__ of obj
 
 /// <summary>
 /// Create a deeply required version of another type.
@@ -7737,7 +7541,7 @@ type RequireOneOrNone<'ObjectType, 'KeysType> = private RequireOneOrNone__ of ob
 /// <remarks>@category Set</remarks>
 /// <remarks>@category Map</remarks>
 [<Erase>]
-type RequiredDeep<'T> = private RequiredDeep__ of obj
+type RequiredDeep<'T> = private Phantom_RequiredDeep__ of obj
 
 /// <summary>
 /// Extract all required keys from the given type.
@@ -7856,7 +7660,7 @@ type SchemaOptions =
 /// <remarks>@see {@link SchemaOptions}</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type Schema<'Type, 'Value, 'Options> = private Schema__ of obj
+type Schema<'Type, 'Value, 'Options> = private Phantom_Schema__ of obj
 
 /// <summary>
 /// Convert a string literal to screaming-snake-case.
@@ -7877,7 +7681,7 @@ type Schema<'Type, 'Value, 'Options> = private Schema__ of obj
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type ScreamingSnakeCase<'Value, 'Options> = private ScreamingSnakeCase__ of obj
+type ScreamingSnakeCase<'Value, 'Options> = private Phantom_ScreamingSnakeCase__ of obj
 
 [<Interface>]
 type SetFieldTypeOptions =
@@ -7928,7 +7732,8 @@ type SetFieldTypeOptions =
 /// </code>
 /// </example>
 /// <remarks>@category Object</remarks>
-type SetFieldType = obj
+[<Erase>]
+type SetFieldType<'BaseType, 'Keys, 'NewType, 'Options> = private Phantom_SetFieldType__ of obj
 
 /// <summary>
 /// Create a type that makes the specified keys non-nullable (removes <c>null</c> and <c>undefined</c>), supports deeply nested key paths, and leaves all other keys unchanged.
@@ -7984,7 +7789,7 @@ type SetFieldType = obj
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type SetNonNullableDeep<'BaseType, 'KeyPaths> = private SetNonNullableDeep__ of obj
+type SetNonNullableDeep<'BaseType, 'KeyPaths> = private Phantom_SetNonNullableDeep__ of obj
 
 /// <summary>
 /// Create a type that makes the given keys non-nullable, while keeping the remaining keys as is.
@@ -8015,7 +7820,7 @@ type SetNonNullableDeep<'BaseType, 'KeyPaths> = private SetNonNullableDeep__ of 
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type SetNonNullable<'BaseType, 'Keys> = private SetNonNullable__ of obj
+type SetNonNullable<'BaseType, 'Keys> = private Phantom_SetNonNullable__ of obj
 
 /// <summary>
 /// Create a type that makes the given keys optional, while keeping the remaining keys as is.
@@ -8040,7 +7845,7 @@ type SetNonNullable<'BaseType, 'Keys> = private SetNonNullable__ of obj
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type SetOptional<'BaseType, 'Keys> = private SetOptional__ of obj
+type SetOptional<'BaseType, 'Keys> = private Phantom_SetOptional__ of obj
 
 /// <summary>
 /// Create a function that replaces some parameters with the given parameters.
@@ -8102,7 +7907,7 @@ type SetOptional<'BaseType, 'Keys> = private SetOptional__ of obj
 /// </example>
 /// <remarks>@category Function</remarks>
 [<Erase>]
-type SetParameterType<'Function_, 'P> = private SetParameterType__ of obj
+type SetParameterType<'Function_, 'P> = private Phantom_SetParameterType__ of obj
 
 /// <summary>
 /// Create a type that makes the given keys readonly, while keeping the remaining keys as is.
@@ -8127,7 +7932,7 @@ type SetParameterType<'Function_, 'P> = private SetParameterType__ of obj
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type SetReadonly<'BaseType, 'Keys> = private SetReadonly__ of obj
+type SetReadonly<'BaseType, 'Keys> = private Phantom_SetReadonly__ of obj
 
 /// <summary>
 /// Create a type that makes the given keys required, with support for deeply nested key paths, while keeping the remaining keys as is.
@@ -8158,7 +7963,7 @@ type SetReadonly<'BaseType, 'Keys> = private SetReadonly__ of obj
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type SetRequiredDeep<'BaseType, 'KeyPaths> = private SetRequiredDeep__ of obj
+type SetRequiredDeep<'BaseType, 'KeyPaths> = private Phantom_SetRequiredDeep__ of obj
 
 /// <summary>
 /// Create a type that makes the given keys required, while keeping the remaining keys as is.
@@ -8187,7 +7992,7 @@ type SetRequiredDeep<'BaseType, 'KeyPaths> = private SetRequiredDeep__ of obj
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type SetRequired<'BaseType, 'Keys> = private SetRequired__ of obj
+type SetRequired<'BaseType, 'Keys> = private Phantom_SetRequired__ of obj
 
 /// <summary>
 /// Create a function type with a return type of your choice and the same parameters as the given function type.
@@ -8208,7 +8013,7 @@ type SetRequired<'BaseType, 'Keys> = private SetRequired__ of obj
 /// </example>
 /// <remarks>@category Function</remarks>
 [<Erase>]
-type SetReturnType<'Function_, 'TypeToReturn> = private SetReturnType__ of obj
+type SetReturnType<'Function_, 'TypeToReturn> = private Phantom_SetReturnType__ of obj
 
 /// <summary>
 /// SharedUnionFieldsDeep options.
@@ -8291,7 +8096,7 @@ type SharedUnionFieldsDeepOptions =
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Union</remarks>
 [<Erase>]
-type SharedUnionFieldsDeep<'Union, 'Options> = private SharedUnionFieldsDeep__ of obj
+type SharedUnionFieldsDeep<'Union, 'Options> = private Phantom_SharedUnionFieldsDeep__ of obj
 
 /// <summary>
 /// Create a type with shared fields from a union of object types.
@@ -8355,7 +8160,7 @@ type SharedUnionFieldsDeep<'Union, 'Options> = private SharedUnionFieldsDeep__ o
 /// <remarks>@category Object</remarks>
 /// <remarks>@category Union</remarks>
 [<Erase>]
-type SharedUnionFields<'Union> = private SharedUnionFields__ of obj
+type SharedUnionFields<'Union> = private Phantom_SharedUnionFields__ of obj
 
 /// <summary>
 /// Deeply simplifies an object type.
@@ -8466,7 +8271,7 @@ type SharedUnionFields<'Union> = private SharedUnionFields__ of obj
 /// <remarks>@see {@link Simplify}</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type SimplifyDeep<'Type, 'ExcludeType> = private SimplifyDeep__ of obj
+type SimplifyDeep<'Type, 'ExcludeType> = private Phantom_SimplifyDeep__ of obj
 
 /// <summary>
 /// Useful to flatten the type output to improve type hints shown in editors. And also to transform an interface into a type to aide with assignability.
@@ -8529,7 +8334,8 @@ type SimplifyDeep<'Type, 'ExcludeType> = private SimplifyDeep__ of obj
 /// <remarks>@link https://github.com/microsoft/TypeScript/issues/15300</remarks>
 /// <remarks>@see {@link SimplifyDeep}</remarks>
 /// <remarks>@category Object</remarks>
-type Simplify = obj
+[<Erase>]
+type Simplify<'T> = private Phantom_Simplify__ of obj
 
 /// <summary>
 /// Create a type that only accepts an object with a single key.
@@ -8551,7 +8357,7 @@ type Simplify = obj
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type SingleKeyObject<'ObjectType> = private SingleKeyObject__ of obj
+type SingleKeyObject<'ObjectType> = private Phantom_SingleKeyObject__ of obj
 
 /// <summary>
 /// Convert a string literal to snake-case.
@@ -8593,7 +8399,7 @@ type SingleKeyObject<'ObjectType> = private SingleKeyObject__ of obj
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type SnakeCase<'Value, 'Options> = private SnakeCase__ of obj
+type SnakeCase<'Value, 'Options> = private Phantom_SnakeCase__ of obj
 
 /// <summary>
 /// Convert object properties to snake case recursively.
@@ -8657,7 +8463,7 @@ type SnakeCase<'Value, 'Options> = private SnakeCase__ of obj
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type SnakeCasedPropertiesDeep<'Value, 'Options> = private SnakeCasedPropertiesDeep__ of obj
+type SnakeCasedPropertiesDeep<'Value, 'Options> = private Phantom_SnakeCasedPropertiesDeep__ of obj
 
 /// <summary>
 /// Convert top-level object properties to snake case.
@@ -8695,7 +8501,7 @@ type SnakeCasedPropertiesDeep<'Value, 'Options> = private SnakeCasedPropertiesDe
 /// <remarks>@category Template literal</remarks>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type SnakeCasedProperties<'Value, 'Options> = private SnakeCasedProperties__ of obj
+type SnakeCasedProperties<'Value, 'Options> = private Phantom_SnakeCasedProperties__ of obj
 
 /// <remarks>@see {@link SomeExtend}</remarks>
 [<Interface>]
@@ -8783,7 +8589,7 @@ type SomeExtendOptions =
 /// <remarks>@category Utilities</remarks>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type SomeExtend<'TArray, 'Type, 'Options> = private SomeExtend__ of obj
+type SomeExtend<'TArray, 'Type, 'Options> = private Phantom_SomeExtend__ of obj
 
 /// <summary>
 /// Splits an array into three parts, where the first contains all elements before the rest element, the second is the <a href="https://www.typescriptlang.org/docs/handbook/2/objects.html#tuple-types"><c>rest</c></a> element itself, and the third contains all elements after the rest element.
@@ -8820,7 +8626,7 @@ type SomeExtend<'TArray, 'Type, 'Options> = private SomeExtend__ of obj
 /// <remarks>@see {@link ExcludeRestElement}</remarks>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type SplitOnRestElement<'Array_, 'Options> = private SplitOnRestElement__ of obj
+type SplitOnRestElement<'Array_, 'Options> = private Phantom_SplitOnRestElement__ of obj
 
 /// <summary>
 /// Split options.
@@ -8878,7 +8684,7 @@ type SplitOptions =
 /// <remarks>@category String</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type Split<'S, 'Delimiter, 'Options> = private Split__ of obj
+type Split<'S, 'Delimiter, 'Options> = private Phantom_Split__ of obj
 
 /// <summary>
 /// Mimic the type inferred by TypeScript when merging two objects or two arrays/tuples using the spread syntax.
@@ -8931,7 +8737,7 @@ type Split<'S, 'Delimiter, 'Options> = private Split__ of obj
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type Spread<'FirstType, 'SecondType> = private Spread__ of obj
+type Spread<'FirstType, 'SecondType> = private Phantom_Spread__ of obj
 
 /// <summary>
 /// Returns the length of the given string.
@@ -8969,7 +8775,8 @@ type Spread<'FirstType, 'SecondType> = private Spread__ of obj
 /// </example>
 /// <remarks>@category String</remarks>
 /// <remarks>@category Template literal</remarks>
-type StringLength = obj
+[<Erase>]
+type StringLength<'S> = private Phantom_StringLength__ of obj
 
 /// <summary>
 /// Returns a new string which contains the specified number of copies of a given string, just like <c>String#repeat()</c>.
@@ -9009,7 +8816,7 @@ type StringLength = obj
 /// <remarks>@category String</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type StringRepeat<'S, 'Count> = private StringRepeat__ of obj
+type StringRepeat<'S, 'Count> = private Phantom_StringRepeat__ of obj
 
 /// <summary>
 /// Returns a string slice of a given range, just like <c>String#slice()</c>.
@@ -9036,7 +8843,7 @@ type StringRepeat<'S, 'Count> = private StringRepeat__ of obj
 /// </example>
 /// <remarks>@category String</remarks>
 [<Erase>]
-type StringSlice<'S, 'Start, 'End> = private StringSlice__ of obj
+type StringSlice<'S, 'Start, 'End> = private Phantom_StringSlice__ of obj
 
 /// <remarks>@see {@link StringToArray}</remarks>
 [<Interface>]
@@ -9107,7 +8914,7 @@ type StringToArrayOptions =
 /// <remarks>@see {@link StringToArrayOptions}</remarks>
 /// <remarks>@category String</remarks>
 [<Erase>]
-type StringToArray<'S, 'Options> = private StringToArray__ of obj
+type StringToArray<'S, 'Options> = private Phantom_StringToArray__ of obj
 
 /// <summary>
 /// Converts a numeric string to a number.
@@ -9159,7 +8966,7 @@ type StringToArray<'S, 'Options> = private StringToArray__ of obj
 /// <remarks>@category Numeric</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type StringToNumber<'S> = private StringToNumber__ of obj
+type StringToNumber<'S> = private Phantom_StringToNumber__ of obj
 
 /// <summary>
 /// Create a type with the keys of the given type changed to <c>string</c> type.
@@ -9258,7 +9065,7 @@ type StructuredCloneable2 =
 /// </example>
 /// <remarks>@category Numeric</remarks>
 [<Erase>]
-type Subtract<'A, 'B> = private Subtract__ of obj
+type Subtract<'A, 'B> = private Phantom_Subtract__ of obj
 
 /// <summary>
 /// Returns the sum of two numbers.
@@ -9290,7 +9097,7 @@ type Subtract<'A, 'B> = private Subtract__ of obj
 /// </example>
 /// <remarks>@category Numeric</remarks>
 [<Erase>]
-type Sum<'A, 'B> = private Sum__ of obj
+type Sum<'A, 'B> = private Phantom_Sum__ of obj
 
 /// <summary>
 /// Create a union of types that share a common discriminant property.
@@ -9338,7 +9145,8 @@ type Sum<'A, 'B> = private Sum__ of obj
 /// </code>
 /// </example>
 /// <remarks>@category Utilities</remarks>
-type TaggedUnion = obj
+[<Erase>]
+type TaggedUnion<'TagKey, 'UnionMembers> = private Phantom_TaggedUnion__ of obj
 
 /// <summary>
 /// Create a <a href="https://medium.com/@KevinBGreene/surviving-the-typescript-ecosystem-branding-and-type-tagging-6cf6e516523d">tagged type</a> that can support <a href="https://github.com/sindresorhus/type-fest/issues/665">multiple tags</a> and <a href="https://medium.com/@ethanresnick/advanced-typescript-tagged-types-improved-with-type-level-metadata-5072fc125fcf">per-tag metadata</a>.
@@ -9402,8 +9210,7 @@ type TaggedUnion = obj
 /// </code>
 /// </example>
 /// <remarks>@category Type</remarks>
-[<Erase>]
-type Tagged<'Type, 'TagName, 'TagMetadata> = private Tagged__ of obj
+type Tagged<'Type, 'TagName, 'TagMetadata> = JS.Intersect<'Type, Tagged.Members<'TagName, 'TagMetadata>>
 
 /// <summary>
 /// Given a type and a tag name, returns the metadata associated with that tag on that type.
@@ -9433,7 +9240,8 @@ type Tagged<'Type, 'TagName, 'TagMetadata> = private Tagged__ of obj
 /// </code>
 /// </example>
 /// <remarks>@category Type</remarks>
-type GetTagMetadata = obj
+[<Erase>]
+type GetTagMetadata<'Type, 'TagName> = private Phantom_GetTagMetadata__ of obj
 
 /// <summary>
 /// Get the untagged portion of a tagged type created with <c>Tagged</c>.
@@ -9466,7 +9274,7 @@ type GetTagMetadata = obj
 /// </example>
 /// <remarks>@category Type</remarks>
 [<Erase>]
-type UnwrapTagged<'TaggedType> = private UnwrapTagged__ of obj
+type UnwrapTagged<'TaggedType> = private Phantom_UnwrapTagged__ of obj
 
 /// <summary>
 /// Note: The <c>Opaque</c> type is deprecated in favor of <c>Tagged</c>.
@@ -9543,8 +9351,7 @@ type UnwrapTagged<'TaggedType> = private UnwrapTagged__ of obj
 /// </example>
 /// <remarks>@category Type</remarks>
 /// <remarks>@deprecated Use {@link Tagged} instead</remarks>
-[<Erase>]
-type Opaque<'Type, 'Token> = private Opaque__ of obj
+type Opaque<'Type, 'Token> = JS.Intersect<'Type, Opaque.Members<'Token>>
 
 /// <summary>
 /// Note: The <c>UnwrapOpaque</c> type is deprecated in favor of <c>UnwrapTagged</c>.
@@ -9584,7 +9391,7 @@ type Opaque<'Type, 'Token> = private Opaque__ of obj
 /// <remarks>@category Type</remarks>
 /// <remarks>@deprecated Use {@link UnwrapTagged} instead</remarks>
 [<Erase>]
-type UnwrapOpaque<'OpaqueType> = private UnwrapOpaque__ of obj
+type UnwrapOpaque<'OpaqueType> = private Phantom_UnwrapOpaque__ of obj
 
 /// <summary>
 /// Remove leading and trailing spaces from a string.
@@ -9602,7 +9409,7 @@ type UnwrapOpaque<'OpaqueType> = private UnwrapOpaque__ of obj
 /// <remarks>@category String</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type Trim<'V> = private Trim__ of obj
+type Trim<'V> = private Phantom_Trim__ of obj
 
 /// <summary>
 /// Type for <a href="https://www.typescriptlang.org/docs/handbook/tsconfig-json.html">TypeScript's <c>tsconfig.json</c> file</a>.
@@ -9649,9 +9456,9 @@ type TsConfigJson =
     /// <summary>
     /// Referenced projects.
     /// </summary>
-    abstract references: TsConfigJson.References.Item[] option with get, set
+    abstract references: TsConfigJson.References[] option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?compilerOptions: TsConfigJson.CompilerOptions, ?watchOptions: TsConfigJson.WatchOptions, ?typeAcquisition: TsConfigJson.TypeAcquisition, ?compileOnSave: bool, ?extends: U2<string, string[]>, ?files: string[], ?exclude: string[], ?``include``: string[], ?references: TsConfigJson.References.Item[]) : TsConfigJson = jsNative
+    static member Create (?compilerOptions: TsConfigJson.CompilerOptions, ?watchOptions: TsConfigJson.WatchOptions, ?typeAcquisition: TsConfigJson.TypeAcquisition, ?compileOnSave: bool, ?extends: U2<string, string[]>, ?files: string[], ?exclude: string[], ?``include``: string[], ?references: TsConfigJson.References[]) : TsConfigJson = jsNative
 
 /// <summary>
 /// Create a tuple type of the specified length with elements of the specified type.
@@ -9739,7 +9546,7 @@ type TsConfigJson =
 /// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type TupleOf<'Length, 'Fill> = private TupleOf__ of obj
+type TupleOf<'Length, 'Fill> = private Phantom_TupleOf__ of obj
 
 /// <summary>
 /// Transforms a tuple into an object, mapping each tuple index to its corresponding type as a key-value pair.
@@ -9778,7 +9585,7 @@ type TupleOf<'Length, 'Fill> = private TupleOf__ of obj
 /// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type TupleToObject<'TArray> = private TupleToObject__ of obj
+type TupleToObject<'TArray> = private Phantom_TupleToObject__ of obj
 
 /// <summary>
 /// Convert a tuple/array into a union type of its elements.
@@ -9835,7 +9642,7 @@ type TupleToObject<'TArray> = private TupleToObject__ of obj
 /// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type TupleToUnion<'ArrayType> = private TupleToUnion__ of obj
+type TupleToUnion<'ArrayType> = private Phantom_TupleToUnion__ of obj
 
 /// <summary>
 /// Matches any <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray">typed array</a>, like <c>Uint8Array</c> or <c>Float64Array</c>.
@@ -9887,7 +9694,7 @@ type TypedArray = U12<Fable.Core.TS.Es.BigInt64Array<U2<Fable.Core.TS.Es.ArrayBu
 /// </code>
 /// </example>
 [<Erase>]
-type UndefinedOnPartialDeep<'T> = private UndefinedOnPartialDeep__ of obj
+type UndefinedOnPartialDeep<'T> = private Phantom_UndefinedOnPartialDeep__ of obj
 
 /// <summary>
 /// Returns the length of a union type.
@@ -9912,7 +9719,8 @@ type UndefinedOnPartialDeep<'T> = private UndefinedOnPartialDeep__ of obj
 /// </code>
 /// </example>
 /// <remarks>@category Type</remarks>
-type UnionLength = obj
+[<Erase>]
+type UnionLength<'Union> = private Phantom_UnionLength__ of obj
 
 /// <summary>
 /// Returns an arbitrary member of a union type.
@@ -9974,7 +9782,7 @@ type UnionLength = obj
 /// </example>
 /// <remarks>@category Type</remarks>
 [<Erase>]
-type UnionMember<'T> = private UnionMember__ of obj
+type UnionMember<'T> = private Phantom_UnionMember__ of obj
 
 /// <summary>
 /// Convert a union type to an intersection type.
@@ -9995,7 +9803,7 @@ type UnionMember<'T> = private UnionMember__ of obj
 /// </example>
 /// <remarks>@category Type</remarks>
 [<Erase>]
-type UnionToIntersection<'Union> = private UnionToIntersection__ of obj
+type UnionToIntersection<'Union> = private Phantom_UnionToIntersection__ of obj
 
 /// <summary>
 /// Convert a union type into an unordered tuple type of its elements.
@@ -10036,7 +9844,7 @@ type UnionToIntersection<'Union> = private UnionToIntersection__ of obj
 /// </example>
 /// <remarks>@category Array</remarks>
 [<Erase>]
-type UnionToTuple<'Union> = private UnionToTuple__ of obj
+type UnionToTuple<'Union> = private Phantom_UnionToTuple__ of UnknownArray
 
 /// <summary>
 /// Represents an array with <c>unknown</c> value.
@@ -10128,7 +9936,7 @@ type UnknownRecord =
     [<EmitIndexer>]
     abstract Item: float -> obj with get, set
     [<EmitIndexer>]
-    abstract Item: obj -> obj with get, set
+    abstract Item: Fable.Core.TS.Es.Symbol -> obj with get, set
 
 /// <summary>
 /// Represents a set with <c>unknown</c> value.
@@ -10181,7 +9989,7 @@ type UnknownSet = Fable.Core.TS.Es.ReadonlySet<obj>
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type UnwrapPartial<'PartialObjectType> = private UnwrapPartial__ of obj
+type UnwrapPartial<'PartialObjectType> = private Phantom_UnwrapPartial__ of obj
 
 /// <summary>
 /// Revert the <c>Required</c> modifier on an object type.
@@ -10209,7 +10017,7 @@ type UnwrapPartial<'PartialObjectType> = private UnwrapPartial__ of obj
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type UnwrapRequired<'RequiredObjectType> = private UnwrapRequired__ of obj
+type UnwrapRequired<'RequiredObjectType> = private Phantom_UnwrapRequired__ of obj
 
 /// <summary>
 /// Create a union of the given object's values, and optionally specify which keys to get the values from.
@@ -10233,7 +10041,8 @@ type UnwrapRequired<'RequiredObjectType> = private UnwrapRequired__ of obj
 /// </code>
 /// </example>
 /// <remarks>@category Object</remarks>
-type ValueOf<'ObjectType> = proptypelock<'ObjectType>
+[<Erase>]
+type ValueOf<'ObjectType, 'ValueType> = private Phantom_ValueOf__ of proptypelock<'ObjectType>
 
 /// <summary>
 /// Words options.
@@ -10324,7 +10133,7 @@ type WordsOptions =
 /// <remarks>@category Change case</remarks>
 /// <remarks>@category Template literal</remarks>
 [<Erase>]
-type Words<'Sentence, 'Options> = private Words__ of obj
+type Words<'Sentence, 'Options> = private Phantom_Words__ of obj
 
 /// <summary>
 /// Create a deeply mutable version of an <c>object</c>/<c>ReadonlyMap</c>/<c>ReadonlySet</c>/<c>ReadonlyArray</c> type. The inverse of <c>ReadonlyDeep&lt;T&gt;</c>. Use <c>Writable&lt;T&gt;</c> if you only need one level deep.
@@ -10357,7 +10166,7 @@ type Words<'Sentence, 'Options> = private Words__ of obj
 /// <remarks>@category Set</remarks>
 /// <remarks>@category Map</remarks>
 [<Erase>]
-type WritableDeep<'T> = private WritableDeep__ of obj
+type WritableDeep<'T> = private Phantom_WritableDeep__ of obj
 
 /// <summary>
 /// Extract all writable keys from the given type.
@@ -10428,7 +10237,7 @@ type WritableKeysOf<'Type> = keyof<'Type>
 /// </example>
 /// <remarks>@category Object</remarks>
 [<Erase>]
-type Writable<'BaseType, 'Keys> = private Writable__ of obj
+type Writable<'BaseType, 'Keys> = private Phantom_Writable__ of obj
 
 /// <summary>
 /// Returns a boolean for whether only one of two given types is <c>true</c>.
@@ -10512,7 +10321,7 @@ type Writable<'BaseType, 'Keys> = private Writable__ of obj
 /// <remarks>@see {@link And}</remarks>
 /// <remarks>@see {@link Or}</remarks>
 [<Erase>]
-type Xor<'A, 'B> = private Xor__ of obj
+type Xor<'A, 'B> = private Phantom_Xor__ of obj
 
 module ConditionalPickDeepOptions =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -10572,9 +10381,9 @@ module Globals =
     /// <remarks>@category Observable</remarks>
     [<Interface>]
     type ObservableLike<'ValueType> =
-        abstract subscribe: ?observer: ObservableLike.Subscribe.Observer<'ValueType> -> Unsubscribable
+        abstract subscribe: ?observer: TypeFest.Globals.ObservableLike.Subscribe.Observer<'ValueType> -> Unsubscribable
         [<ParamObject; Emit("$0")>]
-        static member Create (subscribe: (ObservableLike.Subscribe.Observer<'ValueType> option -> Unsubscribable)) : ObservableLike<'ValueType> = jsNative
+        static member Create (subscribe: (TypeFest.Globals.ObservableLike.Subscribe.Observer<'ValueType> option -> Unsubscribable)) : ObservableLike<'ValueType> = jsNative
 
     module ObservableLike =
         module Subscribe =
@@ -10585,6 +10394,10 @@ module Globals =
                 abstract complete: (unit -> unit) option with get, set
                 [<ParamObject; Emit("$0")>]
                 static member Create (?next: ('ValueType -> unit), ?error: (obj -> unit), ?complete: (unit -> unit)) : Observer<'ValueType> = jsNative
+
+module InvariantOf =
+    type Members<'Type> =
+        interface end
 
 module Jsonifiable2 =
     [<Interface>]
@@ -10598,6 +10411,10 @@ module MergeDeepOptions =
     type ArrayMergeMode =
         | [<CompiledName("replace")>] Replace
         | [<CompiledName("spread")>] Spread
+
+module Opaque =
+    type Members<'Token> =
+        interface end
 
 module PackageJson =
     [<Interface>]
@@ -10623,41 +10440,13 @@ module PackageJson =
 
     [<Interface>]
     type DevEngines =
-        abstract os: U2<PackageJson.DevEngines.Os.Item[], PackageJson.DevEngines.Os.Item> option with get, set
-        abstract cpu: U2<PackageJson.DevEngines.Os.Item[], PackageJson.DevEngines.Os.Item> option with get, set
-        abstract libc: U2<PackageJson.DevEngines.Os.Item[], PackageJson.DevEngines.Os.Item> option with get, set
-        abstract runtime: U2<PackageJson.DevEngines.Os.Item[], PackageJson.DevEngines.Os.Item> option with get, set
-        abstract packageManager: U2<PackageJson.DevEngines.Os.Item[], PackageJson.DevEngines.Os.Item> option with get, set
+        abstract os: U2<DevEngineDependency[], DevEngineDependency> option with get, set
+        abstract cpu: U2<DevEngineDependency[], DevEngineDependency> option with get, set
+        abstract libc: U2<DevEngineDependency[], DevEngineDependency> option with get, set
+        abstract runtime: U2<DevEngineDependency[], DevEngineDependency> option with get, set
+        abstract packageManager: U2<DevEngineDependency[], DevEngineDependency> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?os: U2<PackageJson.DevEngines.Os.Item[], PackageJson.DevEngines.Os.Item>, ?cpu: U2<PackageJson.DevEngines.Os.Item[], PackageJson.DevEngines.Os.Item>, ?libc: U2<PackageJson.DevEngines.Os.Item[], PackageJson.DevEngines.Os.Item>, ?runtime: U2<PackageJson.DevEngines.Os.Item[], PackageJson.DevEngines.Os.Item>, ?packageManager: U2<PackageJson.DevEngines.Os.Item[], PackageJson.DevEngines.Os.Item>) : DevEngines = jsNative
-
-    type Directories =
-        /// <summary>
-        /// Location for executable scripts. Sugar to generate entries in the <c>bin</c> property by walking the folder.
-        /// </summary>
-        abstract bin: string option with get, set
-        /// <summary>
-        /// Location for Markdown files.
-        /// </summary>
-        abstract doc: string option with get, set
-        /// <summary>
-        /// Location for example scripts.
-        /// </summary>
-        abstract example: string option with get, set
-        /// <summary>
-        /// Location for the bulk of the library.
-        /// </summary>
-        abstract lib: string option with get, set
-        /// <summary>
-        /// Location for man pages. Sugar to generate a <c>man</c> array by walking the folder.
-        /// </summary>
-        abstract man: string option with get, set
-        /// <summary>
-        /// Location for test files.
-        /// </summary>
-        abstract test: string option with get, set
-        [<EmitIndexer>]
-        abstract Item: string -> U5<string, float, bool, JsonValue[], JsonObject> option with get, set
+        static member Create (?os: U2<DevEngineDependency[], DevEngineDependency>, ?cpu: U2<DevEngineDependency[], DevEngineDependency>, ?libc: U2<DevEngineDependency[], DevEngineDependency>, ?runtime: U2<DevEngineDependency[], DevEngineDependency>, ?packageManager: U2<DevEngineDependency[], DevEngineDependency>) : DevEngines = jsNative
 
     type Engines =
         abstract node: string option with get, set
@@ -10684,30 +10473,6 @@ module PackageJson =
         [<ParamObject; Emit("$0")>]
         static member Create (url: string, ?``type``: string) : Funding = jsNative
 
-    type Overrides =
-        [<EmitIndexer>]
-        abstract Item: string -> U2<string, Overrides> option with get, set
-
-    type PublishConfig =
-        /// <summary>
-        /// When publishing scoped packages, the access level defaults to restricted. If you want your scoped package to be publicly viewable (and installable) set <c>--access=public</c>. The only valid values for access are public and restricted. Unscoped packages always have an access level of public.
-        /// </summary>
-        abstract access: PackageJson.PublishConfig.Access option with get, set
-        /// <summary>
-        /// The base URL of the npm registry.
-        /// <br /><br />
-        /// Default: <c>'https://registry.npmjs.org/'</c>
-        /// </summary>
-        abstract registry: string option with get, set
-        /// <summary>
-        /// The tag to publish the package under.
-        /// <br /><br />
-        /// Default: <c>'latest'</c>
-        /// </summary>
-        abstract tag: string option with get, set
-        [<EmitIndexer>]
-        abstract Item: string -> U5<string, float, bool, JsonValue[], JsonObject> option with get, set
-
     [<Interface>]
     type Repository =
         abstract ``type``: string with get, set
@@ -10720,6 +10485,46 @@ module PackageJson =
         abstract directory: string option with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (``type``: string, url: string, ?directory: string) : Repository = jsNative
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Type =
+        | [<CompiledName("commonjs")>] Commonjs
+        | [<CompiledName("module")>] Module
+
+    /// <summary>
+    /// A person who has been involved in creating or maintaining the package.
+    /// </summary>
+    type Person = U2<string, Author>
+
+    type BugsLocation = U2<string, Bugs>
+
+    type DirectoryLocations =
+        /// <summary>
+        /// Location for executable scripts. Sugar to generate entries in the <c>bin</c> property by walking the folder.
+        /// </summary>
+        abstract bin: string option with get, set
+        /// <summary>
+        /// Location for Markdown files.
+        /// </summary>
+        abstract doc: string option with get, set
+        /// <summary>
+        /// Location for example scripts.
+        /// </summary>
+        abstract example: string option with get, set
+        /// <summary>
+        /// Location for the bulk of the library.
+        /// </summary>
+        abstract lib: string option with get, set
+        /// <summary>
+        /// Location for man pages. Sugar to generate a <c>man</c> array by walking the folder.
+        /// </summary>
+        abstract man: string option with get, set
+        /// <summary>
+        /// Location for test files.
+        /// </summary>
+        abstract test: string option with get, set
+        [<EmitIndexer>]
+        abstract Item: string -> U5<string, float, bool, JsonValue[], JsonObject> option with get, set
 
     type Scripts =
         /// <summary>
@@ -10837,13 +10642,91 @@ module PackageJson =
         [<EmitIndexer>]
         abstract Item: string -> string option with get, set
 
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Type =
-        | [<CompiledName("commonjs")>] Commonjs
-        | [<CompiledName("module")>] Module
+    /// <summary>
+    /// Dependencies of the package. The version range is a string which has one or more space-separated descriptors. Dependencies can also be identified with a tarball or Git URL.
+    /// </summary>
+    type Dependency = JS.Record<string, string option>
+
+    /// <summary>
+    /// Recursive map describing selective dependency version overrides supported by npm.
+    /// </summary>
+    type DependencyOverrides =
+        [<EmitIndexer>]
+        abstract Item: string -> U2<string, DependencyOverrides> option with get, set
+
+    /// <summary>
+    /// Specifies requirements for development environment components such as operating systems, runtimes, or package managers. Used to ensure consistent development environments across the team.
+    /// </summary>
+    [<Interface>]
+    type DevEngineDependency =
+        abstract name: string with get, set
+        abstract version: string option with get, set
+        abstract onFail: PackageJson.DevEngineDependency.OnFail option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string, ?version: string, ?onFail: PackageJson.DevEngineDependency.OnFail) : DevEngineDependency = jsNative
+
+    /// <summary>
+    /// A mapping of conditions and the paths to which they resolve.
+    /// </summary>
+    type ExportConditions =
+        [<EmitIndexer>]
+        abstract Item: string -> Exports with get, set
+
+    /// <summary>
+    /// Entry points of a module, optionally with conditions and subpath exports.
+    /// </summary>
+    type Exports = U3<string, U2<string, ExportConditions>[], ExportConditions> option
+
+    /// <summary>
+    /// Import map entries of a module, optionally with conditions and subpath imports.
+    /// </summary>
+    type Imports = JS.Record<string, Exports>
 
     [<Interface>]
-    type Workspaces =
+    type NonStandardEntryPoints =
+        /// <summary>
+        /// An ECMAScript module ID that is the primary entry point to the program.
+        /// </summary>
+        abstract ``module``: string option with get, set
+        /// <summary>
+        /// A module ID with untranspiled code that is the primary entry point to the program.
+        /// </summary>
+        abstract esnext: U2<string, Esnext> option with get, set
+        /// <summary>
+        /// A hint to JavaScript bundlers or component tools when packaging modules for client side use.
+        /// </summary>
+        abstract browser: U2<string, JS.Record<string, U2<string, bool> option>> option with get, set
+        /// <summary>
+        /// Denote which files in your project are "pure" and therefore safe for Webpack to prune if unused.
+        /// <br /><br />
+        /// <a href="https://webpack.js.org/guides/tree-shaking/">Read more.</a>
+        /// </summary>
+        abstract sideEffects: U2<bool, string[]> option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?``module``: string, ?esnext: U2<string, Esnext>, ?browser: U2<string, JS.Record<string, U2<string, bool> option>>, ?sideEffects: U2<bool, string[]>) : NonStandardEntryPoints = jsNative
+
+    [<Interface>]
+    type TypeScriptConfiguration =
+        /// <summary>
+        /// Location of the bundled TypeScript declaration file.
+        /// </summary>
+        abstract types: string option with get, set
+        /// <summary>
+        /// Version selection map of TypeScript.
+        /// </summary>
+        abstract typesVersions: JS.Record<string, JS.Record<string, string[] option> option> option with get, set
+        /// <summary>
+        /// Location of the bundled TypeScript declaration file. Alias of <c>types</c>.
+        /// </summary>
+        abstract typings: string option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?types: string, ?typesVersions: JS.Record<string, JS.Record<string, string[] option> option>, ?typings: string) : TypeScriptConfiguration = jsNative
+
+    /// <summary>
+    /// An alternative configuration for workspaces.
+    /// </summary>
+    [<Interface>]
+    type WorkspaceConfig =
         /// <summary>
         /// An array of workspace pattern strings which contain the workspace packages.
         /// </summary>
@@ -10856,30 +10739,269 @@ module PackageJson =
         /// </summary>
         abstract nohoist: string[] option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?packages: string[], ?nohoist: string[]) : Workspaces = jsNative
+        static member Create (?packages: string[], ?nohoist: string[]) : WorkspaceConfig = jsNative
 
-    module DevEngines =
-        module Os =
-            [<Interface>]
-            type Item =
-                abstract name: string with get, set
-                abstract version: string option with get, set
-                abstract onFail: PackageJson.DevEngines.Os.Item.OnFail option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (name: string, ?version: string, ?onFail: PackageJson.DevEngines.Os.Item.OnFail) : Item = jsNative
+    /// <summary>
+    /// A workspace pattern points to a directory or group of directories which contain packages that should be included in the workspace installation process.
+    /// <br /><br />
+    /// The patterns are handled with <a href="https://github.com/isaacs/minimatch">minimatch</a>.
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// `docs` → Include the docs directory and install its dependencies.
+    /// `packages/*` → Include all nested directories within the packages directory, like `packages/cli` and `packages/core`.
+    /// </code>
+    /// </example>
+    type WorkspacePattern = string
 
-            module Item =
-                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                type OnFail =
-                    | [<CompiledName("download")>] Download
-                    | [<CompiledName("error")>] Error
-                    | [<CompiledName("ignore")>] Ignore
-                    | [<CompiledName("warn")>] Warn
+    [<Interface>]
+    type YarnConfiguration =
+        /// <summary>
+        /// If your package only allows one version of a given dependency, and you’d like to enforce the same behavior as <c>yarn install --flat</c> on the command-line, set this to <c>true</c>.
+        /// <br /><br />
+        /// Note that if your <c>package.json</c> contains <c>"flat": true</c> and other packages depend on yours (e.g. you are building a library rather than an app), those other packages will also need <c>"flat": true</c> in their <c>package.json</c> or be installed with <c>yarn install --flat</c> on the command-line.
+        /// </summary>
+        abstract flat: bool option with get, set
+        /// <summary>
+        /// Selective version resolutions. Allows the definition of custom package versions inside dependencies without manual edits in the <c>yarn.lock</c> file.
+        /// </summary>
+        abstract resolutions: Dependency option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?flat: bool, ?resolutions: Dependency) : YarnConfiguration = jsNative
 
-    module Exports =
-        type Item =
-            [<EmitIndexer>]
-            abstract Item: string -> U3<string, U2<string, Item>[], Item> option with get, set
+    [<Interface>]
+    type JSPMConfiguration =
+        /// <summary>
+        /// JSPM configuration.
+        /// </summary>
+        abstract jspm: PackageJson option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?jspm: PackageJson) : JSPMConfiguration = jsNative
+
+    /// <summary>
+    /// Type for <a href="https://docs.npmjs.com/creating-a-package-json-file">npm's <c>package.json</c> file</a>. Containing standard npm properties.
+    /// </summary>
+    type PackageJsonStandard =
+        /// <summary>
+        /// The name of the package.
+        /// </summary>
+        abstract name: string option with get, set
+        /// <summary>
+        /// Package version, parseable by <a href="https://github.com/npm/node-semver"><c>node-semver</c></a>.
+        /// </summary>
+        abstract version: string option with get, set
+        /// <summary>
+        /// Package description, listed in <c>npm search</c>.
+        /// </summary>
+        abstract description: string option with get, set
+        /// <summary>
+        /// Keywords associated with package, listed in <c>npm search</c>.
+        /// </summary>
+        abstract keywords: string[] option with get, set
+        /// <summary>
+        /// The URL to the package's homepage.
+        /// </summary>
+        abstract homepage: string option with get, set
+        /// <summary>
+        /// The URL to the package's issue tracker and/or the email address to which issues should be reported.
+        /// </summary>
+        abstract bugs: BugsLocation option with get, set
+        /// <summary>
+        /// The license for the package.
+        /// </summary>
+        abstract license: string option with get, set
+        /// <summary>
+        /// The licenses for the package.
+        /// </summary>
+        abstract licenses: PackageJson.Licenses.Item[] option with get, set
+        abstract author: Person option with get, set
+        /// <summary>
+        /// A list of people who contributed to the package.
+        /// </summary>
+        abstract contributors: Person[] option with get, set
+        /// <summary>
+        /// A list of people who maintain the package.
+        /// </summary>
+        abstract maintainers: Person[] option with get, set
+        /// <summary>
+        /// The files included in the package.
+        /// </summary>
+        abstract files: string[] option with get, set
+        /// <summary>
+        /// Resolution algorithm for importing ".js" files from the package's scope.
+        /// <br /><br />
+        /// <a href="https://nodejs.org/api/esm.html#esm_package_json_type_field">Read more.</a>
+        /// </summary>
+        abstract ``type``: Type option with get, set
+        /// <summary>
+        /// The module ID that is the primary entry point to the program.
+        /// </summary>
+        abstract main: string option with get, set
+        /// <summary>
+        /// Subpath exports to define entry points of the package.
+        /// <br /><br />
+        /// <a href="https://nodejs.org/api/packages.html#subpath-exports">Read more.</a>
+        /// </summary>
+        abstract exports: U3<string, U2<string, ExportConditions>[], ExportConditions> option with get, set
+        /// <summary>
+        /// Subpath imports to define internal package import maps that only apply to import specifiers from within the package itself.
+        /// <br /><br />
+        /// <a href="https://nodejs.org/api/packages.html#subpath-imports">Read more.</a>
+        /// </summary>
+        abstract imports: Imports option with get, set
+        /// <summary>
+        /// The executable files that should be installed into the <c>PATH</c>.
+        /// </summary>
+        abstract bin: U2<string, JS.Record<string, string option>> option with get, set
+        /// <summary>
+        /// Filenames to put in place for the <c>man</c> program to find.
+        /// </summary>
+        abstract man: U2<string, string[]> option with get, set
+        /// <summary>
+        /// Indicates the structure of the package.
+        /// </summary>
+        abstract directories: DirectoryLocations option with get, set
+        /// <summary>
+        /// Location for the code repository.
+        /// </summary>
+        abstract repository: U2<string, Repository> option with get, set
+        /// <summary>
+        /// Script commands that are run at various times in the lifecycle of the package. The key is the lifecycle event, and the value is the command to run at that point.
+        /// </summary>
+        abstract scripts: Scripts option with get, set
+        /// <summary>
+        /// Is used to set configuration parameters used in package scripts that persist across upgrades.
+        /// </summary>
+        abstract config: JsonObject option with get, set
+        /// <summary>
+        /// The dependencies of the package.
+        /// </summary>
+        abstract dependencies: Dependency option with get, set
+        /// <summary>
+        /// Additional tooling dependencies that are not required for the package to work. Usually test, build, or documentation tooling.
+        /// </summary>
+        abstract devDependencies: Dependency option with get, set
+        /// <summary>
+        /// Dependencies that are skipped if they fail to install.
+        /// </summary>
+        abstract optionalDependencies: Dependency option with get, set
+        /// <summary>
+        /// Dependencies that will usually be required by the package user directly or via another dependency.
+        /// </summary>
+        abstract peerDependencies: Dependency option with get, set
+        /// <summary>
+        /// Indicate peer dependencies that are optional.
+        /// </summary>
+        abstract peerDependenciesMeta: JS.Record<string, PackageJson.PeerDependenciesMeta.Item option> option with get, set
+        /// <summary>
+        /// Package names that are bundled when the package is published.
+        /// </summary>
+        abstract bundledDependencies: string[] option with get, set
+        /// <summary>
+        /// Alias of <c>bundledDependencies</c>.
+        /// </summary>
+        abstract bundleDependencies: string[] option with get, set
+        /// <summary>
+        /// Overrides is used to support selective version overrides using npm, which lets you define custom package versions or ranges inside your dependencies.
+        /// </summary>
+        abstract overrides: DependencyOverrides option with get, set
+        /// <summary>
+        /// Engines that this package runs on.
+        /// </summary>
+        abstract engines: Engines option with get, set
+        /// <remarks>@deprecated</remarks>
+        abstract engineStrict: bool option with get, set
+        /// <summary>
+        /// Operating systems the module runs on.
+        /// </summary>
+        abstract os: string[] option with get, set
+        /// <summary>
+        /// CPU architectures the module runs on.
+        /// </summary>
+        abstract cpu: string[] option with get, set
+        /// <summary>
+        /// Define the runtime and package manager for developing the current project.
+        /// </summary>
+        abstract devEngines: DevEngines option with get, set
+        /// <summary>
+        /// If set to <c>true</c>, a warning will be shown if package is installed locally. Useful if the package is primarily a command-line application that should be installed globally.
+        /// </summary>
+        /// <remarks>@deprecated</remarks>
+        abstract preferGlobal: bool option with get, set
+        /// <summary>
+        /// If set to <c>true</c>, then npm will refuse to publish it.
+        /// </summary>
+        abstract ``private``: bool option with get, set
+        /// <summary>
+        /// A set of config values that will be used at publish-time. It's especially handy to set the tag, registry or access, to ensure that a given package is not tagged with 'latest', published to the global public registry or that a scoped module is private by default.
+        /// </summary>
+        abstract publishConfig: PublishConfig option with get, set
+        /// <summary>
+        /// Describes and notifies consumers of a package's monetary support information.
+        /// <br /><br />
+        /// <a href="https://github.com/npm/rfcs/blob/main/implemented/0017-add-funding-support.md">Read more.</a>
+        /// </summary>
+        abstract funding: U2<string, Funding> option with get, set
+        /// <summary>
+        /// Used to configure <a href="https://docs.npmjs.com/cli/using-npm/workspaces">npm workspaces</a> / <a href="https://classic.yarnpkg.com/docs/workspaces/">Yarn workspaces</a>.
+        /// <br /><br />
+        /// Workspaces allow you to manage multiple packages within the same repository in such a way that you only need to run your install command once in order to install all of them in a single pass.
+        /// <br /><br />
+        /// Please note that the top-level <c>private</c> property of <c>package.json</c> <b>must</b> be set to <c>true</c> in order to use workspaces.
+        /// </summary>
+        abstract workspaces: U2<string[], WorkspaceConfig> option with get, set
+
+    /// <summary>
+    /// Type for <a href="https://nodejs.org/api/packages.html#nodejs-packagejson-field-definitions"><c>package.json</c> file used by the Node.js runtime</a>.
+    /// </summary>
+    [<Interface>]
+    type NodeJsStandard =
+        /// <summary>
+        /// Defines which package manager is expected to be used when working on the current project. It can set to any of the <a href="https://nodejs.org/api/corepack.html#supported-package-managers">supported package managers</a>, and will ensure that your teams use the exact same package manager versions without having to install anything else than Node.js.
+        /// <br /><br />
+        /// __This field is currently experimental and needs to be opted-in; check the <a href="https://nodejs.org/api/corepack.html">Corepack</a> page for details about the procedure.__
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// ```json
+        /// {
+        /// 	"packageManager": "&lt;package manager name&gt;@&lt;version&gt;"
+        /// }
+        /// </code>
+        /// <code>
+        /// </code>
+        /// </example>
+        abstract packageManager: string option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?packageManager: string) : NodeJsStandard = jsNative
+
+    type PublishConfig =
+        /// <summary>
+        /// When publishing scoped packages, the access level defaults to restricted. If you want your scoped package to be publicly viewable (and installable) set <c>--access=public</c>. The only valid values for access are public and restricted. Unscoped packages always have an access level of public.
+        /// </summary>
+        abstract access: PackageJson.PublishConfig.Access option with get, set
+        /// <summary>
+        /// The base URL of the npm registry.
+        /// <br /><br />
+        /// Default: <c>'https://registry.npmjs.org/'</c>
+        /// </summary>
+        abstract registry: string option with get, set
+        /// <summary>
+        /// The tag to publish the package under.
+        /// <br /><br />
+        /// Default: <c>'latest'</c>
+        /// </summary>
+        abstract tag: string option with get, set
+        [<EmitIndexer>]
+        abstract Item: string -> U5<string, float, bool, JsonValue[], JsonObject> option with get, set
+
+    module DevEngineDependency =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type OnFail =
+            | [<CompiledName("download")>] Download
+            | [<CompiledName("error")>] Error
+            | [<CompiledName("ignore")>] Ignore
+            | [<CompiledName("warn")>] Warn
 
     module Licenses =
         [<Interface>]
@@ -10901,6 +11023,10 @@ module PackageJson =
         type Access =
             | [<CompiledName("public")>] Public
             | [<CompiledName("restricted")>] Restricted
+
+module Tagged =
+    type Members<'TagName, 'TagMetadata> =
+        interface end
 
 module TsConfigJson =
     type CompilerOptions =
@@ -10980,7 +11106,7 @@ module TsConfigJson =
         /// Specify what JSX code is generated.
         /// </summary>
         /// <defaultValue>'preserve'</defaultValue>
-        abstract jsx: TsConfigJson.CompilerOptions.Jsx option with get, set
+        abstract jsx: TsConfigJson.CompilerOptions.JSX option with get, set
         /// <summary>
         /// Specifies the object invoked for <c>createElement</c> and <c>__spread</c> when targeting <c>'react'</c> JSX emit.
         /// </summary>
@@ -11280,7 +11406,7 @@ module TsConfigJson =
         /// <summary>
         /// List of TypeScript language server plugins to load.
         /// </summary>
-        abstract plugins: TsConfigJson.CompilerOptions.Plugins.Item[] option with get, set
+        abstract plugins: TsConfigJson.CompilerOptions.Plugin[] option with get, set
         /// <summary>
         /// Specify list of root directories to be used when resolving modules.
         /// </summary>
@@ -11332,7 +11458,7 @@ module TsConfigJson =
         /// <summary>
         /// List of library files to be included in the compilation.
         /// </summary>
-        abstract lib: TsConfigJson.CompilerOptions.Lib.Item[] option with get, set
+        abstract lib: TsConfigJson.CompilerOptions.Lib[] option with get, set
         /// <summary>
         /// Enable strict null checks.
         /// </summary>
@@ -11518,27 +11644,6 @@ module TsConfigJson =
         abstract libReplacement: bool option with get, set
 
     [<Interface>]
-    type TypeAcquisition =
-        /// <summary>
-        /// Enable auto type acquisition.
-        /// </summary>
-        abstract enable: bool option with get, set
-        /// <summary>
-        /// Specifies a list of type declarations to be included in auto type acquisition. For example, <c>['jquery', 'lodash']</c>.
-        /// </summary>
-        abstract ``include``: string[] option with get, set
-        /// <summary>
-        /// Specifies a list of type declarations to be excluded from auto type acquisition. For example, <c>['jquery', 'lodash']</c>.
-        /// </summary>
-        abstract exclude: string[] option with get, set
-        /// <summary>
-        /// Disable inferring what types should be added based on filenames in a project.
-        /// </summary>
-        abstract disableFilenameBasedTypeAcquisition: bool option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?enable: bool, ?``include``: string[], ?exclude: string[], ?disableFilenameBasedTypeAcquisition: bool) : TypeAcquisition = jsNative
-
-    [<Interface>]
     type WatchOptions =
         /// <summary>
         /// Specify the strategy for watching individual files.
@@ -11569,30 +11674,57 @@ module TsConfigJson =
         [<ParamObject; Emit("$0")>]
         static member Create (?watchFile: TsConfigJson.WatchOptions.WatchFile, ?watchDirectory: TsConfigJson.WatchOptions.WatchDirectory, ?fallbackPolling: TsConfigJson.WatchOptions.FallbackPolling, ?synchronousWatchDirectory: bool, ?excludeDirectories: string[], ?excludeFiles: string[]) : WatchOptions = jsNative
 
+    /// <summary>
+    /// Auto type (.d.ts) acquisition options for this project.
+    /// </summary>
+    [<Interface>]
+    type TypeAcquisition =
+        /// <summary>
+        /// Enable auto type acquisition.
+        /// </summary>
+        abstract enable: bool option with get, set
+        /// <summary>
+        /// Specifies a list of type declarations to be included in auto type acquisition. For example, <c>['jquery', 'lodash']</c>.
+        /// </summary>
+        abstract ``include``: string[] option with get, set
+        /// <summary>
+        /// Specifies a list of type declarations to be excluded from auto type acquisition. For example, <c>['jquery', 'lodash']</c>.
+        /// </summary>
+        abstract exclude: string[] option with get, set
+        /// <summary>
+        /// Disable inferring what types should be added based on filenames in a project.
+        /// </summary>
+        abstract disableFilenameBasedTypeAcquisition: bool option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?enable: bool, ?``include``: string[], ?exclude: string[], ?disableFilenameBasedTypeAcquisition: bool) : TypeAcquisition = jsNative
+
+    [<Interface>]
+    type References =
+        /// <summary>
+        /// A normalized path on disk.
+        /// </summary>
+        abstract path: string with get, set
+        /// <summary>
+        /// The path as the user originally wrote it.
+        /// </summary>
+        abstract originalPath: string option with get, set
+        /// <summary>
+        /// True if the output of this reference should be prepended to the output of this project.
+        /// <br /><br />
+        /// Only valid for <c>--outFile</c> compilations.
+        /// </summary>
+        /// <remarks>@deprecated This option will be removed in TypeScript 5.5.</remarks>
+        abstract prepend: bool option with get, set
+        /// <summary>
+        /// True if it is intended that this reference form a circularity.
+        /// </summary>
+        abstract circular: bool option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (path: string, ?originalPath: string, ?prepend: bool, ?circular: bool) : References = jsNative
+
     module CompilerOptions =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type FallbackPolling =
-            | [<CompiledName("dynamicPriority")>] DynamicPriority
-            | [<CompiledName("dynamicPriorityPolling")>] DynamicPriorityPolling
-            | [<CompiledName("fixedChunkSize")>] FixedChunkSize
-            | [<CompiledName("fixedInterval")>] FixedInterval
-            | [<CompiledName("fixedPollingInterval")>] FixedPollingInterval
-            | [<CompiledName("priorityInterval")>] PriorityInterval
-            | [<CompiledName("priorityPollingInterval")>] PriorityPollingInterval
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type IgnoreDeprecations =
-            | [<CompiledName("5.0")>] N50
-            | [<CompiledName("6.0")>] N60
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type ImportsNotUsedAsValues =
-            | [<CompiledName("error")>] Error
-            | [<CompiledName("preserve")>] Preserve
-            | [<CompiledName("remove")>] Remove
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Jsx =
+        type JSX =
             | [<CompiledName("preserve")>] Preserve
             | [<CompiledName("react")>] React
             | [<CompiledName("react-jsx")>] ReactJsx
@@ -11631,27 +11763,6 @@ module TsConfigJson =
             | [<CompiledName("preserve")>] Preserve2
             | [<CompiledName("system")>] System2
             | [<CompiledName("umd")>] Umd
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type ModuleDetection =
-            | [<CompiledName("auto")>] Auto
-            | [<CompiledName("force")>] Force
-            | [<CompiledName("legacy")>] Legacy
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type ModuleResolution =
-            | Bundler
-            | Classic
-            | Node
-            | Node10
-            | Node16
-            | NodeNext
-            | [<CompiledName("bundler")>] Bundler2
-            | [<CompiledName("classic")>] Classic2
-            | [<CompiledName("node")>] Node2
-            | [<CompiledName("node10")>] Node102
-            | [<CompiledName("node16")>] Node162
-            | [<CompiledName("nodenext")>] Nodenext
 
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
         type NewLine =
@@ -11694,6 +11805,242 @@ module TsConfigJson =
             | [<CompiledName("esnext")>] Esnext
 
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Lib =
+            | DOM
+            | [<CompiledName("DOM.AsyncIterable")>] DOMAsyncIterable
+            | [<CompiledName("DOM.Iterable")>] DOMIterable
+            | Decorators
+            | [<CompiledName("Decorators.Legacy")>] DecoratorsLegacy
+            | ES2015
+            | [<CompiledName("ES2015.Collection")>] ES2015Collection
+            | [<CompiledName("ES2015.Core")>] ES2015Core
+            | [<CompiledName("ES2015.Generator")>] ES2015Generator
+            | [<CompiledName("ES2015.Iterable")>] ES2015Iterable
+            | [<CompiledName("ES2015.Promise")>] ES2015Promise
+            | [<CompiledName("ES2015.Proxy")>] ES2015Proxy
+            | [<CompiledName("ES2015.Reflect")>] ES2015Reflect
+            | [<CompiledName("ES2015.Symbol")>] ES2015Symbol
+            | [<CompiledName("ES2015.Symbol.WellKnown")>] ES2015SymbolWellKnown
+            | ES2016
+            | [<CompiledName("ES2016.Array.Include")>] ES2016ArrayInclude
+            | ES2017
+            | [<CompiledName("ES2017.ArrayBuffer")>] ES2017ArrayBuffer
+            | [<CompiledName("ES2017.Date")>] ES2017Date
+            | [<CompiledName("ES2017.Intl")>] ES2017Intl
+            | [<CompiledName("ES2017.Object")>] ES2017Object
+            | [<CompiledName("ES2017.SharedMemory")>] ES2017SharedMemory
+            | [<CompiledName("ES2017.String")>] ES2017String
+            | [<CompiledName("ES2017.TypedArrays")>] ES2017TypedArrays
+            | ES2018
+            | [<CompiledName("ES2018.AsyncGenerator")>] ES2018AsyncGenerator
+            | [<CompiledName("ES2018.AsyncIterable")>] ES2018AsyncIterable
+            | [<CompiledName("ES2018.Intl")>] ES2018Intl
+            | [<CompiledName("ES2018.Promise")>] ES2018Promise
+            | [<CompiledName("ES2018.Regexp")>] ES2018Regexp
+            | ES2019
+            | [<CompiledName("ES2019.Array")>] ES2019Array
+            | [<CompiledName("ES2019.Intl")>] ES2019Intl
+            | [<CompiledName("ES2019.Object")>] ES2019Object
+            | [<CompiledName("ES2019.String")>] ES2019String
+            | [<CompiledName("ES2019.Symbol")>] ES2019Symbol
+            | ES2020
+            | [<CompiledName("ES2020.BigInt")>] ES2020BigInt
+            | [<CompiledName("ES2020.Date")>] ES2020Date
+            | [<CompiledName("ES2020.Intl")>] ES2020Intl
+            | [<CompiledName("ES2020.Number")>] ES2020Number
+            | [<CompiledName("ES2020.Promise")>] ES2020Promise
+            | [<CompiledName("ES2020.SharedMemory")>] ES2020SharedMemory
+            | [<CompiledName("ES2020.String")>] ES2020String
+            | [<CompiledName("ES2020.Symbol.WellKnown")>] ES2020SymbolWellKnown
+            | ES2021
+            | [<CompiledName("ES2021.Intl")>] ES2021Intl
+            | [<CompiledName("ES2021.Promise")>] ES2021Promise
+            | [<CompiledName("ES2021.String")>] ES2021String
+            | [<CompiledName("ES2021.WeakRef")>] ES2021WeakRef
+            | ES2022
+            | [<CompiledName("ES2022.Array")>] ES2022Array
+            | [<CompiledName("ES2022.Error")>] ES2022Error
+            | [<CompiledName("ES2022.Intl")>] ES2022Intl
+            | [<CompiledName("ES2022.Object")>] ES2022Object
+            | [<CompiledName("ES2022.RegExp")>] ES2022RegExp
+            | [<CompiledName("ES2022.SharedMemory")>] ES2022SharedMemory
+            | [<CompiledName("ES2022.String")>] ES2022String
+            | ES2023
+            | [<CompiledName("ES2023.Array")>] ES2023Array
+            | [<CompiledName("ES2023.Collection")>] ES2023Collection
+            | [<CompiledName("ES2023.Intl")>] ES2023Intl
+            | ES2024
+            | [<CompiledName("ES2024.ArrayBuffer")>] ES2024ArrayBuffer
+            | [<CompiledName("ES2024.Collection")>] ES2024Collection
+            | [<CompiledName("ES2024.Object")>] ES2024Object
+            | [<CompiledName("ES2024.Promise")>] ES2024Promise
+            | [<CompiledName("ES2024.Regexp")>] ES2024Regexp
+            | [<CompiledName("ES2024.SharedMemory")>] ES2024SharedMemory
+            | [<CompiledName("ES2024.String")>] ES2024String
+            | ES2025
+            | [<CompiledName("ES2025.Collection")>] ES2025Collection
+            | [<CompiledName("ES2025.Float16")>] ES2025Float16
+            | [<CompiledName("ES2025.Intl")>] ES2025Intl
+            | [<CompiledName("ES2025.Iterator")>] ES2025Iterator
+            | [<CompiledName("ES2025.Promise")>] ES2025Promise
+            | [<CompiledName("ES2025.RegExp")>] ES2025RegExp
+            | ES5
+            | ES6
+            | ES7
+            | ESNext
+            | [<CompiledName("ESNext.Array")>] ESNextArray
+            | [<CompiledName("ESNext.AsyncIterable")>] ESNextAsyncIterable
+            | [<CompiledName("ESNext.BigInt")>] ESNextBigInt
+            | [<CompiledName("ESNext.Collection")>] ESNextCollection
+            | [<CompiledName("ESNext.Decorators")>] ESNextDecorators
+            | [<CompiledName("ESNext.Disposable")>] ESNextDisposable
+            | [<CompiledName("ESNext.Error")>] ESNextError
+            | [<CompiledName("ESNext.Float16")>] ESNextFloat16
+            | [<CompiledName("ESNext.Intl")>] ESNextIntl
+            | [<CompiledName("ESNext.Iterator")>] ESNextIterator
+            | [<CompiledName("ESNext.Object")>] ESNextObject
+            | [<CompiledName("ESNext.Promise")>] ESNextPromise
+            | [<CompiledName("ESNext.Regexp")>] ESNextRegexp
+            | [<CompiledName("ESNext.String")>] ESNextString
+            | [<CompiledName("ESNext.Symbol")>] ESNextSymbol
+            | [<CompiledName("ESNext.Temporal")>] ESNextTemporal
+            | [<CompiledName("ESNext.WeakRef")>] ESNextWeakRef
+            | ScriptHost
+            | WebWorker
+            | [<CompiledName("WebWorker.AsyncIterable")>] WebWorkerAsyncIterable
+            | [<CompiledName("WebWorker.ImportScripts")>] WebWorkerImportScripts
+            | [<CompiledName("WebWorker.Iterable")>] WebWorkerIterable
+            | [<CompiledName("decorators")>] Decorators2
+            | [<CompiledName("decorators.legacy")>] DecoratorsLegacy2
+            | [<CompiledName("dom")>] Dom
+            | [<CompiledName("dom.asynciterable")>] DomAsynciterable
+            | [<CompiledName("dom.iterable")>] DomIterable
+            | [<CompiledName("es2015")>] Es2015
+            | [<CompiledName("es2015.collection")>] Es2015Collection
+            | [<CompiledName("es2015.core")>] Es2015Core
+            | [<CompiledName("es2015.generator")>] Es2015Generator
+            | [<CompiledName("es2015.iterable")>] Es2015Iterable
+            | [<CompiledName("es2015.promise")>] Es2015Promise
+            | [<CompiledName("es2015.proxy")>] Es2015Proxy
+            | [<CompiledName("es2015.reflect")>] Es2015Reflect
+            | [<CompiledName("es2015.symbol")>] Es2015Symbol
+            | [<CompiledName("es2015.symbol.wellknown")>] Es2015SymbolWellknown
+            | [<CompiledName("es2016")>] Es2016
+            | [<CompiledName("es2016.array.include")>] Es2016ArrayInclude
+            | [<CompiledName("es2017")>] Es2017
+            | [<CompiledName("es2017.arraybuffer")>] Es2017Arraybuffer
+            | [<CompiledName("es2017.date")>] Es2017Date
+            | [<CompiledName("es2017.intl")>] Es2017Intl
+            | [<CompiledName("es2017.object")>] Es2017Object
+            | [<CompiledName("es2017.sharedmemory")>] Es2017Sharedmemory
+            | [<CompiledName("es2017.string")>] Es2017String
+            | [<CompiledName("es2017.typedarrays")>] Es2017Typedarrays
+            | [<CompiledName("es2018")>] Es2018
+            | [<CompiledName("es2018.asyncgenerator")>] Es2018Asyncgenerator
+            | [<CompiledName("es2018.asynciterable")>] Es2018Asynciterable
+            | [<CompiledName("es2018.intl")>] Es2018Intl
+            | [<CompiledName("es2018.promise")>] Es2018Promise
+            | [<CompiledName("es2018.regexp")>] Es2018Regexp
+            | [<CompiledName("es2019")>] Es2019
+            | [<CompiledName("es2019.array")>] Es2019Array
+            | [<CompiledName("es2019.intl")>] Es2019Intl
+            | [<CompiledName("es2019.object")>] Es2019Object
+            | [<CompiledName("es2019.string")>] Es2019String
+            | [<CompiledName("es2019.symbol")>] Es2019Symbol
+            | [<CompiledName("es2020")>] Es2020
+            | [<CompiledName("es2020.bigint")>] Es2020Bigint
+            | [<CompiledName("es2020.date")>] Es2020Date
+            | [<CompiledName("es2020.intl")>] Es2020Intl
+            | [<CompiledName("es2020.number")>] Es2020Number
+            | [<CompiledName("es2020.promise")>] Es2020Promise
+            | [<CompiledName("es2020.sharedmemory")>] Es2020Sharedmemory
+            | [<CompiledName("es2020.string")>] Es2020String
+            | [<CompiledName("es2020.symbol.wellknown")>] Es2020SymbolWellknown
+            | [<CompiledName("es2021")>] Es2021
+            | [<CompiledName("es2021.intl")>] Es2021Intl
+            | [<CompiledName("es2021.promise")>] Es2021Promise
+            | [<CompiledName("es2021.string")>] Es2021String
+            | [<CompiledName("es2021.weakref")>] Es2021Weakref
+            | [<CompiledName("es2022")>] Es2022
+            | [<CompiledName("es2022.array")>] Es2022Array
+            | [<CompiledName("es2022.error")>] Es2022Error
+            | [<CompiledName("es2022.intl")>] Es2022Intl
+            | [<CompiledName("es2022.object")>] Es2022Object
+            | [<CompiledName("es2022.regexp")>] Es2022Regexp
+            | [<CompiledName("es2022.sharedmemory")>] Es2022Sharedmemory
+            | [<CompiledName("es2022.string")>] Es2022String
+            | [<CompiledName("es2023")>] Es2023
+            | [<CompiledName("es2023.array")>] Es2023Array
+            | [<CompiledName("es2023.collection")>] Es2023Collection
+            | [<CompiledName("es2023.intl")>] Es2023Intl
+            | [<CompiledName("es2024")>] Es2024
+            | [<CompiledName("es2024.arraybuffer")>] Es2024Arraybuffer
+            | [<CompiledName("es2024.collection")>] Es2024Collection
+            | [<CompiledName("es2024.object")>] Es2024Object
+            | [<CompiledName("es2024.promise")>] Es2024Promise
+            | [<CompiledName("es2024.regexp")>] Es2024Regexp
+            | [<CompiledName("es2024.sharedmemory")>] Es2024Sharedmemory
+            | [<CompiledName("es2024.string")>] Es2024String
+            | [<CompiledName("es2025")>] Es2025
+            | [<CompiledName("es2025.collection")>] Es2025Collection
+            | [<CompiledName("es2025.float16")>] Es2025Float16
+            | [<CompiledName("es2025.intl")>] Es2025Intl
+            | [<CompiledName("es2025.iterator")>] Es2025Iterator
+            | [<CompiledName("es2025.promise")>] Es2025Promise
+            | [<CompiledName("es2025.regexp")>] Es2025Regexp
+            | [<CompiledName("es5")>] Es5
+            | [<CompiledName("es6")>] Es6
+            | [<CompiledName("es7")>] Es7
+            | [<CompiledName("esnext")>] Esnext
+            | [<CompiledName("esnext.array")>] EsnextArray
+            | [<CompiledName("esnext.asynciterable")>] EsnextAsynciterable
+            | [<CompiledName("esnext.bigint")>] EsnextBigint
+            | [<CompiledName("esnext.collection")>] EsnextCollection
+            | [<CompiledName("esnext.decorators")>] EsnextDecorators
+            | [<CompiledName("esnext.disposable")>] EsnextDisposable
+            | [<CompiledName("esnext.error")>] EsnextError
+            | [<CompiledName("esnext.float16")>] EsnextFloat16
+            | [<CompiledName("esnext.intl")>] EsnextIntl
+            | [<CompiledName("esnext.iterator")>] EsnextIterator
+            | [<CompiledName("esnext.object")>] EsnextObject
+            | [<CompiledName("esnext.promise")>] EsnextPromise
+            | [<CompiledName("esnext.regexp")>] EsnextRegexp
+            | [<CompiledName("esnext.string")>] EsnextString
+            | [<CompiledName("esnext.symbol")>] EsnextSymbol
+            | [<CompiledName("esnext.temporal")>] EsnextTemporal
+            | [<CompiledName("esnext.weakref")>] EsnextWeakref
+            | [<CompiledName("scripthost")>] Scripthost
+            | [<CompiledName("webworker")>] Webworker
+            | [<CompiledName("webworker.asynciterable")>] WebworkerAsynciterable
+            | [<CompiledName("webworker.importscripts")>] WebworkerImportscripts
+            | [<CompiledName("webworker.iterable")>] WebworkerIterable
+
+        [<Interface>]
+        type Plugin =
+            /// <summary>
+            /// Plugin name.
+            /// </summary>
+            abstract name: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (name: string) : Plugin = jsNative
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type ImportsNotUsedAsValues =
+            | [<CompiledName("error")>] Error
+            | [<CompiledName("preserve")>] Preserve
+            | [<CompiledName("remove")>] Remove
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type FallbackPolling =
+            | [<CompiledName("dynamicPriority")>] DynamicPriority
+            | [<CompiledName("dynamicPriorityPolling")>] DynamicPriorityPolling
+            | [<CompiledName("fixedChunkSize")>] FixedChunkSize
+            | [<CompiledName("fixedInterval")>] FixedInterval
+            | [<CompiledName("fixedPollingInterval")>] FixedPollingInterval
+            | [<CompiledName("priorityInterval")>] PriorityInterval
+            | [<CompiledName("priorityPollingInterval")>] PriorityPollingInterval
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
         type WatchDirectory =
             | [<CompiledName("dynamicPriorityPolling")>] DynamicPriorityPolling
             | [<CompiledName("fixedChunkSizePolling")>] FixedChunkSizePolling
@@ -11709,252 +12056,31 @@ module TsConfigJson =
             | [<CompiledName("useFsEvents")>] UseFsEvents
             | [<CompiledName("useFsEventsOnParentDirectory")>] UseFsEventsOnParentDirectory
 
-        module Lib =
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type Item =
-                | DOM
-                | [<CompiledName("DOM.AsyncIterable")>] DOMAsyncIterable
-                | [<CompiledName("DOM.Iterable")>] DOMIterable
-                | Decorators
-                | [<CompiledName("Decorators.Legacy")>] DecoratorsLegacy
-                | ES2015
-                | [<CompiledName("ES2015.Collection")>] ES2015Collection
-                | [<CompiledName("ES2015.Core")>] ES2015Core
-                | [<CompiledName("ES2015.Generator")>] ES2015Generator
-                | [<CompiledName("ES2015.Iterable")>] ES2015Iterable
-                | [<CompiledName("ES2015.Promise")>] ES2015Promise
-                | [<CompiledName("ES2015.Proxy")>] ES2015Proxy
-                | [<CompiledName("ES2015.Reflect")>] ES2015Reflect
-                | [<CompiledName("ES2015.Symbol")>] ES2015Symbol
-                | [<CompiledName("ES2015.Symbol.WellKnown")>] ES2015SymbolWellKnown
-                | ES2016
-                | [<CompiledName("ES2016.Array.Include")>] ES2016ArrayInclude
-                | ES2017
-                | [<CompiledName("ES2017.ArrayBuffer")>] ES2017ArrayBuffer
-                | [<CompiledName("ES2017.Date")>] ES2017Date
-                | [<CompiledName("ES2017.Intl")>] ES2017Intl
-                | [<CompiledName("ES2017.Object")>] ES2017Object
-                | [<CompiledName("ES2017.SharedMemory")>] ES2017SharedMemory
-                | [<CompiledName("ES2017.String")>] ES2017String
-                | [<CompiledName("ES2017.TypedArrays")>] ES2017TypedArrays
-                | ES2018
-                | [<CompiledName("ES2018.AsyncGenerator")>] ES2018AsyncGenerator
-                | [<CompiledName("ES2018.AsyncIterable")>] ES2018AsyncIterable
-                | [<CompiledName("ES2018.Intl")>] ES2018Intl
-                | [<CompiledName("ES2018.Promise")>] ES2018Promise
-                | [<CompiledName("ES2018.Regexp")>] ES2018Regexp
-                | ES2019
-                | [<CompiledName("ES2019.Array")>] ES2019Array
-                | [<CompiledName("ES2019.Intl")>] ES2019Intl
-                | [<CompiledName("ES2019.Object")>] ES2019Object
-                | [<CompiledName("ES2019.String")>] ES2019String
-                | [<CompiledName("ES2019.Symbol")>] ES2019Symbol
-                | ES2020
-                | [<CompiledName("ES2020.BigInt")>] ES2020BigInt
-                | [<CompiledName("ES2020.Date")>] ES2020Date
-                | [<CompiledName("ES2020.Intl")>] ES2020Intl
-                | [<CompiledName("ES2020.Number")>] ES2020Number
-                | [<CompiledName("ES2020.Promise")>] ES2020Promise
-                | [<CompiledName("ES2020.SharedMemory")>] ES2020SharedMemory
-                | [<CompiledName("ES2020.String")>] ES2020String
-                | [<CompiledName("ES2020.Symbol.WellKnown")>] ES2020SymbolWellKnown
-                | ES2021
-                | [<CompiledName("ES2021.Intl")>] ES2021Intl
-                | [<CompiledName("ES2021.Promise")>] ES2021Promise
-                | [<CompiledName("ES2021.String")>] ES2021String
-                | [<CompiledName("ES2021.WeakRef")>] ES2021WeakRef
-                | ES2022
-                | [<CompiledName("ES2022.Array")>] ES2022Array
-                | [<CompiledName("ES2022.Error")>] ES2022Error
-                | [<CompiledName("ES2022.Intl")>] ES2022Intl
-                | [<CompiledName("ES2022.Object")>] ES2022Object
-                | [<CompiledName("ES2022.RegExp")>] ES2022RegExp
-                | [<CompiledName("ES2022.SharedMemory")>] ES2022SharedMemory
-                | [<CompiledName("ES2022.String")>] ES2022String
-                | ES2023
-                | [<CompiledName("ES2023.Array")>] ES2023Array
-                | [<CompiledName("ES2023.Collection")>] ES2023Collection
-                | [<CompiledName("ES2023.Intl")>] ES2023Intl
-                | ES2024
-                | [<CompiledName("ES2024.ArrayBuffer")>] ES2024ArrayBuffer
-                | [<CompiledName("ES2024.Collection")>] ES2024Collection
-                | [<CompiledName("ES2024.Object")>] ES2024Object
-                | [<CompiledName("ES2024.Promise")>] ES2024Promise
-                | [<CompiledName("ES2024.Regexp")>] ES2024Regexp
-                | [<CompiledName("ES2024.SharedMemory")>] ES2024SharedMemory
-                | [<CompiledName("ES2024.String")>] ES2024String
-                | ES2025
-                | [<CompiledName("ES2025.Collection")>] ES2025Collection
-                | [<CompiledName("ES2025.Float16")>] ES2025Float16
-                | [<CompiledName("ES2025.Intl")>] ES2025Intl
-                | [<CompiledName("ES2025.Iterator")>] ES2025Iterator
-                | [<CompiledName("ES2025.Promise")>] ES2025Promise
-                | [<CompiledName("ES2025.RegExp")>] ES2025RegExp
-                | ES5
-                | ES6
-                | ES7
-                | ESNext
-                | [<CompiledName("ESNext.Array")>] ESNextArray
-                | [<CompiledName("ESNext.AsyncIterable")>] ESNextAsyncIterable
-                | [<CompiledName("ESNext.BigInt")>] ESNextBigInt
-                | [<CompiledName("ESNext.Collection")>] ESNextCollection
-                | [<CompiledName("ESNext.Decorators")>] ESNextDecorators
-                | [<CompiledName("ESNext.Disposable")>] ESNextDisposable
-                | [<CompiledName("ESNext.Error")>] ESNextError
-                | [<CompiledName("ESNext.Float16")>] ESNextFloat16
-                | [<CompiledName("ESNext.Intl")>] ESNextIntl
-                | [<CompiledName("ESNext.Iterator")>] ESNextIterator
-                | [<CompiledName("ESNext.Object")>] ESNextObject
-                | [<CompiledName("ESNext.Promise")>] ESNextPromise
-                | [<CompiledName("ESNext.Regexp")>] ESNextRegexp
-                | [<CompiledName("ESNext.String")>] ESNextString
-                | [<CompiledName("ESNext.Symbol")>] ESNextSymbol
-                | [<CompiledName("ESNext.Temporal")>] ESNextTemporal
-                | [<CompiledName("ESNext.WeakRef")>] ESNextWeakRef
-                | ScriptHost
-                | WebWorker
-                | [<CompiledName("WebWorker.AsyncIterable")>] WebWorkerAsyncIterable
-                | [<CompiledName("WebWorker.ImportScripts")>] WebWorkerImportScripts
-                | [<CompiledName("WebWorker.Iterable")>] WebWorkerIterable
-                | [<CompiledName("decorators")>] Decorators2
-                | [<CompiledName("decorators.legacy")>] DecoratorsLegacy2
-                | [<CompiledName("dom")>] Dom
-                | [<CompiledName("dom.asynciterable")>] DomAsynciterable
-                | [<CompiledName("dom.iterable")>] DomIterable
-                | [<CompiledName("es2015")>] Es2015
-                | [<CompiledName("es2015.collection")>] Es2015Collection
-                | [<CompiledName("es2015.core")>] Es2015Core
-                | [<CompiledName("es2015.generator")>] Es2015Generator
-                | [<CompiledName("es2015.iterable")>] Es2015Iterable
-                | [<CompiledName("es2015.promise")>] Es2015Promise
-                | [<CompiledName("es2015.proxy")>] Es2015Proxy
-                | [<CompiledName("es2015.reflect")>] Es2015Reflect
-                | [<CompiledName("es2015.symbol")>] Es2015Symbol
-                | [<CompiledName("es2015.symbol.wellknown")>] Es2015SymbolWellknown
-                | [<CompiledName("es2016")>] Es2016
-                | [<CompiledName("es2016.array.include")>] Es2016ArrayInclude
-                | [<CompiledName("es2017")>] Es2017
-                | [<CompiledName("es2017.arraybuffer")>] Es2017Arraybuffer
-                | [<CompiledName("es2017.date")>] Es2017Date
-                | [<CompiledName("es2017.intl")>] Es2017Intl
-                | [<CompiledName("es2017.object")>] Es2017Object
-                | [<CompiledName("es2017.sharedmemory")>] Es2017Sharedmemory
-                | [<CompiledName("es2017.string")>] Es2017String
-                | [<CompiledName("es2017.typedarrays")>] Es2017Typedarrays
-                | [<CompiledName("es2018")>] Es2018
-                | [<CompiledName("es2018.asyncgenerator")>] Es2018Asyncgenerator
-                | [<CompiledName("es2018.asynciterable")>] Es2018Asynciterable
-                | [<CompiledName("es2018.intl")>] Es2018Intl
-                | [<CompiledName("es2018.promise")>] Es2018Promise
-                | [<CompiledName("es2018.regexp")>] Es2018Regexp
-                | [<CompiledName("es2019")>] Es2019
-                | [<CompiledName("es2019.array")>] Es2019Array
-                | [<CompiledName("es2019.intl")>] Es2019Intl
-                | [<CompiledName("es2019.object")>] Es2019Object
-                | [<CompiledName("es2019.string")>] Es2019String
-                | [<CompiledName("es2019.symbol")>] Es2019Symbol
-                | [<CompiledName("es2020")>] Es2020
-                | [<CompiledName("es2020.bigint")>] Es2020Bigint
-                | [<CompiledName("es2020.date")>] Es2020Date
-                | [<CompiledName("es2020.intl")>] Es2020Intl
-                | [<CompiledName("es2020.number")>] Es2020Number
-                | [<CompiledName("es2020.promise")>] Es2020Promise
-                | [<CompiledName("es2020.sharedmemory")>] Es2020Sharedmemory
-                | [<CompiledName("es2020.string")>] Es2020String
-                | [<CompiledName("es2020.symbol.wellknown")>] Es2020SymbolWellknown
-                | [<CompiledName("es2021")>] Es2021
-                | [<CompiledName("es2021.intl")>] Es2021Intl
-                | [<CompiledName("es2021.promise")>] Es2021Promise
-                | [<CompiledName("es2021.string")>] Es2021String
-                | [<CompiledName("es2021.weakref")>] Es2021Weakref
-                | [<CompiledName("es2022")>] Es2022
-                | [<CompiledName("es2022.array")>] Es2022Array
-                | [<CompiledName("es2022.error")>] Es2022Error
-                | [<CompiledName("es2022.intl")>] Es2022Intl
-                | [<CompiledName("es2022.object")>] Es2022Object
-                | [<CompiledName("es2022.regexp")>] Es2022Regexp
-                | [<CompiledName("es2022.sharedmemory")>] Es2022Sharedmemory
-                | [<CompiledName("es2022.string")>] Es2022String
-                | [<CompiledName("es2023")>] Es2023
-                | [<CompiledName("es2023.array")>] Es2023Array
-                | [<CompiledName("es2023.collection")>] Es2023Collection
-                | [<CompiledName("es2023.intl")>] Es2023Intl
-                | [<CompiledName("es2024")>] Es2024
-                | [<CompiledName("es2024.arraybuffer")>] Es2024Arraybuffer
-                | [<CompiledName("es2024.collection")>] Es2024Collection
-                | [<CompiledName("es2024.object")>] Es2024Object
-                | [<CompiledName("es2024.promise")>] Es2024Promise
-                | [<CompiledName("es2024.regexp")>] Es2024Regexp
-                | [<CompiledName("es2024.sharedmemory")>] Es2024Sharedmemory
-                | [<CompiledName("es2024.string")>] Es2024String
-                | [<CompiledName("es2025")>] Es2025
-                | [<CompiledName("es2025.collection")>] Es2025Collection
-                | [<CompiledName("es2025.float16")>] Es2025Float16
-                | [<CompiledName("es2025.intl")>] Es2025Intl
-                | [<CompiledName("es2025.iterator")>] Es2025Iterator
-                | [<CompiledName("es2025.promise")>] Es2025Promise
-                | [<CompiledName("es2025.regexp")>] Es2025Regexp
-                | [<CompiledName("es5")>] Es5
-                | [<CompiledName("es6")>] Es6
-                | [<CompiledName("es7")>] Es7
-                | [<CompiledName("esnext")>] Esnext
-                | [<CompiledName("esnext.array")>] EsnextArray
-                | [<CompiledName("esnext.asynciterable")>] EsnextAsynciterable
-                | [<CompiledName("esnext.bigint")>] EsnextBigint
-                | [<CompiledName("esnext.collection")>] EsnextCollection
-                | [<CompiledName("esnext.decorators")>] EsnextDecorators
-                | [<CompiledName("esnext.disposable")>] EsnextDisposable
-                | [<CompiledName("esnext.error")>] EsnextError
-                | [<CompiledName("esnext.float16")>] EsnextFloat16
-                | [<CompiledName("esnext.intl")>] EsnextIntl
-                | [<CompiledName("esnext.iterator")>] EsnextIterator
-                | [<CompiledName("esnext.object")>] EsnextObject
-                | [<CompiledName("esnext.promise")>] EsnextPromise
-                | [<CompiledName("esnext.regexp")>] EsnextRegexp
-                | [<CompiledName("esnext.string")>] EsnextString
-                | [<CompiledName("esnext.symbol")>] EsnextSymbol
-                | [<CompiledName("esnext.temporal")>] EsnextTemporal
-                | [<CompiledName("esnext.weakref")>] EsnextWeakref
-                | [<CompiledName("scripthost")>] Scripthost
-                | [<CompiledName("webworker")>] Webworker
-                | [<CompiledName("webworker.asynciterable")>] WebworkerAsynciterable
-                | [<CompiledName("webworker.importscripts")>] WebworkerImportscripts
-                | [<CompiledName("webworker.iterable")>] WebworkerIterable
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type ModuleResolution =
+            | Bundler
+            | Classic
+            | Node
+            | Node10
+            | Node16
+            | NodeNext
+            | [<CompiledName("bundler")>] Bundler2
+            | [<CompiledName("classic")>] Classic2
+            | [<CompiledName("node")>] Node2
+            | [<CompiledName("node10")>] Node102
+            | [<CompiledName("node16")>] Node162
+            | [<CompiledName("nodenext")>] Nodenext
 
-        module Plugins =
-            [<Interface>]
-            type Item =
-                /// <summary>
-                /// Plugin name.
-                /// </summary>
-                abstract name: string with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (name: string) : Item = jsNative
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type ModuleDetection =
+            | [<CompiledName("auto")>] Auto
+            | [<CompiledName("force")>] Force
+            | [<CompiledName("legacy")>] Legacy
 
-    module References =
-        [<Interface>]
-        type Item =
-            /// <summary>
-            /// A normalized path on disk.
-            /// </summary>
-            abstract path: string with get, set
-            /// <summary>
-            /// The path as the user originally wrote it.
-            /// </summary>
-            abstract originalPath: string option with get, set
-            /// <summary>
-            /// True if the output of this reference should be prepended to the output of this project.
-            /// <br /><br />
-            /// Only valid for <c>--outFile</c> compilations.
-            /// </summary>
-            /// <remarks>@deprecated This option will be removed in TypeScript 5.5.</remarks>
-            abstract prepend: bool option with get, set
-            /// <summary>
-            /// True if it is intended that this reference form a circularity.
-            /// </summary>
-            abstract circular: bool option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (path: string, ?originalPath: string, ?prepend: bool, ?circular: bool) : Item = jsNative
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type IgnoreDeprecations =
+            | [<CompiledName("5.0")>] N50
+            | [<CompiledName("6.0")>] N60
 
     module WatchOptions =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -11993,6 +12119,29 @@ module TsConfigJson =
             | [<CompiledName("prioritypollinginterval")>] Prioritypollinginterval
             | [<CompiledName("usefsevents")>] Usefsevents
             | [<CompiledName("usefseventsonparentdirectory")>] Usefseventsonparentdirectory
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type WatchFileKind =
+            | DynamicPriorityPolling
+            | FixedChunkSizePolling
+            | FixedPollingInterval
+            | PriorityPollingInterval
+            | UseFsEvents
+            | UseFsEventsOnParentDirectory
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type WatchDirectoryKind =
+            | DynamicPriorityPolling
+            | FixedChunkSizePolling
+            | FixedPollingInterval
+            | UseFsEvents
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type PollingWatchKind =
+            | DynamicPriority
+            | FixedChunkSize
+            | FixedInterval
+            | PriorityInterval
 
 [<Erase>]
 type U12<'t1, 't2, 't3, 't4, 't5, 't6, 't7, 't8, 't9, 't10, 't11, 't12> =

@@ -25,11 +25,19 @@ paid for.
 
 ## Compile-gate dependency pin
 
-A compile gate is only evidence if it compiles against what a consumer will: `Fable.Core` 5.2.0
+A compile gate is only evidence if it compiles against what a consumer will: `Fable.Core`
 (`src/Xantham.Fable.Core`, `tests/Xantham.Generator.CompileGate`), `Xantham.Fable.Core.TS`
 (generated from the root compiler pin, referenced by every consumer compile gate), and the
 `typescript` 7.x pin in `package.json`, which supplies both the producer's `lib.*.d.ts` and the
 live `tsc --api` server.
+
+`Fable.Core` supplies `CaseTest`; the public `Fickl.Core` package supplies
+`Fickl.Core.InlineInterfaceAttribute` through the support project's dependency. Keep that
+dependency transitive for generated bindings and DLL consumers.
+
+JavaScript runtime gates use Fickl, pinned in `.config/dotnet-tools.json`. Restore with
+`dotnet tool restore` and compile with `dotnet fickl`; `build.fsx -- test --run-gate`
+runs both the bindings and Partas gates with that local pin.
 
 ## Project structure
 
@@ -141,7 +149,7 @@ our code runs against; `dist/` wins over upstream `main` when they disagree; (2)
 `tools/tsc-ast/upstream/`, vendored at the pinned, checksummed commit (`sync tsc-ast --check`
 reports drift); (3) `gh api repos/microsoft/TypeScript/contents/<path>` for the rest.
 
-Known drift: the binary AST `ProtocolVersion` is **8** (`Ast` in `Library.fs`) — a note quoting
-version 7 predates the merge. Kind ordinals are positional in `ast.json`, not the JavaScript
+Known drift: the binary AST `ProtocolVersion` is **9** (`Ast` in `Library.fs`) — a note quoting
+an earlier version predates this pin. Kind ordinals are positional in `ast.json`, not the JavaScript
 compiler API's — never hand-write one; `SyntaxKind` in `Ast.generated.fs` is diffed against
 upstream's `syntaxKind.enum.ts` on every generator run.

@@ -14,13 +14,15 @@ let private declaresInterface (model: ShapeModel) (facts: TypeFacts) =
     (flag TypeFlags.Object facts
      // A constructor object is shape even with no properties of its own: `interface F { new
      // (): X }` has no members and one construct signature, and becomes an interface of one
-     // `Create` (§4.4).
+     // `Create` (§4.4). A class whose members are all private is nominal: it admits only its
+     // own instances, which an empty interface keeps apart from `obj`.
      && (not (
              facts.Members.IsEmpty
              && facts.IndexInfos.IsEmpty
              && facts.ConstructSignatures.IsEmpty
+             && not facts.PrivateMembers
          )
-         || hasIncompatibleOverloadedTypeParameters model facts)
+         || hasInterfaceCallSignatures model facts)
      // A pure index signature the checker gave no symbol of its own - reached through a
      // type alias, or written inline - resolves through `objectRef` as a `Record`/
      // `ReadonlyRecord` reference instead (TR059). `interface Bag { [key: string]:
@@ -64,6 +66,18 @@ let shapeInterfaces: Pass<ShapeModel> =
                             |> Option.map (fun typeId -> typeId, (export.Docs, export.Tags)))
                         |> Map.ofList
 
+                    // The JSDoc of the export whose value a declaration is: a function merged
+                    // with a namespace documents its call signatures, which the hybrid's
+                    // `Invoke` carries.
+                    let valueDocs =
+                        model.Harvest.Exports
+                        |> List.choose (fun export ->
+                            Map.tryFind export.Symbol.SymbolId model.ExportTypes
+                            |> Option.bind _.Value
+                            |> Option.map (fun typeId -> typeId, (export.Docs, export.Tags)))
+                        |> List.distinctBy fst
+                        |> Map.ofList
+
                     // A union whose arms agree on every member except which ones they declare
                     // `never` (wave fourteen item 4): folded into one interface named after the
                     // union itself, with the exclusive members optional and one `Create`
@@ -71,6 +85,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                     // each arm keeps minting its own interface, as today.
                     let exclusiveUnions =
                         model.DeclNames
+                        |> Map.filter (fun typeId _ -> not (Map.containsKey typeId model.AliasApplications))
                         |> Map.toList
                         |> List.choose (fun (typeId, name) ->
                             match Map.tryFind typeId model.Types with
@@ -81,11 +96,16 @@ let shapeInterfaces: Pass<ShapeModel> =
                                 | ExclusiveArmsDecline arms -> Some(typeId, name, Choice2Of2 arms)
                             | _ -> None)
 
+                    // The fold replaces only the arms the checker named: a source-named arm is a
+                    // declaration in its own right and stays, nesting under its namespace.
                     let foldedArmIds =
                         exclusiveUnions
                         |> List.collect (fun (_, _, outcome) ->
                             match outcome with
-                            | Choice1Of2(_, arms) -> arms |> List.map (fun a -> a.Facts.Response.TypeId)
+                            | Choice1Of2(_, arms) ->
+                                arms
+                                |> List.filter (fun a -> isAnonymousArm a.Facts)
+                                |> List.map (fun a -> a.Facts.Response.TypeId)
                             | Choice2Of2 _ -> [])
                         |> Set.ofList
 
@@ -135,6 +155,11 @@ let shapeInterfaces: Pass<ShapeModel> =
                         |> List.collect (fun (typeId, name) ->
                             match Map.tryFind typeId model.Types with
                             | Some facts when declaresInterface model facts && not (Set.contains name declaredOnce) ->
+                                let facts =
+                                    { facts with
+                                        CallSignatures = List.distinct facts.CallSignatures
+                                    }
+
                                 declaredOnce <- Set.add name declaredOnce
                                 let typeParameters, scope, parameterFindings = declTypeParams ctx model name facts
 
@@ -305,6 +330,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                                         | FsConstructor _
                                         | FsInvoke _
                                         | FsSymbolKeyed _
+                                        | FsStringKeyed _
                                         | FsLiteralKeyed _ -> false)
 
                                 let invokes =
@@ -312,6 +338,7 @@ let shapeInterfaces: Pass<ShapeModel> =
                                         []
                                     else
                                         facts.CallSignatures
+                                        |> List.collect (restOverloads model)
                                         |> List.map (fun signature ->
                                             let typeParameters, parameters, returns, signatureFindings =
                                                 shapeSignature
@@ -323,10 +350,13 @@ let shapeInterfaces: Pass<ShapeModel> =
 
                                             findings <- findings @ signatureFindings
 
+                                            let docs, tags =
+                                                Map.tryFind typeId valueDocs |> Option.defaultValue ("", [])
+
                                             FsInvoke
                                                 {
-                                                    Docs = ""
-                                                    Tags = []
+                                                    Docs = docs
+                                                    Tags = signatureTags tags signature
                                                     TypeParameters = typeParameters
                                                     Parameters = parameters
                                                     Return = returns
@@ -363,6 +393,11 @@ let shapeInterfaces: Pass<ShapeModel> =
                                         Docs = docs
                                         Tags = tags
                                         Order = Map.tryFind typeId model.DeclOrders |> Option.defaultValue None
+                                        Callable =
+                                            isPureCallback facts
+                                            && facts.IndexInfos.IsEmpty
+                                            && facts.CallSignatures.Length = 1
+                                            && hasInterfaceCallSignatures model facts
                                         TypeParameters = typeParameters
                                         Inherits = (inherits |> List.map snd) @ Option.toList sequence
                                         Members = members @ invokes
@@ -376,32 +411,48 @@ let shapeInterfaces: Pass<ShapeModel> =
                     // Every arm's own `Create` overload carries only its own members and the
                     // shared ones - never a `never`-typed placeholder for the other arm's
                     // exclusive member - so a folded pair's overloads carry no `unit` parameter.
-                    let buildParam (owner: string) (m: ResolvedMember) =
+                    let allocatedName names (m: ResolvedMember) =
+                        Map.tryFind m.Symbol.Name names
+                        |> Option.defaultWith (fun () -> Naming.memberName m.Symbol.Name)
+
+                    let buildParam scoped names (owner: string) (m: ResolvedMember) =
                         let reference, refFindings =
-                            typeRef ctx (selectAnyReturn ctx model m.Symbol.Name owner) None owner m.TypeId
+                            memberTypeRef ctx (selectAnyReturn ctx scoped m.Symbol.Name owner) None owner m
 
                         {
-                            Name = Naming.memberName m.Symbol.Name
+                            Name = allocatedName names m
                             Optional = m.Optional
                             Rest = false
                             Type = reference
                         },
                         refFindings
 
-                    let buildMember (owner: string) (optional: bool) (m: ResolvedMember) =
+                    let buildMember scoped names (owner: string) (optional: bool) (m: ResolvedMember) =
                         let reference, refFindings =
-                            typeRef ctx (selectAnyReturn ctx model m.Symbol.Name owner) None owner m.TypeId
+                            memberTypeRef ctx (selectAnyReturn ctx scoped m.Symbol.Name owner) None owner m
 
-                        FsProperty
-                            {
-                                Name = Naming.memberName m.Symbol.Name
-                                Docs = m.Docs
-                                Tags = m.Tags
-                                ReadOnly = m.ReadOnly
-                                Type = optionalRef optional reference
-                                Literal = None
-                            },
-                        refFindings
+                        let member_ =
+                            FsProperty
+                                {
+                                    Name = allocatedName names m
+                                    Docs = m.Docs
+                                    Tags = m.Tags
+                                    ReadOnly = m.ReadOnly
+                                    Type = optionalRef optional reference
+                                    Literal = None
+                                    NullKey = not optional && requiresNullKey model m.TypeId
+                                }
+
+                        match Map.tryFind m.Symbol.Name names with
+                        | Some allocated ->
+                            FsStringKeyed(Naming.memberName m.Symbol.Name, member_),
+                            refFindings
+                            @ [
+                                Finding.make
+                                    $"{owner}.{m.Symbol.Name}"
+                                    (Members.StringKeyedMemberAsEmit(Naming.memberName m.Symbol.Name, allocated))
+                            ]
+                        | None -> member_, refFindings
 
                     let foldedDecls, foldedFindings =
                         exclusiveUnions
@@ -410,30 +461,55 @@ let shapeInterfaces: Pass<ShapeModel> =
                             | Choice2Of2 arms ->
                                 [], [ Finding.make name (TypeReference.ExclusiveArmsNotFoldable arms) ]
                             | Choice1Of2(shared, arms) ->
+                                let all = shared @ (arms |> List.collect _.Own) |> List.distinctBy _.Symbol.Name
+                                let facts = Map.find typeId model.Types
+                                let typeParameters, scope, parameterFindings = declTypeParams ctx model name facts
+
+                                let scoped =
+                                    { model with
+                                        DeclNames = declNames
+                                        TypeVars = scope
+                                    }
+
+                                let names = stringMemberNames Set.empty { facts with Members = all }
+
                                 let sharedMembers, sharedFindings =
-                                    shared |> List.map (buildMember name false) |> List.unzip
+                                    shared |> List.map (buildMember scoped names name false) |> List.unzip
 
                                 let exclusiveMembers, exclusiveFindings =
                                     arms
                                     |> List.collect (fun a -> a.Own)
-                                    |> List.map (buildMember name true)
+                                    |> List.map (buildMember scoped names name true)
                                     |> List.unzip
 
                                 let overloads, overloadFindings =
                                     arms
                                     |> List.map (fun arm ->
                                         let sharedParams, sharedParamFindings =
-                                            shared |> List.map (buildParam name) |> List.unzip
+                                            shared |> List.map (buildParam scoped names name) |> List.unzip
 
                                         let ownParams, ownParamFindings =
-                                            arm.Own |> List.map (buildParam name) |> List.unzip
+                                            arm.Own |> List.map (buildParam scoped names name) |> List.unzip
 
                                         let required, optional =
                                             (sharedParams @ ownParams) |> List.partition (fun p -> not p.Optional)
 
+                                        let nullKeys =
+                                            shared @ arm.Own
+                                            |> List.filter (fun m -> not m.Optional && requiresNullKey model m.TypeId)
+                                            |> List.map (allocatedName names)
+
                                         {
                                             Parameters = required @ optional
                                             Literals = []
+                                            NullKeys = nullKeys
+                                            StringKeys =
+                                                shared @ arm.Own
+                                                |> List.choose (fun member_ ->
+                                                    Map.tryFind member_.Symbol.Name names
+                                                    |> Option.map (fun name ->
+                                                        name, Naming.memberName member_.Symbol.Name))
+                                                |> Map.ofList
                                         },
                                         List.concat sharedParamFindings @ List.concat ownParamFindings)
                                     |> List.unzip
@@ -448,7 +524,8 @@ let shapeInterfaces: Pass<ShapeModel> =
                                             Docs = docs
                                             Tags = tags
                                             Order = order
-                                            TypeParameters = []
+                                            Callable = false
+                                            TypeParameters = typeParameters
                                             Inherits = []
                                             Members = sharedMembers @ exclusiveMembers
                                             Entrypoint = None
@@ -456,7 +533,8 @@ let shapeInterfaces: Pass<ShapeModel> =
                                             Statics = []
                                         }
                                 ],
-                                (List.concat sharedFindings
+                                (parameterFindings
+                                 @ List.concat sharedFindings
                                  @ List.concat exclusiveFindings
                                  @ List.concat overloadFindings
                                  @ [ Finding.make name (TypeReference.ExclusiveArmsFolded arms.Length) ]))

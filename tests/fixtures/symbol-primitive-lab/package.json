@@ -1,0 +1,6 @@
+{
+    "name": "symbol-primitive-lab",
+    "version": "1.0.0",
+    "types": "index.d.ts",
+    "description": "Hand-authored fixture for symbol and unique symbol at reference positions (W1). Both read as the compiler lib's own Symbol interface; a union with a real obj arm still collapses. Tracked in git, no npm install."
+}

@@ -17,6 +17,29 @@ let private abbreviation name order target =
           TypeParameters = []
           Target = target }
 
+[<Tests>]
+let secondaryPhantomOwnershipTests =
+    testCase "secondary phantom aliases retain compiler module ownership" <| fun _ ->
+        let ctx =
+            { context with
+                PackageDir = "/packages/ownership" * Measure.uom<Measure.dirPath>
+                Config =
+                    { GeneratorConfig.Default with
+                        Groups = Map.ofList [ "typescript/lib" * Measure.uom<Measure.npmDependency>, Ship ] } }
+        let names = [ "Lowercase"; "Capitalize"; "Uncapitalize"; "NoInfer" ]
+        let declarations =
+            names |> List.map (fun name ->
+                FsPhantom
+                    { Name = name; Docs = ""; Tags = []; Order = coreOrder
+                      TypeParameters = [ { Name = "T"; Constraint = None } ]; Carrier = FsObj })
+        let groups = Pipeline.groupModules ctx { shapeModel [] with Decls = declarations }
+        let placements =
+            groups |> List.collect (fun group ->
+                group.Decls |> List.map (fun decl -> Render.declName decl, (group.Module, group.IsEntry)))
+        Expect.equal (Map.ofList placements)
+            (names |> List.map (fun name -> name, ("TypeScript.Lib.Es", false)) |> Map.ofList)
+            "ownership follows alias declaration order even when its type-table name is shared"
+
 let private placement expected exportedNames names declarations facts =
     let ctx =
         { context with
@@ -42,7 +65,7 @@ let private placement expected exportedNames names declarations facts =
     let model =
         { shapeModel facts with
             Harvest = { HarvestModel.Empty with Exports = exported |> List.map snd }
-            ExportTypes = exported |> List.map (fun (typeId, export) -> export.Symbol.Id * Measure.uom<Measure.symbolId>, { Declared = Some (typeId * Measure.uom<Measure.typeId>); Value = None }) |> Map.ofList
+            ExportTypes = exported |> List.map (fun (typeId, export) -> export.Symbol.SymbolId, { Declared = Some (typeId * Measure.uom<Measure.typeId>); Value = None; AliasParameters = None }) |> Map.ofList
             DeclNames = names |> List.map (fun (id, name) -> id * Measure.uom<Measure.typeId>, name) |> Map.ofList
             Decls = declarations }
 
@@ -71,7 +94,7 @@ let private sharedName expected definingFile =
         { symbol 101 "LocalType" SymbolFlags.TypeAlias with
             Declarations = ValueSome [| "1.TypeAliasDeclaration./packages/ownership/index.d.ts" |] }
     let shared =
-        facts { typeResponse 10 TypeFlags.Object with Symbol = ValueSome definition.Id }
+        facts { typeResponse 10 TypeFlags.Object with Symbol = ValueSome(Build.compactOf definition) }
     let model =
         { shapeModel [ shared ] with
             Harvest =
@@ -81,8 +104,8 @@ let private sharedName expected definingFile =
                           { export "SharedType" definition with Order = definingOrder } ] }
             ExportTypes =
                 Map.ofList
-                    [ 100<Measure.symbolId>, { Declared = Some 10<Measure.typeId>; Value = None }
-                      101<Measure.symbolId>, { Declared = Some 10<Measure.typeId>; Value = None } ] }
+                    [ (Build.symbolKey 100), { Declared = Some 10<Measure.typeId>; Value = None; AliasParameters = None }
+                      (Build.symbolKey 101), { Declared = Some 10<Measure.typeId>; Value = None; AliasParameters = None } ] }
 
     let named, _ =
         Pipeline.runTier ctx [ Shape.ExportNames.nameExports ] model |> Async.RunSynchronously
@@ -99,7 +122,7 @@ let private hookPlacement expected origin file compilerLib =
                     CompilerLib = compilerLib } }
     let iface name =
         FsInterface
-            { Name = name; Docs = ""; Tags = []; Order = None; TypeParameters = []
+            { Callable = false; Name = name; Docs = ""; Tags = []; Order = None; TypeParameters = []
               Inherits = []; Members = []; Entrypoint = None; CreateOverloads = []; Statics = [] }
     let station =
         { facts (typeResponse 10 TypeFlags.Object) with
@@ -241,6 +264,25 @@ let exportOrderTests =
                 Pipeline.runTier ctx [ Shape.Ordering.orderDeclarations ] declarations |> Async.RunSynchronously
             shaped.Decls |> List.map Render.declName
             |> Flip.Expect.equal "emitted declarations retain the same logical source order" expected
+
+        // `globalThis.Intl.Locale` and `Intl.Locale` are one declaration at one position, and
+        // the checker enumerates the two namespace scopes in either order.
+        testTheory "a declaration's own namespace path precedes an alias path in any input order" [ false; true ] <| fun reversed ->
+            let declaring = symbolKey 50
+            let occurrence path =
+                { export "Locale" (symbol 51 "Locale" (SymbolFlags.Interface ||| SymbolFlags.Variable)) with
+                    DeclaringNamespace = Some declaring
+                    NamespacePath = Some path
+                    Order = Some { File = "/packages/entry/index.d.ts" * Measure.uom<Measure.declFile>; NodeIndex = 4 * Measure.uom<Measure.nodeId> } }
+            let occurrences = [ occurrence "globalThis.Intl"; occurrence "Intl" ]
+            let model =
+                { HarvestModel.Empty with
+                    Exports = if reversed then List.rev occurrences else occurrences
+                    Namespaces = Map.ofList [ declaring, "Intl" * Measure.uom<Measure.symbolName> ] }
+            let ctx = { context with PackageDir = "/packages/entry" * Measure.uom<Measure.dirPath> }
+            let actual, _ = Pipeline.runTier ctx [ Harvest.orderExports ] model |> Async.RunSynchronously
+            actual.Exports |> List.map _.NamespacePath
+            |> Flip.Expect.equal "the declaring namespace's occurrence is first" [ Some "Intl"; Some "globalThis.Intl" ]
     ]
 
 [<Tests>]
@@ -282,7 +324,7 @@ let groupedCompilerAliasTests =
                         { HarvestModel.Empty with
                             Exports = if exported then [ export "RequestCache" exportedSymbol ] else [] }
                     ExportTypes =
-                        if exported then Map.ofList [ 100<Measure.symbolId>, { Declared = Some 10<Measure.typeId>; Value = None } ]
+                        if exported then Map.ofList [ (Build.symbolKey 100), { Declared = Some 10<Measure.typeId>; Value = None; AliasParameters = None } ]
                         else Map.empty
                     DeclNames =
                         (10<Measure.typeId>, "RequestCache") :: (reads |> List.map (fun (id, name, _) -> id * Measure.uom<Measure.typeId>, name)) |> Map.ofList

@@ -17,15 +17,17 @@ let rec private shapedMemberName (m: FsMember) =
     | FsConstructor _ -> "Create"
     | FsInvoke _ -> "Invoke"
     | FsSymbolKeyed(_, inner) -> shapedMemberName inner
+    | FsStringKeyed(_, inner) -> shapedMemberName inner
     | FsLiteralKeyed(_, _, inner) -> shapedMemberName inner
 
 /// Whether F# admits a static beside an instance member of the same name. Only between two
 /// methods (`Response.json` is both): property over property is FS0441, method over property
 /// FS0434, and a static property under an abstract method is FS3214 at every use.
-let private staticFitsBeside (instance: FsMember) (isMethod: bool) =
+let rec private staticFitsBeside (instance: FsMember) (isMethod: bool) =
     match instance with
     | FsMethod _
     | FsLiteralKeyed _ -> isMethod
+    | FsStringKeyed(_, inner) -> staticFitsBeside inner isMethod
     | FsProperty _
     | FsIndexer _
     | FsConstructor _
@@ -41,12 +43,14 @@ let private staticBinding (binding: ImportBinding) (key: string) =
     | ImportNamed name -> ImportNamed $"{name}.{key}"
     | GlobalName name -> GlobalName $"{name}.{key}"
     | ImportFrom(name, specifier) -> ImportFrom($"{name}.{key}", specifier)
+    | ImportKeyed _ -> ImportKeyed(binding, key)
 
 /// The ambient module specifier an `ImportFrom` binding carries; `None` for every other binding
 /// form.
-let private specifierOfBinding (binding: ImportBinding) =
+let rec private specifierOfBinding (binding: ImportBinding) =
     match binding with
     | ImportFrom(_, specifier) -> Some specifier
+    | ImportKeyed(binding, _) -> specifierOfBinding binding
     | ImportDefault
     | ImportNamed _
     | GlobalName _ -> None
@@ -125,10 +129,22 @@ let shapeClasses: Pass<ShapeModel> =
                     /// One static, shaped: a method where the checker says so and it has a
                     /// signature, a property otherwise - settable where TypeScript declares it
                     /// assignable, get-only where it declares it `readonly`.
-                    let shapeStatic (export: HarvestedExport) (name: string) (m: ResolvedMember) =
-                        let key = Naming.memberName m.Symbol.Name
-                        let owner = $"{name}.{key}"
-                        let binding = staticBinding (bindingOf export) key
+                    let shapeStatic (export: HarvestedExport) (name: string) names (m: ResolvedMember) =
+                        let renamed = Map.tryFind m.Symbol.Name names
+                        let key = renamed |> Option.defaultWith (fun () -> Naming.memberName m.Symbol.Name)
+                        let owner = $"{name}.{m.Symbol.Name}"
+
+                        let binding =
+                            match renamed with
+                            | Some _ -> ImportKeyed(bindingOf export, Naming.memberName m.Symbol.Name)
+                            | None -> staticBinding (bindingOf export) key
+
+                        if renamed.IsSome then
+                            emit (
+                                Finding.make
+                                    owner
+                                    (Members.StringKeyedMemberAsEmit(Naming.memberName m.Symbol.Name, key))
+                            )
 
                         let asMethod =
                             if not (emitsAsMethod model m) then
@@ -165,6 +181,7 @@ let shapeClasses: Pass<ShapeModel> =
                             match asMethod with
                             | Some memberFacts ->
                                 memberFacts.CallSignatures
+                                |> List.collect (restOverloads model)
                                 |> List.map (fun signature ->
                                     let typeParameters, parameters, returns, signatureFindings =
                                         shapeSignature ctx model (Some name) owner signature
@@ -223,7 +240,11 @@ let shapeClasses: Pass<ShapeModel> =
                                         Docs = m.Docs
                                         Tags = m.Tags
                                         TypeParameters = []
-                                        Binding = (if settable then bindingOf export else binding)
+                                        Binding =
+                                            (if settable && renamed.IsNone then
+                                                 bindingOf export
+                                             else
+                                                 binding)
                                         Body = ExportValue(optionalRef m.Optional reference)
                                         Settable = settable
                                     }
@@ -343,17 +364,14 @@ let shapeClasses: Pass<ShapeModel> =
                                     // already declared; a symbol-keyed static is unrepresentable
                                     // for the same reason an instance one is (§4.14).
                                     let shaped =
+                                        let reserved =
+                                            Map.tryFind declaredName declared |> Option.defaultValue Set.empty
+
+                                        let names = stringMemberNames reserved facts
+
                                         facts.Members
                                         |> List.filter (fun m ->
-                                            if m.Symbol.Name.Contains '`' then
-                                                emit (
-                                                    Finding.make
-                                                        $"{declaredName}.{m.Symbol.Name}"
-                                                        Members.UnspellableMemberDropped
-                                                )
-
-                                                false
-                                            elif m.Symbol.Name = "prototype" then
+                                            if m.Symbol.Name = "prototype" then
                                                 false
                                             elif isSymbolKeyed m.Symbol.Name then
                                                 let stable = m.Symbol.Name.Substring(0, m.Symbol.Name.LastIndexOf '@')
@@ -367,7 +385,7 @@ let shapeClasses: Pass<ShapeModel> =
                                                 false
                                             else
                                                 true)
-                                        |> List.collect (shapeStatic export declaredName)
+                                        |> List.collect (shapeStatic export declaredName names)
 
                                     if not shaped.IsEmpty then
                                         statics <-
@@ -387,7 +405,10 @@ let shapeClasses: Pass<ShapeModel> =
                                         admitEntrypoint export facts.ConstructSignatures bases declaredName
 
                                     facts.ConstructSignatures
-                                    |> List.mapi (fun ordinal signature ->
+                                    |> List.collect (restOverloads model)
+                                    |> List.indexed
+                                    |> List.filter (fun (_, signature) -> not signature.IsPrivate)
+                                    |> List.map (fun (ordinal, signature) ->
                                         let typeParameters, parameters, returns, signatureFindings =
                                             shapeSignature ctx model (Some name) name signature
 

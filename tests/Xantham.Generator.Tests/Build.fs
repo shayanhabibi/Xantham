@@ -1,4 +1,4 @@
-﻿/// The terse model-construction vocabulary the per-pass tests are written in: wire responses
+/// The terse model-construction vocabulary the per-pass tests are written in: wire responses
 /// have many fields and the tests care about two or three, so each shape is written out once
 /// here and copy-updated at use sites.
 module Xantham.Generator.Tests.Build
@@ -26,10 +26,29 @@ let context =
         SkippedPaths = []
     }
 
+/// A snapshot-owned symbol's key: no owning file.
+let symbolKey (id: int) : SymbolKey = { File = ValueNone; Id = int64 id }
+
+/// A compact reference to a snapshot-owned symbol, as a type or a parent names one.
+let compact (id: int) : CompactSymbolReference = { Id = int64 id; File = ValueNone }
+
+/// The compact reference a type or a parent names the symbol by.
+let compactOf (symbol: SymbolResponse) : CompactSymbolReference =
+    {
+        Id = symbol.Reference.Id
+        File = symbol.Reference.File |> ValueOption.map _.NodeId
+    }
+
 let symbol (id: int) (name: string) (flags: SymbolFlags) : SymbolResponse =
     {
-        Id = id
-        Project = "test"
+        Reference =
+            {
+                Kind = ProtoEnums.SymbolOwnerKind.Snapshot
+                File = ValueNone
+                Snapshot = ValueSome 1
+                Project = ValueSome "test"
+                Id = int64 id
+            }
         Name = name
         Flags = flags
         CheckFlags = Unchecked.defaultof<CheckFlags>
@@ -54,6 +73,11 @@ let typeResponse (id: int) (flags: TypeFlags) : TypeResponse =
         FixedLength = ValueNone
         Readonly = ValueNone
         LabeledElementDeclarations = ValueNone
+        TypeParameter = ValueNone
+        ConstraintType = ValueNone
+        NameType = ValueNone
+        TemplateType = ValueNone
+        ThisType = ValueNone
         ObjectType = ValueNone
         IndexType = ValueNone
         CheckType = ValueNone
@@ -82,12 +106,15 @@ let resolvedMember (sym: SymbolResponse) (typeId: int) : ResolvedMember =
         TypeId = typeId * Measure.uom<Measure.typeId>
         WellKnownSymbol = None
         ResolvesToFunction = false
+        SourceStringAnnotation = None
     }
 
 let export (name: string) (sym: SymbolResponse) : HarvestedExport =
     {
         ExportName = name
         Symbol = sym
+        DeclaringNamespace = sym.ParentSymbolId |> ValueOption.toOption
+        NamespacePath = None
         HasValueExport = uint32 (sym.Flags &&& SymbolFlags.Value) <> 0u
         Docs = ""
         Tags = []
@@ -99,6 +126,7 @@ let export (name: string) (sym: SymbolResponse) : HarvestedExport =
 let shapeModel (table: TypeFacts list) : ShapeModel =
     {
         Harvest = HarvestModel.Empty
+        CompilerNoInferSymbols = Set.empty
         ExportTypes = Map.empty
         Types =
             table
@@ -109,6 +137,8 @@ let shapeModel (table: TypeFacts list) : ShapeModel =
         DeclOrders = Map.empty
         DeclParams = Map.empty
         AliasApplications = Map.empty
+        SourceStringAliases = Map.empty
+        MintedNames = Set.empty
         ExportMembers = []
         TypeVars = Map.empty
         KeyVars = Map.empty
@@ -125,9 +155,12 @@ let signature (parameters: ResolvedMember list) (returnTypeId: int) : ResolvedSi
         HasRest = false
         TypeParameters = []
         IsAbstract = false
+        IsPrivate = false
         ReturnTypeId = returnTypeId * Measure.uom<Measure.typeId>
         Source = None
         OwnDoc = None
+        RestPatternNames = []
+        HasThisParameter = false
     }
 
 /// Runs one pass to completion under the wire-less context and splits the outcome.

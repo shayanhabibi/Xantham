@@ -969,7 +969,7 @@ nodesOut.indent(w => {
 // ────────────────────────────────────────────────────────────────────────────
 
 // The numbering rule is the whole reason this file can be trusted, and nothing downstream would
-// announce it changing: 307 and 79 are hard-coded in the live tests today.
+// announce it changing.
 for (const [kind, expected] of ANCHORS) {
   const actual = values.get(kind);
   if (actual !== expected) {

@@ -53,7 +53,7 @@ type Budget =
 [<Interface>]
 type Slot =
     abstract value: string option with get, set
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"value\": o[\"value\"] ?? null}))($0)")>]
     static member Create (?value: string) : Slot = jsNative
 
 [<Interface>]

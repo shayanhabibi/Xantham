@@ -1,6 +1,6 @@
 {
   "repo": "microsoft/TypeScript",
-  "ref": "cf7b9361a33fa0c8e1afa3cf45fde29c9ab23ec0",
+  "ref": "3e9236361fa97a9e6c685f4833ac457ae2d8c50a",
   "comment": "Pinned commit of the upstream sources vendored into tools/tsc-ast/upstream, which mirrors the upstream directory layout. Bump `ref` (or pass --ref) and run `dotnet fsi tools/generate-wire.fsx sync tsc-ast` to resync.",
   "sources": [
     {
@@ -16,6 +16,13 @@
         "generate-ts-ast.ts",
         "package.json",
         "tsconfig.json"
+      ]
+    },
+    {
+      "comment": "The generator helpers schema.ts imports: `repoRoot`, which resolves to tools/tsc-ast/upstream because the vendored tree mirrors the upstream layout. It imports `tinyexec`, which the root package.json pins.",
+      "dir": "tools/scripts/gen",
+      "files": [
+        "utils.mts"
       ]
     },
     {

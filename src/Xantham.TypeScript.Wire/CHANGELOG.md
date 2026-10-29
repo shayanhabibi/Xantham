@@ -1,5 +1,5 @@
 ---
-last_commit_released: 977355536eba47bff4672d609cccca7523bda9f7
+last_commit_released: 687a15f013a1ea6531f0f51c5b015c416949c039
 name: Xantham.TypeScript.Wire
 include:
   - ../../Directory.Build.props
@@ -12,6 +12,14 @@ updaters:
 ---
 
 # Changelog
+
+## 0.3.1-beta.2 - 2026-10-25
+
+### 🚀 Features
+
+* *(wire)* Migrate to TypeScript 7.1.0-beta and Fickl (#162) ([40a70f03](https://github.com/shayanhabibi/Xantham/commit/40a70f03aee7712a4caf3c388d1600ff11a84b59))
+
+<strong><small>[View changes on Github](https://github.com/shayanhabibi/Xantham/compare/977355536eba47bff4672d609cccca7523bda9f7..687a15f013a1ea6531f0f51c5b015c416949c039)</small></strong>
 
 ## 0.3.1-beta.1 - 2026-10-14
 

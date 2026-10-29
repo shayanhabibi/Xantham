@@ -1,4 +1,4 @@
-﻿module Xantham.Generator.Shape.Anonymous
+module Xantham.Generator.Shape.Anonymous
 
 open Xantham.Generator
 open Xantham.Generator.Measure
@@ -45,7 +45,7 @@ let private isAliasIntersectionForm (model: ShapeModel) (facts: TypeFacts) =
 /// A generic alias over a tagged union, in a form that binds parameters of its own: every
 /// argument it carries is a distinct type parameter (§4.9, §4.5(2)).
 let private isAliasTaggedForm (model: ShapeModel) (facts: TypeFacts) =
-    isTaggedDeclaration model facts
+    isObjectUnionDeclaration model facts
     && (match facts.Response.AliasArgumentTypeIds with
         | ValueSome arguments ->
             arguments.Length > 0
@@ -58,7 +58,7 @@ let private isAliasTaggedForm (model: ShapeModel) (facts: TypeFacts) =
 /// symbol -> the smallest type id carrying it that binds parameters of its own. Every larger id
 /// carrying the same alias symbol is read as an application of that form. Where the declared type
 /// is in the table it is the form, since the checker creates it before any instantiation.
-let private aliasDeclarationForms (model: ShapeModel) : Map<int<Measure.symbolId>, int<Measure.typeId>> =
+let private aliasDeclarationForms (model: ShapeModel) : Map<SymbolKey, int<Measure.typeId>> =
     model.Types
     |> Map.toList
     |> List.sortBy fst
@@ -74,9 +74,10 @@ let private aliasDeclarationForms (model: ShapeModel) : Map<int<Measure.symbolId
             | _ -> forms)
         Map.empty
 
-/// Whether a union carrying a generic tagged alias's symbol is an application of the alias's
+/// Whether a union carrying a generic object alias's symbol is an application of the alias's
 /// declared form, arm for arm: each instance arm is the declared arm itself, an application of
 /// the same named declaration, or an arm written inline under the same tag value and fields.
+/// Exclusive arms require the same compiler declaration or symbol as well as the same fields.
 /// Correspondence fails for a transformed union that keeps the alias symbol over another arm set.
 let private armsCorrespond (model: ShapeModel) (declared: TypeFacts) (instance: TypeFacts) =
     match taggedUnionShape model declared with
@@ -91,13 +92,15 @@ let private armsCorrespond (model: ShapeModel) (declared: TypeFacts) (instance: 
             arm.Response.ObjectFlags
             |> ValueOption.exists (fun flags -> flags.HasFlag ObjectFlags.Reference)
 
-        let corresponds (declaredArm: TypeFacts, value: string) (instanceArm: TypeFacts) =
+        let corresponds (case: TaggedArm) (instanceArm: TypeFacts) =
+            let declaredArm = case.Facts
+
             declaredArm.Response.TypeId = instanceArm.Response.TypeId
             || (isReference declaredArm
                 && isReference instanceArm
                 && declaredArm.Response.TargetTypeId.IsSome
                 && declaredArm.Response.TargetTypeId = instanceArm.Response.TargetTypeId)
-            || (taggedArmValue model tag instanceArm = Some value
+            || (taggedArmValue model tag instanceArm = Some case.Value
                 && fields instanceArm = fields declaredArm)
 
         instanceArms.Length = cases.Length
@@ -106,7 +109,58 @@ let private armsCorrespond (model: ShapeModel) (declared: TypeFacts) (instance: 
            |> List.forall (fun case -> (instanceArms |> List.filter (corresponds case)).Length = 1)
         && instanceArms
            |> List.forall (fun arm -> (cases |> List.filter (fun case -> corresponds case arm)).Length = 1)
-    | _ -> false
+    | _ when
+        (match exclusiveArmShape model declared with
+         | ExclusiveArmsFold _ -> true
+         | _ -> false)
+        ->
+        let instanceArms =
+            instance.UnionMembers |> List.choose (fun id -> Map.tryFind id model.Types)
+
+        let declaredArms =
+            declared.UnionMembers |> List.choose (fun id -> Map.tryFind id model.Types)
+
+        let fields (arm: TypeFacts) =
+            arm.Members
+            |> List.map (fun member_ -> member_.Symbol.Name, member_.Optional, member_.ReadOnly)
+            |> List.sort
+
+        let corresponds (left: TypeFacts) (right: TypeFacts) =
+            left.Response.TypeId = right.Response.TypeId
+            || ((not left.Declarations.IsEmpty
+                 && Set.ofList left.Declarations = Set.ofList right.Declarations
+                 || (left.Response.SymbolId.IsSome
+                     && left.Response.SymbolId = right.Response.SymbolId))
+                && fields left = fields right)
+
+        declaredArms.Length = instanceArms.Length
+        && declaredArms.Length = declared.UnionMembers.Length
+        && instanceArms.Length = instance.UnionMembers.Length
+        && declaredArms
+           |> List.forall (fun arm -> instanceArms |> List.filter (corresponds arm) |> List.length = 1)
+        && instanceArms
+           |> List.forall (fun arm ->
+               declaredArms
+               |> List.filter (fun declared -> corresponds declared arm)
+               |> List.length
+                   =
+                   1)
+    | _ ->
+        match erasedObjectUnionShape model declared, erasedObjectUnionShape model instance with
+        | Some declaredArms, Some instanceArms ->
+            let corresponds ((left: TypeFacts), leftTest) ((right: TypeFacts), rightTest) =
+                leftTest = rightTest
+                && (left.Response.TypeId = right.Response.TypeId
+                    || (left.Response.TargetTypeId.IsSome
+                        && left.Response.TargetTypeId = right.Response.TargetTypeId))
+
+            declaredArms.Length = instanceArms.Length
+            && declaredArms
+               |> List.forall (fun arm -> (instanceArms |> List.filter (corresponds arm)).Length = 1)
+            && instanceArms
+               |> List.forall (fun arm ->
+                   (declaredArms |> List.filter (fun declaredArm -> corresponds declaredArm arm)).Length = 1)
+        | _ -> false
 
 /// The consistent parameter bindings recoverable from two compiler-identified forms of one
 /// alias. Transformed fragments contribute no bindings; conflicting bindings reject the result.
@@ -230,7 +284,7 @@ let private unifyAlias
 /// operand paths recover a complete, consistent substitution for the declaration parameters.
 let internal aliasInstantiationOf
     (model: ShapeModel)
-    (forms: Map<int<Measure.symbolId>, int<Measure.typeId>>)
+    (forms: Map<SymbolKey, int<Measure.typeId>>)
     (facts: TypeFacts)
     : (string * int<Measure.typeId> list option) option =
     match facts.Response.AliasSymbolId with
@@ -298,9 +352,16 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
     let mutable orders = model.DeclOrders
     let mutable declParams = model.DeclParams
     let mutable aliasApplications = model.AliasApplications
+    let mutable minted = model.MintedNames
+    let mutable exportRoots = Set.empty
     let mutable findings = []
     let mutable taken = model.DeclNames |> Map.toList |> List.map snd |> Set.ofList
     let mutable visited = Set.empty
+
+    /// The module an anonymous arm's own declarations nest under, where it differs from the
+    /// arm's name: `Recovery.Cases.Aborted` for an arm of a union declared as a DU, `Choice` for
+    /// an arm of a union the exclusive-arm fold declares as one interface.
+    let mutable nestBases: Map<int<Measure.typeId>, string> = Map.empty
 
     let recoveredAliases =
         model.Types
@@ -324,9 +385,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
     /// The module name a type nests under, where its own symbol is written inside a namespace
     /// this run names.
     let namespaceOf (facts: TypeFacts) =
-        facts.SymbolParent
-        |> Option.bind (fun parent -> Map.tryFind parent model.Harvest.Namespaces)
-        |> Option.map (fun value -> Naming.pascalSegment (value / uom<symbolName>))
+        namespacePath model.Harvest.Namespaces facts.SymbolParent
 
     /// The specifier module path of the export whose types are being walked, dotted; empty at
     /// the root.
@@ -353,10 +412,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
         // A name TypeScript separates by the namespace it is written in separates the same way
         // here, rather than by number: `TailStream`'s `TailEvent` reads `TailStream.TailEvent`
         // beside the global class of that name.
-        let wanted =
-            match owner with
-            | Some ns when Set.contains (underPrefix admitted) taken -> underPrefix (nestUnder ns admitted)
-            | _ -> underPrefix admitted
+        let wanted = underPrefix (underNamespace owner admitted)
 
         let unique =
             if not (Set.contains wanted taken) then
@@ -376,10 +432,19 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                     Finding.make unique (SynthesizeAnonymous.NameSanitisedForIdentifier(preferred, unique))
                 ]
 
-        if (withoutPrefix unique).Contains "." then
+        if owner.IsNone && (withoutPrefix unique).Contains "." then
             findings <-
                 findings
                 @ [ Finding.make unique (SynthesizeAnonymous.NameNestedUnderOwner unique) ]
+
+        unique
+
+    /// Records position-derived names at the claim site, excluding source export roots.
+    let claimDerived typeId order path =
+        let unique = claim None path typeId order
+
+        if not (Set.contains path exportRoots) then
+            minted <- Set.add unique minted
 
         unique
 
@@ -417,7 +482,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
     let becomesTaggedUnion (facts: TypeFacts) =
         let _, remaining = splitNullish model facts
 
-        isTaggedDeclaration model facts
+        isObjectUnionDeclaration model facts
         && (namedUnionByMembers ctx { model with DeclNames = names } remaining).IsNone
 
     /// The type ids a declaration reads through call signatures rather than through a reference
@@ -429,15 +494,43 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
     /// `strictNullChecks` the member reads `callback | undefined`, and the delegate is declared
     /// for the arm.
     let signatureShaped =
+        let mutable retainedValues = Set.empty
+
         let exported =
             model.ExportTypes
             |> Map.toList
-            |> List.collect (fun (_, ids) -> Option.toList ids.Declared @ Option.toList ids.Value)
+            |> List.collect (fun (symbolId, ids) ->
+                let retainedValue =
+                    ids.Value
+                    |> Option.bind (fun id -> Map.tryFind id model.Types)
+                    |> Option.exists (fun facts ->
+                        model.Harvest.Exports
+                        |> List.exists (fun export ->
+                            export.Symbol.SymbolId = symbolId
+                            && isPolymorphicCallableValue model export.Symbol.Flags facts))
 
+                if retainedValue then
+                    retainedValues <- Set.union retainedValues (Set.ofList (Option.toList ids.Value))
+                    []
+                else
+                    Option.toList ids.Declared @ Option.toList ids.Value)
+
+        // A method's type that another member reads as a property (`Pick<Container, "exec">`)
+        // keeps its delegate.
         let methods =
-            model.Types
-            |> Map.toList
-            |> List.collect (fun (_, facts) -> facts.Members |> List.filter (emitsAsMethod model) |> List.map _.TypeId)
+            let members =
+                model.Types |> Map.toList |> List.collect (fun (_, facts) -> facts.Members)
+
+            let properties =
+                members
+                |> List.filter (emitsAsMethod model >> not)
+                |> List.map _.TypeId
+                |> Set.ofList
+
+            members
+            |> List.filter (emitsAsMethod model)
+            |> List.map _.TypeId
+            |> List.filter (fun id -> not (Set.contains id properties))
 
         // The arms of a member type that carry call signatures of their own.
         let callbackArms (typeId: int<Measure.typeId>) =
@@ -470,7 +563,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                 else
                     [])
 
-        Set.ofList (exported @ methods @ hooks)
+        Set.difference (Set.ofList (exported @ methods @ hooks)) retainedValues
 
     let needsName (facts: TypeFacts) =
         if Map.containsKey facts.Response.TypeId names then
@@ -495,17 +588,23 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
             (GeneratorConfig.disposition ctx.Config facts.Origin = Ship
              || facts.SymbolName |> Option.forall isSyntheticName)
             && not (Set.contains facts.Response.TypeId signatureShaped)
-            // F# has no rank-2 form, so a generic signature can only be approximated by
-            // hoisting its variables onto the declaration - and a reference has nothing to
-            // apply them back with. Written inline, they stay in the scope that bound them.
-            && facts.CallSignatures
-               |> List.forall (fun signature -> signature.TypeParameters.IsEmpty)
+            && (hasInterfaceCallSignatures model facts
+                || facts.CallSignatures
+                   |> List.forall (fun signature -> signature.TypeParameters.IsEmpty))
             // An application of a generic callback alias - `ExportedHandlerFetchHandler<Env,
             // Cf, Props>` at a member of `ExportedHandler` - binds the alias's parameters on
             // its head and gives a reference nothing to apply them with. It expands in place,
             // under the name the alias itself already carries.
             && declParamIds facts = ownArguments facts
-            && callbackRetainedAsDelegate model names facts
+            && (hasInterfaceCallSignatures model facts
+                || callbackRetainedAsDelegate model names facts
+                // A catalogued generic callable interface keeps its declaration and parameters
+                // wherever it is reached, so its applications read the same in every consumer.
+                || ((ctx.Config.DeclarationCatalog
+                     || not (List.isEmpty ctx.Config.DeclarationReferences))
+                    && hasAny SymbolFlags.Interface facts.SymbolFlags
+                    && (facts.SymbolName |> Option.exists (isSyntheticName >> not))
+                    && not (List.isEmpty (declParamIds facts))))
             && (instantiationOf { model with DeclNames = names } facts).IsNone
         elif flag TypeFlags.Object facts then
             // Entry-group object shapes with members become interfaces; arrays stay arrays and
@@ -551,6 +650,20 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                 facts.NonNullableAlias |> Option.iter (walk path order)
                 facts.NonNullableApplication |> Option.iter (walk path order)
 
+                if flag TypeFlags.TypeParameter facts then
+                    for bound in Option.toList facts.Constraint @ Option.toList facts.Default do
+                        match Map.tryFind bound model.Types with
+                        | Some boundFacts when
+                            (boundFacts.SymbolName |> Option.exists (isSyntheticName >> not))
+                            && (hasAny (SymbolFlags.Interface ||| SymbolFlags.Class) boundFacts.SymbolFlags
+                                || not boundFacts.AliasDeclarations.IsEmpty)
+                            ->
+                            walk path order bound
+                        | _ -> ()
+
+                for parameter in declParamIds facts do
+                    walk path order parameter
+
                 // The generic declaration behind an instantiation is named ahead of it, so
                 // `Ready<T>` reached only through `Resource<T> = Ready<T> | ...` declares
                 // `Ready<'T>` once and instantiations are applications of it (§4.9).
@@ -574,7 +687,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                             if flag TypeFlags.Union declaredFacts then
                                 walk path order declared
                         | Some declaredFacts when hasConditionalOperand model declaredFacts ->
-                            claim None path declared order |> ignore
+                            claimDerived declared order path |> ignore
                         | Some _ -> walk path order declared
                         | None -> ()
                     | _ -> ()
@@ -583,29 +696,35 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                 if needsName facts then
                     // A path-derived name already carries its owner, so only a name taken from
                     // the type's own symbol has a namespace left to fall back on.
-                    let preferred, owner =
+                    let preferred, owner, derived =
                         match facts.SymbolName with
                         | Some name when not (isSyntheticName name) ->
-                            Naming.pascalSegment (name / uom<symbolName>), namespaceOf facts
-                        | _ -> path, None
+                            Naming.pascalSegment (name / uom<symbolName>), namespaceOf facts, false
+                        | _ -> path, None, true
+
+                    let claimName () =
+                        if derived then
+                            claimDerived typeId order preferred
+                        else
+                            claim owner preferred typeId order
 
                     let claimed =
                         // A named type exported directly from no public path stays at the root
                         // (decision 10), homed by its own name and namespace rather than by the
                         // export the walk reaches it through.
                         if Set.contains typeId publiclyExportedTypeIds then
-                            claim owner preferred typeId order
+                            claimName ()
                         else
                             let referencingPrefix = modulePrefix
                             modulePrefix <- ""
-                            let result = claim owner preferred typeId order
+                            let result = claimName ()
                             modulePrefix <- referencingPrefix
                             result
 
                     // The delegate declaration `shape-callbacks` writes for it (D5): the arity
                     // guarantee `System.Func` gives, under a name whose parameters read as
                     // TypeScript spelled them.
-                    if isPureCallback facts then
+                    if isPureCallback facts && not (hasInterfaceCallSignatures model facts) then
                         findings <-
                             findings
                             @ [ Finding.make claimed (SynthesizeAnonymous.CallbackDelegateNamed claimed) ]
@@ -641,7 +760,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                 let named = Map.tryFind typeId names
 
                 let into segment =
-                    nestUnder (named |> Option.defaultValue path) segment
+                    nestUnder (Map.tryFind typeId nestBases |> Option.orElse named |> Option.defaultValue path) segment
 
                 // An instantiation of a named declaration reads only its arguments: its
                 // members are the declaration's, substituted, and shaping happens there.
@@ -682,6 +801,9 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                         @ (facts.AmbientClass |> Option.map snd |> Option.defaultValue [])
 
                     for signature in signatures do
+                        for parameter in signature.TypeParameters do
+                            walk (into "TypeParameter") order parameter
+
                         for p in signature.Parameters do
                             walk (into (Naming.pascalSegment p.Symbol.Name)) order p.TypeId
 
@@ -694,7 +816,36 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                         |> Option.exists (fun application -> Map.containsKey application names)
 
                     if not readsApplication then
+                        let caseModules =
+                            match named with
+                            | Some unionName ->
+                                let caseNames = taggedCaseNames model facts
+
+                                if not caseNames.IsEmpty then
+                                    // A case named `Cases` would take the module path the case
+                                    // modules open under, so that union keeps the arm-name path.
+                                    if caseNames |> Map.exists (fun _ caseName -> caseName = "Cases") then
+                                        Map.empty
+                                    else
+                                        caseNames
+                                        |> Map.map (fun _ caseName -> nestUnder (nestUnder unionName "Cases") caseName)
+                                else
+                                    // The exclusive-arm fold declares the union as one interface
+                                    // under its own name, and its arms' declarations nest there.
+                                    match exclusiveArmShape model facts with
+                                    | ExclusiveArmsFold _ ->
+                                        facts.UnionMembers |> List.map (fun armId -> armId, unionName) |> Map.ofList
+                                    | NotExclusiveArms
+                                    | ExclusiveArmsDecline _ -> Map.empty
+                            | None -> Map.empty
+
                         for memberId in facts.UnionMembers do
+                            let anonymous = Map.tryFind memberId model.Types |> Option.exists isAnonymousArm
+
+                            match Map.tryFind memberId caseModules with
+                            | Some caseModule when anonymous -> nestBases <- Map.add memberId caseModule nestBases
+                            | _ -> ()
+
                             walk (named |> Option.defaultValue path) order memberId
 
                     for argument in facts.TypeArguments do
@@ -705,6 +856,26 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
 
                     for interfaceId in facts.ImplementedTypes do
                         walk (into "Implements") order interfaceId
+
+                    // An anonymous operand of an intersection over a type parameter is declared
+                    // under the intersection's path (§4.6), or under `<Alias>.Members` for an
+                    // alias body, whose own name is the alias's. A named operand takes its name
+                    // from its own declaration.
+                    match openOperands model facts with
+                    | Some kept ->
+                        let operandPath =
+                            if facts.Response.AliasSymbolId.IsSome then
+                                nestUnder path "Members"
+                            else
+                                path
+
+                        for operand in kept do
+                            if
+                                flag TypeFlags.Object operand
+                                && operand.SymbolName |> Option.forall isSyntheticName
+                            then
+                                walk operandPath order operand.Response.TypeId
+                    | None -> ()
 
                     if
                         ctx.Config.DeclarationCatalog
@@ -722,17 +893,77 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
                                 walk (into "Base") order operand
                             | _ -> ()
 
+    /// The role an export's value side is named for beside its type side, and whether the
+    /// shapes its values own nest under the source namespace: an enum's object, a namespace or a
+    /// variable merged with a type. A class's static side is not a value side this pass names.
+    let valueSideRole (export: HarvestedExport) =
+        let flags = export.Symbol.Flags
+
+        if hasAny SymbolFlags.Class flags then
+            None
+        elif hasAny (SymbolFlags.RegularEnum ||| SymbolFlags.ConstEnum) flags then
+            Some("Enum", true)
+        elif hasAny SymbolFlags.ValueModule flags then
+            Some("Namespace", true)
+        elif hasAny (SymbolFlags.FunctionScopedVariable ||| SymbolFlags.BlockScopedVariable) flags then
+            Some("Value", false)
+        else
+            None
+
     let fallback = defaultExportName ctx
     let pathOf = ExportLayout.declPath (ExportLayout.modulePaths model) model
 
+    exportRoots <-
+        model.Harvest.Exports
+        |> List.map (fun export ->
+            pathOf export
+            @ [
+                underNamespace
+                    (exportNamespacePath model.Harvest.Namespaces export)
+                    (Naming.pascalSegment (fsName fallback export))
+            ]
+            |> String.concat ".")
+        |> Set.ofList
+
     for export in model.Harvest.Exports do
         modulePrefix <- pathOf export |> String.concat "."
-        let root = underPrefix (Naming.pascalSegment (fsName fallback export))
+
+        let stem =
+            underNamespace
+                (exportNamespacePath model.Harvest.Namespaces export)
+                (Naming.pascalSegment (fsName fallback export))
+
+        let root = underPrefix stem
 
         match Map.tryFind export.Symbol.SymbolId model.ExportTypes with
         | Some ids ->
-            for typeId in [ yield! Option.toList ids.Declared; yield! Option.toList ids.Value ] do
-                walk root export.Order typeId
+            ids.Declared |> Option.iter (walk root export.Order)
+
+            match ids.Declared, ids.Value with
+            | Some declared, Some value when declared <> value ->
+                match valueSideRole export, Map.tryFind value model.Types with
+                | Some(role, underNamespace), Some facts when
+                    Set.contains root taken
+                    && not (Map.containsKey value names)
+                    && needsName facts
+                    && not (isConstructorObject facts)
+                    ->
+                    let declaredAs = claim None $"{stem}{role}" value export.Order
+
+                    findings <-
+                        findings
+                        @ [
+                            Finding.make declaredAs (SynthesizeAnonymous.ValueSideNamed(root, declaredAs))
+                        ]
+
+                    // TypeScript reaches a namespace value's shape as `Point.defaults`: it
+                    // belongs to the namespace's module, not to the minted value interface.
+                    if underNamespace then
+                        nestBases <- Map.add value root nestBases
+                | _ -> ()
+            | _ -> ()
+
+            ids.Value |> Option.iter (walk root export.Order)
         | None -> ()
 
     { model with
@@ -740,6 +971,7 @@ let private nameAnonymous (ctx: Context) (model: ShapeModel) : ShapeModel * Find
         DeclOrders = orders
         DeclParams = declParams
         AliasApplications = aliasApplications
+        MintedNames = minted
     },
     findings
 

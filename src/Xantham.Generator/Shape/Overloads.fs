@@ -150,6 +150,7 @@ let dedupeOverloads: Pass<ShapeModel> =
                                     seen <- Set.add key seen
                                     true
                             | FsSymbolKeyed(_, FsMethod m)
+                            | FsStringKeyed(_, FsMethod m)
                             | FsLiteralKeyed(_, _, FsMethod m) ->
                                 let key = m.Name, signatureKey m.TypeParameters m.Parameters
 
@@ -162,11 +163,23 @@ let dedupeOverloads: Pass<ShapeModel> =
                                     seen <- Set.add key seen
                                     true
                             | FsSymbolKeyed _
+                            | FsStringKeyed _
                             | FsLiteralKeyed _ -> true)
 
                     let decls =
                         model.Decls
                         |> List.map (function
+                            | FsErasedObjectUnion decl ->
+                                FsErasedObjectUnion
+                                    { decl with
+                                        Invokes =
+                                            decl.Invokes
+                                            |> List.map FsInvoke
+                                            |> dedupeMethods decl.Name
+                                            |> List.choose (function
+                                                | FsInvoke invoke -> Some invoke
+                                                | _ -> None)
+                                    }
                             | FsInterface decl ->
                                 FsInterface
                                     { decl with

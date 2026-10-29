@@ -60,14 +60,12 @@ type InheritedApplied =
 [<Interface>]
 type StringBound =
     inherit Bound<string>
-    abstract value: string with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (value: string) : StringBound = jsNative
 
 [<Interface>]
 type NumberBound =
     inherit Bound<float>
-    abstract value: float with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (value: float) : NumberBound = jsNative
 
@@ -90,7 +88,6 @@ type Recursive<'T when 'T :> Recursive<'T>> =
 [<Interface>]
 type RecursiveValue =
     inherit Recursive<RecursiveValue>
-    abstract next: RecursiveValue with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (next: RecursiveValue) : RecursiveValue = jsNative
 

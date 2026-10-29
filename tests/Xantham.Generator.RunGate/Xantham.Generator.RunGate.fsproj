@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <!-- The Fable *run* gate of docs/plans/generator-architecture.md §5: where the compile gate
          proves the goldens type-check, this one proves the erased idioms they lean on *behave* -
@@ -10,7 +10,7 @@
          `register.mjs` installs the ambient globals and resolves the fixture package names.
 
          It is an executable, not a test project: `dotnet build` type-checks it, and
-         `build.fsx test` runs `dotnet fable` on it after the suites; the exact command is the
+         `build.fsx test` runs `dotnet fickl` on it after the suites; the exact command is the
          `run gate` stage there (an XML comment cannot spell a double-dash flag), and it runs
          from this directory.
 
@@ -44,6 +44,8 @@
         <Compile Include="..\Xantham.Generator.Tests\golden\union-arm-overload-lab\UnionArmOverloadLab.fs" Link="union-arm-overload-lab\UnionArmOverloadLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\delegate-name-lab\DelegateNameLab.fs" Link="delegate-name-lab\DelegateNameLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\shared-tag-lab\SharedTagLab.fs" Link="shared-tag-lab\SharedTagLab.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\tagged-arm-lab\TaggedArmLab.fs" Link="tagged-arm-lab\TaggedArmLab.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\inline-arm-lab\InlineArmLab.fs" Link="inline-arm-lab\InlineArmLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\record-index-lab\RecordIndexLab.fs" Link="record-index-lab\RecordIndexLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\callable-hybrid-lab\CallableHybridLab.fs" Link="callable-hybrid-lab\CallableHybridLab.fs" />
         <Compile Include="..\Xantham.Generator.Tests\golden\callable-overloads-lab\CallableOverloadsLab.fs" Link="callable-overloads-lab\CallableOverloadsLab.fs" />
@@ -67,13 +69,25 @@
         <Compile Include="..\Xantham.Generator.Tests\golden\projection-lab-companions\*.fs" Link="projection-lab-companions\%(Filename)%(Extension)" />
         <Compile Include="..\Xantham.Generator.Tests\golden\projection-operations\*.fs" Link="projection-operations\%(Filename)%(Extension)" />
         <Compile Include="Projections.fs" />
+        <Compile Include="ErasedCases.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\erased-exclusive-lab\ErasedExclusiveLab.fs" Link="erased-exclusive-lab\ErasedExclusiveLab.fs" />
+        <Compile Include="GeneratedErasedCases.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\generic-callable-reference-lab\GenericCallableReferenceLab.fs" Link="generic-callable-reference-lab\GenericCallableReferenceLab.fs" />
+        <Compile Include="GenericCallableReferences.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\generic-callable-interface-lab\GenericCallableInterfaceLab.fs" Link="generic-callable-interface-lab\GenericCallableInterfaceLab.fs" />
+        <Compile Include="GenericCallableInterfaces.fs" />
+        <Compile Include="RecursiveCallbacks.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\census-callable-provenance-lab\CensusCallableProvenanceLab.fs" Link="census-callable-provenance-lab\CensusCallableProvenanceLab.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\census-ambient-export-value-lab\CensusAmbientExportValueLab.fs" Link="census-ambient-export-value-lab\CensusAmbientExportValueLab.fs" />
+        <Compile Include="..\Xantham.Generator.Tests\golden\census-backtick-members-lab\CensusBacktickMembersLab.fs" Link="census-backtick-members-lab\CensusBacktickMembersLab.fs" />
+        <Compile Include="BacktickMembers.fs" />
         <Compile Include="Program.fs" />
         <None Include="register.mjs" />
     </ItemGroup>
 
     <ItemGroup>
         <!-- One Fable.Core across the support package, the compile gate and this gate. -->
-        <PackageReference Include="Fable.Core" Version="5.2.0" />
+        <PackageReference Include="Fable.Core" Version="5.6.0" />
         <ProjectReference Include="..\..\src\Xantham.Fable.Core.TS\Xantham.Fable.Core.TS.fsproj" />
         <ProjectReference Include="..\..\src\Xantham.Fable.Core\Xantham.Fable.Core.fsproj" />
     </ItemGroup>

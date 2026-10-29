@@ -16,7 +16,7 @@ answer is different in kind — a name that Fable.Core adds, or that this reposi
 has to change.
 
 Every claim is verified against the pins this repository built on at the time: `Fable.Core`
-**5.2.0**, the `fable` tool 5.0.0, `fable-library-js` 5.0.0. The `fable` tool pin is now 5.17.2;
+**5.2.0**, the `fable` tool 5.0.0, `fable-library-js` 5.0.0. The compiler tool pin is now Fickl 0.5.3;
 `Fable.Core` is unchanged. The inventory method is
 `fcs_nuget_types Fable.Core` against `tests/Xantham.Generator.CompileGate`, which resolves the
 exact assembly the compile gate compiles against.
@@ -120,6 +120,10 @@ route, which wave three verified exists but did not take.
 *2026-10-13 (W4).* Members keyed by well-known symbols are now emitted: `[Symbol.iterator]` as
 `inherit seq<'T>`, every other key as a `Symbol<Name>` member under `[<Emit>]`. A key naming a
 package's own `unique symbol` remains `MB002`.
+
+*2026-10-24 (W1).* The type half is closed with the generated binding: `symbol` and
+`unique symbol` are written as the compiler lib's `Symbol` interface (`Fable.Core.TS.Es.Symbol`),
+`TR069`. A `unique symbol` still reports `TR042` for its identity.
 
 [//]: # (ANSWER)
 Same as before; we'll generate or hand roll our own bindings for this.

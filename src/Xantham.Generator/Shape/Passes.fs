@@ -10,14 +10,17 @@ let passes: Pass<ShapeModel> list =
     [
         ExportNames.nameExports
         Anonymous.synthesizeAnonymous
+        SourceStringAliases.nameAliases
         ConstructorObjects.nameConstructorObjects
         FreeTypeParams.bindFreeTypeParams
         MixedUnionCensus.countMixedUnions
         LiteralUnions.classifyLiteralUnions
         TaggedUnions.detectTaggedUnions
+        ErasedObjectUnions.detectErasedObjectUnions
         Callbacks.shapeCallbacks
         Interfaces.shapeInterfaces
         Aliases.shapeAliases
+        SourceStringAliases.reifyAliases
         Classes.shapeClasses
         Exports.shapeExports
         ParamObjects.synthesizeParamObjects
@@ -26,6 +29,8 @@ let passes: Pass<ShapeModel> list =
         Overloads.dedupeOverloads
         Ordering.orderDeclarations
         UnionArms.expandUnionArms
+        Arity.resolveModuleSuffixes
+        Arity.repairConstraints
         Arity.repairArity
         Arity.normalizeObjUnions
         ExportCollisions.resolveExportCollisions

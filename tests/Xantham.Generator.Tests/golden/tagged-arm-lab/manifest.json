@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "package": "tagged-arm-lab",
+  "module": "TaggedArmLab",
+  "counts": {
+    "exact": 17,
+    "ergonomic": 89,
+    "widened": 5,
+    "escape": 0
+  },
+  "passes": [
+    {
+      "pass": "SY - synthesize-anonymous",
+      "total": 32,
+      "exact": 32
+    },
+    {
+      "pass": "DT - detect-tagged-unions",
+      "total": 55,
+      "exact": 38,
+      "ergonomic": 13,
+      "widened": 4
+    },
+    {
+      "pass": "EO - detect-erased-object-unions",
+      "total": 1,
+      "exact": 1
+    },
+    {
+      "pass": "shape-callbacks",
+      "total": 1,
+      "ergonomic": 1
+    },
+    {
+      "pass": "SI - shape-interfaces",
+      "total": 83,
+      "ergonomic": 79,
+      "widened": 4
+    },
+    {
+      "pass": "SP - synthesize-paramobjects",
+      "total": 128,
+      "exact": 44,
+      "ergonomic": 84
+    },
+    {
+      "pass": "settle-symbol-members",
+      "total": 1,
+      "ergonomic": 1
+    },
+    {
+      "pass": "DD - drop-orphan-delegates",
+      "total": 35,
+      "exact": 35
+    }
+  ]
+}

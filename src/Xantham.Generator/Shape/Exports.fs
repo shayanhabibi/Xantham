@@ -1,4 +1,4 @@
-﻿module Xantham.Generator.Shape.Exports
+module Xantham.Generator.Shape.Exports
 
 open Xantham.Generator
 open Xantham.Generator.Measure
@@ -12,7 +12,34 @@ open Xantham.Generator.Shape.ExportLayout
 let private globalObject = "globalThis"
 
 
-/// `Exports` members from the value exports that are not classes: functions (every overload
+/// Source-ordered calls with their original expanded ordinals. Identical nongeneric inputs
+/// select the first declaration's return in TypeScript.
+let private sourceCallSignatures (model: ShapeModel) symbolFlags (facts: TypeFacts) =
+    let mutable seen = Set.empty
+
+    facts.CallSignatures
+    |> List.collect (fun signature ->
+        let eligible =
+            hasAny SymbolFlags.Function symbolFlags
+            && signature.Source.IsSome
+            && signature.TypeParameters.IsEmpty
+            && not signature.HasRest
+            && not signature.HasThisParameter
+
+        let key =
+            signature.Parameters
+            |> List.map (fun parameter -> parameter.TypeId, parameter.Optional)
+
+        let retained = not eligible || not (Set.contains key seen)
+
+        if eligible then
+            seen <- Set.add key seen
+
+        restOverloads model signature |> List.map (fun expanded -> retained, expanded))
+    |> List.indexed
+    |> List.choose (fun (ordinal, (retained, signature)) -> if retained then Some(ordinal, signature) else None)
+
+/// `Exports` members from the value exports that are not classes: functions (every reachable overload
 /// emitted), and values - `const`/`let`/`var` and namespace objects - as properties, settable
 /// where the value is a mutable global.
 let shapeExports: Pass<ShapeModel> =
@@ -71,9 +98,20 @@ let shapeExports: Pass<ShapeModel> =
                                 | None ->
                                     emit (Finding.make findingName ShapeExports.NoValueType)
                                     []
-                                | Some facts when not facts.CallSignatures.IsEmpty ->
-                                    facts.CallSignatures
-                                    |> List.mapi (fun ordinal signature ->
+                                // A function's value is a method only where its call signatures
+                                // are all it carries; one merged with a namespace holding values
+                                // is a hybrid object, bound whole and called through `Invoke`.
+                                // A polymorphic callable value also stays whole: turning it
+                                // into a method prevents passing its original interface value.
+                                | Some facts when
+                                    not facts.CallSignatures.IsEmpty
+                                    && facts.Members.IsEmpty
+                                    && facts.IndexInfos.IsEmpty
+                                    && facts.ConstructSignatures.IsEmpty
+                                    && not (isPolymorphicCallableValue model export.Symbol.Flags facts)
+                                    ->
+                                    sourceCallSignatures model export.Symbol.Flags facts
+                                    |> List.map (fun (ordinal, signature) ->
                                         let typeParameters, parameters, returns, signatureFindings =
                                             shapeSignature ctx model None findingName signature
 
@@ -83,7 +121,7 @@ let shapeExports: Pass<ShapeModel> =
                                             OwnedExportMember.Owner = owner
                                             HarvestIndex = index
                                             ExportName = export.ExportName
-                                            SourceSymbolId = export.Symbol.Id * uom<symbolId>
+                                            SourceSymbolId = export.Symbol.SymbolId
                                             SignatureOrdinal = Some ordinal
                                             Member =
                                                 {
@@ -118,6 +156,7 @@ let shapeExports: Pass<ShapeModel> =
                                         | GlobalName _ -> mutableValue
                                         | ImportDefault
                                         | ImportFrom _
+                                        | ImportKeyed _
                                         | ImportNamed _ -> false
 
                                     if mutableValue && not settable then

@@ -21,29 +21,5 @@ module Part =
     type Output =
         | [<CompiledName("text")>] Text of value: string
         | [<CompiledName("json")>] Json of value: U2<string, float> option
-
-    [<Interface>]
-    type Output2 =
-        /// <remarks>TypeScript type: <c>"text"</c></remarks>
-        abstract ``type``: string with get, set
-        abstract value: string with get, set
-        [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
-        static member Create (value: string) : Output2 = jsNative
-
-    module Output2 =
-        /// <remarks>TypeScript type: <c>"text"</c></remarks>
-        [<Literal>]
-        let ``type`` = "text"
-
-    [<Interface>]
-    type Output3 =
-        /// <remarks>TypeScript type: <c>"json"</c></remarks>
-        abstract ``type``: string with get, set
-        abstract value: U2<string, float> option with get, set
-        [<ParamObject; Emit("({ type: 'json', ...$0 })")>]
-        static member Create (?value: U2<string, float>) : Output3 = jsNative
-
-    module Output3 =
-        /// <remarks>TypeScript type: <c>"json"</c></remarks>
-        [<Literal>]
-        let ``type`` = "json"
+        [<ParamObject; Emit("(o => ({type: 'json', ...o, \"value\": o[\"value\"] ?? null}))($0)")>]
+        static member CreateJson (?value: U2<string, float>) : Output = jsNative

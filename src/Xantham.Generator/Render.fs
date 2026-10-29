@@ -250,6 +250,35 @@ let internal jsLiteral =
     | LitString text -> jsString text
     | other -> printLiteral other
 
+/// The JavaScript of a tagged case's test, in `Emit` syntax over the tested object `$0`.
+let internal caseTestSource (test: FsCaseTest) =
+    let access (name: string) =
+        if System.Text.RegularExpressions.Regex.IsMatch(name, "^[A-Za-z_][A-Za-z0-9_]*$") then
+            $"$0.{name}"
+        else
+            $"$0[{jsString name}]"
+
+    let typeofName =
+        function
+        | TypeofString -> "string"
+        | TypeofNumber -> "number"
+        | TypeofBoolean -> "boolean"
+        | TypeofBigInt -> "bigint"
+        | TypeofSymbol -> "symbol"
+        | TypeofFunction -> "function"
+        | TypeofObject -> "object"
+
+    match test with
+    | LiteralEquals(name, value, false) -> $"{access name} === {jsLiteral value}"
+    | LiteralEquals(name, value, true) -> $"({access name} === {jsLiteral value} || {access name} === undefined)"
+    | HasProperty name -> $"{jsString name} in $0"
+    | IsDefined name -> $"{access name} !== undefined"
+    | LacksProperties names ->
+        names
+        |> List.map (fun name -> $"!({jsString name} in $0)")
+        |> String.concat " && "
+    | TypeofIs(name, typeofClass) -> $"typeof {access name} === '{typeofName typeofClass}'"
+
 /// A literal as the right-hand side of an F# `[<Literal>]` binding: numbers are `float`.
 let internal fsLiteralValue =
     function
@@ -562,30 +591,59 @@ let private renderParamList (parameters: FsParam list) =
         |> sprintf "(%s)"
 
 /// The attributes of a `Create` overload. Literal members are written into the object; the
-/// expression is parenthesised, since `{` in statement position opens a block.
+/// expression is parenthesised, since `{` in statement position opens a block. A key in
+/// `NullKeys` (D3) is written as `null` where its argument is absent or `undefined`; the
+/// argument object is bound once by an arrow, so each argument is evaluated once.
 let private createAttribute (overload: FsCreateOverload) =
     let parameters = overload.Parameters
+    let keys = overload.StringKeys
+
+    let jsName name =
+        Map.tryFind name keys |> Option.defaultValue name
 
     let literals =
         overload.Literals
         |> List.map (fun (key, value) -> $"{jsKey key}: {jsLiteral value}")
 
-    if bindParameters parameters = parameters then
-        match literals, parameters with
-        | [], _ -> "[<ParamObject; Emit(\"$0\")>]"
-        | literals, [] ->
+    let nullKey (parameter: FsParam) =
+        List.contains parameter.Name overload.NullKeys
+
+    if keys.IsEmpty && bindParameters parameters = parameters then
+        let nulls =
+            parameters
+            |> List.filter nullKey
+            |> List.map (fun parameter ->
+                let key = stringLit parameter.Name
+                $"{key}: o[{key}] ?? null")
+
+        match literals, parameters, nulls with
+        | [], _, [] -> "[<ParamObject; Emit(\"$0\")>]"
+        | literals, [], _ ->
             let expression = "({ " + String.concat ", " literals + " })"
             $"[<Emit({stringLit expression})>]"
-        | literals, _ ->
+        | literals, _, [] ->
             let expression = "({ " + String.concat ", " (literals @ [ "...$0" ]) + " })"
+            $"[<ParamObject; Emit({stringLit expression})>]"
+        | literals, _, nulls ->
+            let expression =
+                "(o => ({" + String.concat ", " (literals @ [ "...o" ] @ nulls) + "}))($0)"
+
             $"[<ParamObject; Emit({stringLit expression})>]"
     else
         let fields =
             parameters
             |> List.mapi (fun index parameter ->
-                let field = $"{stringLit parameter.Name}: ${index}"
+                let key =
+                    if keys.IsEmpty then
+                        stringLit parameter.Name
+                    else
+                        jsString (jsName parameter.Name)
 
-                if parameter.Optional then
+                let field = $"{key}: ${index}"
+
+                if nullKey parameter then
+                    $"{key}: (${index}) ?? null"
+                elif parameter.Optional then
                     $"...(${index} === undefined ? {{}} : {{{field}}})"
                 else
                     field)
@@ -682,10 +740,9 @@ let private jsIdentifier =
 /// omitted optional argument is absent: `$0.log('warn', $1...)`.
 let internal literalCallTemplate (target: string) (literals: (int * string) list) (parameters: FsParam list) =
     let receiver =
-        if jsIdentifier.IsMatch target then
-            $"$0.{target}"
-        else
-            $"$0[{jsQuote target}]"
+        if jsIdentifier.IsMatch target then $"$0.{target}"
+        elif target.Contains '`' then $"$0[{jsString target}]"
+        else $"$0[{jsQuote target}]"
 
     let last = literals |> List.map fst |> List.fold max 0
 
@@ -719,6 +776,21 @@ let rec private renderMemberWith (attributes: Map<string, (string * string) list
         let emit = $"Emit({stringLit (literalCallTemplate target literals m.Parameters)})"
         renderMemberWith (Map.add m.Name (existing @ [ "member", emit ]) attributes) inner
     | FsLiteralKeyed(_, _, inner) -> renderMemberWith attributes inner
+    | FsStringKeyed(key, inner) ->
+        let access = $"$0[{jsString key}]"
+        let emit text = $"Emit({stringLit text})"
+
+        let name, sites =
+            match inner with
+            | FsProperty property when property.ReadOnly -> property.Name, [ "member", emit access ]
+            | FsProperty property -> property.Name, [ "get", emit access; "set", emit (access + " = $1") ]
+            | FsMethod method_ ->
+                let arguments = if method_.Parameters.IsEmpty then "()" else "($1...)"
+                method_.Name, [ "member", emit (access + arguments) ]
+            | _ -> "", []
+
+        let existing = Map.tryFind name attributes |> Option.defaultValue []
+        renderMemberWith (Map.add name (existing @ sites) attributes) inner
     | FsSymbolKeyed(symbol, inner) ->
         // `$0[Symbol.<symbol>]` reaches the symbol key: a read-only property at the member site,
         // a writable one per accessor, and a method as a call.
@@ -803,7 +875,7 @@ let private renderMember m = renderMemberWith Map.empty m
 /// One binding attribute at `indent`, optionally carrying a second attribute inside the same
 /// brackets. A global names its own path off `globalThis`; an import names its specifier - the
 /// run's runtime package, or an ambient module's own quoted specifier.
-let private bindingAttribute
+let rec private bindingAttribute
     (runtimePackage: string<importSpecifier>)
     (indent: string)
     (also: string)
@@ -816,55 +888,102 @@ let private bindingAttribute
     | ImportNamed name -> $"{indent}[<Import({stringLit name}, {package}){also}>]"
     | ImportFrom(name, specifier) -> $"{indent}[<Import({stringLit name}, {stringLit specifier}){also}>]"
     | GlobalName name -> $"{indent}[<Global({stringLit name}){also}>]"
+    | ImportKeyed(binding, _) -> bindingAttribute runtimePackage indent also binding
 
 /// The binding a declaration writes at the type level, where it holds a settable member. Under a
 /// type-level attribute Fable compiles `X.y <- v` to `X.y = v`; under a per-member one it compiles
 /// the call `X.y(v)`.
 let private hoistedBinding (members: FsExportMember list) =
-    members |> List.tryPick (fun m -> if m.Settable then Some m.Binding else None)
+    members
+    |> List.tryPick (fun m ->
+        match m.Binding with
+        | ImportKeyed(binding, _) -> Some binding
+        | binding when m.Settable -> Some binding
+        | _ -> None)
 
 /// One bound member - an `Exports` member or a class static - as its attribute line and its
 /// signature. Both hold an `ImportBinding` and neither has an F# body, so they render the same.
 let private renderBound (runtimePackage: string<importSpecifier>) (publicName: string option) (m: FsExportMember) =
-    [
-        yield! docLines "    " m.Docs m.Tags
+    match m.Binding with
+    | ImportKeyed(binding, key) ->
+        let access = $"$0[{jsString key}]"
 
-        let attribute (also: string) =
-            bindingAttribute runtimePackage "    " also m.Binding
+        let attribute template =
+            let emit = $"; Emit({stringLit template})"
+            bindingAttribute runtimePackage "" emit binding
 
-        match m.Body with
-        | ExportFunction(parameters, returns) ->
-            yield attribute ""
+        [
+            yield! docLines "    " m.Docs m.Tags
+            match m.Body with
+            | ExportValue reference when m.Settable ->
+                let getter = attribute access
+                let setter = attribute (access + " = $1")
+                yield $"    static member {ident m.Name}"
+                yield $"        with {getter} get (): {printType reference} = jsNative"
+                yield $"        and {setter} set (_: {printType reference}): unit = jsNative"
+            | ExportValue reference ->
+                yield "    " + attribute access
+                yield $"    static member {ident m.Name}: {printType reference} = jsNative"
+            | ExportFunction(parameters, returns) ->
+                let call = access + (if parameters.IsEmpty then "()" else "($1...)")
+                yield "    " + attribute call
 
-            yield
-                $"    static member {declHead m.Name m.TypeParameters} {renderParamList parameters} : {printType returns} = jsNative"
-        | ExportValue reference when m.Settable ->
-            // The declaring type carries the attribute, and the member name is the JavaScript key
-            // read off whatever that names.
-            let reference = printType reference
+                yield
+                    $"    static member {declHead m.Name m.TypeParameters} {renderParamList parameters} : {printType returns} = jsNative"
+            | ExportConstructor _ -> failwith "a string-keyed static is a property or method"
+        ]
+    | _ ->
+        [
+            yield! docLines "    " m.Docs m.Tags
 
-            match publicName with
-            | Some name when name <> m.Name -> yield $"    [<CompiledName({stringLit name})>]"
-            | _ -> ()
+            let attribute (also: string) =
+                bindingAttribute runtimePackage "    " also m.Binding
 
-            yield $"    static member {ident m.Name}"
-            yield $"        with get (): {reference} = jsNative"
-            yield $"        and set (_: {reference}): unit = jsNative"
-        | ExportValue reference ->
-            yield attribute ""
-            yield $"    static member {ident m.Name}: {printType reference} = jsNative"
-        | ExportConstructor(parameters, returns) ->
-            yield attribute "; EmitConstructor"
+            match m.Body with
+            | ExportFunction(parameters, returns) ->
+                yield attribute ""
 
-            yield
-                $"    static member {declHead m.Name m.TypeParameters} {renderParamList parameters} : {printType returns} = jsNative"
-    ]
+                yield
+                    $"    static member {declHead m.Name m.TypeParameters} {renderParamList parameters} : {printType returns} = jsNative"
+            | ExportValue reference when m.Settable ->
+                // The declaring type carries the attribute, and the member name is the JavaScript key
+                // read off whatever that names.
+                let reference = printType reference
+
+                match publicName with
+                | Some name when name <> m.Name -> yield $"    [<CompiledName({stringLit name})>]"
+                | _ -> ()
+
+                yield $"    static member {ident m.Name}"
+                yield $"        with get (): {reference} = jsNative"
+                yield $"        and set (_: {reference}): unit = jsNative"
+            | ExportValue reference ->
+                yield attribute ""
+                yield $"    static member {ident m.Name}: {printType reference} = jsNative"
+            | ExportConstructor(parameters, returns) ->
+                yield attribute "; EmitConstructor"
+
+                yield
+                    $"    static member {declHead m.Name m.TypeParameters} {renderParamList parameters} : {printType returns} = jsNative"
+        ]
 
 /// One member of an entrypoint class. A method stays `abstract`, which is the slot a derived
 /// class overrides; a property is a concrete binding onto the instance, because the JavaScript
 /// constructor is what assigns it and a derived class reads it as it stands.
-let private renderClassMember attributes (m: FsMember) =
+let rec private renderClassMember attributes (m: FsMember) =
     match m with
+    | FsStringKeyed(key, (FsProperty property as inner)) ->
+        let access = $"$0[{jsString key}]"
+        let emit text = $"Emit({stringLit text})"
+
+        let sites =
+            if property.ReadOnly then
+                [ "member", emit access ]
+            else
+                [ "get", emit access; "set", emit (access + " = $1") ]
+
+        let existing = Map.tryFind property.Name attributes |> Option.defaultValue []
+        renderClassMember (Map.add property.Name (existing @ sites) attributes) inner
     | FsProperty p ->
         [
             yield! docLines "    " p.Docs p.Tags
@@ -957,6 +1076,9 @@ let private renderInterface attributes (runtimePackage: string<importSpecifier>)
     [
         yield! docLines "" decl.Docs decl.Tags
 
+        if decl.Callable then
+            yield "[<Fickl.Core.CallableInterface>]"
+
         // Any static with a body makes F# infer a class; the attribute keeps the type an
         // interface (and needs default-interface-member runtime support to type-check).
         if not (decl.CreateOverloads.IsEmpty && decl.Statics.IsEmpty) then
@@ -1028,6 +1150,86 @@ let private renderStringEnum (decl: FsStringEnumDecl) =
             | attributes -> yield $"""    | [<{String.concat "; " attributes}>] {ident case.Name}"""
     ]
 
+/// The doc text of one tagged-union field: its comment, each tag as `@name text`, and a literal
+/// field's TypeScript type.
+let private fieldDocText (field: FsTaggedField) : string list =
+    [
+        let summary = field.Docs.Trim()
+
+        if summary <> "" then
+            yield! splitLines summary
+
+        for tag in field.Tags do
+            match (tag.Text |> ValueOption.defaultValue "").Trim() with
+            | "" -> yield $"@{tag.Name}"
+            | text -> yield! splitLines $"@{tag.Name} {text}"
+
+        match field.Literal with
+        | Some value -> yield $"TypeScript type: `{Xantham.Generator.Shape.Spec.typeScriptLiteral value}`"
+        | None -> ()
+    ]
+
+/// The XML doc of a tagged-union case: a `<param>` per field once any field carries text, empty
+/// where a field carries none. FS3390 holds a documented case to documenting each field.
+let private caseDocLines (case: FsTaggedCase) =
+    let texts = case.Fields |> List.map (fun field -> field, fieldDocText field)
+
+    if texts |> List.forall (snd >> List.isEmpty) then
+        []
+    else
+        [
+            for field, lines in texts do
+                let name = xmlEscape field.Name
+
+                match lines with
+                | [] -> yield $"    /// <param name=\"{name}\"></param>"
+                | [ single ] -> yield $"    /// <param name=\"{name}\">{inlineCode single}</param>"
+                | lines ->
+                    yield $"    /// <param name=\"{name}\">"
+                    yield! docBody "    " lines
+                    yield $"    /// </param>"
+        ]
+
+/// The `Create` overload of a tagged case: the non-literal fields as parameters, required ones
+/// first, with the tag and the literal fields written into the object.
+let private caseCreate (decl: FsTaggedUnionDecl) (case: FsTaggedCase) : (string * FsCreateOverload) option =
+    case.Create
+    |> Option.map (fun memberName ->
+        let parameters =
+            case.Fields
+            |> List.filter (fun field -> field.Literal.IsNone)
+            |> List.map (fun field ->
+                ({
+                    Name = field.Name
+                    Optional =
+                        match field.Type with
+                        | FsOption _ -> true
+                        | _ -> false
+                    Rest = false
+                    Type = field.Type
+                }
+                : FsParam))
+
+        let required, optional = parameters |> List.partition (fun p -> not p.Optional)
+        let tag = case.CompiledName |> Option.defaultValue case.Name
+
+        let nullKeys =
+            case.Fields
+            |> List.filter (fun field -> field.Literal.IsNone && field.NullKey)
+            |> List.map _.Name
+
+        let literals =
+            case.Fields
+            |> List.choose (fun field -> field.Literal |> Option.map (fun value -> field.Name, value))
+
+        memberName,
+        {
+            Parameters = required @ optional
+            Literals = (decl.Tag, LitString tag) :: literals
+            NullKeys = nullKeys
+            StringKeys = Map.empty
+        })
+
 /// A tagged union (D4, §4.5(2)). `RequireQualifiedAccess` for the same reason the StringEnum
 /// emission takes it: one generated module holds every declaration a package has, and bare
 /// case names collide across unions - and here with the member interfaces the cases carry.
@@ -1038,17 +1240,58 @@ let private renderTaggedUnion (decl: FsTaggedUnionDecl) =
         yield $"type {declHead decl.Name decl.TypeParameters} ="
 
         for case in decl.Cases do
+            yield! caseDocLines case
+
             // Named fields, so the JS keys survive: Fable emits each field under its own name.
             let fields =
                 case.Fields
-                |> List.map (fun field -> $"{ident field.Name}: {printTypeIn true field.Type}")
+                |> List.map (fun field ->
+                    if case.Inlines then
+                        printTypeIn true field.Type
+                    else
+                        $"{ident field.Name}: {printTypeIn true field.Type}")
                 |> String.concat " * "
 
             let carries = if case.Fields.IsEmpty then "" else $" of {fields}"
 
-            match case.CompiledName with
-            | Some tag -> yield $"    | [<CompiledName({stringLit tag})>] {ident case.Name}{carries}"
-            | None -> yield $"    | {ident case.Name}{carries}"
+            let attributes =
+                [
+                    match case.CompiledName with
+                    | Some tag -> yield $"CompiledName({stringLit tag})"
+                    | None -> ()
+                    match case.CaseTest with
+                    | Some test -> yield $"CaseTest({stringLit (caseTestSource test)})"
+                    | None -> ()
+                    if case.Inlines then
+                        yield "Fickl.Core.InlineInterface"
+                ]
+
+            match attributes with
+            | [] -> yield $"    | {ident case.Name}{carries}"
+            | attributes -> yield $"""    | [<{String.concat "; " attributes}>] {ident case.Name}{carries}"""
+
+        for case in decl.Cases do
+            match caseCreate decl case with
+            | Some(memberName, overload) ->
+                yield "    " + createAttribute overload
+
+                yield
+                    $"    static member {ident memberName} {renderParamList overload.Parameters} : {declRef decl.Name decl.TypeParameters} = jsNative"
+            | None -> ()
+    ]
+
+let private renderErasedObjectUnion (decl: FsErasedObjectUnionDecl) =
+    [
+        yield! docLines "" decl.Docs decl.Tags
+        yield "[<RequireQualifiedAccess; Erase>]"
+        yield $"type {declHead decl.Name decl.TypeParameters} ="
+        for case in decl.Cases do
+            yield
+                $"    | [<Fickl.Core.CaseTest({stringLit (caseTestSource case.Test)})>] {ident case.Name} of {printTypeIn true case.Payload}"
+        for invoke in decl.Invokes do
+            yield "    [<Emit(\"$0($1...)\")>]"
+            let head = declHead "Invoke" invoke.TypeParameters
+            yield $"    member _.{head} {renderParamList invoke.Parameters} : {printType invoke.Return} = jsNative"
     ]
 
 let private renderEnum (decl: FsEnumDecl) =
@@ -1108,9 +1351,9 @@ let private renderMeasure (decl: FsMeasureDecl) =
 /// (§4.10, §4.11). The name and the arity survive, so uses of it stay distinct from one another
 /// and from `obj`; the single private case means a cast is the only way in or out.
 let private renderPhantom (decl: FsPhantomDecl) =
-    // Named after the type it carries, so the cases of two phantoms never collide in the one
-    // module a package generates into.
-    let case = ident (decl.Name + "__")
+    // Preserve the complete spelling, including case, behind an uppercase prefix: a legal
+    // type name may start lowercase, but an unqualified union case may not.
+    let case = ident ("Phantom_" + decl.Name + "__")
 
     [
         yield! docLines "" decl.Docs decl.Tags
@@ -1191,6 +1434,7 @@ let declName =
     | FsInterface decl -> decl.Name
     | FsStringEnum decl -> decl.Name
     | FsTaggedUnion decl -> decl.Name
+    | FsErasedObjectUnion decl -> decl.Name
     | FsEnum decl -> decl.Name
     | FsAbbrev decl -> decl.Name
     | FsDelegateType decl -> decl.Name
@@ -1210,6 +1454,7 @@ let private underLeaf (name: string) =
     | FsInterface decl -> FsInterface { decl with Name = name }
     | FsStringEnum decl -> FsStringEnum { decl with Name = name }
     | FsTaggedUnion decl -> FsTaggedUnion { decl with Name = name }
+    | FsErasedObjectUnion decl -> FsErasedObjectUnion { decl with Name = name }
     | FsEnum decl -> FsEnum { decl with Name = name }
     | FsAbbrev decl -> FsAbbrev { decl with Name = name }
     | FsDelegateType decl -> FsDelegateType { decl with Name = name }
@@ -1340,6 +1585,7 @@ let rec private qualifyMember foreign =
                 Return = qualifyRef foreign m.Return
             }
     | FsSymbolKeyed(symbol, inner) -> FsSymbolKeyed(symbol, qualifyMember foreign inner)
+    | FsStringKeyed(key, inner) -> FsStringKeyed(key, qualifyMember foreign inner)
     | FsLiteralKeyed(target, literals, inner) -> FsLiteralKeyed(target, literals, qualifyMember foreign inner)
 
 let private qualifyBound foreign (m: FsExportMember) =
@@ -1376,6 +1622,25 @@ let internal qualifyDecl foreign =
                             Parameters = List.map (qualifyParam foreign) overload.Parameters
                         })
                 Statics = decl.Statics |> List.map (qualifyBound foreign)
+            }
+    | FsErasedObjectUnion decl ->
+        FsErasedObjectUnion
+            { decl with
+                TypeParameters = qualifyTypeParams foreign decl.TypeParameters
+                Cases =
+                    decl.Cases
+                    |> List.map (fun case ->
+                        { case with
+                            Payload = qualifyRef foreign case.Payload
+                        })
+                Invokes =
+                    decl.Invokes
+                    |> List.map (fun invoke ->
+                        { invoke with
+                            TypeParameters = qualifyTypeParams foreign invoke.TypeParameters
+                            Parameters = invoke.Parameters |> List.map (qualifyParam foreign)
+                            Return = qualifyRef foreign invoke.Return
+                        })
             }
     | FsTaggedUnion decl ->
         FsTaggedUnion
@@ -1470,6 +1735,7 @@ let private declErasedArities (decl: FsDecl) : int list =
     let rec ofMember =
         function
         | FsSymbolKeyed(_, inner)
+        | FsStringKeyed(_, inner)
         | FsLiteralKeyed(_, _, inner) -> ofMember inner
         | FsProperty p -> erasedArities p.Type
         | FsIndexer i -> erasedArities i.Key @ erasedArities i.Value
@@ -1515,6 +1781,10 @@ let private declErasedArities (decl: FsDecl) : int list =
         (d.TypeParameters |> List.collect ofTypeParam)
         @ (d.Cases
            |> List.collect (fun case -> case.Fields |> List.collect (fun f -> erasedArities f.Type)))
+    | FsErasedObjectUnion d ->
+        (d.TypeParameters |> List.collect ofTypeParam)
+        @ (d.Cases |> List.collect (fun case -> erasedArities case.Payload))
+        @ (d.Invokes |> List.collect (FsInvoke >> ofMember))
     | FsExports container -> container.Members |> List.collect (fun owned -> ofExportMember owned.Member)
     | FsStringEnum _
     | FsEnum _ -> []
@@ -1652,8 +1922,17 @@ let private renderBody
 
     // `group.Module :: scope` is the path a reference resolves against; the file's own module
     // is the root of every nested path.
-    let qualify (scope: string list) (name: string) =
-        relativeQualification (group.Module :: scope) $"{group.Module}.{name}"
+    let qualify shadowed (scope: string list) (name: string) =
+        let absolute = $"{group.Module}.{name}"
+        let relative = relativeQualification (group.Module :: scope) absolute
+
+        if relative.Contains '.' && Set.contains ((relative.Split '.')[0]) shadowed then
+            if Set.contains ((absolute.Split '.')[0]) shadowed then
+                $"global.{absolute}"
+            else
+                absolute
+        else
+            relative
 
     let scopedReferences =
         names
@@ -1673,7 +1952,7 @@ let private renderBody
                 shadowed
                 |> Set.toList
                 |> List.collect (fun leaf -> Map.tryFind leaf namesByLeaf |> Option.defaultValue [])
-                |> List.map (fun name -> name, qualify scope name)
+                |> List.map (fun name -> name, qualify shadowed scope name)
                 |> List.filter (fun (name, qualified) -> qualified <> name)
                 |> Map.ofList
 
@@ -1717,6 +1996,7 @@ let private renderBody
                 | None -> renderInterface attributes group.RuntimePackage decl
         | FsStringEnum decl -> renderStringEnum decl
         | FsTaggedUnion decl -> renderTaggedUnion decl
+        | FsErasedObjectUnion decl -> renderErasedObjectUnion decl
         | FsEnum decl -> renderEnum decl
         | FsAbbrev decl -> renderAbbrev group.RuntimePackage decl
         | FsDelegateType decl -> renderDelegate decl
@@ -2050,6 +2330,12 @@ let internal renderSourcesCustomized annotations raw (modules: GroupModule list)
                                         yield! exports (interface_.Name + ".") interface_.Statics
                                     | FsExports container ->
                                         yield! exports (container.Name + ".") (container.Members |> List.map _.Member)
+                                    | FsTaggedUnion union ->
+                                        for case in union.Cases do
+                                            match caseCreate union case with
+                                            | Some(memberName, overload) ->
+                                                yield! bound $"{union.Name}.{memberName}" overload.Parameters
+                                            | None -> ()
                                     | _ -> ()
 
                             for group in written do
@@ -2119,6 +2405,7 @@ let symbolTiers (model: RenderModel) : (string * Tier * Finding list) list =
             | FsInterface decl -> [ decl.Name ]
             | FsStringEnum decl -> [ decl.Name ]
             | FsTaggedUnion decl -> [ decl.Name ]
+            | FsErasedObjectUnion decl -> [ decl.Name ]
             | FsEnum decl -> [ decl.Name ]
             | FsAbbrev decl -> [ decl.Name ]
             | FsDelegateType decl -> [ decl.Name ]
@@ -2306,6 +2593,7 @@ let private declFiles (model: RenderModel) : Map<string, string> =
         | FsInterface decl -> Some(decl.Name, decl.Order)
         | FsStringEnum decl -> Some(decl.Name, decl.Order)
         | FsTaggedUnion decl -> Some(decl.Name, decl.Order)
+        | FsErasedObjectUnion decl -> Some(decl.Name, decl.Order)
         | FsEnum decl -> Some(decl.Name, decl.Order)
         | FsAbbrev decl -> Some(decl.Name, decl.Order)
         | FsDelegateType decl -> Some(decl.Name, decl.Order)

@@ -222,3 +222,19 @@ type PropertyRecord<'T, 'K> =
     abstract Item: keyof<'T> -> 'K with get, set
 
 type NoInfer<'T> = 'T
+
+/// <summary>
+/// A TypeScript intersection (<c>A &amp; B</c>) with an operand F# cannot inherit: a type
+/// parameter, as in <c>P &amp; { children?: Element }</c>. Erased: the runtime value is the one
+/// object both operands describe.
+/// </summary>
+/// <remarks>
+/// <para><c>Left</c> and <c>Right</c> read the value as either operand without copying or
+/// converting it. Three or more operands nest to the right:
+/// <c>Intersect&lt;'P, Intersect&lt;'Q, Members&gt;&gt;</c>.</para>
+/// <para><c>Intersect.unsafeCast</c> reads a value as the intersection without checking it;
+/// <c>Intersect.assign</c> copies the second operand's own properties onto the first and
+/// returns the first. Both preserve the first operand's identity and prototype.</para>
+/// </remarks>
+[<Erase>]
+type Intersect<'A, 'B> = private Intersect__ of obj

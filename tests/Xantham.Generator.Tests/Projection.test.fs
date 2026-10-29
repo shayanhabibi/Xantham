@@ -12,11 +12,23 @@ open Xantham.Generator.Myriad
 let private root = Path.GetFullPath(Path.Combine(__SOURCE_DIRECTORY__, "../.."))
 let private package = Path.Combine(root, "tests/fixtures/projection-lab")
 let private identity = { Id = "lab.literal-unions"; Version = "1"; Configuration = Map.empty }
+let private supportReferences () =
+    let assets = JsonNode.Parse(File.ReadAllText(Path.Combine(root, "src/Xantham.Fable.Core/obj/project.assets.json")))
+    ["Fable.Core"; "Fickl.Core"] |> List.map (fun name ->
+        let library = assets["libraries"].AsObject() |> Seq.find (fun entry -> entry.Key.StartsWith(name + "/", StringComparison.OrdinalIgnoreCase))
+        let assembly =
+            assets["targets"].AsObject() |> Seq.collect (fun target ->
+                let entry = target.Value[library.Key]
+                if isNull entry then Seq.empty else entry["compile"].AsObject() |> Seq.map _.Key)
+            |> Seq.find (fun file -> Path.GetFileName file = name + ".dll")
+        assets["packageFolders"].AsObject()
+        |> Seq.map (fun folder -> Path.Combine(folder.Key, library.Value["path"].GetValue<string>(), assembly))
+        |> Seq.find File.Exists)
 let private compiler workspace =
     let configuration = DirectoryInfo(AppContext.BaseDirectory).Parent.Name
     let references = ["Xantham.Fable.Core"; "Xantham.Fable.Core.TS"] |> List.map (fun name ->
         Path.Combine(root, "src", name, "bin", configuration, "net8.0", name + ".dll"))
-    Compiler.dotnet workspace references
+    Compiler.dotnet workspace (references @ supportReferences ())
 
 let private selections =
     ["Choice"; "EqualA"; "EqualB"; "OverlapC"; "Weird"] |> List.map (fun name ->
@@ -28,8 +40,22 @@ let private companionFiles (model: RenderModel) = model.Files |> List.filter (fs
 let private run compiler projections config =
     Pipeline.generateProjectedWith compiler projections [] config package |> Async.RunSynchronously
 
+// A symbol id is a handle the server assigns as symbols are first asked for, so two sessions over
+// one program number them by their request order.
+let private withoutSymbolHandles (decl: FsDecl) =
+    match decl with
+    | FsExports exports ->
+        FsExports
+            { exports with
+                Members =
+                    exports.Members
+                    |> List.map (fun owned -> { owned with SourceSymbolId = { File = ValueNone; Id = 0L } }) }
+    | other -> other
+
 let private stableFindings (model: RenderModel) =
-    {model with Findings = model.Findings |> List.sortBy (fun finding -> finding.Pass, finding.Symbol, finding.Key, sprintf "%A" finding.Kind)}
+    {model with
+        Decls = model.Decls |> List.map withoutSymbolHandles
+        Findings = model.Findings |> List.sortBy (fun finding -> finding.Pass, finding.Symbol, finding.Key, sprintf "%A" finding.Kind)}
 
 let private rejects code action =
     let failure = try action (); None with error -> Some (error.ToString())
@@ -59,6 +85,18 @@ let private operationSelections =
 
 [<Tests>]
 let tests = testList "projection companions" [
+    testCase "validation uses supplied support identities and retains fallback for a filename impostor" <| fun _ ->
+        use scratch = Scratch.directory "projection-support-references"
+        let references = supportReferences ()
+        Expect.equal (Compile.supportPackages references) "" "explicit support assemblies require no fallback packages"
+        let source = "module ExplicitSupport\nopen Fable.Core\ntype Payload = abstract value: string\n[<TypeScriptTaggedUnion(\"kind\")>]\ntype Value = | [<Fickl.Core.InlineInterface>] Item of Payload\n"
+        Compile.validate (Compiler.dotnet scratch.Path references) ["Consumer.fs", source] [] |> Async.RunSynchronously
+        let impostor = Path.Combine(scratch.Path, "Fable.Core.dll")
+        File.Copy(typeof<unit>.Assembly.Location, impostor)
+        let fallback = Compile.supportPackages [impostor]
+        Expect.stringContains fallback "Include='Fable.Core'" "assembly identity authenticates the supplied Fable dependency"
+        Expect.stringContains fallback "Include='Fickl.Core'" "unsupplied support dependency keeps its fallback"
+
     testCase "Myriad companions are deterministic, gated goldens and leave the raw ABI intact" <| fun _ ->
         use scratch = Scratch.directory "projection-golden"
         let compile = compiler scratch.Path

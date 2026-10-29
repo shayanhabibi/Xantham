@@ -1,0 +1,5 @@
+{
+  "name": "census-ambient-export-value-lab",
+  "type": "module",
+  "types": "index.d.ts"
+}

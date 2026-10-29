@@ -27,15 +27,12 @@ type Writer =
 /// <summary>
 /// The same separation on call signatures, reached through <c>Invoke</c>.
 /// </summary>
-[<Interface>]
 type Setter =
     abstract count: float with get, set
     [<Emit("$0($1...)")>]
     abstract Invoke: a: string * b: string * c: string * d: string -> unit
     [<Emit("$0($1...)")>]
     abstract Invoke: a: string * b: string * c: string * d: float -> unit
-    [<ParamObject; Emit("$0")>]
-    static member Create (count: float) : Setter = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
@@ -43,6 +40,4 @@ type Exports =
     [<Import("writer", "overload-arity-lab")>]
     static member writer: Writer = jsNative
     [<Import("setter", "overload-arity-lab")>]
-    static member setter (a: string, b: string, c: string, d: string) : unit = jsNative
-    [<Import("setter", "overload-arity-lab")>]
-    static member setter (a: string, b: string, c: string, d: float) : unit = jsNative
+    static member setter: Setter = jsNative

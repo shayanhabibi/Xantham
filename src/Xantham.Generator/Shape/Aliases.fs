@@ -60,6 +60,7 @@ let shapeAliases: Pass<ShapeModel> =
                             | FsInterface decl -> [ decl.Name ]
                             | FsStringEnum decl -> [ decl.Name ]
                             | FsTaggedUnion decl -> [ decl.Name ]
+                            | FsErasedObjectUnion decl -> [ decl.Name ]
                             | FsEnum decl -> [ decl.Name ]
                             | FsAbbrev decl -> [ decl.Name ]
                             | FsDelegateType decl -> [ decl.Name ]
@@ -84,14 +85,15 @@ let shapeAliases: Pass<ShapeModel> =
                     // A generic declaration cannot be named bare on the right of an abbreviation -
                     // F# demands the full arity - so an alias to one repeats its parameters and
                     // applies them straight through: `type Alias<'T> = Primary<'T>`.
-                    let parametersOf =
-                        model.Decls
+                    let parametersOf declarations =
+                        declarations
                         |> List.choose (function
                             | FsInterface decl -> Some(decl.Name, decl.TypeParameters)
                             | FsAbbrev decl -> Some(decl.Name, decl.TypeParameters)
                             | FsDelegateType decl -> Some(decl.Name, decl.TypeParameters)
                             | FsPhantom decl -> Some(decl.Name, decl.TypeParameters)
                             | FsTaggedUnion decl -> Some(decl.Name, decl.TypeParameters)
+                            | FsErasedObjectUnion decl -> Some(decl.Name, decl.TypeParameters)
                             | _ -> None)
                         |> Map.ofList
 
@@ -109,7 +111,29 @@ let shapeAliases: Pass<ShapeModel> =
 
                     let exportPath = ExportLayout.declPath (ExportLayout.modulePaths model) model
 
-                    let aliasDecls =
+                    let noInferAlias (export: HarvestedExport) name =
+                        if Set.contains export.Symbol.SymbolId model.CompilerNoInferSymbols then
+                            Map.tryFind export.Symbol.SymbolId model.ExportTypes
+                            |> Option.bind _.AliasParameters
+                            |> Option.map (fun ids ->
+                                let parameters, _, parameterFindings = typeParamsOf ctx model name ids
+                                let operand = FsTypeVar parameters.Head.Name
+
+                                let target =
+                                    if ctx.Config.ResolveNoInfer then
+                                        operand
+                                    else
+                                        FsApp("JS.NoInfer", [ operand ])
+
+                                parameters, target, parameterFindings)
+                        else
+                            None
+
+                    let aliasDecls remainingDecls =
+                        // Canonical abbreviations and phantoms emitted below own parameters too.
+                        // Reexports must apply them instead of inventing a bare generic reference.
+                        let parametersOf = parametersOf (model.Decls @ remainingDecls)
+
                         model.Harvest.Exports
                         |> List.choose (fun export ->
                             if not (hasAny SymbolFlags.Type export.Symbol.Flags) then
@@ -118,7 +142,12 @@ let shapeAliases: Pass<ShapeModel> =
                                 let name =
                                     String.concat
                                         "."
-                                        (exportPath export @ [ Naming.typeNameSegment (fsName fallback export) ])
+                                        (exportPath export
+                                         @ [
+                                             underNamespace
+                                                 (exportNamespacePath model.Harvest.Namespaces export)
+                                                 (Naming.typeNameSegment (fsName fallback export))
+                                         ])
 
                                 let definingOwner typeId =
                                     Map.tryFind typeId definingExports
@@ -127,12 +156,35 @@ let shapeAliases: Pass<ShapeModel> =
 
                                 let owner = ExportLayout.ownerOf model.RuntimePackage export.Origin
 
+                                let declaresOwnAlias typeId =
+                                    hasAny SymbolFlags.TypeAlias export.Symbol.Flags
+                                    && (Map.tryFind typeId definingExports
+                                        |> Option.exists (fun defining ->
+                                            defining.Symbol.SymbolId <> export.Symbol.SymbolId))
+
                                 match
-                                    Map.tryFind export.Symbol.SymbolId model.ExportTypes |> Option.bind _.Declared
+                                    noInferAlias export name,
+                                    (Map.tryFind export.Symbol.SymbolId model.ExportTypes |> Option.bind _.Declared)
                                 with
-                                | Some typeId ->
+                                | Some(parameters, target, parameterFindings), _ ->
+                                    findings <- findings @ parameterFindings
+
+                                    Some(
+                                        FsAbbrev
+                                            {
+                                                Value = None
+                                                Name = name
+                                                Docs = export.Docs
+                                                Tags = export.Tags
+                                                Order = export.Order
+                                                TypeParameters = parameters
+                                                Target = target
+                                            }
+                                    )
+                                | None, Some typeId ->
                                     match Map.tryFind typeId model.DeclNames with
-                                    | Some _ when definingOwner typeId <> Some owner -> None
+                                    | Some _ when definingOwner typeId <> Some owner && not (declaresOwnAlias typeId) ->
+                                        None
                                     | Some primary when primary = name -> None
                                     | Some _ when Map.tryFind typeId definingExports = Some export -> None
                                     | Some primary when Set.contains name claimed ->
@@ -150,6 +202,28 @@ let shapeAliases: Pass<ShapeModel> =
                                                 FsNamed primary
                                             else
                                                 FsApp(primary, typeParameters |> List.map (_.Name >> FsTypeVar))
+
+                                        let typeParameters, target =
+                                            let owned =
+                                                Map.tryFind export.Symbol.SymbolId model.ExportTypes
+                                                |> Option.bind _.AliasParameters
+
+                                            match owned, Map.tryFind typeId model.Types with
+                                            | Some ids, Some facts when declaresOwnAlias typeId ->
+                                                let parameters, scope, parameterFindings =
+                                                    typeParamsOf ctx model name ids
+
+                                                let target, refFindings =
+                                                    let scoped = { model with TypeVars = scope }
+
+                                                    if Set.contains primary declaredNames then
+                                                        typeRef ctx scoped None name typeId
+                                                    else
+                                                        typeRefIgnoringSelf ctx scoped name facts
+
+                                                findings <- findings @ parameterFindings @ refFindings
+                                                parameters, target
+                                            | _ -> typeParameters, target
 
                                         // An abbreviation of a shared Any intrinsic (`Lowercase =
                                         // Uppercase`) carries the widening its claimant reports.
@@ -173,7 +247,7 @@ let shapeAliases: Pass<ShapeModel> =
                                                 }
                                         )
                                     | None -> None
-                                | None -> None)
+                                | None, None -> None)
 
                     let remainingDecls =
                         model.DeclNames
@@ -183,6 +257,9 @@ let shapeAliases: Pass<ShapeModel> =
                             if
                                 Set.contains name declaredNames
                                 || Map.containsKey typeId model.AliasApplications
+                                || (Map.tryFind typeId definingExports
+                                    |> Option.exists (fun export ->
+                                        Set.contains export.Symbol.SymbolId model.CompilerNoInferSymbols))
                             then
                                 None
                             else
@@ -217,8 +294,18 @@ let shapeAliases: Pass<ShapeModel> =
 
                                         // Binds the operand a `T[keyof T]` body reads (W8, #139).
                                         let typeParameters, scope, parameterFindings =
-                                            match valueOfOperand model facts with
-                                            | Some objectId when
+                                            let declarationParameters =
+                                                Map.tryFind typeId definingExports
+                                                |> Option.bind (fun export ->
+                                                    Map.tryFind export.Symbol.SymbolId model.ExportTypes)
+                                                |> Option.bind _.AliasParameters
+
+                                            match declarationParameters, valueOfOperand model facts with
+                                            | Some parameters, _ ->
+                                                parameters @ freeParamsOf model facts.Response.TypeId
+                                                |> List.distinct
+                                                |> typeParamsOf ctx model name
+                                            | None, Some objectId when
                                                 (declParamIds facts @ freeParamsOf model facts.Response.TypeId).IsEmpty
                                                 ->
                                                 typeParamsOf ctx model name [ objectId ]
@@ -286,7 +373,7 @@ let shapeAliases: Pass<ShapeModel> =
                                                             then
                                                                 FsString
                                                             else
-                                                                FsObj
+                                                                reference
                                                     }
                                             )
                                         else
@@ -303,6 +390,8 @@ let shapeAliases: Pass<ShapeModel> =
                                                     }
                                             )
                                 | None -> None)
+
+                    let aliasDecls = aliasDecls remainingDecls
 
                     let model =
                         { model with

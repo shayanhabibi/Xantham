@@ -130,9 +130,9 @@ type Observed =
 [<Erase>]
 type Exports =
     [<Import("key", "symbol-member-lab")>]
-    static member key: obj = jsNative
+    static member key: Fable.Core.TS.Es.Symbol = jsNative
     [<Import("iterator", "symbol-member-lab")>]
-    static member iterator: obj = jsNative
+    static member iterator: Fable.Core.TS.Es.Symbol = jsNative
     [<Import("resource", "symbol-member-lab")>]
     static member resource: Disposable = jsNative
     [<Import("tagged", "symbol-member-lab")>]

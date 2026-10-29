@@ -1,0 +1,6 @@
+{
+    "name": "open-intersection-lab",
+    "type": "module",
+    "types": "index.d.ts",
+    "description": "Hand-authored fixture exercising intersections over a type-parameter operand (docs/.ai/plans/generator-type-mapping.md 4.6): an operand whose bound already declares the literal's members reduces to the parameter, an operand the literal adds members to keeps both sides through the support package's Intersect, two and three operands nest, and a primitive operand still widens. Tracked in git, no npm install."
+}

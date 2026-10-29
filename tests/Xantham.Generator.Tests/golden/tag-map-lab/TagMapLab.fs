@@ -124,14 +124,16 @@ type Doc =
     /// </summary>
     abstract libElements<'E when 'E :> Fable.Core.TS.Dom.Element>: qualifiedName: typekeyof<Fable.Core.TS.Dom.HTMLElementTagNameMap, 'E> -> Fable.Core.TS.Dom.HTMLCollectionOf<'E>
 
-type ValueOf<'ObjectType> = proptypelock<'ObjectType>
+[<Erase>]
+type ValueOf<'ObjectType, 'ValueType> = private Phantom_ValueOf__ of proptypelock<'ObjectType>
 
 type ValuesOf<'T> = proptypelock<'T>
 
 /// <summary>
 /// The negative: a key parameter with no default selects a narrower set than proptypelock states.
 /// </summary>
-type Picked = obj
+[<Erase>]
+type Picked<'T, 'K> = private Phantom_Picked__ of obj
 
 /// <summary>
 /// A mapped type whose value does not read the key.
@@ -142,7 +144,7 @@ type Stringified<'T> = PropertyRecord<'T, string>
 /// The negative: a value that reads the key has no single value type.
 /// </summary>
 [<Erase>]
-type Mirrored<'T> = private Mirrored__ of obj
+type Mirrored<'T> = private Phantom_Mirrored__ of obj
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

@@ -20,6 +20,7 @@ let auditCoverage: Pass<ShapeModel> =
                             | FsInterface decl -> [ decl.Name ]
                             | FsStringEnum decl -> [ decl.Name ]
                             | FsTaggedUnion decl -> [ decl.Name ]
+                            | FsErasedObjectUnion decl -> [ decl.Name ]
                             | FsEnum decl -> [ decl.Name ]
                             | FsAbbrev decl -> [ decl.Name ]
                             | FsDelegateType decl -> [ decl.Name ]
@@ -41,11 +42,20 @@ let auditCoverage: Pass<ShapeModel> =
                         |> Option.bind (fun typeId -> Map.tryFind typeId model.DeclNames)
                         |> Option.defaultValue (name export)
 
+                    let membersOf =
+                        model.Harvest.Exports
+                        |> List.choose (fun export ->
+                            export.DeclaringNamespace |> Option.map (fun parent -> parent, export))
+                        |> List.groupBy fst
+                        |> List.map (fun (parent, members) -> parent, List.map snd members)
+                        |> Map.ofList
+
                     // An export is represented by a declaration carrying its name, by a declaration nested
                     // under a module of its name (a TS namespace), or by a declaration whose final segment is
                     // its name (a specifier-scoped or namespace-contested type), or by a declaration
                     // carrying the name assigned by `name-exports` (`$Shape` declared `Shape`).
-                    let represented (export: HarvestedExport) =
+                    // A namespace is also represented through its harvested members at any module path.
+                    let rec represented (export: HarvestedExport) =
                         let exported = name export
 
                         Set.contains exported generated
@@ -53,13 +63,9 @@ let auditCoverage: Pass<ShapeModel> =
                         || generated
                            |> Set.exists (fun declared ->
                                declared.StartsWith(exported + ".") || declared.EndsWith("." + exported))
-
-                    // The parent symbols of every harvested export, identifying which namespaces
-                    // have harvested members.
-                    let namespacesWithMembers =
-                        model.Harvest.Exports
-                        |> List.choose (fun export -> export.Symbol.ParentSymbolId |> ValueOption.toOption)
-                        |> Set.ofList
+                        || (hasAny SymbolFlags.Module export.Symbol.Flags
+                            && Map.tryFind export.Symbol.SymbolId membersOf
+                               |> Option.exists (List.exists represented))
 
                     // A namespace export whose declared members all omit the `export` keyword -
                     // `SolidStore.Unwrappable` in `solid-js`. Harvest yields it empty, so its type
@@ -68,7 +74,7 @@ let auditCoverage: Pass<ShapeModel> =
                         hasAny SymbolFlags.Module export.Symbol.Flags
                         && not (hasAny SymbolFlags.Type export.Symbol.Flags)
                         && not export.HasValueExport
-                        && not (Set.contains export.Symbol.SymbolId namespacesWithMembers)
+                        && not (Map.containsKey export.Symbol.SymbolId membersOf)
 
                     let missing =
                         model.Harvest.Exports

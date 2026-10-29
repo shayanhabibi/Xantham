@@ -18,13 +18,13 @@ type Root =
 
 /// <summary>catalog-subpath-lab/chat</summary>
 module Chat =
+    type LegacyOptions = Options
+
     [<Interface>]
-    type LegacyOptions =
+    type Options =
         abstract title: string with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (title: string) : LegacyOptions = jsNative
-
-    type Options = LegacyOptions
+        static member Create (title: string) : Options = jsNative
 
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]

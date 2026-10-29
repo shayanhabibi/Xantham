@@ -30,5 +30,5 @@ export type Bag = Named & { [key: string]: unknown };
 export type Loose = Named & Partial<Timed>;
 /** A callable operand: the properties flatten and the call signature is the hybrid finding. */
 export type Cancelable = (() => void) & { cancel(): void };
-/** Not flattened: a type-parameter operand has no members to read, so it widens loudly. */
+/** Not flattened: a type-parameter operand has no members to read, so it is carried beside the literal. */
 export declare function merge<T>(base: T & { id: number }): T;
